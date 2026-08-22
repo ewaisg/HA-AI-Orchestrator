@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FND-014-FIXTURE-HARNESS-001",
+  "task_id": "FND-014",
+  "kind": "automated_test",
+  "captured_at": "2026-08-22T19:36:45Z",
+  "source_revision": {
+    "state": "committed",
+    "git_commit": "1b0c5bfdbf1f4851610bed4fcbc9ca7e4d29a43e",
+    "dirty": false
+  },
+  "traceability": {
+    "requirements": ["FND-014"],
+    "decisions": ["DEC-005", "DEC-015"],
+    "controls": ["DD-05"],
+    "tests": [
+      "TEST_EVIDENCE_SCHEMA",
+      "TEST_PROVIDER_FIXTURES",
+      "TEST_CANARY_SCAN"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant_test_plugin",
+        "status": "not_applicable",
+        "reason": "FND-014 runs only the isolated schema, fixture, and security suites."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "scripts", "tests"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "scripts", "tests"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "evidence-manifest-schema",
+      "location_type": "repository",
+      "repository_path": "docs/quality/schemas/evidence-manifest.schema.json",
+      "sha256": "9dfaf07ec42e9f5b0a92b2b912d41940efaa861062f7c3dbc3a6672a43d34b01",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "fake-provider-fixture-schema",
+      "location_type": "repository",
+      "repository_path": "tests/fixtures/providers/schema/fake-provider-fixture.schema.json",
+      "sha256": "f26a1e65d8958b5eba8a86dcc4aa187df699dd1a9b9a1d99510638d6a800b7c1",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "synthetic-canary-corpus",
+      "location_type": "repository",
+      "repository_path": "tests/security/canaries.py",
+      "sha256": "b6e79853dca56a18aa54cc8c1971db6d9d463d05e3dff56c29ae303f6e5cf295",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "passed",
+  "unknowns": [],
+  "residuals": [
+    {
+      "id": "PRJ-007",
+      "description": "Native Windows cannot import the Home Assistant test plugin because its stack imports fcntl; FND-015 lifecycle acceptance requires an approved Linux or live-instance path.",
+      "blocks": ["FND-015"]
+    }
+  ],
+  "reviews": [
+    {
+      "role": "test_release",
+      "status": "approved",
+      "reviewed_at": "2026-08-22T19:36:45Z"
+    }
+  ]
+}

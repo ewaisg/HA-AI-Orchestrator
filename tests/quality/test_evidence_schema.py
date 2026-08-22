@@ -14,6 +14,7 @@ SCHEMA_PATH = ROOT / "docs" / "quality" / "schemas" / "evidence-manifest.schema.
 EXAMPLE_PATH = (
     ROOT / "docs" / "quality" / "templates" / "evidence-manifest.example.json"
 )
+MANIFEST_ROOT = ROOT / "docs" / "evidence" / "manifests"
 
 
 def _load_json(path: Path) -> dict[str, object]:
@@ -60,6 +61,16 @@ def test_example_matches_schema(
     validator: Draft202012Validator, example: dict[str, object]
 ) -> None:
     validator.validate(example)
+
+
+def test_committed_manifests_match_schema(
+    validator: Draft202012Validator,
+) -> None:
+    for path in sorted(MANIFEST_ROOT.rglob("*.json")):
+        errors = sorted(
+            validator.iter_errors(_load_json(path)), key=lambda error: list(error.path)
+        )
+        assert not errors, f"{path.relative_to(ROOT)}: {errors}"
 
 
 @pytest.mark.parametrize(

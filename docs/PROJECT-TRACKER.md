@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-22
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **Implement and verify the claimed FND-014 evidence/fixture harness, then claim FND-015 and build the evidence-producing integration/panel skeleton. Live LM Studio ENV-003 remains a separate later review; ENV-004, ENV-009, and ENV-010 remain Phase 0 readiness evidence gates.**
+Current resume point: **Continue claimed FND-015: build the Home Assistant config-entry/admin-WebSocket/fake-provider skeleton and the bundled Lit panel shell, then run pure tests plus frontend build checks. Home Assistant lifecycle acceptance still needs the recorded Linux or approved live-instance path. Live LM Studio ENV-003 remains a separate later review; ENV-004, ENV-009, and ENV-010 remain Phase 0 readiness evidence gates.**
 
 ## Status rules
 
@@ -21,12 +21,12 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | Redacted read-only Home Assistant environment inspection and independent HA/privacy review recorded on 2026-08-22 |
-| Active work | FND-014 redacted evidence and deterministic fake-provider fixture harness |
+| Last completed | FND-014 evidence/fixture harness independently approved; manifest `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json` records the clean source revision and checks |
+| Active work | FND-015 evidence-producing Home Assistant integration, fake-provider runtime, and Lit panel skeleton |
 | Evidence/input needed | Exact window/Echo entity and action identifiers; later LM Studio non-secret settings; ENV-011 only before HACS distribution; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
 | Next gate | Phase 0 architecture/repository readiness review |
-| Production code | Not started; repository bootstrap policy is in review |
-| Repository | Local Git repository on `main`; no remote configured |
+| Production code | FND-015 bootstrap started; provider/backend, Home Assistant, and UI work is split across non-overlapping paths |
+| Repository | Local Git repository on `codex/foundation-skeleton`; no remote configured |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -45,8 +45,8 @@ No task may move to `DONE` based only on an assertion.
 | FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `TODO` | FND-015, ENV-001 | Desktop/mobile load, unload/reload, cache, upgrade, and fallback evidence |
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `TODO` | FND-015 | One harmless no-side-effect workflow across reload/restart with no duplicate trigger; any live-host gate uses only the relevant approved environment evidence |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `TODO` | FND-007 | Redacted data-flow map and requirement/control/test IDs |
-| FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `IN PROGRESS` | FND-009 | Claimed 2026-08-22. Expected: JSON schemas/examples, synthetic canary corpus, deterministic fixture catalogue, schema/semantic/redaction tests, and reviewed evidence record. Runtime zero-network and repeatability proof belongs to FND-015. |
-| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `TODO` | FND-009, FND-014 | Config-entry lifecycle, admin WebSocket, deterministic zero-network/repeatability fake-provider runtime, panel shell, Conversation/AI Task proof, and redaction tests |
+| FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |
+| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `IN PROGRESS` | FND-009, FND-014 | Claimed 2026-08-22. Expected files: `custom_components/ai_orchestrator/**`, `frontend/**`, sync/verification scripts, and bounded tests. Verification: deterministic fake-provider repeatability/no-network proof, admin-only WebSocket/config-entry tests, frontend check/build/bundle identity, redaction/canary checks, and HA lifecycle evidence on an approved Linux or live-instance path. |
 
 ## Phase 1 — local provider and onboarding MVP
 
