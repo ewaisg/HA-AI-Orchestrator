@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "evidence_id": "EXAMPLE-FND-015-001",
+  "task_id": "FND-015",
+  "kind": "automated_test",
+  "captured_at": "2026-08-22T00:00:00Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["FND-015"],
+    "decisions": ["DEC-001", "DEC-005"],
+    "controls": ["DD-05"],
+    "tests": ["TEST_EVIDENCE_SCHEMA_001"]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "home_assistant_core",
+        "status": "not_applicable",
+        "reason": "This template demonstrates synthetic schema evidence only."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "TEST_EVIDENCE_SCHEMA_001",
+      "command_argv": [
+        "pytest",
+        "tests/quality/test_evidence_schema.py"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "EXAMPLE_REVIEW_PENDING",
+      "description": "This is a non-acceptance template and has not been independently reviewed.",
+      "blocks": ["FND-015"]
+    }
+  ],
+  "residuals": [],
+  "reviews": [
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

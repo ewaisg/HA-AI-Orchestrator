@@ -1,0 +1,38 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "generate.empty_response",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "streaming": "unsupported",
+    "structured_output": "unknown",
+    "tool_calling": "unsupported",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Return an empty synthetic response." }
+    ],
+    "tools": []
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": { "kind": "message", "text": "", "tool_calls": [] }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": { "kind": "message", "text": "", "tool_calls": [] },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

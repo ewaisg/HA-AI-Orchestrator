@@ -1,0 +1,38 @@
+[project]
+name = "ha-ai-orchestrator"
+version = "0.1.0"
+description = "Private Home Assistant AI orchestration integration"
+requires-python = ">=3.14.2,<3.15"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "homeassistant==2026.8.3",
+  "jsonschema==4.26.0",
+  "pytest-homeassistant-custom-component==0.13.357",
+  "ruff==0.16.4",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+package = false
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = [
+  "custom_components/ai_orchestrator/frontend",
+  "frontend/dist",
+]
+
+[tool.ruff.lint]
+select = ["ASYNC", "B", "BLE", "D", "E", "F", "I", "LOG", "S", "UP"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D", "S101"]

@@ -1,0 +1,49 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "capabilities.unknown",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "discover_capabilities",
+  "capabilities": {
+    "streaming": "unknown",
+    "structured_output": "unknown",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": { "messages": [], "tools": [] },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": {
+          "kind": "capability_record",
+          "capabilities": {
+            "streaming": "unknown",
+            "structured_output": "unknown",
+            "tool_calling": "unknown",
+            "usage": "unknown"
+          }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": {
+      "kind": "capability_record",
+      "capabilities": {
+        "streaming": "unknown",
+        "structured_output": "unknown",
+        "tool_calling": "unknown",
+        "usage": "unknown"
+      }
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

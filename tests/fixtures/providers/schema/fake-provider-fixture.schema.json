@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-orchestrator.invalid/schemas/fake-provider-fixture.schema.json",
+  "title": "AI Orchestrator deterministic fake-provider fixture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_schema_version",
+    "fixture_id",
+    "provider_contract_version",
+    "provenance",
+    "redaction",
+    "operation",
+    "capabilities",
+    "request_match",
+    "script",
+    "expected",
+    "required_capabilities"
+  ],
+  "properties": {
+    "fixture_schema_version": { "const": 1 },
+    "fixture_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"
+    },
+    "provider_contract_version": { "const": "phase0-draft-1" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": { "type": { "const": "synthetic" } }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contains_live_data", "status"],
+      "properties": {
+        "contains_live_data": { "const": false },
+        "status": { "const": "reviewed" }
+      }
+    },
+    "operation": {
+      "enum": [
+        "validate_connection",
+        "discover_capabilities",
+        "generate",
+        "stream"
+      ]
+    },
+    "capabilities": { "$ref": "#/$defs/capabilities" },
+    "request_match": { "$ref": "#/$defs/request_match" },
+    "script": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clock", "steps"],
+      "properties": {
+        "clock": { "const": "manual" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/script_step" }
+        }
+      }
+    },
+    "expected": { "$ref": "#/$defs/expected" },
+    "required_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["streaming", "structured_output", "tool_calling", "usage"]
+      }
+    }
+  },
+  "$defs": {
+    "support_state": {
+      "enum": ["supported", "unsupported", "unknown"]
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["streaming", "structured_output", "tool_calling", "usage"],
+      "properties": {
+        "streaming": { "$ref": "#/$defs/support_state" },
+        "structured_output": { "$ref": "#/$defs/support_state" },
+        "tool_calling": { "$ref": "#/$defs/support_state" },
+        "usage": { "$ref": "#/$defs/support_state" }
+      }
+    },
+    "request_match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["messages", "tools"],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/message" }
+        },
+        "tools": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool" }
+        }
+      }
+    },
+    "message": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "content"],
+      "properties": {
+        "role": { "enum": ["system", "user", "assistant", "tool"] },
+        "content": { "type": "string" }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "parameters"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "parameters": { "type": "object" }
+      }
+    },
+    "script_step": {
+      "oneOf": [
+        { "$ref": "#/$defs/return_step" },
+        { "$ref": "#/$defs/emit_delta_step" },
+        { "$ref": "#/$defs/complete_stream_step" },
+        { "$ref": "#/$defs/error_step" },
+        { "$ref": "#/$defs/malformed_step" },
+        { "$ref": "#/$defs/cancellation_step" }
+      ]
+    },
+    "return_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type", "result"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "return" },
+        "result": { "$ref": "#/$defs/normalized_result" }
+      }
+    },
+    "emit_delta_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type", "text"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "emit_delta" },
+        "text": { "type": "string" }
+      }
+    },
+    "complete_stream_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type", "finish_reason"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "complete_stream" },
+        "finish_reason": { "enum": ["stop", "length", "tool_call", "refusal"] },
+        "usage": { "$ref": "#/$defs/usage" }
+      }
+    },
+    "error_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type", "error"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "raise_normalized_error" },
+        "error": { "$ref": "#/$defs/normalized_error" }
+      }
+    },
+    "malformed_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type", "payload"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "return_malformed" },
+        "payload": {}
+      }
+    },
+    "cancellation_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "type"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "const": "await_cancellation" }
+      }
+    },
+    "normalized_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "text", "tool_calls"],
+          "properties": {
+            "kind": { "const": "message" },
+            "text": { "type": "string" },
+            "tool_calls": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/tool_call" }
+            },
+            "usage": { "$ref": "#/$defs/usage" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reachable"],
+          "properties": {
+            "kind": { "const": "connection_validation" },
+            "reachable": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "capabilities"],
+          "properties": {
+            "kind": { "const": "capability_record" },
+            "capabilities": { "$ref": "#/$defs/capabilities" }
+          }
+        }
+      ]
+    },
+    "tool_call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "arguments"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "arguments": { "type": "object" }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_tokens", "output_tokens"],
+      "properties": {
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "normalized_error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "enum": [
+            "authentication",
+            "authorization",
+            "not_found",
+            "rate_limited",
+            "context_overflow",
+            "safety_refusal",
+            "provider_unavailable",
+            "invalid_response",
+            "timeout",
+            "connection",
+            "tls",
+            "dns",
+            "cancelled",
+            "unsupported"
+          ]
+        },
+        "message": { "type": "string", "minLength": 1 },
+        "retry_hint_ms": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "expected": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "outcome",
+            "normalized_result",
+            "retry_allowed",
+            "failover_allowed",
+            "request_count"
+          ],
+          "properties": {
+            "outcome": { "const": "success" },
+            "normalized_result": { "$ref": "#/$defs/normalized_result" },
+            "retry_allowed": { "type": "boolean" },
+            "failover_allowed": { "type": "boolean" },
+            "request_count": { "type": "integer", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "outcome",
+            "normalized_error",
+            "retry_allowed",
+            "failover_allowed",
+            "request_count"
+          ],
+          "properties": {
+            "outcome": { "enum": ["error", "cancelled"] },
+            "normalized_error": { "$ref": "#/$defs/normalized_error" },
+            "retry_allowed": { "type": "boolean" },
+            "failover_allowed": { "type": "boolean" },
+            "request_count": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    }
+  }
+}

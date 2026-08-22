@@ -1,0 +1,46 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "stream.chunked_success",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "stream",
+  "capabilities": {
+    "streaming": "supported",
+    "structured_output": "unknown",
+    "tool_calling": "unsupported",
+    "usage": "supported"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Stream the synthetic fixture response." }
+    ],
+    "tools": []
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      { "sequence": 0, "type": "emit_delta", "text": "Synthetic " },
+      { "sequence": 1, "type": "emit_delta", "text": "stream." },
+      {
+        "sequence": 2,
+        "type": "complete_stream",
+        "finish_reason": "stop",
+        "usage": { "input_tokens": 5, "output_tokens": 2 }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": {
+      "kind": "message",
+      "text": "Synthetic stream.",
+      "tool_calls": [],
+      "usage": { "input_tokens": 5, "output_tokens": 2 }
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": ["streaming"]
+}

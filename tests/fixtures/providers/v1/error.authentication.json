@@ -1,0 +1,44 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "error.authentication",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "streaming": "unknown",
+    "structured_output": "unknown",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Exercise a synthetic authentication failure." }
+    ],
+    "tools": []
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "raise_normalized_error",
+        "error": {
+          "code": "authentication",
+          "message": "Synthetic credentials were rejected."
+        }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "error",
+    "normalized_error": {
+      "code": "authentication",
+      "message": "Synthetic credentials were rejected."
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

@@ -1,0 +1,33 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "validate.connection_success",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "validate_connection",
+  "capabilities": {
+    "streaming": "unknown",
+    "structured_output": "unknown",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": { "messages": [], "tools": [] },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": { "kind": "connection_validation", "reachable": true }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": { "kind": "connection_validation", "reachable": true },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

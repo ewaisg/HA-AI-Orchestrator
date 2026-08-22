@@ -1,0 +1,41 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "generate.malformed_response",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "streaming": "unknown",
+    "structured_output": "unknown",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Exercise synthetic malformed output." }
+    ],
+    "tools": []
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return_malformed",
+        "payload": { "unexpected": ["synthetic", "shape"] }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "error",
+    "normalized_error": {
+      "code": "invalid_response",
+      "message": "Synthetic provider response did not match the contract."
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

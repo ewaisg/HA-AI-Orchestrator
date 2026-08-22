@@ -1,0 +1,37 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "request.cancelled",
+  "provider_contract_version": "phase0-draft-1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "streaming": "unknown",
+    "structured_output": "unknown",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Wait for synthetic cancellation." }
+    ],
+    "tools": []
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      { "sequence": 0, "type": "await_cancellation" }
+    ]
+  },
+  "expected": {
+    "outcome": "cancelled",
+    "normalized_error": {
+      "code": "cancelled",
+      "message": "Synthetic request was cancelled."
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": []
+}

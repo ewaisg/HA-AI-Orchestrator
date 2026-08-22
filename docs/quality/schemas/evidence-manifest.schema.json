@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-orchestrator.invalid/schemas/evidence-manifest.schema.json",
+  "title": "AI Orchestrator evidence manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "task_id",
+    "kind",
+    "captured_at",
+    "source_revision",
+    "traceability",
+    "environment",
+    "checks",
+    "artifacts",
+    "result",
+    "unknowns",
+    "residuals",
+    "reviews"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,63}$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}-[0-9]{3}$"
+    },
+    "kind": {
+      "enum": [
+        "automated_test",
+        "scenario",
+        "compatibility",
+        "ui",
+        "review"
+      ]
+    },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "source_revision": { "$ref": "#/$defs/source_revision" },
+    "traceability": { "$ref": "#/$defs/traceability" },
+    "environment": { "$ref": "#/$defs/environment" },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "result": { "enum": ["passed", "failed", "incomplete"] },
+    "unknowns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/open_item" }
+    },
+    "residuals": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/open_item" }
+    },
+    "reviews": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/review" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "result": { "const": "passed" } },
+        "required": ["result"]
+      },
+      "then": {
+        "properties": {
+          "source_revision": {
+            "properties": {
+              "state": { "const": "committed" },
+              "dirty": { "const": false }
+            },
+            "required": ["state", "dirty", "git_commit"]
+          },
+          "checks": {
+            "items": {
+              "properties": { "result": { "const": "passed" } }
+            }
+          },
+          "unknowns": { "maxItems": 0 },
+          "reviews": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "role": { "const": "test_release" },
+                "status": { "const": "approved" }
+              },
+              "required": ["role", "status"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "source_revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "dirty"],
+      "properties": {
+        "state": { "enum": ["committed", "working_tree"] },
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "dirty": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "const": "committed" } },
+            "required": ["state"]
+          },
+          "then": { "required": ["git_commit"] }
+        },
+        {
+          "if": {
+            "properties": { "state": { "const": "working_tree" } },
+            "required": ["state"]
+          },
+          "then": { "not": { "required": ["git_commit"] } }
+        }
+      ]
+    },
+    "traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirements", "decisions", "controls", "tests"],
+      "properties": {
+        "requirements": { "$ref": "#/$defs/id_list" },
+        "decisions": { "$ref": "#/$defs/id_list" },
+        "controls": { "$ref": "#/$defs/id_list" },
+        "tests": { "$ref": "#/$defs/id_list" }
+      }
+    },
+    "id_list": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_mode", "components"],
+      "properties": {
+        "data_mode": { "enum": ["synthetic", "live_redacted"] },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/component" }
+        }
+      }
+    },
+    "component": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "status", "version"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "status": { "const": "verified" },
+            "version": { "type": "string", "minLength": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "status", "unknown_reason"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "status": { "const": "unknown" },
+            "unknown_reason": { "type": "string", "minLength": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "status", "reason"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "status": { "const": "not_applicable" },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command_argv", "exit_code", "result"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+        },
+        "command_argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "exit_code": { "type": "integer" },
+        "result": { "enum": ["passed", "failed", "skipped"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "result": { "const": "passed" } },
+            "required": ["result"]
+          },
+          "then": { "properties": { "exit_code": { "const": 0 } } }
+        },
+        {
+          "if": {
+            "properties": { "result": { "const": "failed" } },
+            "required": ["result"]
+          },
+          "then": { "properties": { "exit_code": { "not": { "const": 0 } } } }
+        }
+      ]
+    },
+    "artifact": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "location_type",
+            "repository_path",
+            "sha256",
+            "classification",
+            "contains_live_data",
+            "redaction_status"
+          ],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "location_type": { "const": "repository" },
+            "repository_path": {
+              "type": "string",
+              "minLength": 1,
+              "allOf": [
+                { "pattern": "^(?!/)(?![A-Za-z]:)[^\\\\]+$" },
+                { "not": { "pattern": "(^|/)\\.\\.(/|$)" } }
+              ]
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "classification": { "enum": ["synthetic", "live_redacted"] },
+            "contains_live_data": { "const": false },
+            "redaction_status": { "enum": ["not_applicable", "reviewed"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "location_type",
+            "external_evidence_id",
+            "sha256",
+            "classification",
+            "redaction_status"
+          ],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "location_type": { "const": "external_private" },
+            "external_evidence_id": {
+              "type": "string",
+              "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "classification": { "const": "live_private" },
+            "redaction_status": { "const": "private_not_committed" }
+          }
+        }
+      ]
+    },
+    "open_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "blocks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_-]{1,63}$"
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "status"],
+      "properties": {
+        "role": {
+          "enum": [
+            "primary",
+            "tracker_steward",
+            "home_assistant",
+            "provider_backend",
+            "ui",
+            "workflow_safety",
+            "test_release",
+            "project_owner"
+          ]
+        },
+        "status": { "enum": ["pending", "approved", "rejected"] },
+        "reviewed_at": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": { "enum": ["approved", "rejected"] }
+            },
+            "required": ["status"]
+          },
+          "then": { "required": ["reviewed_at"] }
+        }
+      ]
+    }
+  }
+}
