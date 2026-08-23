@@ -1,0 +1,10 @@
+{
+  "domain": "ai_orchestrator",
+  "name": "AI Orchestrator",
+  "version": "0.1.0",
+  "config_flow": true,
+  "dependencies": ["frontend", "panel_custom"],
+  "codeowners": [],
+  "integration_type": "hub",
+  "requirements": []
+}

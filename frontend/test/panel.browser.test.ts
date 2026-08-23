@@ -1,0 +1,95 @@
+import { afterEach, describe, expect, it } from "vitest";
+
+import { AiOrchestratorPanel, PANEL_TAG } from "../src/entry";
+import { createFailingHass, createFakeHass, FOUNDATION_STATUS } from "./fixtures/fake-hass";
+
+const mounted: AiOrchestratorPanel[] = [];
+
+async function mountPanel(hass = createFakeHass()): Promise<AiOrchestratorPanel> {
+  const panel = document.createElement(PANEL_TAG) as AiOrchestratorPanel;
+  panel.hass = hass;
+  document.body.append(panel);
+  mounted.push(panel);
+  await panel.updateComplete;
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+  await panel.updateComplete;
+  return panel;
+}
+
+function shadowText(panel: AiOrchestratorPanel): string {
+  return panel.shadowRoot?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+}
+
+afterEach(() => {
+  for (const panel of mounted.splice(0)) {
+    panel.remove();
+  }
+});
+
+describe("AI Orchestrator panel shell", () => {
+  it("registers one custom element and reports an incomplete setup honestly", async () => {
+    const panel = await mountPanel();
+
+    expect(customElements.get(PANEL_TAG)).toBe(AiOrchestratorPanel);
+    expect(shadowText(panel)).toContain("Integration setup is not complete");
+    expect(shadowText(panel)).toContain("None contacted");
+    expect(shadowText(panel)).toContain("Not available");
+  });
+
+  it("does not treat unknown status values as healthy", async () => {
+    const panel = await mountPanel(
+      createFakeHass({ ...FOUNDATION_STATUS, schema_version: 99 }),
+    );
+
+    expect(shadowText(panel)).toContain("The status response is not supported");
+    expect(shadowText(panel)).toContain("No action ran");
+  });
+
+  it("shows a bounded failure state without rendering raw error content", async () => {
+    const panel = await mountPanel(
+      createFailingHass(new Error("credential-like-value-must-not-render")),
+    );
+
+    expect(shadowText(panel)).toContain("The integration status could not be read");
+    expect(shadowText(panel)).not.toContain("credential-like-value-must-not-render");
+    const featureStates = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLElement>(".status-list .state-pill") ?? []),
+    ].map((pill) => pill.textContent?.trim());
+    expect(featureStates).toEqual(["Unknown", "Unknown", "Unknown", "Unknown"]);
+  });
+
+  it("provides keyboard-native section navigation without fabricated data", async () => {
+    const panel = await mountPanel();
+    const providerButton = [...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? [])].find(
+      (button) => button.textContent?.includes("Providers"),
+    );
+
+    expect(providerButton).toBeDefined();
+    providerButton?.click();
+    await panel.updateComplete;
+
+    expect(shadowText(panel)).toContain("Provider setup is not enabled yet");
+    expect(shadowText(panel)).toContain("No endpoint, credential, model identifier");
+  });
+
+  it("does not write panel state to browser storage", async () => {
+    const before = new Map<string, string>();
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key !== null) {
+        before.set(key, localStorage.getItem(key) ?? "");
+      }
+    }
+
+    await mountPanel();
+
+    const after = new Map<string, string>();
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key !== null) {
+        after.set(key, localStorage.getItem(key) ?? "");
+      }
+    }
+    expect(after).toEqual(before);
+  });
+});

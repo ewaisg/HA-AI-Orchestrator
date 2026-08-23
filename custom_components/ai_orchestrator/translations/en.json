@@ -1,0 +1,14 @@
+{
+  "title": "AI Orchestrator",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up AI Orchestrator",
+        "description": "Create the private orchestration foundation. Provider connections and workflows are not configured in this step."
+      }
+    },
+    "abort": {
+      "already_configured": "AI Orchestrator is already configured."
+    }
+  }
+}

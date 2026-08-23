@@ -1,0 +1,6 @@
+dist/
+node_modules/
+.vitest-attachments/
+playwright-report/
+test-results/
+test/__screenshots__/

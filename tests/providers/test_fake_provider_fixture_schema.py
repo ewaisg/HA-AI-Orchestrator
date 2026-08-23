@@ -1,8 +1,11 @@
 """Schema and semantic checks for deterministic fake-provider fixtures."""
 
+# ruff: noqa: E402 -- the uninstalled custom integration needs the repo root.
+
 from __future__ import annotations
 
 import json
+import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -11,6 +14,13 @@ import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from custom_components.ai_orchestrator.providers.fake import (
+    FixtureValidationError,
+    parse_fake_provider_fixture,
+)
+
 SCHEMA_PATH = (
     ROOT
     / "tests"
@@ -62,6 +72,8 @@ def _all_keys(value: Any) -> set[str]:
 
 
 def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
+    """Secondary readable oracle; runtime parsing is the canonical semantics."""
+
     errors: list[str] = []
     operation = fixture["operation"]
     steps = fixture["script"]["steps"]
@@ -75,16 +87,21 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
         if fixture["capabilities"][capability] != "supported":
             errors.append(f"required capability {capability} is not supported")
 
+    terminal_type = terminal["type"]
     if operation == "validate_connection":
+        if terminal_type not in {"return", "raise_normalized_error"}:
+            errors.append("validate_connection has an invalid terminal event")
         if (
-            terminal["type"] != "return"
-            or terminal.get("result", {}).get("kind") != "connection_validation"
+            terminal_type == "return"
+            and terminal.get("result", {}).get("kind") != "connection_validation"
         ):
             errors.append("validate_connection must return connection_validation")
     elif operation == "discover_capabilities":
+        if terminal_type not in {"return", "raise_normalized_error"}:
+            errors.append("discover_capabilities has an invalid terminal event")
         if (
-            terminal["type"] != "return"
-            or terminal.get("result", {}).get("kind") != "capability_record"
+            terminal_type == "return"
+            and terminal.get("result", {}).get("kind") != "capability_record"
         ):
             errors.append("discover_capabilities must return capability_record")
     elif operation == "generate":
@@ -94,15 +111,48 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
             "raise_normalized_error",
             "await_cancellation",
         }
-        if terminal["type"] not in allowed:
+        if terminal_type not in allowed:
             errors.append("generate has an invalid terminal event")
-        if terminal["type"] == "return" and terminal["result"]["kind"] != "message":
+        if terminal_type == "return" and terminal["result"]["kind"] != "message":
             errors.append("generate must return a message")
     elif operation == "stream":
-        if terminal["type"] != "complete_stream":
-            errors.append("stream must terminate with complete_stream")
+        if terminal_type not in {
+            "complete_stream",
+            "raise_normalized_error",
+            "await_cancellation",
+        }:
+            errors.append("stream has an invalid terminal event")
         if any(step["type"] != "emit_delta" for step in steps[:-1]):
             errors.append("stream pre-terminal events must be emit_delta")
+
+    if terminal_type == "return":
+        if expected["outcome"] != "success":
+            errors.append("return requires a success outcome")
+        elif terminal["result"] != expected["normalized_result"]:
+            errors.append("scripted and expected results differ")
+    elif terminal_type == "return_malformed":
+        if (
+            expected["outcome"] != "error"
+            or expected.get("normalized_error", {}).get("code") != "invalid_response"
+        ):
+            errors.append("malformed requires error and invalid_response")
+    elif terminal_type == "raise_normalized_error":
+        if expected["outcome"] != "error":
+            errors.append("normalized error requires an error outcome")
+        elif terminal["error"] != expected.get("normalized_error"):
+            errors.append("scripted and expected errors differ")
+    elif terminal_type == "await_cancellation":
+        if (
+            expected["outcome"] != "cancelled"
+            or expected.get("normalized_error", {}).get("code") != "cancelled"
+        ):
+            errors.append("cancellation requires cancelled outcome and code")
+    elif terminal_type == "complete_stream" and expected["outcome"] != "success":
+        errors.append("complete stream requires a success outcome")
+
+    if expected["outcome"] in {"error", "cancelled"}:
+        if not expected.get("normalized_error", {}).get("message", "").strip():
+            errors.append("normalized error message cannot be empty")
 
     return errors
 
@@ -140,6 +190,14 @@ def test_all_fixtures_match_schema(
             validator.iter_errors(fixture), key=lambda error: list(error.path)
         )
         assert not errors, f"{path.name}: {errors}"
+
+
+def test_all_fixtures_are_accepted_by_canonical_runtime_parser(
+    fixtures: list[tuple[Path, dict[str, Any]]],
+) -> None:
+    for path, fixture in fixtures:
+        parsed = parse_fake_provider_fixture(fixture)
+        assert parsed.fixture_id == path.stem
 
 
 def test_fixture_ids_are_unique_and_match_filenames(
@@ -219,6 +277,7 @@ def test_script_and_expected_results_are_consistent(
 
 
 def test_semantics_reject_cross_field_contradictions(
+    validator: Draft202012Validator,
     fixtures: list[tuple[Path, dict[str, Any]]],
 ) -> None:
     by_id = {fixture["fixture_id"]: fixture for _, fixture in fixtures}
@@ -237,7 +296,35 @@ def test_semantics_reject_cross_field_contradictions(
 
     implausible_count = deepcopy(by_id["generate.text_success"])
     implausible_count["expected"]["request_count"] = 99
-    assert _semantic_errors(implausible_count)
+
+    malformed_cancelled = deepcopy(by_id["generate.malformed_response"])
+    malformed_cancelled["expected"]["outcome"] = "cancelled"
+
+    for altered in (
+        wrong_result,
+        unsupported_requirement,
+        implausible_count,
+        malformed_cancelled,
+    ):
+        validator.validate(altered)
+        assert _semantic_errors(altered)
+        with pytest.raises(FixtureValidationError):
+            parse_fake_provider_fixture(altered)
+
+
+def test_schema_and_runtime_reject_empty_error_messages(
+    validator: Draft202012Validator,
+    fixtures: list[tuple[Path, dict[str, Any]]],
+) -> None:
+    by_id = {fixture["fixture_id"]: fixture for _, fixture in fixtures}
+    altered = deepcopy(by_id["error.authentication"])
+    altered["script"]["steps"][-1]["error"]["message"] = ""
+    altered["expected"]["normalized_error"]["message"] = ""
+
+    with pytest.raises(ValidationError):
+        validator.validate(altered)
+    with pytest.raises(FixtureValidationError, match="message cannot be empty"):
+        parse_fake_provider_fixture(altered)
 
 
 @pytest.mark.parametrize(
