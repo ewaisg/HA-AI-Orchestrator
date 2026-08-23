@@ -58,7 +58,8 @@ if automatic registration fails; this evidence does not claim another version.
 
 ## Update and removal boundary
 
-Config-entry removal/reinstallation, restart recovery, YAML fallback, and
-restoration of automatic registration are validated on the named FND-011 target
-in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Itemized integration
-reload, cache, mobile-client, and Core-upgrade evidence remains open.
+Config-entry removal/reinstallation, reload, restart recovery, cache-bypassing
+refresh, YAML fallback, and restoration of automatic registration are validated
+on the named FND-011 target in
+`docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Complete mobile-client and
+Core-upgrade evidence remains open.
