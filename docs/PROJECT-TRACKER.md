@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **Complete independent test/release review of FND-015 using `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`, then claim FND-011 and run the named live panel lifecycle matrix. Do not begin LOC-001 until FND-010 passes. Live LM Studio ENV-003 remains a separate later review; ENV-004, ENV-009, and ENV-010 remain Phase 0 readiness evidence gates.**
+Current resume point: **Continue claimed FND-011: revalidate the exact live Home Assistant versions, convert the project-owner's preliminary restart/reload/cache/mobile report into itemized evidence, then test removal/reinstall and the isolated YAML fallback. Upgrade survival requires a later two-version artifact and remains open. Do not begin LOC-001 until FND-010 passes.**
 
 ## Status rules
 
@@ -21,12 +21,12 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | FND-014 evidence/fixture harness independently approved; manifest `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json` records the clean source revision and checks |
-| Active work | FND-015 implementation and automated verification complete; independent test/release review pending |
-| Evidence/input needed | FND-015 independent review; FND-011 live unload/reload, restart, cache, mobile, upgrade, removal, and fallback evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
+| Last completed | FND-015 foundation skeleton independently approved; clean-revision manifest `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json` records the implementation and checks |
+| Active work | FND-011 live bundled-panel registration and compatibility proof |
+| Evidence/input needed | Exact current HA versions and itemized FND-011 live results; removal/reinstall, YAML fallback, and upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
 | Next gate | Phase 0 architecture/repository readiness review |
 | Production code | FND-015 config-entry, admin WebSocket, offline fake-provider, and bundled Lit panel skeleton implemented; real providers and workflows remain absent |
-| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-015 review changes are currently uncommitted |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-015 source revision `7de030a1b8c7c6f337f13dce404b862df9363dd8` is independently verified |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -42,11 +42,11 @@ No task may move to `DONE` based only on an assertion.
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
 | FND-010 | Phase 0 readiness review | Test/release | `TODO` | FND-007, FND-011 through FND-015 | Independent checklist; no unresolved implementation-critical unknowns |
-| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `TODO` | FND-015, ENV-001 | Desktop/mobile load, unload/reload, cache, upgrade, and fallback evidence |
+| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `IN PROGRESS` | FND-015, ENV-001 | Claimed 2026-08-23. Project owner reports the requested restart/reload/cache/mobile checks appear to work and confirmed the `None contacted` summary; exact versions and itemized results were not returned. Next: capture those exact values, then test removal/reinstall and YAML fallback. Upgrade survival remains open. |
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `TODO` | FND-015 | One harmless no-side-effect workflow across reload/restart with no duplicate trigger; any live-host gate uses only the relevant approved environment evidence |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `TODO` | FND-007 | Redacted data-flow map and requirement/control/test IDs |
 | FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |
-| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `REVIEW` | FND-009, FND-014 | Linux full suite: 102 passed; pure Windows suite: 81 passed; frontend browser suite: 16 passed; bundle and canary checks passed. Direct project-owner report confirms manual install and initial panel render. Working-tree manifest: `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`. Next: independent test/release review on a clean committed revision. |
+| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `DONE` | FND-009, FND-014 | Independent test/release review approved clean source revision `7de030a1b8c7c6f337f13dce404b862df9363dd8`: Linux full suite 102 passed; pure Windows suite 81 passed; frontend browser suite 16 passed; dependency audit, bundle identity, canary, format, and lint checks passed. Acceptance manifest: `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`. |
 
 ## Phase 1 — local provider and onboarding MVP
 

@@ -31,3 +31,12 @@ must be revalidated before FND-011 compatibility acceptance.
 FND-011 must record desktop and approved mobile rendering, unload/reload,
 restart recovery, cache behavior, upgrade behavior, removal, and the isolated
 YAML fallback on named Home Assistant versions.
+
+## Project-owner follow-up
+
+After receiving an itemized restart, integration-reload, hard-refresh, mobile,
+and log-review checklist, the project owner reported that all appeared to work.
+The owner later located and confirmed the expected `AI destination` / `None
+contacted` summary. Exact current Home Assistant versions and itemized PASS/FAIL
+values were not returned, so this follow-up is preliminary FND-011 evidence and
+does not close any unreported lifecycle scenario.

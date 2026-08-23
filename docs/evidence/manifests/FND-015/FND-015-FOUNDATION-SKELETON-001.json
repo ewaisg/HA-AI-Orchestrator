@@ -3,10 +3,11 @@
   "evidence_id": "FND-015-FOUNDATION-SKELETON-001",
   "task_id": "FND-015",
   "kind": "automated_test",
-  "captured_at": "2026-08-23T08:01:20Z",
+  "captured_at": "2026-08-23T08:38:32Z",
   "source_revision": {
-    "state": "working_tree",
-    "dirty": true
+    "state": "committed",
+    "git_commit": "7de030a1b8c7c6f337f13dce404b862df9363dd8",
+    "dirty": false
   },
   "traceability": {
     "requirements": ["FND-015"],
@@ -69,16 +70,10 @@
     {
       "id": "LINUX_FULL_SUITE",
       "command_argv": [
-        "docker",
-        "exec",
-        "--workdir",
-        "/workspace",
-        "--env",
-        "UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv",
-        "ai-orchestrator-fnd015-test",
-        "sh",
-        "-lc",
-        "python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen && uv run pytest"
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "git archive --format=tar 7de030a1b8c7c6f337f13dce404b862df9363dd8 | docker run --rm -i --name ai-orchestrator-fnd015-independent-review --workdir /workspace --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen && uv run pytest -p no:cacheprovider\""
       ],
       "exit_code": 0,
       "result": "passed"
@@ -122,14 +117,8 @@
       "redaction_status": "not_applicable"
     }
   ],
-  "result": "incomplete",
-  "unknowns": [
-    {
-      "id": "INDEPENDENT_REVIEW_PENDING",
-      "description": "The verified FND-015 working tree still requires an independent test/release review and a clean committed-revision manifest.",
-      "blocks": ["FND-015"]
-    }
-  ],
+  "result": "passed",
+  "unknowns": [],
   "residuals": [
     {
       "id": "LIVE_PANEL_LIFECYCLE",
@@ -145,7 +134,8 @@
     },
     {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-23T08:38:32Z"
     }
   ]
 }
