@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from homeassistant.components import frontend, panel_custom
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.core import HomeAssistant
+from homeassistant.core import Context, HomeAssistant
 from homeassistant.exceptions import ConfigEntryError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -18,8 +18,10 @@ from custom_components.ai_orchestrator.const import (
     DOMAIN,
     FOUNDATION_ENTRY_UNIQUE_ID,
     PANEL_URL_PATH,
+    WORKFLOW_PROBE_EVENT,
 )
 from custom_components.ai_orchestrator.runtime import async_get_runtime
+from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_probe
 
 
 async def test_async_setup_registers_global_surfaces(hass: HomeAssistant) -> None:
@@ -63,9 +65,11 @@ async def test_entry_setup_and_unload_manage_panel(hass: HomeAssistant) -> None:
         runtime = async_get_runtime(hass)
         assert runtime.loaded_foundation_entry_ids == {entry.entry_id}
         assert runtime.owns_panel is True
+        assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
         assert await async_unload_entry(hass, entry)
         assert runtime.loaded_foundation_entry_ids == set()
         assert runtime.owns_panel is False
+        assert WORKFLOW_PROBE_EVENT not in hass.bus.async_listeners()
 
     register_panel.assert_awaited_once_with(hass)
     unregister_panel.assert_called_once_with(hass)
@@ -127,9 +131,12 @@ async def test_panel_unloads_only_after_last_loaded_foundation_entry(
     ):
         assert await async_setup_entry(hass, first)
         assert await async_setup_entry(hass, second)
+        assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
         assert await async_unload_entry(hass, first)
         unregister_panel.assert_not_called()
+        assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
         assert await async_unload_entry(hass, second)
+        assert WORKFLOW_PROBE_EVENT not in hass.bus.async_listeners()
 
     register_panel.assert_awaited_once_with(hass)
     unregister_panel.assert_called_once_with(hass)
@@ -170,6 +177,7 @@ async def test_foreign_panel_collision_fails_entry_setup(
     runtime = async_get_runtime(hass)
     assert runtime.loaded_foundation_entry_ids == set()
     assert runtime.owns_panel is False
+    assert runtime.workflow_probe_unsubscribe is None
 
 
 async def test_config_entry_manager_lifecycle(
@@ -194,6 +202,7 @@ async def test_config_entry_manager_lifecycle(
     assert entry.state is ConfigEntryState.LOADED
     assert async_get_runtime(hass).loaded_foundation_entry_ids == {entry.entry_id}
     assert frontend.async_panel_exists(hass, PANEL_URL_PATH)
+    assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
 
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
@@ -201,6 +210,41 @@ async def test_config_entry_manager_lifecycle(
     assert entry.state is ConfigEntryState.NOT_LOADED
     assert async_get_runtime(hass).loaded_foundation_entry_ids == set()
     assert not frontend.async_panel_exists(hass, PANEL_URL_PATH)
+    assert WORKFLOW_PROBE_EVENT not in hass.bus.async_listeners()
+
+
+async def test_config_entry_manager_reload_keeps_exactly_one_probe_listener(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """Home Assistant's real reload path detaches before registering once."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.ai_orchestrator.async_register_static_assets",
+        new_callable=AsyncMock,
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    before_reload = async_run_workflow_probe(hass, context=Context())
+    assert before_reload["executions_for_trigger"] == 1
+    assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
+
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.LOADED
+    assert hass.bus.async_listeners()[WORKFLOW_PROBE_EVENT] == 1
+    after_reload = async_run_workflow_probe(hass, context=Context())
+    assert after_reload["execution_count"] == 2
+    assert after_reload["executions_for_trigger"] == 1
+    assert after_reload["registration_count"] == 2
 
 
 async def test_config_entry_manager_reports_foreign_panel_collision(
@@ -232,4 +276,5 @@ async def test_config_entry_manager_reports_foreign_panel_collision(
 
     assert entry.state is ConfigEntryState.SETUP_ERROR
     assert async_get_runtime(hass).loaded_foundation_entry_ids == set()
+    assert async_get_runtime(hass).workflow_probe_unsubscribe is None
     assert hass.data[frontend.DATA_PANELS][PANEL_URL_PATH] is foreign_panel

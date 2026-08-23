@@ -13,6 +13,10 @@ from .panel import (
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
+from .workflow_probe import (
+    async_setup_workflow_probe,
+    async_unload_workflow_probe,
+)
 
 type AIOrchestratorConfigEntry = ConfigEntry[None]
 
@@ -38,6 +42,7 @@ async def async_setup_entry(
 
     if not runtime.loaded_foundation_entry_ids:
         runtime.owns_panel = await async_register_panel(hass)
+        async_setup_workflow_probe(hass)
     runtime.loaded_foundation_entry_ids.add(entry.entry_id)
     return True
 
@@ -51,6 +56,7 @@ async def async_unload_entry(
     if runtime.loaded_foundation_entry_ids:
         return True
 
+    async_unload_workflow_probe(hass)
     if runtime.owns_panel:
         async_unregister_panel(hass)
         runtime.owns_panel = False

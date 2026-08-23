@@ -35,4 +35,33 @@ describe("panel accessibility baseline", () => {
 
     expect(stopShipViolations, JSON.stringify(stopShipViolations, undefined, 2)).toEqual([]);
   });
+
+  it("has no serious or critical violations in the lifecycle probe surface", async () => {
+    mounted = document.createElement(PANEL_TAG) as AiOrchestratorPanel;
+    mounted.hass = createFakeHass();
+    document.body.append(mounted);
+    await mounted.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await mounted.updateComplete;
+    const automationButton = [
+      ...(mounted.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Automations"));
+    automationButton?.click();
+    await mounted.updateComplete;
+
+    const results = await axe.run(
+      { fromShadowDom: [PANEL_TAG, ".app-frame"] },
+      {
+        runOnly: {
+          type: "tag",
+          values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
+        },
+      },
+    );
+    const stopShipViolations = results.violations.filter(
+      (violation) => violation.impact === "serious" || violation.impact === "critical",
+    );
+
+    expect(stopShipViolations, JSON.stringify(stopShipViolations, undefined, 2)).toEqual([]);
+  });
 });

@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AiOrchestratorPanel, PANEL_TAG } from "../src/entry";
-import { createFailingHass, createFakeHass, FOUNDATION_STATUS } from "./fixtures/fake-hass";
+import {
+  createFailingHass,
+  createFakeHass,
+  createRoutedFakeHass,
+  FOUNDATION_STATUS,
+  FOUNDATION_WORKFLOW_PROBE_RESULT,
+} from "./fixtures/fake-hass";
 
 const mounted: AiOrchestratorPanel[] = [];
 
@@ -91,5 +97,67 @@ describe("AI Orchestrator panel shell", () => {
       }
     }
     expect(after).toEqual(before);
+  });
+
+  it("runs only the bounded no-side-effect lifecycle probe", async () => {
+    const requestTypes: unknown[] = [];
+    const panel = await mountPanel(
+      createRoutedFakeHass(
+        {
+          "ai_orchestrator/status": FOUNDATION_STATUS,
+          "ai_orchestrator/workflow/probe/run": FOUNDATION_WORKFLOW_PROBE_RESULT,
+        },
+        (message) => requestTypes.push(message.type),
+      ),
+    );
+    const automationButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Automations"));
+
+    automationButton?.click();
+    await panel.updateComplete;
+    const probeButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+    ].find((button) => button.textContent?.includes("Run lifecycle probe"));
+    probeButton?.click();
+    await panel.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await panel.updateComplete;
+
+    expect(requestTypes).toEqual([
+      "ai_orchestrator/status",
+      "ai_orchestrator/workflow/probe/run",
+    ]);
+    expect(shadowText(panel)).toContain("One trigger produced exactly one execution");
+    expect(shadowText(panel)).toContain("Provider contacted: no");
+    expect(shadowText(panel)).toContain("Home Assistant action called: no");
+  });
+
+  it("renders a bounded failure without exposing malformed probe content", async () => {
+    const panel = await mountPanel(
+      createRoutedFakeHass({
+        "ai_orchestrator/status": FOUNDATION_STATUS,
+        "ai_orchestrator/workflow/probe/run": {
+          ...FOUNDATION_WORKFLOW_PROBE_RESULT,
+          executions_for_trigger: 2,
+          raw_error: "credential-like-probe-error-must-not-render",
+        },
+      }),
+    );
+    const automationButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Automations"));
+    automationButton?.click();
+    await panel.updateComplete;
+    const probeButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+    ].find((button) => button.textContent?.includes("Run lifecycle probe"));
+    probeButton?.click();
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await panel.updateComplete;
+
+    expect(shadowText(panel)).toContain("The lifecycle probe was not confirmed");
+    expect(shadowText(panel)).toContain("No provider or Home Assistant action was called");
+    expect(shadowText(panel)).not.toContain("credential-like-probe-error-must-not-render");
   });
 });

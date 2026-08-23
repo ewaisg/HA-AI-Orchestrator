@@ -1,5 +1,6 @@
 """Domain-wide runtime state for AI Orchestrator."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from homeassistant.core import HomeAssistant, callback
@@ -13,6 +14,9 @@ class AIOrchestratorRuntime:
 
     loaded_foundation_entry_ids: set[str] = field(default_factory=set)
     owns_panel: bool = False
+    workflow_probe_unsubscribe: Callable[[], None] | None = None
+    workflow_probe_execution_count: int = 0
+    workflow_probe_registration_count: int = 0
 
 
 @callback

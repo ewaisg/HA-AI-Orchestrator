@@ -38,6 +38,12 @@ states are all unavailable:
 The remaining navigation sections are intentional placeholders. The foundation
 does not contact an AI destination or execute a Home Assistant action.
 
+The Automations section may expose the Phase 0 **lifecycle probe**. That bounded
+test fires one integration-owned internal event and increments an in-memory
+counter. A valid result reports exactly one execution for the trigger, no
+provider contact, and no Home Assistant action call. It is not a published
+automation or the product workflow runtime.
+
 ## Troubleshooting
 
 - If Home Assistant cannot find the integration, verify the exact manifest path
@@ -49,6 +55,9 @@ does not contact an AI destination or execute a Home Assistant action.
   `ai_orchestrator` directory from one repository revision; do not mix backend
   and frontend files from different revisions.
 - Check **Settings -> System -> Logs** for `ai_orchestrator` setup errors.
+- If the lifecycle probe does not report exactly one execution for its trigger,
+  treat the result as a failed compatibility check and do not infer that
+  workflows are available.
 
 Automatic panel registration remains an isolated compatibility boundary. Both
 automatic registration and the exact YAML fallback documented in
@@ -61,5 +70,5 @@ if automatic registration fails; this evidence does not claim another version.
 Config-entry removal/reinstallation, reload, restart recovery, cache-bypassing
 refresh, YAML fallback, and restoration of automatic registration are validated
 on the named FND-011 target in
-`docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Complete mobile-client and
-Core-upgrade evidence remains open.
+`docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Android Companion App
+rendering is also confirmed. Core-upgrade evidence remains open.

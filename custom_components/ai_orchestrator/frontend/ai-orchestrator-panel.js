@@ -254,86 +254,86 @@ var v = class extends HTMLElement {
 v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[m("elementProperties")] = /* @__PURE__ */ new Map(), v[m("finalized")] = /* @__PURE__ */ new Map(), ie?.({ ReactiveElement: v }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var y = globalThis, ae = (e) => e, b = y.trustedTypes, x = b ? b.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, S = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, w = "?" + C, oe = `<${w}>`, T = document, E = () => T.createComment(""), D = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, se = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", k = "[ 	\n\f\r]", A = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, j = /-->/g, ce = />/g, M = RegExp(`>|${k}(?:([^\\s"'>=/]+)(${k}*=${k}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), N = /'/g, P = /"/g, F = /^(?:script|style|textarea|title)$/i, I = ((e) => (t, ...n) => ({
+var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, T = "?" + w, ae = `<${T}>`, E = document, D = () => E.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", k = Array.isArray, oe = (e) => k(e) || typeof e?.[Symbol.iterator] == "function", A = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, M = /-->/g, se = />/g, N = RegExp(`>|${A}(?:([^\\s"'>=/]+)(${A}*=${A}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), P = /'/g, F = /"/g, I = /^(?:script|style|textarea|title)$/i, L = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), L = Symbol.for("lit-noChange"), R = Symbol.for("lit-nothing"), z = /* @__PURE__ */ new WeakMap(), B = T.createTreeWalker(T, 129);
-function V(e, t) {
-	if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return x === void 0 ? t : x.createHTML(t);
+}))(1), R = Symbol.for("lit-noChange"), z = Symbol.for("lit-nothing"), B = /* @__PURE__ */ new WeakMap(), V = E.createTreeWalker(E, 129);
+function H(e, t) {
+	if (!k(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return S === void 0 ? t : S.createHTML(t);
 }
-var le = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = A;
+var ce = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = j;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === A ? c[1] === "!--" ? o = j : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = M) : (F.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = M) : o = ce : o === M ? c[0] === ">" ? (o = i ?? A, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? M : c[3] === "\"" ? P : N) : o === P || o === N ? o = M : o === j || o === ce ? o = A : (o = M, i = void 0);
-		let d = o === M && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === A ? n + oe : l >= 0 ? (r.push(s), n.slice(0, l) + S + n.slice(l) + C + d) : n + C + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === j ? c[1] === "!--" ? o = M : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = N) : (I.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = N) : o = se : o === N ? c[0] === ">" ? (o = i ?? j, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? N : c[3] === "\"" ? F : P) : o === F || o === P ? o = N : o === M || o === se ? o = j : (o = N, i = void 0);
+		let d = o === N && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === j ? n + ae : l >= 0 ? (r.push(s), n.slice(0, l) + C + n.slice(l) + w + d) : n + w + (l === -2 ? t : d);
 	}
-	return [V(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, H = class e {
+	return [H(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, U = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = le(t, n);
-		if (this.el = e.createElement(l, r), B.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = ce(t, n);
+		if (this.el = e.createElement(l, r), V.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = B.nextNode()) !== null && c.length < s;) {
+		for (; (i = V.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(S)) {
-					let t = u[o++], n = i.getAttribute(e).split(C), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(C)) {
+					let t = u[o++], n = i.getAttribute(e).split(w), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? de : r[1] === "?" ? fe : r[1] === "@" ? pe : G
+						ctor: r[1] === "." ? ue : r[1] === "?" ? de : r[1] === "@" ? fe : K
 					}), i.removeAttribute(e);
-				} else e.startsWith(C) && (c.push({
+				} else e.startsWith(w) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (F.test(i.tagName)) {
-					let e = i.textContent.split(C), t = e.length - 1;
+				if (I.test(i.tagName)) {
+					let e = i.textContent.split(w), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = b ? b.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], E()), B.nextNode(), c.push({
+						i.textContent = x ? x.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], D()), V.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], E());
+						i.append(e[t], D());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === w) c.push({
+				if (i.data === T) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(C, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(w, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += C.length - 1;
+					}), e += w.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = T.createElement("template");
+		let n = E.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function U(e, t, n = e, r) {
-	if (t === L) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = D(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = U(e, i._$AS(e, t.values), i, r)), t;
+function W(e, t, n = e, r) {
+	if (t === R) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = O(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = W(e, i._$AS(e, t.values), i, r)), t;
 }
-var ue = class {
+var le = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var ue = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? T).importNode(t, !0);
-		B.currentNode = r;
-		let i = B.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? E).importNode(t, !0);
+		V.currentNode = r;
+		let i = V.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new W(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new me(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new G(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new pe(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = B.nextNode(), a++);
+			a !== s?.index && (i = V.nextNode(), a++);
 		}
-		return B.currentNode = T, r;
+		return V.currentNode = E, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, W = class e {
+}, G = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = R, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = z, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var ue = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = U(this, e, t), D(e) ? e === R || e == null || e === "" ? (this._$AH !== R && this._$AR(), this._$AH = R) : e !== this._$AH && e !== L && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = W(this, e, t), O(e) ? e === z || e == null || e === "" ? (this._$AH !== z && this._$AR(), this._$AH = z) : e !== this._$AH && e !== R && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? oe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var ue = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== R && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(T.createTextNode(e)), this._$AH = e;
+		this._$AH !== z && O(this._$AH) ? this._$AA.nextSibling.data = e : this.T(E.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = H.createElement(V(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = U.createElement(H(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new ue(r, this), n = e.u(this.options);
+			let e = new le(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = z.get(e.strings);
-		return t === void 0 && z.set(e.strings, t = new H(e)), t;
+		let t = B.get(e.strings);
+		return t === void 0 && B.set(e.strings, t = new U(e)), t;
 	}
 	k(t) {
-		O(this._$AH) || (this._$AH = [], this._$AR());
+		k(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(E()), this.O(E()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(D()), this.O(D()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = ae(e).nextSibling;
-			ae(e).remove(), e = t;
+			let t = b(e).nextSibling;
+			b(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, G = class {
+}, K = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var ue = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = R, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = R;
+		this.type = 1, this._$AH = z, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = z;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = U(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== L, a && (this._$AH = e);
+		if (i === void 0) e = W(this, e, t, 0), a = !O(e) || e !== this._$AH && e !== R, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = U(this, r[n + o], t, o), s === L && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === R ? e = R : e !== R && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = W(this, r[n + o], t, o), s === R && (s = this._$AH[o]), a ||= !O(s) || s !== this._$AH[o], s === z ? e = z : e !== z && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === R ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === z ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, de = class extends G {
+}, ue = class extends K {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === R ? void 0 : e;
+		this.element[this.name] = e === z ? void 0 : e;
 	}
-}, fe = class extends G {
+}, de = class extends K {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== R);
+		this.element.toggleAttribute(this.name, !!e && e !== z);
 	}
-}, pe = class extends G {
+}, fe = class extends K {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = U(this, e, t, 0) ?? R) === L) return;
-		let n = this._$AH, r = e === R && n !== R || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== R && (n === R || r);
+		if ((e = W(this, e, t, 0) ?? z) === R) return;
+		let n = this._$AH, r = e === z && n !== z || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== z && (n === z || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, me = class {
+}, pe = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var ue = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		U(this, e);
+		W(this, e);
 	}
-}, he = y.litHtmlPolyfillSupport;
-he?.(H, W), (y.litHtmlVersions ??= []).push("3.3.3");
-var ge = (e, t, n) => {
+}, me = y.litHtmlPolyfillSupport;
+me?.(U, G), (y.litHtmlVersions ??= []).push("3.3.3");
+var he = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new W(t.insertBefore(E(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new G(t.insertBefore(D(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, K = globalThis, q = class extends v {
+}, q = globalThis, J = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var ge = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ge(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = he(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,39 +502,39 @@ var ge = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return L;
+		return R;
 	}
 };
-q._$litElement$ = !0, q.finalized = !0, K.litElementHydrateSupport?.({ LitElement: q });
-var _e = K.litElementPolyfillSupport;
-_e?.({ LitElement: q }), (K.litElementVersions ??= []).push("4.2.2");
+J._$litElement$ = !0, J.finalized = !0, q.litElementHydrateSupport?.({ LitElement: J });
+var ge = q.litElementPolyfillSupport;
+ge?.({ LitElement: J }), (q.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var ve = Object.freeze({ type: "ai_orchestrator/status" }), J = [
+var _e = Object.freeze({ type: "ai_orchestrator/status" }), Y = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], Y = class extends Error {
+], X = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function X(e) {
+function Z(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Z(e, t) {
+function Q(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function ye(e) {
-	if (!X(e) || !Z(e, [
+function ve(e) {
+	if (!Z(e) || !Q(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !X(e.features) || !Z(e.features, J)) throw new Y();
+	]) || !Z(e.features) || !Q(e.features, Y)) throw new X();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || J.some((e) => t[e] !== !1)) throw new Y();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || Y.some((e) => t[e] !== !1)) throw new X();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,15 +547,47 @@ function ye(e) {
 		}
 	};
 }
-async function be(e) {
-	return ye(await e.callWS({ ...ve }));
+async function ye(e) {
+	return ve(await e.callWS({ ..._e }));
 }
-function xe(e) {
-	return X(e) && e.code === "unauthorized";
+function be(e) {
+	return Z(e) && e.code === "unauthorized";
+}
+//#endregion
+//#region src/api/workflow-probe-client.ts
+var xe = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Se = class extends Error {
+	constructor() {
+		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
+	}
+};
+function Ce(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function we(e, t) {
+	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
+}
+function Te(e) {
+	return typeof e == "number" && Number.isInteger(e) && e > 0;
+}
+function Ee(e) {
+	if (!Ce(e) || !we(e, [
+		"schema_version",
+		"workflow_id",
+		"trigger_type",
+		"execution_count",
+		"executions_for_trigger",
+		"registration_count",
+		"provider_contacted",
+		"home_assistant_action_called"
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Te(e.execution_count) || e.executions_for_trigger !== 1 || !Te(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Se();
+	return e;
+}
+async function De(e) {
+	return Ee(await e.callWS({ ...xe }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var Se = o`
+var Oe = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1089,6 +1121,28 @@ var Se = o`
     line-height: 1.65;
   }
 
+  .probe-actions {
+    justify-content: center;
+  }
+
+  .probe-result {
+    display: grid;
+    gap: 5px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--orchestrator-border);
+    border-radius: 12px;
+    background: var(--orchestrator-canvas);
+    color: var(--orchestrator-muted);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .probe-result strong {
+    color: var(--orchestrator-text);
+  }
+
   .loading-bar {
     width: 100%;
     max-width: 320px;
@@ -1223,7 +1277,7 @@ var Se = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Q = "ai-orchestrator-panel", $ = [
+`, ke = "ai-orchestrator-panel", $ = [
 	{
 		id: "home",
 		label: "Home"
@@ -1256,12 +1310,12 @@ var Se = o`
 		id: "settings",
 		label: "Settings"
 	}
-], Ce = {
+], Ae = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, we = {
+}, je = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -1291,11 +1345,11 @@ var Se = o`
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function Te(e) {
+function Me(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
 	return $.find((e) => e.id === t)?.id;
 }
-var Ee = class extends q {
+var Ne = class extends J {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -1303,20 +1357,22 @@ var Ee = class extends q {
 		panel: { attribute: !1 },
 		_activeSection: { state: !0 },
 		_loadState: { state: !0 },
-		_status: { state: !0 }
+		_status: { state: !0 },
+		_probeLoadState: { state: !0 },
+		_probeResult: { state: !0 }
 	};
-	static styles = Se;
+	static styles = Oe;
 	_hasRequested = !1;
 	_requestSequence = 0;
 	constructor() {
-		super(), this.narrow = !1, this._activeSection = "home", this._loadState = "waiting";
+		super(), this.narrow = !1, this._activeSection = "home", this._loadState = "waiting", this._probeLoadState = "idle";
 	}
 	disconnectedCallback() {
 		this._requestSequence += 1, super.disconnectedCallback();
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = Te(this.route);
+			let e = Me(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
@@ -1324,19 +1380,19 @@ var Ee = class extends q {
 		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus());
 	}
 	render() {
-		return I`
+		return L`
       <div class="app-frame ${this.narrow ? "narrow" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
     `;
 	}
 	_renderSidebar() {
-		return I`
+		return L`
       <aside class="sidebar">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">AI</span>
@@ -1347,11 +1403,11 @@ var Ee = class extends q {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${$.map((e) => I`
+          ${$.map((e) => L`
               <button
                 class="nav-button"
                 type="button"
-                aria-current=${this._activeSection === e.id ? "page" : R}
+                aria-current=${this._activeSection === e.id ? "page" : z}
                 @click=${() => this._selectSection(e.id)}
               >
                 <span class="nav-marker" aria-hidden="true"></span>
@@ -1370,7 +1426,7 @@ var Ee = class extends q {
 	}
 	_renderHome() {
 		let e = this._statusHeading();
-		return I`
+		return L`
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
@@ -1393,7 +1449,7 @@ var Ee = class extends q {
           <h2 id="foundation-status">${e.title}</h2>
           <p class="hero-description">${e.detail}</p>
           ${this._renderStatusAction()}
-          ${this._loadState === "loading" ? I`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : R}
+          ${this._loadState === "loading" ? L`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : z}
         </div>
         <div class="connection-summary" aria-label="Connection summary">
           <p class="summary-label">Home Assistant</p>
@@ -1420,17 +1476,17 @@ var Ee = class extends q {
     `;
 	}
 	_renderFeatureCard() {
-		return I`
+		return L`
       <section class="card" aria-labelledby="feature-status-heading">
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${J.map((e) => {
+          ${Y.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
-			return I`
+			return L`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${Ce[e]}</span>
+                  <span class="status-name">${Ae[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -1444,7 +1500,7 @@ var Ee = class extends q {
     `;
 	}
 	_renderNextSteps() {
-		return I`
+		return L`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
         <p class="card-intro">Each capability opens only after its own verification gate.</p>
@@ -1467,8 +1523,8 @@ var Ee = class extends q {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = we[e], n = $.find((t) => t.id === e)?.label ?? "Section";
-		return I`
+		let t = je[e], n = $.find((t) => t.id === e)?.label ?? "Section";
+		return L`
       <header class="page-header">
         <div>
           <p class="eyebrow">${n}</p>
@@ -1490,8 +1546,62 @@ var Ee = class extends q {
       </section>
     `;
 	}
+	_renderWorkflowProbe() {
+		return L`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Automations</p>
+          <h1>Restricted workflow lifecycle probe</h1>
+          <p class="page-intro">
+            This Phase 0 control fires one integration-owned internal event. It records an
+            in-memory count and calls neither an AI provider nor a Home Assistant action.
+          </p>
+        </div>
+        <span class="phase-badge">Lifecycle evidence only</span>
+      </header>
+      <section class="placeholder" aria-labelledby="probe-title">
+        <div class="placeholder-inner">
+          <span class="phase-badge">No device action</span>
+          <h2 id="probe-title">Run one harmless trigger</h2>
+          <p>
+            A successful result must report exactly one execution for this trigger. Reload and
+            restart tests use that exact delta to detect duplicate listener registration.
+          </p>
+          <div class="hero-actions probe-actions">
+            <button
+              class="primary-button"
+              type="button"
+              ?disabled=${this._probeLoadState === "loading"}
+              @click=${this._runWorkflowProbe}
+            >
+              ${this._probeLoadState === "loading" ? "Running probe…" : "Run lifecycle probe"}
+            </button>
+            <button class="secondary-button" type="button" @click=${() => this._selectSection("home")}>
+              Return to foundation status
+            </button>
+          </div>
+          <div class="probe-result" role="status" aria-live="polite">
+            ${this._renderWorkflowProbeResult()}
+          </div>
+        </div>
+      </section>
+    `;
+	}
+	_renderWorkflowProbeResult() {
+		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? L`
+        <strong>One trigger produced exactly one execution.</strong>
+        <span>
+          Runtime execution ${this._probeResult.execution_count}; listener registration
+          ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
+          called: no.
+        </span>
+      ` : this._probeLoadState === "error" ? L`
+        <strong>The lifecycle probe was not confirmed.</strong>
+        <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
+      ` : this._probeLoadState === "loading" ? L`<span>Waiting for the bounded integration response.</span>` : L`<span>No lifecycle probe has run in this panel session.</span>`;
+	}
 	_renderStatusAction() {
-		return this._loadState === "loading" ? R : this._loadState === "ready" && this._status?.configured === !1 ? I`
+		return this._loadState === "loading" ? z : this._loadState === "ready" && this._status?.configured === !1 ? L`
         <div class="hero-actions">
           <button class="secondary-button" type="button" @click=${this._refreshStatus}>
             Check again
@@ -1501,11 +1611,11 @@ var Ee = class extends q {
 			"denied",
 			"incompatible",
 			"error"
-		].includes(this._loadState) ? I`
+		].includes(this._loadState) ? L`
         <div class="hero-actions">
           <button class="primary-button" type="button" @click=${this._refreshStatus}>Retry status check</button>
         </div>
-      ` : R;
+      ` : z;
 	}
 	_statusHeading() {
 		return this._loadState === "loading" ? {
@@ -1566,17 +1676,30 @@ var Ee = class extends q {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await be(e);
+			let n = await ye(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof Y ? "incompatible" : xe(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof X ? "incompatible" : be(e) ? "denied" : "error";
+		}
+	};
+	_runWorkflowProbe = async () => {
+		let e = this.hass;
+		if (e === void 0) {
+			this._probeLoadState = "error", this._probeResult = void 0;
+			return;
+		}
+		this._probeLoadState = "loading", this._probeResult = void 0;
+		try {
+			this._probeResult = await De(e), this._probeLoadState = "ready";
+		} catch {
+			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
 };
 //#endregion
 //#region src/entry.ts
-customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Q, Ee);
+customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(ke, Ne);
 //#endregion
-export { Ee as AiOrchestratorPanel, Q as PANEL_TAG };
+export { Ne as AiOrchestratorPanel, ke as PANEL_TAG };

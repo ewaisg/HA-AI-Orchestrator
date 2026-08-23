@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FND-012-WORKFLOW-LIFECYCLE-001",
+  "task_id": "FND-012",
+  "kind": "automated_test",
+  "captured_at": "2026-08-23T16:17:09Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["FND-012"],
+    "decisions": ["DEC-004", "DEC-005"],
+    "controls": ["DD-01", "DD-02", "DD-07"],
+    "tests": [
+      "LINUX_FOCUSED_LIFECYCLE",
+      "LINUX_FULL_SUITE",
+      "PURE_TEST_SUITE",
+      "FRONTEND_CHECK",
+      "CANARY_SCAN",
+      "BACKEND_FAIL_CLOSED",
+      "CONTEXT_PROPAGATION",
+      "NO_PROVIDER_OR_ACTION_CALL"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python_linux",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant_core",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "home_assistant_frontend",
+        "status": "verified",
+        "version": "20260729.7"
+      },
+      {
+        "name": "docker_linux_engine",
+        "status": "verified",
+        "version": "29.5.2"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "LINUX_FOCUSED_LIFECYCLE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "docker run --rm --name ai-orchestrator-fnd012-focused-3 --workdir /workspace --volume \"${PWD}:/workspace\" --volume ai-orchestrator-fnd012-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc \"python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider tests/home_assistant/test_workflow_probe.py tests/home_assistant/test_init.py tests/home_assistant/test_websocket_api.py\""
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "docker run --rm --name ai-orchestrator-fnd012-clean-full-2 --workdir /workspace --volume \"${PWD}:/source:ro\" --volume ai-orchestrator-fnd012-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc \"python -m pip install --no-cache-dir uv==0.12.1 && tar --exclude=.git --exclude=.venv --exclude=frontend/node_modules --exclude=frontend/dist -C /source -cf - . | tar -xf - -C /workspace && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider\""
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "FRONTEND_CHECK",
+      "command_argv": ["npm", "--prefix", "frontend", "run", "check"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "FRONTEND_AUDIT",
+      "command_argv": ["npm", "--prefix", "frontend", "audit", "--audit-level=high"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "bundled-panel",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js",
+      "sha256": "32e8ab2dbc8c621b4cb8bea03db818b8feff205d1b0dc2457f18160814cdf2dd",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "python-lock",
+      "location_type": "repository",
+      "repository_path": "uv.lock",
+      "sha256": "d38315cfeed267abc8912394b4505a0b6abf75b97eea0f6239fae0280fd91a6c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "not_applicable"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "LIVE_RELOAD_RESTART_PENDING",
+      "description": "The committed bundle must run the harmless probe once before reload, once after config-entry reload, and once after a real Home Assistant restart with an execution delta of exactly one.",
+      "blocks": ["FND-012"]
+    },
+    {
+      "id": "CLEAN_COMMIT_TEST_RELEASE_PENDING",
+      "description": "The test/release role must independently verify the clean committed implementation and final live evidence.",
+      "blocks": ["FND-012"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "PROBE_NOT_PRODUCT_RUNTIME",
+      "description": "The lifecycle probe is deliberately in-memory and action-free; workflow schema, persistence, migrations, actions, and AI steps remain later tracked work."
+    }
+  ],
+  "reviews": [
+    {
+      "role": "primary",
+      "status": "approved",
+      "reviewed_at": "2026-08-23T16:10:55Z"
+    },
+    {
+      "role": "workflow_safety",
+      "status": "approved",
+      "reviewed_at": "2026-08-23T16:17:45Z"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

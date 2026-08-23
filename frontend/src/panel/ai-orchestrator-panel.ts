@@ -8,6 +8,10 @@ import {
   StatusContractError,
   type StatusFeature,
 } from "../api/status-client";
+import {
+  runWorkflowProbe,
+  type WorkflowProbeResult,
+} from "../api/workflow-probe-client";
 import type {
   HomeAssistantLike,
   HomeAssistantPanelInfo,
@@ -30,6 +34,7 @@ const SECTIONS = [
 
 type SectionId = (typeof SECTIONS)[number]["id"];
 type LoadState = "waiting" | "loading" | "ready" | "denied" | "incompatible" | "error";
+type ProbeLoadState = "idle" | "loading" | "ready" | "error";
 
 const FEATURE_LABELS: Record<StatusFeature, string> = {
   providers: "Provider connections",
@@ -90,6 +95,8 @@ export class AiOrchestratorPanel extends LitElement {
     _activeSection: { state: true },
     _loadState: { state: true },
     _status: { state: true },
+    _probeLoadState: { state: true },
+    _probeResult: { state: true },
   };
 
   public static override styles = panelStyles;
@@ -102,6 +109,8 @@ export class AiOrchestratorPanel extends LitElement {
   private declare _activeSection: SectionId;
   private declare _loadState: LoadState;
   private declare _status?: OrchestratorStatus;
+  private declare _probeLoadState: ProbeLoadState;
+  private declare _probeResult?: WorkflowProbeResult;
   private _hasRequested = false;
   private _requestSequence = 0;
 
@@ -110,6 +119,7 @@ export class AiOrchestratorPanel extends LitElement {
     this.narrow = false;
     this._activeSection = "home";
     this._loadState = "waiting";
+    this._probeLoadState = "idle";
   }
 
   public override disconnectedCallback(): void {
@@ -140,7 +150,9 @@ export class AiOrchestratorPanel extends LitElement {
           <div class="workspace-inner">
             ${this._activeSection === "home"
               ? this._renderHome()
-              : this._renderPlaceholder(this._activeSection)}
+              : this._activeSection === "automations"
+                ? this._renderWorkflowProbe()
+                : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
@@ -314,6 +326,71 @@ export class AiOrchestratorPanel extends LitElement {
     `;
   }
 
+  private _renderWorkflowProbe(): TemplateResult {
+    return html`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Automations</p>
+          <h1>Restricted workflow lifecycle probe</h1>
+          <p class="page-intro">
+            This Phase 0 control fires one integration-owned internal event. It records an
+            in-memory count and calls neither an AI provider nor a Home Assistant action.
+          </p>
+        </div>
+        <span class="phase-badge">Lifecycle evidence only</span>
+      </header>
+      <section class="placeholder" aria-labelledby="probe-title">
+        <div class="placeholder-inner">
+          <span class="phase-badge">No device action</span>
+          <h2 id="probe-title">Run one harmless trigger</h2>
+          <p>
+            A successful result must report exactly one execution for this trigger. Reload and
+            restart tests use that exact delta to detect duplicate listener registration.
+          </p>
+          <div class="hero-actions probe-actions">
+            <button
+              class="primary-button"
+              type="button"
+              ?disabled=${this._probeLoadState === "loading"}
+              @click=${this._runWorkflowProbe}
+            >
+              ${this._probeLoadState === "loading" ? "Running probe…" : "Run lifecycle probe"}
+            </button>
+            <button class="secondary-button" type="button" @click=${() => this._selectSection("home")}>
+              Return to foundation status
+            </button>
+          </div>
+          <div class="probe-result" role="status" aria-live="polite">
+            ${this._renderWorkflowProbeResult()}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  private _renderWorkflowProbeResult(): TemplateResult {
+    if (this._probeLoadState === "ready" && this._probeResult !== undefined) {
+      return html`
+        <strong>One trigger produced exactly one execution.</strong>
+        <span>
+          Runtime execution ${this._probeResult.execution_count}; listener registration
+          ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
+          called: no.
+        </span>
+      `;
+    }
+    if (this._probeLoadState === "error") {
+      return html`
+        <strong>The lifecycle probe was not confirmed.</strong>
+        <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
+      `;
+    }
+    if (this._probeLoadState === "loading") {
+      return html`<span>Waiting for the bounded integration response.</span>`;
+    }
+    return html`<span>No lifecycle probe has run in this panel session.</span>`;
+  }
+
   private _renderStatusAction(): TemplateResult | typeof nothing {
     if (this._loadState === "loading") {
       return nothing;
@@ -476,6 +553,25 @@ export class AiOrchestratorPanel extends LitElement {
           : isAccessDeniedFailure(error)
             ? "denied"
             : "error";
+    }
+  };
+
+  private readonly _runWorkflowProbe = async (): Promise<void> => {
+    const hass = this.hass;
+    if (hass === undefined) {
+      this._probeLoadState = "error";
+      this._probeResult = undefined;
+      return;
+    }
+
+    this._probeLoadState = "loading";
+    this._probeResult = undefined;
+    try {
+      this._probeResult = await runWorkflowProbe(hass);
+      this._probeLoadState = "ready";
+    } catch {
+      this._probeResult = undefined;
+      this._probeLoadState = "error";
     }
   };
 }

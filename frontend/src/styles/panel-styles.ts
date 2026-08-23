@@ -534,6 +534,28 @@ export const panelStyles = css`
     line-height: 1.65;
   }
 
+  .probe-actions {
+    justify-content: center;
+  }
+
+  .probe-result {
+    display: grid;
+    gap: 5px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--orchestrator-border);
+    border-radius: 12px;
+    background: var(--orchestrator-canvas);
+    color: var(--orchestrator-muted);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .probe-result strong {
+    color: var(--orchestrator-text);
+  }
+
   .loading-bar {
     width: 100%;
     max-width: 320px;
