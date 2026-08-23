@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **Continue FND-012 live validation from committed source revision `8994784ce4b3ad8d0368185e031cc57e233aae8f`: replace the complete installed `ai_orchestrator` directory, restart Home Assistant, run the Automations lifecycle probe, reload the config entry and run it again, then restart and run it a third time. Every run must report exactly one execution and no provider/action call. FND-011 is waiting only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
+Current resume point: **FND-012 is independently approved and complete. Continue existing FND-007 by capturing its remaining exact environment and policy evidence; do not claim dependent FND-013 until FND-007 is complete. FND-011 remains open only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
 
 ## Status rules
 
@@ -21,9 +21,9 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | FND-015 foundation skeleton independently approved; clean-revision manifest `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json` records the implementation and checks |
-| Active work | FND-012 restricted no-side-effect workflow lifecycle probe |
-| Evidence/input needed | FND-012 live run/reload/restart results; later FND-011 Core-upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
+| Last completed | FND-012 restricted workflow lifecycle probe independently approved; manifest `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json` records clean-source and live evidence |
+| Active work | FND-007 remaining live environment and policy facts |
+| Evidence/input needed | Later FND-011 Core-upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
 | Next gate | Phase 0 architecture/repository readiness review |
 | Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
@@ -43,7 +43,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
 | FND-010 | Phase 0 readiness review | Test/release | `TODO` | FND-007, FND-011 through FND-015 | Independent checklist; no unresolved implementation-critical unknowns |
 | FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `NEEDS INPUT` | FND-015, ENV-001 | All same-version scenarios are confirmed on the exact matrix in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`, including Home Assistant Companion App for Android. Only survival across an actual Core upgrade remains; do not infer or force that result. |
-| FND-012 | Prove restricted workflow lifecycle | HA + workflow | `IN PROGRESS` | FND-015 | Committed revision `8994784ce4b3ad8d0368185e031cc57e233aae8f`: one internal event trigger, admin-only input-free run command, in-memory count, no provider/action call, explicit unload cleanup, strict backend/panel fail-closed contracts, context propagation, and duplicate tests. Linux full suite 113 passed; focused lifecycle suite 22 passed; frontend 29 passed. Independent workflow/safety re-review approved. Next: live run/reload/restart sequence; final test/release review remains pending. Manifest: `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json`. |
+| FND-012 | Prove restricted workflow lifecycle | HA + workflow | `DONE` | FND-015 | Committed revision `8994784ce4b3ad8d0368185e031cc57e233aae8f`: Linux full suite 113 passed; focused lifecycle suite 22 passed; frontend 29 passed; independent workflow/safety review approved. Project-owner live result on the named target was execution `1` initially, `2` after reload, and `1` after full restart; Home remained healthy and the log search showed no issue. Independent clean-source test/release review approved 2026-08-23T17:13:05Z. Manifest: `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json`. |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `TODO` | FND-007 | Redacted data-flow map and requirement/control/test IDs |
 | FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |
 | FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `DONE` | FND-009, FND-014 | Independent test/release review approved clean source revision `7de030a1b8c7c6f337f13dce404b862df9363dd8`: Linux full suite 102 passed; pure Windows suite 81 passed; frontend browser suite 16 passed; dependency audit, bundle identity, canary, format, and lint checks passed. Acceptance manifest: `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`. |

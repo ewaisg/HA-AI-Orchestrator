@@ -3,7 +3,7 @@
   "evidence_id": "FND-012-WORKFLOW-LIFECYCLE-001",
   "task_id": "FND-012",
   "kind": "automated_test",
-  "captured_at": "2026-08-23T16:17:09Z",
+  "captured_at": "2026-08-23T17:13:05Z",
   "source_revision": {
     "state": "committed",
     "git_commit": "8994784ce4b3ad8d0368185e031cc57e233aae8f",
@@ -19,13 +19,14 @@
       "PURE_TEST_SUITE",
       "FRONTEND_CHECK",
       "CANARY_SCAN",
+      "LIVE_UI_SEQUENCE",
       "BACKEND_FAIL_CLOSED",
       "CONTEXT_PROPAGATION",
       "NO_PROVIDER_OR_ACTION_CALL"
     ]
   },
   "environment": {
-    "data_mode": "synthetic",
+    "data_mode": "live_redacted",
     "components": [
       {
         "name": "python_linux",
@@ -41,6 +42,16 @@
         "name": "home_assistant_frontend",
         "status": "verified",
         "version": "20260729.7"
+      },
+      {
+        "name": "home_assistant_supervisor",
+        "status": "verified",
+        "version": "2026.07.5"
+      },
+      {
+        "name": "home_assistant_operating_system",
+        "status": "verified",
+        "version": "18.2"
       },
       {
         "name": "docker_linux_engine",
@@ -107,6 +118,15 @@
       "command_argv": ["npm", "--prefix", "frontend", "audit", "--audit-level=high"],
       "exit_code": 0,
       "result": "passed"
+    },
+    {
+      "id": "LIVE_UI_SEQUENCE",
+      "command_argv": [
+        "home_assistant_ui",
+        "run lifecycle probe once; reload AI Orchestrator config entry; run once; fully restart Home Assistant; run once; search logs for ai_orchestrator"
+      ],
+      "exit_code": 0,
+      "result": "passed"
     }
   ],
   "artifacts": [
@@ -129,19 +149,8 @@
       "redaction_status": "not_applicable"
     }
   ],
-  "result": "incomplete",
-  "unknowns": [
-    {
-      "id": "LIVE_RELOAD_RESTART_PENDING",
-      "description": "The committed bundle must run the harmless probe once before reload, once after config-entry reload, and once after a real Home Assistant restart with an execution delta of exactly one.",
-      "blocks": ["FND-012"]
-    },
-    {
-      "id": "CLEAN_COMMIT_TEST_RELEASE_PENDING",
-      "description": "The test/release role must independently verify the clean committed implementation and final live evidence.",
-      "blocks": ["FND-012"]
-    }
-  ],
+  "result": "passed",
+  "unknowns": [],
   "residuals": [
     {
       "id": "PROBE_NOT_PRODUCT_RUNTIME",
@@ -160,8 +169,14 @@
       "reviewed_at": "2026-08-23T16:17:45Z"
     },
     {
+      "role": "project_owner",
+      "status": "approved",
+      "reviewed_at": "2026-08-23T17:06:29Z"
+    },
+    {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-23T17:13:05Z"
     }
   ]
 }

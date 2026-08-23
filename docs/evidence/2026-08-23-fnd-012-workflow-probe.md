@@ -41,26 +41,30 @@ verified implementation and results:
 - Repository canary scan passed.
 - Frontend dependency audit reported zero vulnerabilities.
 
-These results do not substitute for the required live reload and restart
-scenario. Independent workflow/safety re-review approved the working-tree
+Independent workflow/safety re-review approved the working-tree
 implementation on 2026-08-23 after verifying the provider/action spies, exact
 context propagation, backend duplicate fail-closed behavior, manager-level
 reload, and bounded frontend failure handling. Clean committed-source
 test/release review remains pending.
 
-## Pending live sequence
+## Live Home Assistant result
 
-1. Replace the installed `ai_orchestrator` custom-component directory with the
-   complete directory from one committed revision and restart Home Assistant.
-2. Open **AI Orchestrator -> Automations** and run the lifecycle probe once.
-3. Confirm it reports exactly one execution, provider contacted `no`, and Home
-   Assistant action called `no`.
-4. Reload the AI Orchestrator config entry, run the probe again, and confirm the
-   execution delta remains exactly one.
-5. Restart Home Assistant, run the probe again, and confirm the fresh runtime
-   reports execution `1`, listener registration `1`, and the same two `no`
-   safety results.
-6. Search Home Assistant logs for `ai_orchestrator` and record the exact result.
+The project owner installed the committed component on the named FND-011 Home
+Assistant OS target and followed the supplied run/reload/restart sequence. The
+direct report on 2026-08-23 was:
 
-FND-012 cannot move to `DONE` until this sequence and the required independent
-workflow/safety review are recorded.
+| Stage | Reported runtime execution |
+|---|---|
+| Initial run after installing and restarting | 1 |
+| One run after config-entry reload | 2 |
+| One run after another full Home Assistant restart | 1 |
+
+The owner also confirmed that Home still displayed `None contacted` and the
+`ai_orchestrator` log search showed no issues. The `1 -> 2 -> 1` sequence is the
+expected evidence for one execution per requested trigger, in-memory continuity
+across config-entry reload, and a fresh runtime after process restart.
+
+Independent test/release review approved the clean committed source and the
+live evidence at 2026-08-23T17:13:05Z. FND-012 is complete. This approval does
+not claim a product workflow runtime, a Home Assistant action capability, or
+the separate FND-011 Core-upgrade result.
