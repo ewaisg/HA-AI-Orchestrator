@@ -23,9 +23,9 @@ The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home
 |---|---|---|---|
 | ENV-001 | `REVALIDATED FOR FND-011` | HA-LIVE-001 through HA-LIVE-003; FND-011-LIVE-001 and FND-011-LIVE-002 in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md` | Revalidate again for a later upgrade or release gate |
 | ENV-002 | `PARTIAL` | HA-LIVE-003 through HA-LIVE-005 | Exact processor architecture; not required for the architecture-independent Phase 0 skeleton |
-| ENV-004 | `PARTIAL` | HA-LIVE-012 through HA-LIVE-016 plus the user's prior successful audible test | Exact entity IDs, action identifier, and action payload/schema |
+| ENV-004 | `RESOLVED FOR PHASE 0 DISCOVERY` | HA-LIVE-012 through HA-LIVE-016 and HA-LIVE-025 through HA-LIVE-027, plus the user's prior successful audible test | Exact identifiers were verified live but are intentionally not committed to the public repository; revalidate and select current targets from discovery for WFL-007 |
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
-| ENV-010 | `PARTIAL` | HA-LIVE-006 and HA-LIVE-022 through HA-LIVE-024 | Backup encryption/emergency-kit/restore readiness; remote-access method, TLS termination, VPN/reverse-proxy use, and relevant LAN/firewall segmentation |
+| ENV-010 | `PARTIAL` | HA-LIVE-006, HA-LIVE-022 through HA-LIVE-024, and HA-LIVE-028 through HA-LIVE-029 | Backup encryption/emergency-kit/restore readiness; VPN use and relevant upstream LAN/firewall segmentation |
 
 ## Prior proof requiring live revalidation
 

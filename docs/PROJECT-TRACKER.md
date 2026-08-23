@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **FND-012 is independently approved and complete. Continue existing FND-007 by capturing its remaining exact environment and policy evidence; do not claim dependent FND-013 until FND-007 is complete. FND-011 remains open only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
+Current resume point: **FND-007 now has the exact live window/Echo action contract and the Home Assistant-visible network facts. Continue FND-007 with ENV-009 privacy/cloud/retention choices, ENV-010 backup encryption/emergency-kit/restore readiness plus any VPN/firewall facts, and the separately deferred LM Studio review. Do not claim dependent FND-013 until FND-007 is complete. FND-011 remains open only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
 
 ## Status rules
 
@@ -23,7 +23,7 @@ No task may move to `DONE` based only on an assertion.
 |---|---|
 | Last completed | FND-012 restricted workflow lifecycle probe independently approved; manifest `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json` records clean-source and live evidence |
 | Active work | FND-007 remaining live environment and policy facts |
-| Evidence/input needed | Later FND-011 Core-upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
+| Evidence/input needed | Later FND-011 Core-upgrade evidence; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/cloud/retention choices plus remaining ENV-010 backup encryption/emergency-kit/restore and VPN/firewall facts |
 | Next gate | Phase 0 architecture/repository readiness review |
 | Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
@@ -38,7 +38,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-004 | Validate Home Assistant and provider extension points | HA specialist | `DONE` | FND-002 | `docs/architecture/HA-PLATFORM-REVIEW.md`; findings reconciled into ADRs |
 | FND-005 | Define complete UI/product behavior | UI specialist | `DONE` | FND-001 | `docs/product/UI-PRODUCT-PLAN.md`; unknowns UI-001 through UI-015 retained |
 | FND-006 | Define test, release, and security gates | Test/security specialist | `DONE` | FND-001, FND-002 | `docs/quality/QUALITY-SECURITY-PLAN.md`; gates and stop-ship rules adopted |
-| FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `IN PROGRESS` | — | ENV-001 and Phase 0 ENV-007 resolved; ENV-002, ENV-004, and ENV-010 partially resolved in `docs/evidence/2026-08-22-home-assistant-environment.md`. Next: exact window/Echo IDs/action schema, later LM Studio review, and remaining readiness policy/network facts |
+| FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `IN PROGRESS` | — | ENV-001, Phase 0 ENV-007, and the ENV-004 discovery/action contract are resolved; ENV-002 and ENV-010 remain partial in `docs/evidence/2026-08-22-home-assistant-environment.md`. Exact household IDs were verified live but withheld from the public repository. Next: ENV-009 choices, remaining ENV-010 backup/VPN/firewall facts, and the separate LM Studio review |
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
 | FND-010 | Phase 0 readiness review | Test/release | `TODO` | FND-007, FND-011 through FND-015 | Independent checklist; no unresolved implementation-critical unknowns |
