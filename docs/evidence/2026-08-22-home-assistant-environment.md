@@ -86,7 +86,7 @@ At this observation, automatic backups were not configured. Encryption, emergenc
 ## Remaining evidence requests
 
 1. Exact processor architecture if a dependency requires architecture-specific packaging (`ENV-002`).
-2. Backup encryption/emergency-kit and restore-readiness status, plus any specific LAN firewall/VLAN rules relevant to the product (`ENV-010`), without keys or recovery material.
+2. Backup encryption/emergency-kit and restore-readiness status plus router/VLAN policy relevant to the product (`ENV-010`), without keys or recovery material. The LM Studio host's broad Windows Firewall application rules are now separately verified in `docs/evidence/2026-08-23-lm-studio-environment.md` and require narrowing.
 3. LM Studio evidence (`ENV-003`) in the separate, later LM Studio review requested by the user.
 4. Revalidate and select the current private trigger/output targets from live discovery before `WFL-007`; do not copy or hardcode the household identifiers recorded only in the active environment.
 

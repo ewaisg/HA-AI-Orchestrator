@@ -15,6 +15,7 @@ This record captures read-only local inspection and two synthetic capability pro
 | LM-LIVE-005 | `GET /api/v0/models` returned nine available models and one loaded model | Local loopback request |
 | LM-LIVE-006 | The loaded model was `mistralai/ministral-3-14b-reasoning`, GGUF `Q4_K_M`, with an active context length of `8192` and a reported maximum context length of `262144` | Local `/api/v0/models` response |
 | LM-LIVE-007 | LM Studio reported `tool_use` for the loaded model | Local `/api/v0/models` response |
+| LM-LIVE-008 | Windows Firewall was enabled with default inbound blocking on Domain, Private, and Public profiles, but two enabled `lm studio.exe` inbound allow rules covered TCP and UDP, any local/remote port, any local/remote IP, and both Private and Public profiles | Read-only `netsh advfirewall` profile and exact named-rule reports; no network name or address retained |
 
 The complete model inventory is intentionally unnecessary for the first adapter. The loaded model identifier above is recorded because it was actually probed; it is not a promise that the same model will remain loaded after restart.
 
@@ -40,14 +41,15 @@ These results prove the observed loaded model/server combination can produce the
 
 ## Security disposition
 
-The current combination of an all-interface listener, plain HTTP, and no API token is not accepted as the final product connection posture. It is reachable from permitted LAN paths without application-layer authentication. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
+The current combination of an all-interface listener, plain HTTP, no API token, and broad LM Studio application allow rules is not accepted as the final product connection posture. The TCP rule permits inbound traffic to the application from any remote IP on any local port on both Private and Public profiles; it is not a Home-Assistant-only boundary. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
 
 Before `LOC-003` can complete:
 
 1. Enable LM Studio API-token authentication, or record and independently approve an equivalent authenticated network control.
 2. Store the token only in the Home Assistant backend and redact it from logs, diagnostics, fixtures, and frontend state.
 3. Re-run a redacted connectivity test from Home Assistant over the LAN, including missing/invalid-token failure cases.
-4. Confirm the host firewall limits access to the intended private source/network.
+4. Replace or disable the broad LM Studio inbound rules and create the narrowest rule that permits the actual Home Assistant source to reach TCP port `1234` on the intended private profile only. UDP is not required by the observed API contract.
+5. Reinspect the effective firewall rule after the change rather than infer success from the settings UI.
 
 Changing authentication now would interrupt the owner's existing `rest_command` until its authorization header is updated, so this review did not make that change without a coordinated implementation step.
 
@@ -57,7 +59,7 @@ Changing authentication now would interrupt the owner's existing `rest_command` 
 - Real timeout, cancellation, streaming, and concurrent-request behavior.
 - Performance and reliability thresholds for the selected workflow classes.
 - The final authenticated Home Assistant-to-LM Studio connection result.
-- Host firewall/VLAN rules and backup/restore readiness tracked under `ENV-010`.
+- Router/VLAN policy and backup/restore readiness tracked under `ENV-010`; the current Windows Firewall application rules are verified but require narrowing.
 
 These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FND-007`; none is represented as passed.
 
