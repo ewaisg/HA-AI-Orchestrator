@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **Continue claimed FND-011 on the revalidated Home Assistant OS / Core 2026.8.3 / Supervisor 2026.07.5 / OS 18.2 / Frontend 20260729.7 baseline. Config-entry removal/reinstall is confirmed with no matching log issue. Run and revert the isolated YAML fallback next. Convert preliminary restart/reload/cache/mobile results into itemized evidence when available. Upgrade survival requires a later two-version artifact and remains open. Do not begin LOC-001 until FND-010 passes.**
+Current resume point: **Continue claimed FND-011 on the revalidated Home Assistant OS / Core 2026.8.3 / Supervisor 2026.07.5 / OS 18.2 / Frontend 20260729.7 baseline. Removal/reinstall, restart recovery, the exact YAML fallback, and restoration of automatic registration are confirmed. Capture itemized integration reload, hard-refresh/cache, and mobile-client results next. Upgrade survival requires a later two-version artifact and remains open. Do not begin LOC-001 until FND-010 passes.**
 
 ## Status rules
 
@@ -23,7 +23,7 @@ No task may move to `DONE` based only on an assertion.
 |---|---|
 | Last completed | FND-015 foundation skeleton independently approved; clean-revision manifest `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json` records the implementation and checks |
 | Active work | FND-011 live bundled-panel registration and compatibility proof |
-| Evidence/input needed | Itemized FND-011 live results; YAML fallback and upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
+| Evidence/input needed | Itemized FND-011 integration-reload, hard-refresh/cache, mobile-client, and upgrade evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
 | Next gate | Phase 0 architecture/repository readiness review |
 | Production code | FND-015 config-entry, admin WebSocket, offline fake-provider, and bundled Lit panel skeleton implemented; real providers and workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-015 source revision `7de030a1b8c7c6f337f13dce404b862df9363dd8` is independently verified |
@@ -42,7 +42,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
 | FND-010 | Phase 0 readiness review | Test/release | `TODO` | FND-007, FND-011 through FND-015 | Independent checklist; no unresolved implementation-critical unknowns |
-| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `IN PROGRESS` | FND-015, ENV-001 | Exact live baseline recorded in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Config-entry removal/reinstall is confirmed and the exact post-test log search reported no issues. Next: run and revert the isolated YAML fallback. Preliminary restart/reload/cache/mobile results still need itemized evidence; upgrade survival remains open. |
+| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `IN PROGRESS` | FND-015, ENV-001 | Exact live baseline and matrix are recorded in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Removal/reinstall, restart recovery, exact YAML fallback, and restoration of automatic registration are confirmed without a matching log issue. Next: itemize integration reload, hard-refresh/cache, and mobile-client results. Upgrade survival remains open. |
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `TODO` | FND-015 | One harmless no-side-effect workflow across reload/restart with no duplicate trigger; any live-host gate uses only the relevant approved environment evidence |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `TODO` | FND-007 | Redacted data-flow map and requirement/control/test IDs |
 | FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |

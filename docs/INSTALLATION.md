@@ -50,12 +50,15 @@ does not contact an AI destination or execute a Home Assistant action.
   and frontend files from different revisions.
 - Check **Settings -> System -> Logs** for `ai_orchestrator` setup errors.
 
-Automatic panel registration is still a compatibility boundary. The exact YAML
-fallback is documented in `custom_components/ai_orchestrator/panel.py`; use it
-only if automatic registration fails.
+Automatic panel registration remains an isolated compatibility boundary. Both
+automatic registration and the exact YAML fallback documented in
+`custom_components/ai_orchestrator/panel.py` were live-verified on Home
+Assistant OS with Core 2026.8.3 and Frontend 20260729.7. Use the fallback only
+if automatic registration fails; this evidence does not claim another version.
 
 ## Update and removal boundary
 
-Live update, cache, reload, removal, and YAML-fallback scenarios remain FND-011
-acceptance work. They must not be described as validated until the tracker links
-their target-version evidence.
+Config-entry removal/reinstallation, restart recovery, YAML fallback, and
+restoration of automatic registration are validated on the named FND-011 target
+in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Itemized integration
+reload, cache, mobile-client, and Core-upgrade evidence remains open.
