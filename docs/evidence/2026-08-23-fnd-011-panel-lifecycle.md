@@ -40,4 +40,3 @@ integration-owned sidebar panel is removed, add the integration again, and
 verify that the panel and foundation summary return. The custom-component files
 remain installed during this test. Record every observation before beginning
 the separate YAML-fallback scenario.
-
