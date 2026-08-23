@@ -27,7 +27,7 @@ The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
 | ENV-009 | `RESOLVED` | HA-OWNER-004 through HA-OWNER-006; DEC-017 through DEC-019 | Revalidate only if the owner changes the policy; workflow-specific cloud opt-ins remain future explicit decisions |
 | ENV-010 | `PARTIAL` | HA-LIVE-006, HA-LIVE-022 through HA-LIVE-024, HA-LIVE-028 through HA-LIVE-029, HA-OWNER-001 through HA-OWNER-003, and LM-LIVE-008 | Backup encryption/emergency-kit/restore readiness and router/VLAN policy remain unknown. The verified broad Windows Firewall LM Studio rules require narrowing |
-| ENV-003 | `PARTIAL` | LM-LIVE-001 through LM-LIVE-009 and LM-PROBE-001 through LM-PROBE-002 in `docs/evidence/2026-08-23-lm-studio-environment.md` | Current server/model and bounded schema/tool-call capabilities are verified. Authentication is disabled, per-request MCPs are enabled, and the host application allow rules are over-broad; remediate all three and revalidate from Home Assistant before LOC-003 can complete |
+| ENV-003 | `PARTIAL` | LM-LIVE-001 through LM-LIVE-010 and LM-PROBE-001 through LM-PROBE-002 in `docs/evidence/2026-08-23-lm-studio-environment.md` | Authentication now rejects a missing token and the created token denies both provider-side MCP classes. Add the secret-backed Home Assistant headers, run authenticated/negative HA-origin tests, and narrow the host firewall before LOC-003 can complete |
 
 ## Prior proof requiring live revalidation
 
