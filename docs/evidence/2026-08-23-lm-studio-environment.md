@@ -16,6 +16,7 @@ This record captures read-only local inspection and two synthetic capability pro
 | LM-LIVE-006 | The loaded model was `mistralai/ministral-3-14b-reasoning`, GGUF `Q4_K_M`, with an active context length of `8192` and a reported maximum context length of `262144` | Local `/api/v0/models` response |
 | LM-LIVE-007 | LM Studio reported `tool_use` for the loaded model | Local `/api/v0/models` response |
 | LM-LIVE-008 | Windows Firewall was enabled with default inbound blocking on Domain, Private, and Public profiles, but two enabled `lm studio.exe` inbound allow rules covered TCP and UDP, any local/remote port, any local/remote IP, and both Private and Public profiles | Read-only `netsh advfirewall` profile and exact named-rule reports; no network name or address retained |
+| LM-LIVE-009 | The live Server Settings popover showed Require Authentication off, zero active API keys, Serve on Local Network on, Allow per-request MCPs on, calling servers from `mcp.json` off, CORS off, just-in-time model loading on, automatic unload on, a 60-minute idle TTL, and keep-only-last-JIT-model on | Read-only LM Studio UI inspection; no setting or token manager was changed or opened |
 
 The complete model inventory is intentionally unnecessary for the first adapter. The loaded model identifier above is recorded because it was actually probed; it is not a promise that the same model will remain loaded after restart.
 
@@ -38,20 +39,24 @@ These results prove the observed loaded model/server combination can produce the
 - LM Studio documents the richer `/api/v0/models` inspection endpoint: <https://lmstudio.ai/docs/developer/rest/endpoints>
 - LM Studio documents JSON-schema structured output for `/v1/chat/completions`: <https://beta.lmstudio.ai/docs/developer/openai-compat/structured-output>
 - LM Studio documents OpenAI-style tool requests and makes clear that the client, not LM Studio, executes requested tools: <https://lmstudio.ai/docs/developer/openai-compat/tools>
+- Home Assistant documents secret-backed headers for `rest_command`: <https://www.home-assistant.io/integrations/rest_command/>
 
 ## Security disposition
 
-The current combination of an all-interface listener, plain HTTP, no API token, and broad LM Studio application allow rules is not accepted as the final product connection posture. The TCP rule permits inbound traffic to the application from any remote IP on any local port on both Private and Public profiles; it is not a Home-Assistant-only boundary. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
+The current combination of an all-interface listener, plain HTTP, no API token, enabled per-request MCPs, and broad LM Studio application allow rules is not accepted as the final product connection posture. The TCP rule permits inbound traffic to the application from any remote IP on any local port on both Private and Public profiles; it is not a Home-Assistant-only boundary. Per-request MCPs conflict with DEC-012's exclusion of provider-side MCP from v1. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
 
 Before `LOC-003` can complete:
 
-1. Enable LM Studio API-token authentication, or record and independently approve an equivalent authenticated network control.
-2. Store the token only in the Home Assistant backend and redact it from logs, diagnostics, fixtures, and frontend state.
-3. Re-run a redacted connectivity test from Home Assistant over the LAN, including missing/invalid-token failure cases.
-4. Replace or disable the broad LM Studio inbound rules and create the narrowest rule that permits the actual Home Assistant source to reach TCP port `1234` on the intended private profile only. UDP is not required by the observed API contract.
-5. Reinspect the effective firewall rule after the change rather than infer success from the settings UI.
+1. Disable Allow per-request MCPs for the v1 connection.
+2. Enable LM Studio API-token authentication, or record and independently approve an equivalent authenticated network control.
+3. Store the token only in the Home Assistant backend and redact it from logs, diagnostics, fixtures, and frontend state. Home Assistant's documented `rest_command` header form supports `Authorization: !secret lmstudio_authorization`, where the `secrets.yaml` value contains the complete `Bearer …` string.
+4. Re-run a redacted connectivity test from Home Assistant over the LAN, including missing/invalid-token failure cases.
+5. Replace or disable the broad LM Studio inbound rules and create the narrowest rule that permits the actual Home Assistant source to reach TCP port `1234` on the intended private profile only. UDP is not required by the observed API contract.
+6. Reinspect the effective firewall rule after the change rather than infer success from the settings UI.
 
 Changing authentication now would interrupt the owner's existing `rest_command` until its authorization header is updated, so this review did not make that change without a coordinated implementation step.
+
+The exact Home Assistant LAN source address was observed in its Network page on 2026-08-23 and is deliberately withheld from this public repository. It is available only for the owner's local firewall configuration.
 
 ## Remaining unknowns
 
