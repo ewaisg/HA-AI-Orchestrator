@@ -21,7 +21,7 @@ The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home
 
 | ID | Resolution | Evidence | Remaining unknown |
 |---|---|---|---|
-| ENV-001 | `RESOLVED` | HA-LIVE-001 through HA-LIVE-003 | Revalidate versions at compatibility/release gates |
+| ENV-001 | `REVALIDATED FOR FND-011` | HA-LIVE-001 through HA-LIVE-003; FND-011-LIVE-001 and FND-011-LIVE-002 in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md` | Revalidate again for a later upgrade or release gate |
 | ENV-002 | `PARTIAL` | HA-LIVE-003 through HA-LIVE-005 | Exact processor architecture; not required for the architecture-independent Phase 0 skeleton |
 | ENV-004 | `PARTIAL` | HA-LIVE-012 through HA-LIVE-016 plus the user's prior successful audible test | Exact entity IDs, action identifier, and action payload/schema |
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
