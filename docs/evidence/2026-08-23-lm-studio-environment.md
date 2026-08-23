@@ -1,0 +1,73 @@
+# LM Studio environment evidence — 2026-08-23
+
+## Scope and handling
+
+This record captures read-only local inspection and two synthetic capability probes for `FND-007` / `ENV-003`. No Home Assistant entity, household data, credential, private hostname, LAN address, or owner prompt was sent to the model or written here. The review did not load or unload a model, change LM Studio settings, execute a tool, or expose the server beyond its existing configuration.
+
+## Observed local environment
+
+| Evidence ID | Observed result | Method |
+|---|---|---|
+| LM-LIVE-001 | LM Studio desktop version `0.4.21+2` (`0.4.21.0` product version) was running | Local process/file metadata |
+| LM-LIVE-002 | The local inference backend was the LM Studio-bundled llama.cpp CUDA/AVX2 backend | Local process path; host-specific path withheld |
+| LM-LIVE-003 | LM Studio was listening on TCP port `1234` on all IPv4 interfaces, not only loopback | Local TCP listener inspection |
+| LM-LIVE-004 | An unauthenticated `GET /v1/models` request over local plain HTTP returned `200` | Local loopback request; proves API authentication was disabled at observation time |
+| LM-LIVE-005 | `GET /api/v0/models` returned nine available models and one loaded model | Local loopback request |
+| LM-LIVE-006 | The loaded model was `mistralai/ministral-3-14b-reasoning`, GGUF `Q4_K_M`, with an active context length of `8192` and a reported maximum context length of `262144` | Local `/api/v0/models` response |
+| LM-LIVE-007 | LM Studio reported `tool_use` for the loaded model | Local `/api/v0/models` response |
+
+The complete model inventory is intentionally unnecessary for the first adapter. The loaded model identifier above is recorded because it was actually probed; it is not a promise that the same model will remain loaded after restart.
+
+## Synthetic capability probes
+
+Both probes used `POST /v1/chat/completions` through loopback with temperature `0` and no private data.
+
+| Evidence ID | Probe | Actual result |
+|---|---|---|
+| LM-PROBE-001 | Strict JSON-schema response with exactly `category` and `value` fields; synthetic input token `BLUE` | Request succeeded; `finish_reason` was `stop`; response was valid JSON with exactly the required keys, `category: color`, and `value: BLUE` |
+| LM-PROBE-002 | Required call to a synthetic function named `lookup_test_value` with only `key: alpha` allowed | Request succeeded; `finish_reason` was `tool_calls`; exactly one call named `lookup_test_value` was returned; arguments parsed as `{"key":"alpha"}`; answer content was empty; the tool was not executed |
+
+These results prove the observed loaded model/server combination can produce the two protocol shapes under these bounded prompts. They do not prove general model reliability, safe action selection, streaming behavior, performance under load, or compatibility after a model/server change.
+
+## Official contract checked
+
+- LM Studio documents OpenAI-compatible `GET /v1/models` and `POST /v1/chat/completions`: <https://lmstudio.ai/docs/developer/openai-compat>
+- LM Studio documents its default local server and optional API-token authentication: <https://lmstudio.ai/docs/developer/rest/quickstart>
+- LM Studio documents the server authentication toggle and Bearer-token requirement: <https://lmstudio.ai/docs/developer/core/authentication>
+- LM Studio documents the richer `/api/v0/models` inspection endpoint: <https://lmstudio.ai/docs/developer/rest/endpoints>
+- LM Studio documents JSON-schema structured output for `/v1/chat/completions`: <https://beta.lmstudio.ai/docs/developer/openai-compat/structured-output>
+- LM Studio documents OpenAI-style tool requests and makes clear that the client, not LM Studio, executes requested tools: <https://lmstudio.ai/docs/developer/openai-compat/tools>
+
+## Security disposition
+
+The current combination of an all-interface listener, plain HTTP, and no API token is not accepted as the final product connection posture. It is reachable from permitted LAN paths without application-layer authentication. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
+
+Before `LOC-003` can complete:
+
+1. Enable LM Studio API-token authentication, or record and independently approve an equivalent authenticated network control.
+2. Store the token only in the Home Assistant backend and redact it from logs, diagnostics, fixtures, and frontend state.
+3. Re-run a redacted connectivity test from Home Assistant over the LAN, including missing/invalid-token failure cases.
+4. Confirm the host firewall limits access to the intended private source/network.
+
+Changing authentication now would interrupt the owner's existing `rest_command` until its authorization header is updated, so this review did not make that change without a coordinated implementation step.
+
+## Remaining unknowns
+
+- Whether the LM Studio server and loaded model automatically recover after host or application restart.
+- Real timeout, cancellation, streaming, and concurrent-request behavior.
+- Performance and reliability thresholds for the selected workflow classes.
+- The final authenticated Home Assistant-to-LM Studio connection result.
+- Host firewall/VLAN rules and backup/restore readiness tracked under `ENV-010`.
+
+These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FND-007`; none is represented as passed.
+
+## Repository-update verification
+
+| Check | Result |
+|---|---|
+| Structured-output synthetic probe | Passed with valid exact-key JSON; see LM-PROBE-001 |
+| No-execution tool-call synthetic probe | Passed with one valid requested tool call and no execution; see LM-PROBE-002 |
+| `uv run python scripts/run_pure_tests.py` | `81 passed`, with five dependency deprecation warnings |
+| Sensitive-value review of the changed evidence/policy files | No custom domain, LAN address, remote-access URL, or private UUID retained |
+
+An initial unqualified `python scripts/run_pure_tests.py` attempt did not start the suite because the workstation's default Python interpreter did not have `pytest`. The documented project environment command above was then used successfully; the failed environment lookup is not represented as a test failure or a passing check.

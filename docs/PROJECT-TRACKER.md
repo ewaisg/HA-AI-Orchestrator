@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **FND-007 now has the exact live window/Echo action contract and the Home Assistant-visible network facts. Continue FND-007 with ENV-009 privacy/cloud/retention choices, ENV-010 backup encryption/emergency-kit/restore readiness plus any VPN/firewall facts, and the separately deferred LM Studio review. Do not claim dependent FND-013 until FND-007 is complete. FND-011 remains open only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
+Current resume point: **FND-007 now has resolved ENV-009 policy defaults, the owner-confirmed Home Assistant-to-LM Studio LAN topology, and partial ENV-003 live LM Studio evidence. The loaded model passed bounded JSON-schema and no-execution tool-call probes, but the all-interface plain-HTTP server currently has authentication disabled. Next, coordinate LM Studio API-token enablement and Home Assistant authorization before LOC-003, and finish ENV-010 backup encryption/emergency-kit/restore readiness plus specific firewall/VLAN facts. Do not claim dependent FND-013 until FND-007 is complete. FND-011 remains open only for an actual Core upgrade artifact. Do not begin LOC-001 until FND-010 passes.**
 
 ## Status rules
 
@@ -23,7 +23,7 @@ No task may move to `DONE` based only on an assertion.
 |---|---|
 | Last completed | FND-012 restricted workflow lifecycle probe independently approved; manifest `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json` records clean-source and live evidence |
 | Active work | FND-007 remaining live environment and policy facts |
-| Evidence/input needed | Later FND-011 Core-upgrade evidence; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/cloud/retention choices plus remaining ENV-010 backup encryption/emergency-kit/restore and VPN/firewall facts |
+| Evidence/input needed | Later FND-011 Core-upgrade evidence; LM Studio API-token enablement and authenticated Home Assistant-origin revalidation before LOC-003; and, before FND-010, remaining ENV-010 backup encryption/emergency-kit/restore plus specific firewall/VLAN facts |
 | Next gate | Phase 0 architecture/repository readiness review |
 | Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
@@ -38,7 +38,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-004 | Validate Home Assistant and provider extension points | HA specialist | `DONE` | FND-002 | `docs/architecture/HA-PLATFORM-REVIEW.md`; findings reconciled into ADRs |
 | FND-005 | Define complete UI/product behavior | UI specialist | `DONE` | FND-001 | `docs/product/UI-PRODUCT-PLAN.md`; unknowns UI-001 through UI-015 retained |
 | FND-006 | Define test, release, and security gates | Test/security specialist | `DONE` | FND-001, FND-002 | `docs/quality/QUALITY-SECURITY-PLAN.md`; gates and stop-ship rules adopted |
-| FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `IN PROGRESS` | — | ENV-001, Phase 0 ENV-007, and the ENV-004 discovery/action contract are resolved; ENV-002 and ENV-010 remain partial in `docs/evidence/2026-08-22-home-assistant-environment.md`. Exact household IDs were verified live but withheld from the public repository. Next: ENV-009 choices, remaining ENV-010 backup/VPN/firewall facts, and the separate LM Studio review |
+| FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `IN PROGRESS` | — | ENV-001, ENV-004 discovery/action contract, Phase 0 ENV-007, and ENV-009 are resolved. ENV-003 is partial in `docs/evidence/2026-08-23-lm-studio-environment.md`: live schema and no-execution tool-call probes passed, while authentication is disabled on an all-interface plain-HTTP listener. ENV-002 and ENV-010 remain partial in `docs/evidence/2026-08-22-home-assistant-environment.md`. Exact private identifiers were withheld. Next: coordinate LM Studio authentication and finish ENV-010 backup/firewall facts |
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
 | FND-010 | Phase 0 readiness review | Test/release | `TODO` | FND-007, FND-011 through FND-015 | Independent checklist; no unresolved implementation-critical unknowns |

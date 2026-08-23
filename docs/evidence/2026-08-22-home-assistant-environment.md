@@ -72,13 +72,23 @@ Echo announcement output through Alexa Devices does not, by itself, prove Echo v
 
 At this observation, automatic backups were not configured. Encryption, emergency-kit readiness, and restore viability were not verified. Home Assistant Cloud is the confirmed remote-access method; native Home Assistant TLS and reverse-proxy trust were not configured. VPN use and upstream LAN/firewall segmentation cannot be determined from these Home Assistant screens. No backup was created, opened, restored, downloaded, or deleted, and no network setting was changed or saved.
 
+## Owner-confirmed policy and network facts
+
+| Evidence ID | Confirmed fact | Source |
+|---|---|---|
+| HA-OWNER-001 | Home Assistant and the LM Studio host are on the same local network | Direct owner statement, 2026-08-23 |
+| HA-OWNER-002 | Remote Home Assistant access uses Home Assistant Cloud together with an owner-managed domain; the exact domain is deliberately not recorded | Direct owner statement, 2026-08-23 |
+| HA-OWNER-003 | OpenVPN is used when the owner remotely administers the computer that hosts LM Studio. It is not required for the Home Assistant-to-LM Studio runtime path | Direct owner statement plus DEC-020, 2026-08-23 |
+| HA-OWNER-004 | Provider routing is local-only by default; cloud use requires explicit per-workflow opt-in | Direct owner acceptance of the recommended policy; DEC-017 |
+| HA-OWNER-005 | Default retention is 30 days for chat content and 90 days for execution metadata | Direct owner acceptance of the recommended policy; DEC-018 |
+| HA-OWNER-006 | Credentials, cameras, precise location, person/presence data, calendars, locks, alarms, and garage/security state are excluded from cloud routes by default | Direct owner acceptance of the recommended policy; DEC-019 |
+
 ## Remaining evidence requests
 
 1. Exact processor architecture if a dependency requires architecture-specific packaging (`ENV-002`).
-2. Backup encryption/emergency-kit and restore-readiness status, plus any VPN and upstream LAN/firewall segmentation relevant to the product (`ENV-010`), without keys or recovery material.
-3. User privacy, cloud-disclosure, and retention choices (`ENV-009`); these cannot be inferred from Home Assistant.
-4. LM Studio evidence (`ENV-003`) in the separate, later LM Studio review requested by the user.
-5. Revalidate and select the current private trigger/output targets from live discovery before `WFL-007`; do not copy or hardcode the household identifiers recorded only in the active environment.
+2. Backup encryption/emergency-kit and restore-readiness status, plus any specific LAN firewall/VLAN rules relevant to the product (`ENV-010`), without keys or recovery material.
+3. LM Studio evidence (`ENV-003`) in the separate, later LM Studio review requested by the user.
+4. Revalidate and select the current private trigger/output targets from live discovery before `WFL-007`; do not copy or hardcode the household identifiers recorded only in the active environment.
 
 ## Revalidation rule
 
