@@ -52,6 +52,7 @@ Only one integration directory may exist under `custom_components/` for the HACS
 The project metadata created by the bootstrap must pin the Phase 0 test environment:
 
 - `homeassistant==2026.8.3`
+- `home-assistant-frontend==20260729.7`; required by the Linux integration test environment when `frontend` and `panel_custom` initialize
 - `pytest-homeassistant-custom-component==0.13.357`; its published metadata also pins `homeassistant==2026.8.3`
 - `ruff==0.16.4`
 - `jsonschema==4.26.0`
@@ -92,7 +93,7 @@ The unqualified `uv run pytest` command is the Linux/CI full-suite command. On t
 
 During Phase 0 the supported development artifact is a manual-copy bundle containing `custom_components/ai_orchestrator/`. The live Home Assistant instance is not a development checkout.
 
-The repository will remain structurally suitable for later HACS validation. HACS support remains incomplete because the project currently has no public GitHub remote, documentation URL, issue tracker, code-owner identifier, brand asset, repository description/topics, or HACS validation/install/update evidence. GitHub releases are optional in HACS and are not a blocker. A private/unpublished product and a HACS-installable repository are separate concerns; current HACS documentation says repository access requires a public GitHub repository.
+The repository is now public at `https://github.com/ewaisg/HA-AI-Orchestrator` and remains structurally suitable for later HACS validation. HACS support is still incomplete because required repository metadata, a code-owner identifier, brand assets, and real HACS validation/install/update evidence are absent. GitHub releases are optional in HACS and are not a blocker. A public repository and a validated HACS-installable integration are separate claims.
 
 ## Compatibility boundary
 

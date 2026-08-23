@@ -7,12 +7,13 @@ This register prevents environment details from being guessed or silently copied
 | ID | Fact | Evidence | Verified |
 |---|---|---|---|
 | PRJ-001 | The project directory contained no source files before foundation setup | Local directory inspection; only generated `outputs/` and `work/` folders existed | 2026-08-22 |
-| PRJ-002 | No production implementation has been created | Repository inspection | 2026-08-22 |
+| PRJ-002 | `SUPERSEDED`: no implementation existed at initial inspection; the FND-015 foundation skeleton now exists while real provider/workflow features remain absent | Repository inspection and FND-015 manifest | 2026-08-23 |
 | PRJ-003 | The product is for private personal use initially | Direct user statement | 2026-08-22 |
 | PRJ-004 | The user requires multi-agent collaboration and evidence-backed work | Direct user statement | 2026-08-22 |
-| PRJ-005 | A local Git repository exists on branch `main`; no remote repository is configured | Local Git initialization/status inspection | 2026-08-22 |
-| PRJ-006 | Development is active on branch `codex/foundation-skeleton` | Local Git inspection | 2026-08-22 |
-| PRJ-007 | The pinned Home Assistant pytest helper cannot initialize natively on this Windows workstation because it imports Unix-only `fcntl`; Docker Desktop's Linux engine was installed but not running at inspection | Real command output from `uv run pytest` and `docker version` | 2026-08-22 |
+| PRJ-005 | The local repository is on `main`; the renamed public remote is `https://github.com/ewaisg/HA-AI-Orchestrator` and remote `main` resolves to the same `4095f569ff70e356580bce0c9c6b0770baf4db2d` revision as local before the FND-015 review changes | Local Git and `git ls-remote` output | 2026-08-23 |
+| PRJ-006 | `SUPERSEDED`: development is currently on local `main`, not `codex/foundation-skeleton` | Local Git inspection | 2026-08-23 |
+| PRJ-007 | Native Windows still cannot initialize the Home Assistant pytest helper because it imports Unix-only `fcntl`; Docker Desktop 4.75.0 Linux engine now provides the approved isolated path, where the full pinned suite passed 102 tests | Real Windows and Docker Linux command output; FND-015 manifest | 2026-08-23 |
+| PRJ-008 | The project owner manually installed the Phase 0 bundle and reported the sidebar panel, default Home section, and placeholder sections visible | `docs/evidence/2026-08-23-fnd-015-live-install.md` | 2026-08-23 |
 
 ## Live Home Assistant verification
 

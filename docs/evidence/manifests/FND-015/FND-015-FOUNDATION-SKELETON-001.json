@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FND-015-FOUNDATION-SKELETON-001",
+  "task_id": "FND-015",
+  "kind": "automated_test",
+  "captured_at": "2026-08-23T08:01:20Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["FND-015"],
+    "decisions": ["DEC-001", "DEC-005", "DEC-014", "DEC-015"],
+    "controls": ["DD-05"],
+    "tests": [
+      "LINUX_FULL_SUITE",
+      "PURE_TEST_SUITE",
+      "FRONTEND_CHECK",
+      "CANARY_SCAN"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant_core",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "home_assistant_frontend",
+        "status": "verified",
+        "version": "20260729.7"
+      },
+      {
+        "name": "docker_desktop_linux_engine",
+        "status": "verified",
+        "version": "4.75.0"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": [
+        "uv",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "scripts",
+        "tests",
+        "custom_components"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "docker",
+        "exec",
+        "--workdir",
+        "/workspace",
+        "--env",
+        "UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv",
+        "ai-orchestrator-fnd015-test",
+        "sh",
+        "-lc",
+        "python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen && uv run pytest"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "FRONTEND_CHECK",
+      "command_argv": ["npm", "--prefix", "frontend", "run", "check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "bundled-panel",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js",
+      "sha256": "07452f4c9f96a3d8c8e23a131c10aaf73c46e7690aecc01425bb4d990924a55c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "python-lock",
+      "location_type": "repository",
+      "repository_path": "uv.lock",
+      "sha256": "d38315cfeed267abc8912394b4505a0b6abf75b97eea0f6239fae0280fd91a6c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "not_applicable"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "INDEPENDENT_REVIEW_PENDING",
+      "description": "The verified FND-015 working tree still requires an independent test/release review and a clean committed-revision manifest.",
+      "blocks": ["FND-015"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "LIVE_PANEL_LIFECYCLE",
+      "description": "The project-owner report covers initial installation and render only; the broader live compatibility matrix belongs to FND-011.",
+      "blocks": ["FND-011"]
+    }
+  ],
+  "reviews": [
+    {
+      "role": "provider_backend",
+      "status": "approved",
+      "reviewed_at": "2026-08-23T08:01:20Z"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # Project tracker
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 Overall state: **Phase 0 — foundation and architecture validation**
-Current resume point: **Continue claimed FND-015: build the Home Assistant config-entry/admin-WebSocket/fake-provider skeleton and the bundled Lit panel shell, then run pure tests plus frontend build checks. Home Assistant lifecycle acceptance still needs the recorded Linux or approved live-instance path. Live LM Studio ENV-003 remains a separate later review; ENV-004, ENV-009, and ENV-010 remain Phase 0 readiness evidence gates.**
+Current resume point: **Complete independent test/release review of FND-015 using `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`, then claim FND-011 and run the named live panel lifecycle matrix. Do not begin LOC-001 until FND-010 passes. Live LM Studio ENV-003 remains a separate later review; ENV-004, ENV-009, and ENV-010 remain Phase 0 readiness evidence gates.**
 
 ## Status rules
 
@@ -22,11 +22,11 @@ No task may move to `DONE` based only on an assertion.
 | Field | Current value |
 |---|---|
 | Last completed | FND-014 evidence/fixture harness independently approved; manifest `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json` records the clean source revision and checks |
-| Active work | FND-015 evidence-producing Home Assistant integration, fake-provider runtime, and Lit panel skeleton |
-| Evidence/input needed | Exact window/Echo entity and action identifiers; later LM Studio non-secret settings; ENV-011 only before HACS distribution; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
+| Active work | FND-015 implementation and automated verification complete; independent test/release review pending |
+| Evidence/input needed | FND-015 independent review; FND-011 live unload/reload, restart, cache, mobile, upgrade, removal, and fallback evidence; exact window/Echo entity and action identifiers; later LM Studio non-secret settings; and, before FND-010, ENV-009 privacy/retention choices plus remaining ENV-010 backup/network evidence |
 | Next gate | Phase 0 architecture/repository readiness review |
-| Production code | FND-015 bootstrap started; provider/backend, Home Assistant, and UI work is split across non-overlapping paths |
-| Repository | Local Git repository on `codex/foundation-skeleton`; no remote configured |
+| Production code | FND-015 config-entry, admin WebSocket, offline fake-provider, and bundled Lit panel skeleton implemented; real providers and workflows remain absent |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-015 review changes are currently uncommitted |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -46,7 +46,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `TODO` | FND-015 | One harmless no-side-effect workflow across reload/restart with no duplicate trigger; any live-host gate uses only the relevant approved environment evidence |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `TODO` | FND-007 | Redacted data-flow map and requirement/control/test IDs |
 | FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |
-| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `IN PROGRESS` | FND-009, FND-014 | Claimed 2026-08-22. Expected files: `custom_components/ai_orchestrator/**`, `frontend/**`, sync/verification scripts, and bounded tests. Verification: deterministic fake-provider repeatability/no-network proof, admin-only WebSocket/config-entry tests, frontend check/build/bundle identity, redaction/canary checks, and HA lifecycle evidence on an approved Linux or live-instance path. |
+| FND-015 | Bootstrap evidence-producing integration/panel skeleton | Backend + UI | `REVIEW` | FND-009, FND-014 | Linux full suite: 102 passed; pure Windows suite: 81 passed; frontend browser suite: 16 passed; bundle and canary checks passed. Direct project-owner report confirms manual install and initial panel render. Working-tree manifest: `docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json`. Next: independent test/release review on a clean committed revision. |
 
 ## Phase 1 — local provider and onboarding MVP
 

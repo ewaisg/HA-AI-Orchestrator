@@ -4,7 +4,14 @@ HA AI Orchestrator is a private Home Assistant product for configuring local and
 
 ## Current state
 
-The project is in **Phase 0: foundation and architecture validation**. No production integration or provider code has been implemented yet.
+The project is in **Phase 0: foundation and architecture validation**. The
+Home Assistant config-entry skeleton, admin-only status API, deterministic
+offline fake provider, and bundled panel shell are implemented and awaiting
+independent FND-015 review. Real provider connections, workflows, entity
+permissions, chat, Assist, notifications, and action execution are not yet
+implemented.
+
+- [Manual installation and current usage](docs/INSTALLATION.md)
 
 - [Project tracker](docs/PROJECT-TRACKER.md)
 - [Product requirements](docs/PRODUCT-REQUIREMENTS.md)

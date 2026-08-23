@@ -1,7 +1,7 @@
 """Tests for the isolated Home Assistant panel compatibility boundary."""
 
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from homeassistant.components import frontend, panel_custom
@@ -26,13 +26,12 @@ from custom_components.ai_orchestrator.panel import (
 
 async def test_register_static_assets(hass: HomeAssistant) -> None:
     """The bundled directory uses the documented async static-path API."""
-    with patch.object(
-        hass.http,
-        "async_register_static_paths",
-        new_callable=AsyncMock,
-    ) as register_paths:
+    http = Mock()
+    http.async_register_static_paths = AsyncMock()
+    with patch.object(hass, "http", http):
         await async_register_static_assets(hass)
 
+    register_paths = http.async_register_static_paths
     register_paths.assert_awaited_once()
     configs = register_paths.await_args.args[0]
     assert len(configs) == 1
