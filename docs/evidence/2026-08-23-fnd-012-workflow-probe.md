@@ -23,12 +23,13 @@ action-capable workflow is built.
 The Automations panel labels this as lifecycle evidence and does not present it
 as a published automation, provider workflow, or device action.
 
-## Automated working-tree evidence
+## Automated committed-source evidence
 
 The acceptance manifest is
 `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json`.
 
-Current verified results:
+Source revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` contains the
+verified implementation and results:
 
 - Clean copied-source Linux suite: 113 passed on Python 3.14.5 and Home
   Assistant Core 2026.8.3.

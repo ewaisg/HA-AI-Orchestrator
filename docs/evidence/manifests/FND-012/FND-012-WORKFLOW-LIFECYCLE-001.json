@@ -5,8 +5,9 @@
   "kind": "automated_test",
   "captured_at": "2026-08-23T16:17:09Z",
   "source_revision": {
-    "state": "working_tree",
-    "dirty": true
+    "state": "committed",
+    "git_commit": "8994784ce4b3ad8d0368185e031cc57e233aae8f",
+    "dirty": false
   },
   "traceability": {
     "requirements": ["FND-012"],
