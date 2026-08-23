@@ -14,6 +14,7 @@ account identifier, entity, or household detail.
 |---|---|---|
 | FND-011-LIVE-001 | Installation method: Home Assistant OS | Confirmed |
 | FND-011-LIVE-002 | Core 2026.8.3; Supervisor 2026.07.5; Operating System 18.2; Frontend 20260729.7 | Confirmed |
+| FND-011-LIVE-003 | Config-entry removal and clean reinstallation completed; the panel and expected foundation state returned; the exact `ai_orchestrator` log search reported `No issues found for search term 'ai_orchestrator'` | Confirmed by direct project-owner report |
 
 These values identify the current FND-011 test target. They do not imply
 compatibility with another Home Assistant release.
@@ -28,15 +29,16 @@ compatibility with another Home Assistant release.
 | Integration unload/reload | Owner reported the supplied checklist appeared to work; an itemized result was not returned | Preliminary |
 | Hard-refresh/cache behavior | Owner reported the supplied checklist appeared to work; an itemized result was not returned | Preliminary |
 | Mobile rendering | Owner reported the supplied checklist appeared to work; the client type and itemized result were not returned | Preliminary |
-| Log review | Owner reported the supplied checklist appeared to work; exact error-search result was not returned | Preliminary |
-| Config-entry removal and clean reinstallation | Not yet run | Pending |
+| Log review after clean reinstallation | Exact `ai_orchestrator` search reported no issues | Confirmed |
+| Config-entry removal and clean reinstallation | Direct project-owner report for the supplied itemized procedure | Confirmed |
 | Exact `panel_custom` YAML fallback | Not yet run | Pending |
 | Survival across one Core upgrade | Requires results from two named Core versions | Pending |
 
 ## Next controlled action
 
-Remove only the field-free AI Orchestrator config entry, verify that the
-integration-owned sidebar panel is removed, add the integration again, and
-verify that the panel and foundation summary return. The custom-component files
-remain installed during this test. Record every observation before beginning
-the separate YAML-fallback scenario.
+Keep the reinstalled config entry and custom-component files in place. Add the
+exact supported `panel_custom` entry to `configuration.yaml`, validate the
+configuration, restart Home Assistant, and verify that the compatible
+YAML-owned panel loads the same foundation state without an `ai_orchestrator`
+setup error. Remove that YAML entry and restart again after recording the test
+so automatic integration-owned registration is restored.
