@@ -27,13 +27,13 @@ The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
 | ENV-009 | `RESOLVED` | HA-OWNER-004 through HA-OWNER-006; DEC-017 through DEC-019 | Revalidate only if the owner changes the policy; workflow-specific cloud opt-ins remain future explicit decisions |
 | ENV-010 | `PARTIAL` | HA-LIVE-006, HA-LIVE-022 through HA-LIVE-024, HA-LIVE-028 through HA-LIVE-029, HA-OWNER-001 through HA-OWNER-003, and LM-LIVE-008 | Backup encryption/emergency-kit/restore readiness and router/VLAN policy remain unknown. The verified broad Windows Firewall LM Studio rules require narrowing |
-| ENV-003 | `PARTIAL` | LM-LIVE-001 through LM-LIVE-010 and LM-PROBE-001 through LM-PROBE-002 in `docs/evidence/2026-08-23-lm-studio-environment.md` | Authentication now rejects a missing token and the created token denies both provider-side MCP classes. Add the secret-backed Home Assistant headers, run authenticated/negative HA-origin tests, and narrow the host firewall before LOC-003 can complete |
+| ENV-003 | `PARTIAL` | LM-LIVE-001 through LM-LIVE-013 and LM-PROBE-001 through LM-PROBE-002 in `docs/evidence/2026-08-23-lm-studio-environment.md` | Authentication rejects a missing token, the restricted token denies both provider-side MCP classes, and the secret-backed Home Assistant path returned HTTP `200`. Add an isolated HA-origin negative test and narrow/reinspect the host firewall before LOC-003 can complete |
 
 ## Prior proof requiring live revalidation
 
 | ID | Prior evidence | Why it is not treated as current fact | Required revalidation |
 |---|---|---|---|
-| PRIOR-001 | Home Assistant received HTTP 200 from an LM Studio OpenAI-compatible chat-completions endpoint | Captured in the referenced conversation; host/model/service configuration may have changed | Test through the live environment without exposing the API token |
+| PRIOR-001 | `SUPERSEDED`: Home Assistant received HTTP 200 from an LM Studio OpenAI-compatible chat-completions endpoint | The earlier conversation was stale context; LM-LIVE-011 through LM-LIVE-013 now provide current redacted live evidence | Revalidate again for LOC-003 and release gates after adapter, server, model, credential, or network changes |
 | PRIOR-002 | An AI-written window announcement played through an Echo speaker | Captured in the referenced conversation; exact entity/action IDs were not provided here | Identify the live trigger entity and output action through HA discovery/user evidence |
 | PRIOR-003 | A Home Assistant Green was described as the HA host | `SUPERSEDED`: installation type, hardware, and versions were revalidated by HA-LIVE-001 through HA-LIVE-003 | Only exact processor architecture remains under ENV-002 |
 
