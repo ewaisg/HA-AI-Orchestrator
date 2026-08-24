@@ -32,13 +32,13 @@ Every requirement has at least one flow, control, and test link. Every flow refe
 
 | Check | Result |
 |---|---|
-| `uv run python scripts/run_pure_tests.py` | `87 passed`, with five dependency deprecation warnings after all workflow/safety corrections and artifact-hash verification |
+| `uv run python scripts/run_pure_tests.py` | `88 passed`, with five dependency deprecation warnings after all workflow/safety corrections, exact readable-row comparison, and artifact-hash verification |
 | `uv run ruff format --check tests/quality/test_traceability.py` | Passed after the new test file was formatted |
 | `uv run ruff check tests/quality/test_traceability.py` | Passed after one import-order issue was automatically corrected |
 | `uv run python scripts/canary_scan.py` | Passed with no findings |
 | `git diff --check` | Passed; only expected Windows line-ending notices were emitted |
 | Targeted sensitive-value scan | No checked private hostname/address/token/key patterns were found |
-| Focused corrected traceability suite with plugin autoload disabled | `6 passed`; one expected unknown `asyncio_mode` warning because the Home Assistant pytest plugin was deliberately not loaded |
+| Focused corrected traceability suite with plugin autoload disabled | `7 passed`, including exact per-requirement readable/catalog mapping equality |
 
 The first format check and first lint check correctly failed on the unformatted new test file. The project formatter changed that file, Ruff corrected the import order, and the complete check set above was rerun successfully. The initial results are not represented as passing runs.
 
@@ -58,4 +58,6 @@ The workflow/safety findings and working-tree corrections are:
 
 Clean revision `621b907d87b8280ad2003c85d7b5dc0e32b1310d` was also rejected: workflow/safety review at `2026-08-24T05:54:29Z` found an outdated Core-upgrade residual and incomplete rate/concurrency links, while test/release review at `2026-08-24T05:57:12Z` found that Windows CRLF hashes did not match clean Linux/Git bytes. Revision `6ba4793a3d5b283c91fc5a78dc141c80644f2c20` corrects those items by linking rate/idempotency tests to provider and notification boundaries, naming `TEST-COMPAT-CORE-UPGRADE` in the residual, enforcing LF for every hashed artifact through `.gitattributes`, and hashing the canonical staged bytes. The focused hash test verifies the working files against those manifest values.
 
-The manifest now points to committed artifact revision `6ba4793a3d5b283c91fc5a78dc141c80644f2c20` with `dirty: false`, but remains `incomplete`. FND-013 must not be marked done until both independent reviewers approve that artifact revision and the metadata-only closeout.
+Metadata candidate `faeafd906ebb5d6f27c05904f3b31b50880aa0b5` received test/release approval at `2026-08-24T06:06:15Z`, but workflow/safety review rejected it at `2026-08-24T06:05:16Z`: the machine catalog linked `REQ-CAP-001` and `REQ-CAP-008` to `CTRL-RATE-001` and `TEST-STORM-CONCURRENCY`, while the corresponding readable rows omitted those two IDs. The corrected readable table fully expands every flow, control, and test ID for all nineteen requirements. A generic row-level integrity test now extracts every readable requirement mapping and requires exact ordered equality with the machine catalog, so a mismatch in any requirement row fails the suite. Because the artifact changed, the earlier test/release approval is superseded and both roles must review the next committed candidate.
+
+The manifest remains `incomplete`. FND-013 must not be marked done until the corrected artifact revision is committed with canonical hashes and both independent reviewers approve its metadata-only review candidate.

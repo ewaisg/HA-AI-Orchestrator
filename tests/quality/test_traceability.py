@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from hashlib import sha256
 from pathlib import Path
 
@@ -28,6 +29,32 @@ def _ids(records: list[dict[str, object]]) -> set[str]:
     values = [str(record["id"]) for record in records]
     assert len(values) == len(set(values)), f"duplicate IDs found: {values}"
     return set(values)
+
+
+def _readable_requirement_mappings() -> dict[str, dict[str, list[str]]]:
+    document = DOCUMENT_PATH.read_text(encoding="utf-8")
+    requirement_section = document.split("## Requirement traceability", 1)[1].split(
+        "## Test registry", 1
+    )[0]
+    mappings: dict[str, dict[str, list[str]]] = {}
+
+    for line in requirement_section.splitlines():
+        if not line.startswith("| REQ-"):
+            continue
+
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        assert len(cells) == 5, f"unexpected requirement row: {line}"
+        requirement_id = cells[0]
+        assert requirement_id not in mappings, (
+            f"duplicate readable row: {requirement_id}"
+        )
+        mappings[requirement_id] = {
+            "flow_ids": re.findall(r"\bFLOW-[0-9]{3}\b", cells[2]),
+            "control_ids": re.findall(r"\bCTRL-[A-Z0-9-]+\b", cells[3]),
+            "test_ids": re.findall(r"\bTEST-[A-Z0-9-]+\b", cells[4]),
+        }
+
+    return mappings
 
 
 def test_traceability_catalog_matches_schema() -> None:
@@ -138,6 +165,20 @@ def test_every_catalog_id_is_present_in_the_readable_map() -> None:
             assert record["id"] in document, (
                 f"{record['id']} is missing from the readable map"
             )
+
+
+def test_readable_requirement_rows_match_catalog_mappings() -> None:
+    catalog = _load_json(CATALOG_PATH)
+    expected = {
+        requirement["id"]: {
+            "flow_ids": requirement["flow_ids"],
+            "control_ids": requirement["control_ids"],
+            "test_ids": requirement["test_ids"],
+        }
+        for requirement in catalog["requirements"]
+    }
+
+    assert _readable_requirement_mappings() == expected
 
 
 def test_sensitive_directional_boundaries_are_explicit() -> None:

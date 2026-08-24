@@ -39,6 +39,7 @@
       "TEST_CATALOG_SCHEMA",
       "TEST_CATALOG_REFERENCES",
       "TEST_CATALOG_READABLE_MAP",
+      "TEST_REQUIREMENT_ROW_MAPPINGS",
       "TEST_SENSITIVE_DIRECTIONAL_BOUNDARIES",
       "TEST_ARTIFACT_HASHES",
       "TEST_CANARY_SCAN"
@@ -105,7 +106,7 @@
       "name": "readable-data-flow-traceability-map",
       "location_type": "repository",
       "repository_path": "docs/quality/DATA-FLOW-TRACEABILITY.md",
-      "sha256": "eb39fcc098312fd190a32f218bd167f29a959c95ad9bb3cde8240a55b29ed0eb",
+      "sha256": "5382c9b97bf20dcd2e00b757e62e6a8ef861539b9e2bc8f535a4db76d17ec2e3",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -132,7 +133,7 @@
       "name": "traceability-integrity-tests",
       "location_type": "repository",
       "repository_path": "tests/quality/test_traceability.py",
-      "sha256": "e4f91db0a5433e148872605ca6a2a7023c82e8950736a55debec0dc26e3d94f0",
+      "sha256": "2b6c56b724600c4adf2389ee3e0682f04fa10ba3f73457f9bc1987b3b6ced8a8",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
