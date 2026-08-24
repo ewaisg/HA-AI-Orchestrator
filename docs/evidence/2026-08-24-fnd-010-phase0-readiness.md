@@ -48,4 +48,4 @@ The Windows pure runner deliberately excludes the Home Assistant pytest plugin b
 
 ## Acceptance status
 
-The local current-version checks pass, but FND-010 remains in review until a committed clean candidate receives independent workflow/safety and test/release approval. LOC-001 must not begin before that closeout.
+Artifact revision `2af1077ecca4c894938efeddc0364aba5c7ca126` contains this readiness record and its incomplete manifest. The local current-version checks pass, but FND-010 remains in review until the clean metadata candidate receives independent workflow/safety and test/release approval. LOC-001 must not begin before that closeout.

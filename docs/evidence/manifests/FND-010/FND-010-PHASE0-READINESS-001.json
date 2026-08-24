@@ -3,10 +3,11 @@
   "evidence_id": "FND-010-PHASE0-READINESS-001",
   "task_id": "FND-010",
   "kind": "review",
-  "captured_at": "2026-08-24T06:27:50Z",
+  "captured_at": "2026-08-24T06:30:05Z",
   "source_revision": {
-    "state": "working_tree",
-    "dirty": true
+    "state": "committed",
+    "git_commit": "2af1077ecca4c894938efeddc0364aba5c7ca126",
+    "dirty": false
   },
   "traceability": {
     "requirements": ["FND-010"],
