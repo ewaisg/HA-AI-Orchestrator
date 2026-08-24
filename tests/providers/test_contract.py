@@ -41,6 +41,19 @@ from custom_components.ai_orchestrator.providers.contract import (
 )
 
 
+def _synthetic_tool() -> ToolDefinition:
+    return ToolDefinition(
+        name="synthetic_tool",
+        description="Synthetic contract test only.",
+        parameters={
+            "type": "object",
+            "properties": {"key": {"type": "string"}},
+            "required": ["key"],
+            "additionalProperties": False,
+        },
+    )
+
+
 def test_provider_contract_has_a_stable_version() -> None:
     assert PROVIDER_CONTRACT_VERSION == "1"
 
@@ -83,28 +96,41 @@ def test_request_rejects_non_contract_message_data() -> None:
 
 
 def test_tool_result_requires_exact_prior_call_correlation() -> None:
-    call = ToolCall(id="synthetic-call-1", name="synthetic_tool", arguments={})
+    call = ToolCall(
+        id="synthetic-call-1",
+        name="synthetic_tool",
+        arguments={"key": "synthetic-key"},
+    )
     messages = (
         Message(MessageRole.ASSISTANT, "", tool_calls=(call,)),
         Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-1"),
     )
 
-    request = ProviderRequest(messages=messages)
+    request = ProviderRequest(messages=messages, tools=(_synthetic_tool(),))
 
     assert request.messages[-1].tool_call_id == request.messages[0].tool_calls[0].id
 
 
 def test_multiple_tool_results_preserve_each_correlation_id() -> None:
     calls = (
-        ToolCall(id="synthetic-call-1", name="synthetic_tool", arguments={}),
-        ToolCall(id="synthetic-call-2", name="synthetic_tool", arguments={}),
+        ToolCall(
+            id="synthetic-call-1",
+            name="synthetic_tool",
+            arguments={"key": "synthetic-one"},
+        ),
+        ToolCall(
+            id="synthetic-call-2",
+            name="synthetic_tool",
+            arguments={"key": "synthetic-two"},
+        ),
     )
     request = ProviderRequest(
         messages=(
             Message(MessageRole.ASSISTANT, "", tool_calls=calls),
             Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-2"),
             Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-1"),
-        )
+        ),
+        tools=(_synthetic_tool(),),
     )
 
     assert {message.tool_call_id for message in request.messages[1:]} == {
@@ -137,6 +163,58 @@ def test_tool_continuation_rejects_unknown_or_missing_results(
 ) -> None:
     with pytest.raises(ValueError):
         ProviderRequest(messages=messages)
+
+
+@pytest.mark.parametrize(
+    ("call", "tools", "message"),
+    [
+        (
+            ToolCall(
+                id="synthetic-call-1",
+                name="unexposed_tool",
+                arguments={"key": "synthetic-key"},
+            ),
+            (),
+            "was not exposed",
+        ),
+        (
+            ToolCall(
+                id="synthetic-call-1",
+                name="synthetic_tool",
+                arguments={"key": 7},
+            ),
+            (_synthetic_tool(),),
+            "wrong type",
+        ),
+    ],
+)
+def test_tool_continuation_revalidates_historical_calls(
+    call: ToolCall,
+    tools: tuple[ToolDefinition, ...],
+    message: str,
+) -> None:
+    messages = (
+        Message(MessageRole.ASSISTANT, "", tool_calls=(call,)),
+        Message(MessageRole.TOOL, "{}", tool_call_id=call.id),
+    )
+
+    with pytest.raises(ValueError, match=message):
+        ProviderRequest(messages=messages, tools=tools)
+
+
+def test_provider_request_rejects_duplicate_tool_definition_names() -> None:
+    duplicate = ToolDefinition(
+        name="synthetic_tool",
+        description="A second definition with the same public name.",
+        parameters={
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+    )
+
+    with pytest.raises(ValueError, match="tool names must be unique"):
+        ProviderRequest(tools=(_synthetic_tool(), duplicate))
 
 
 def test_provider_error_exposes_only_normalized_failure_data() -> None:

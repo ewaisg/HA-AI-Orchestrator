@@ -491,6 +491,39 @@ async def test_tool_result_continuation_remains_provider_request_data() -> None:
     assert result.tool_calls == ()
 
 
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda request: request["messages"][1]["tool_calls"][0].update(
+                {"name": "unexposed_tool"}
+            ),
+            "was not exposed",
+        ),
+        (
+            lambda request: request["messages"][1]["tool_calls"][0].update(
+                {"arguments": {"key": 7}}
+            ),
+            "wrong type",
+        ),
+        (
+            lambda request: request["tools"].append(deepcopy(request["tools"][0])),
+            "tool names must be unique",
+        ),
+    ],
+)
+def test_runtime_rejects_invalid_continuation_contract(
+    mutation: Any, message: str
+) -> None:
+    payload = deepcopy(
+        _load_mapping(FIXTURE_DIR / "generate.tool_continuation_success.json")
+    )
+    mutation(payload["request_match"])
+
+    with pytest.raises(FixtureValidationError, match=message):
+        parse_fake_provider_fixture(payload)
+
+
 @pytest.mark.asyncio
 async def test_multiple_tool_calls_preserve_distinct_correlation_ids() -> None:
     fixture = _load("generate.multiple_tool_calls")

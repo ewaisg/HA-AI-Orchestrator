@@ -166,13 +166,19 @@ class ProviderRequest:
             raise TypeError("Provider request messages must use Message")
         if any(not isinstance(tool, ToolDefinition) for tool in self.tools):
             raise TypeError("Provider request tools must use ToolDefinition")
+        tool_names = [tool.name for tool in self.tools]
+        if len(tool_names) != len(set(tool_names)):
+            raise ValueError("Provider request tool names must be unique")
         if self.output_schema is not None and not isinstance(
             self.output_schema, StructuredOutputDefinition
         ):
             raise TypeError(
                 "Provider output schema must use StructuredOutputDefinition"
             )
-        _validate_tool_continuation(self.messages)
+        _validate_tool_continuation(
+            self.messages,
+            {tool.name: tool for tool in self.tools},
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -388,12 +394,20 @@ type ProviderResult = (
 type StreamEvent = StreamDelta | StreamCompleted
 
 
-def _validate_tool_continuation(messages: tuple[Message, ...]) -> None:
+def _validate_tool_continuation(
+    messages: tuple[Message, ...], exposed_tools: Mapping[str, ToolDefinition]
+) -> None:
     pending: dict[str, str] = {}
     seen: set[str] = set()
     for message in messages:
         if message.role is MessageRole.ASSISTANT:
             for call in message.tool_calls:
+                tool = exposed_tools.get(call.name)
+                if tool is None:
+                    raise ValueError(
+                        "Historical assistant tool call was not exposed by the request"
+                    )
+                validate_schema_value(tool.parameters, call.arguments)
                 if call.id in seen:
                     raise ValueError("Tool call IDs must be unique across the request")
                 seen.add(call.id)
