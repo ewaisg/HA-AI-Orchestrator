@@ -56,4 +56,6 @@ The workflow/safety findings and working-tree corrections are:
 | Prompt injection was not independently controlled/tested | Add immutable-policy/delimited-input control and adversarial injection test to HA-input and provider-output flows |
 | Storm/concurrency, dependency compromise, and device-side effects were not explicit | Add bounded-rate/concurrency, supply-chain, and device-target controls/flows/tests |
 
-The working-tree manifest remains `incomplete`. FND-013 must not be marked done until the corrected clean revision passes all checks and both independent reviewers approve it.
+Clean revision `621b907d87b8280ad2003c85d7b5dc0e32b1310d` was also rejected: workflow/safety review at `2026-08-24T05:54:29Z` found an outdated Core-upgrade residual and incomplete rate/concurrency links, while test/release review at `2026-08-24T05:57:12Z` found that Windows CRLF hashes did not match clean Linux/Git bytes. Revision `6ba4793a3d5b283c91fc5a78dc141c80644f2c20` corrects those items by linking rate/idempotency tests to provider and notification boundaries, naming `TEST-COMPAT-CORE-UPGRADE` in the residual, enforcing LF for every hashed artifact through `.gitattributes`, and hashing the canonical staged bytes. The focused hash test verifies the working files against those manifest values.
+
+The manifest now points to committed artifact revision `6ba4793a3d5b283c91fc5a78dc141c80644f2c20` with `dirty: false`, but remains `incomplete`. FND-013 must not be marked done until both independent reviewers approve that artifact revision and the metadata-only closeout.
