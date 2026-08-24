@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FND-013-DATA-FLOW-TRACEABILITY-001",
+  "task_id": "FND-013",
+  "kind": "review",
+  "captured_at": "2026-08-24T05:33:33Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["FND-013"],
+    "decisions": [
+      "DEC-003",
+      "DEC-005",
+      "DEC-006",
+      "DEC-007",
+      "DEC-010",
+      "DEC-012",
+      "DEC-017",
+      "DEC-018",
+      "DEC-019",
+      "DEC-021",
+      "DEC-022"
+    ],
+    "controls": [
+      "DD-02",
+      "DD-03",
+      "DD-04",
+      "DD-05",
+      "DD-06",
+      "DD-07",
+      "DD-08",
+      "DD-09",
+      "DD-10"
+    ],
+    "tests": [
+      "TEST_CATALOG_SCHEMA",
+      "TEST_CATALOG_REFERENCES",
+      "TEST_CATALOG_READABLE_MAP",
+      "TEST_CANARY_SCAN"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant_runtime",
+        "status": "not_applicable",
+        "reason": "FND-013 validates repository traceability records and does not execute Home Assistant lifecycle behavior."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "tests/quality/test_traceability.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "tests/quality/test_traceability.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff", "--check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "readable-data-flow-traceability-map",
+      "location_type": "repository",
+      "repository_path": "docs/quality/DATA-FLOW-TRACEABILITY.md",
+      "sha256": "6d86dd2496775c00131ea8dae16325c801d31a5e173b8ea0077148773f3a6f1a",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "machine-traceability-catalog",
+      "location_type": "repository",
+      "repository_path": "docs/quality/traceability/traceability.json",
+      "sha256": "063161406edd8e2827be23eeac36c57e84edf1f8a48cc16a059c8df6a21c6ed7",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "traceability-catalog-schema",
+      "location_type": "repository",
+      "repository_path": "docs/quality/traceability/traceability.schema.json",
+      "sha256": "157e5b645d58bb0cff5287cad6e5a5372955fe2fe72e5d7fc2160b259d52c31a",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "traceability-integrity-tests",
+      "location_type": "repository",
+      "repository_path": "tests/quality/test_traceability.py",
+      "sha256": "2752a3dc016e5a05a685ff157da6792b82222a675d0908a9d9d26c394b8ef2ba",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "FND013_REVIEW_PENDING",
+      "description": "Independent workflow/safety and test/release reviews of a clean committed revision are pending.",
+      "blocks": ["FND-013"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "FND011_CORE_UPGRADE",
+      "description": "The actual Home Assistant Core-upgrade artifact remains open and is accurately retained by TEST-COMPAT-LIFECYCLE; it does not block defining the traceability catalog.",
+      "blocks": ["FND-010"]
+    },
+    {
+      "id": "BACKUP_RESTORE_FOLLOWUP",
+      "description": "TEST-BACKUP-RESTORE remains planned with its first isolated restore artifact due by 2027-02-23 or earlier after a major backup or migration change.",
+      "blocks": []
+    }
+  ],
+  "reviews": [
+    {
+      "role": "workflow_safety",
+      "status": "pending"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

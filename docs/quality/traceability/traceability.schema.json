@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-orchestrator.invalid/schemas/traceability.schema.json",
+  "title": "AI Orchestrator data-flow and traceability catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "classification",
+    "data_classes",
+    "nodes",
+    "flows",
+    "requirements",
+    "controls",
+    "tests"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "record_id": { "const": "FND-013-DATA-FLOW-TRACEABILITY-001" },
+    "classification": { "const": "synthetic_redacted" },
+    "data_classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/data_class" }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "flows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/flow" }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/control" }
+    },
+    "tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/test" }
+    }
+  },
+  "$defs": {
+    "summary": { "type": "string", "minLength": 1 },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "data_class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "handling"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^DATA-[A-Z0-9-]+$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "handling": { "$ref": "#/$defs/summary" }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "trust_zone"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^NODE-[A-Z0-9-]+$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "trust_zone": {
+          "enum": [
+            "user_session",
+            "home_assistant",
+            "local_provider",
+            "cloud_provider",
+            "external_output",
+            "artifact_egress",
+            "backup_storage"
+          ]
+        }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "summary",
+        "from_node",
+        "to_node",
+        "boundary",
+        "data_class_ids",
+        "control_ids",
+        "test_ids"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^FLOW-[0-9]{3}$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "from_node": { "type": "string", "pattern": "^NODE-[A-Z0-9-]+$" },
+        "to_node": { "type": "string", "pattern": "^NODE-[A-Z0-9-]+$" },
+        "boundary": { "$ref": "#/$defs/summary" },
+        "data_class_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^DATA-[A-Z0-9-]+$" }
+        },
+        "control_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^CTRL-[A-Z0-9-]+$" }
+        },
+        "test_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEST-[A-Z0-9-]+$" }
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "summary",
+        "source_refs",
+        "delivery_status",
+        "flow_ids",
+        "control_ids",
+        "test_ids"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^REQ-[A-Z0-9-]+$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "source_refs": { "$ref": "#/$defs/source_refs" },
+        "delivery_status": { "enum": ["planned", "partial", "delivered"] },
+        "flow_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^FLOW-[0-9]{3}$" }
+        },
+        "control_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^CTRL-[A-Z0-9-]+$" }
+        },
+        "test_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEST-[A-Z0-9-]+$" }
+        }
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "source_refs", "implementation_status", "evidence_refs"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^CTRL-[A-Z0-9-]+$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "source_refs": { "$ref": "#/$defs/source_refs" },
+        "implementation_status": { "enum": ["design_only", "phase0_verified", "implemented"] },
+        "evidence_refs": { "$ref": "#/$defs/evidence_refs" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "implementation_status": { "enum": ["phase0_verified", "implemented"] } },
+            "required": ["implementation_status"]
+          },
+          "then": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "verification_status", "evidence_refs"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^TEST-[A-Z0-9-]+$" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "verification_status": { "enum": ["planned", "phase0_passed", "passed"] },
+        "evidence_refs": { "$ref": "#/$defs/evidence_refs" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "verification_status": { "enum": ["phase0_passed", "passed"] } },
+            "required": ["verification_status"]
+          },
+          "then": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        }
+      ]
+    }
+  }
+}

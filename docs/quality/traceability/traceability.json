@@ -1,0 +1,619 @@
+{
+  "schema_version": 1,
+  "record_id": "FND-013-DATA-FLOW-TRACEABILITY-001",
+  "classification": "synthetic_redacted",
+  "data_classes": [
+    {
+      "id": "DATA-CREDENTIAL",
+      "summary": "Provider credentials, Home Assistant authentication context, approval tokens, and recovery keys.",
+      "handling": "Backend-only or platform-owned; never provider context, frontend state, logs, diagnostics, exports, fixtures, or committed evidence."
+    },
+    {
+      "id": "DATA-HOUSEHOLD",
+      "summary": "Entity state, attributes, events, presence, security, location, calendar, camera, voice, and notification target data.",
+      "handling": "Deny by default; minimize to an explicit workflow scope and destination policy; redact at every artifact egress."
+    },
+    {
+      "id": "DATA-CONTENT",
+      "summary": "User input, prompts, model-visible context, model output, tool arguments, and tool results.",
+      "handling": "Treat as untrusted; delimit inputs, validate outputs, apply retention policy, and never store hidden reasoning."
+    },
+    {
+      "id": "DATA-CONFIG",
+      "summary": "Provider non-secret options, workflows, routing, model selections, UI preferences, and versioned schemas.",
+      "handling": "Administratively authorized, versioned, validated, migratable, and exported without credentials."
+    },
+    {
+      "id": "DATA-CONTROL",
+      "summary": "Tool definitions, action targets and arguments, risk decisions, confirmations, execution state, and Home Assistant context.",
+      "handling": "Typed and allowlisted; reauthorize before side effects; bind confirmations exactly; never replay unknown outcomes."
+    },
+    {
+      "id": "DATA-TELEMETRY",
+      "summary": "Redacted health, duration, usage, error class, audit metadata, diagnostics, and support/export artifacts.",
+      "handling": "Bounded retention and recursive redaction; no prompt bodies, credentials, or protected household values by default."
+    },
+    {
+      "id": "DATA-RECOVERY",
+      "summary": "Encrypted backups, emergency-kit material, migration data, and restore evidence.",
+      "handling": "Encrypted and stored outside the Home Assistant device; recovery material is never committed; restore tests use spare or isolated systems."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "NODE-USER",
+      "summary": "Authorized administrator or permitted household user.",
+      "trust_zone": "user_session"
+    },
+    {
+      "id": "NODE-FRONTEND",
+      "summary": "Bundled AI Orchestrator panel inside an authenticated Home Assistant session.",
+      "trust_zone": "user_session"
+    },
+    {
+      "id": "NODE-BACKEND",
+      "summary": "AI Orchestrator custom-integration backend, policy layer, workflow runtime, redactor, and provider contract.",
+      "trust_zone": "home_assistant"
+    },
+    {
+      "id": "NODE-HA",
+      "summary": "Home Assistant authentication, registries, state, events, actions, Assist, notifications, and authoritative runtime.",
+      "trust_zone": "home_assistant"
+    },
+    {
+      "id": "NODE-STORE",
+      "summary": "Home Assistant config entries and versioned integration storage.",
+      "trust_zone": "home_assistant"
+    },
+    {
+      "id": "NODE-LOCAL-PROVIDER",
+      "summary": "Explicitly configured local AI endpoint such as LM Studio.",
+      "trust_zone": "local_provider"
+    },
+    {
+      "id": "NODE-CLOUD-PROVIDER",
+      "summary": "Explicitly configured cloud provider such as Azure OpenAI or AWS Bedrock.",
+      "trust_zone": "cloud_provider"
+    },
+    {
+      "id": "NODE-OUTPUT",
+      "summary": "Home Assistant notification, media, voice, or other approved output target.",
+      "trust_zone": "external_output"
+    },
+    {
+      "id": "NODE-ARTIFACT",
+      "summary": "Logs, diagnostics, traces, exports, screenshots, fixtures, and evidence leaving live memory.",
+      "trust_zone": "artifact_egress"
+    },
+    {
+      "id": "NODE-BACKUP",
+      "summary": "Encrypted local and off-device backup locations plus isolated restore environment.",
+      "trust_zone": "backup_storage"
+    }
+  ],
+  "flows": [
+    {
+      "id": "FLOW-001",
+      "summary": "An authenticated user opens the panel, configures product state, tests, approves, or invokes an allowed feature.",
+      "from_node": "NODE-USER",
+      "to_node": "NODE-FRONTEND",
+      "boundary": "User intent enters the authenticated browser session.",
+      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-NO-BROWSER-PROVIDER", "TEST-SECRET-EGRESS"]
+    },
+    {
+      "id": "FLOW-002",
+      "summary": "Home Assistant serves the bundled panel and authenticated product state without provider credentials.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-FRONTEND",
+      "boundary": "Home Assistant backend crosses into browser-visible state.",
+      "data_class_ids": ["DATA-CONFIG", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-RED-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-REDACTION-CANARY", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "FLOW-003",
+      "summary": "The panel calls typed authenticated WebSocket commands on the integration backend.",
+      "from_node": "NODE-FRONTEND",
+      "to_node": "NODE-BACKEND",
+      "boundary": "Browser-controlled input crosses into privileged integration code.",
+      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-OUTPUT-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-OUTPUT-SCHEMA"]
+    },
+    {
+      "id": "FLOW-004",
+      "summary": "Home Assistant supplies selected registries, state, events, action schemas, user context, and Assist input.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-BACKEND",
+      "boundary": "Authoritative Home Assistant data becomes untrusted workflow context.",
+      "data_class_ids": ["DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONTROL"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-TOOL-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-TOOL-ALLOWLIST"]
+    },
+    {
+      "id": "FLOW-005",
+      "summary": "The backend reads and writes provider configuration, versioned workflows, policy, and bounded history.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-STORE",
+      "boundary": "Runtime memory crosses into persistent Home Assistant-owned storage.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-RETENTION-001", "CTRL-RED-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-RETENTION-DELETION", "TEST-REDACTION-CANARY", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "FLOW-006",
+      "summary": "A policy-filtered request is sent through the provider contract to an explicitly configured local endpoint.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-LOCAL-PROVIDER",
+      "boundary": "Selected context leaves Home Assistant for a LAN provider process.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONFIG"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-LOCAL-AUTH-NETWORK"]
+    },
+    {
+      "id": "FLOW-007",
+      "summary": "An explicitly opted-in, policy-filtered request is sent through the provider contract to a cloud provider.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-CLOUD-PROVIDER",
+      "boundary": "Approved context leaves the private network for a named cloud destination.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONFIG"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT"]
+    },
+    {
+      "id": "FLOW-008",
+      "summary": "Local provider output returns to the backend for normalization, schema validation, and policy enforcement.",
+      "from_node": "NODE-LOCAL-PROVIDER",
+      "to_node": "NODE-BACKEND",
+      "boundary": "Untrusted model output re-enters privileged integration code.",
+      "data_class_ids": ["DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
+    },
+    {
+      "id": "FLOW-009",
+      "summary": "Cloud provider output returns to the backend for normalization, schema validation, and policy enforcement.",
+      "from_node": "NODE-CLOUD-PROVIDER",
+      "to_node": "NODE-BACKEND",
+      "boundary": "Untrusted remote model output re-enters privileged integration code.",
+      "data_class_ids": ["DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
+    },
+    {
+      "id": "FLOW-010",
+      "summary": "A validated and currently authorized structured action is invoked through Home Assistant with its originating context.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-HA",
+      "boundary": "Model-influenced structured data approaches an authoritative side-effect runtime.",
+      "data_class_ids": ["DATA-CONTROL", "DATA-HOUSEHOLD", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-ALERT-001"],
+      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-DETERMINISTIC-ALERT"]
+    },
+    {
+      "id": "FLOW-011",
+      "summary": "The backend returns redacted UI state, destination indicators, validation results, and bounded execution traces.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-FRONTEND",
+      "boundary": "Backend state crosses into browser-visible output.",
+      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-RED-001", "CTRL-PRIVACY-001", "CTRL-RETENTION-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-REDACTION-CANARY", "TEST-CLOUD-PRIVACY", "TEST-RETENTION-DELETION"]
+    },
+    {
+      "id": "FLOW-012",
+      "summary": "Home Assistant delivers deterministic primary alerts and approved notifications or announcements to configured output targets.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-OUTPUT",
+      "boundary": "Home Assistant-controlled output leaves the core runtime for a device or notification service.",
+      "data_class_ids": ["DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONTROL"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ALERT-001", "CTRL-ACTION-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-DETERMINISTIC-ALERT", "TEST-ACTION-CONFIRMATION"]
+    },
+    {
+      "id": "FLOW-013",
+      "summary": "Redacted logs, diagnostics, traces, exports, fixtures, and acceptance records leave runtime memory.",
+      "from_node": "NODE-BACKEND",
+      "to_node": "NODE-ARTIFACT",
+      "boundary": "Operational data becomes a persistent or shareable artifact.",
+      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-RED-001", "CTRL-RETENTION-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-REDACTION-CANARY", "TEST-RETENTION-DELETION"]
+    },
+    {
+      "id": "FLOW-014",
+      "summary": "Home Assistant creates encrypted backups to local and off-device locations and restores only under the approved recovery procedure.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-BACKUP",
+      "boundary": "Configuration and protected household state leave the live Home Assistant installation for recovery storage or an isolated restore target.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY", "DATA-RECOVERY"],
+      "control_ids": ["CTRL-BACKUP-001", "CTRL-SECRET-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-BACKUP-CREATE", "TEST-BACKUP-RESTORE", "TEST-SECRET-EGRESS"]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-CAP-001",
+      "summary": "Configure multiple local and cloud provider connections through the UI behind one provider contract.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 1"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-005", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT"]
+    },
+    {
+      "id": "REQ-CAP-002",
+      "summary": "Discover current Home Assistant entities, devices, areas, floors, labels, states, and available actions.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 2"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-011"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-REDACTION-CANARY"]
+    },
+    {
+      "id": "REQ-CAP-003",
+      "summary": "Give every agent or workflow separate observation, action, privacy, and confirmation scopes.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 3"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-003", "FLOW-004", "FLOW-005", "FLOW-010"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-TOOL-001", "CTRL-ACTION-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION"]
+    },
+    {
+      "id": "REQ-CAP-004",
+      "summary": "Build versioned workflows from triggers, deterministic conditions, constrained AI steps, branches, Home Assistant actions, and explicit failure behavior.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 4"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-005", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-010"],
+      "control_ids": ["CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "REQ-CAP-005",
+      "summary": "Support compose, classify, extract, predefined-branch choice, and bounded conversation or tool modes.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 5"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST"]
+    },
+    {
+      "id": "REQ-CAP-006",
+      "summary": "Provide chat and Home Assistant Assist conversation-agent support.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 6"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-004", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-011"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-PROVIDER-001", "CTRL-TOOL-001", "CTRL-RETENTION-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROVIDER-CONTRACT", "TEST-TOOL-ALLOWLIST", "TEST-RETENTION-DELETION"]
+    },
+    {
+      "id": "REQ-CAP-007",
+      "summary": "Deliver announcements and notifications through actions actually available in the live Home Assistant instance.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 7"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART"]
+    },
+    {
+      "id": "REQ-CAP-008",
+      "summary": "Support named local and cloud routes, health checks, policy-safe failover, and visible data destinations.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 8"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-011"],
+      "control_ids": ["CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-IDEMPOTENCY-001"],
+      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-IDEMPOTENT-RESTART"]
+    },
+    {
+      "id": "REQ-CAP-009",
+      "summary": "Provide dry runs, exact context previews, redacted traces, and restart-safe workflow behavior.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 9"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-003", "FLOW-005", "FLOW-010", "FLOW-011", "FLOW-013"],
+      "control_ids": ["CTRL-RED-001", "CTRL-PRIVACY-001", "CTRL-IDEMPOTENCY-001", "CTRL-RETENTION-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-REDACTION-CANARY", "TEST-CLOUD-PRIVACY", "TEST-IDEMPOTENT-RESTART", "TEST-RETENTION-DELETION", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "REQ-CAP-010",
+      "summary": "Support security and event workflows without making AI the primary life-safety detector or unrestricted action authority.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 10"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
+      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-ALERT-001", "CTRL-IDEMPOTENCY-001"],
+      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-DETERMINISTIC-ALERT", "TEST-IDEMPOTENT-RESTART"]
+    },
+    {
+      "id": "REQ-CON-001",
+      "summary": "Initial distribution remains private and personal-use oriented.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 1"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-002", "FLOW-003"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "REQ-CON-002",
+      "summary": "Home Assistant remains the source of truth for states and device actions.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 2", "DEC-003"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "REQ-CON-003",
+      "summary": "Provider credentials and requests never originate directly from the browser.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 3"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-002", "FLOW-003", "FLOW-006", "FLOW-007"],
+      "control_ids": ["CTRL-SECRET-001", "CTRL-ENDPOINT-001"],
+      "test_ids": ["TEST-NO-BROWSER-PROVIDER", "TEST-SECRET-EGRESS", "TEST-ENDPOINT-SSRF"]
+    },
+    {
+      "id": "REQ-CON-004",
+      "summary": "No unrestricted generic Home Assistant action tool is exposed to a model.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 4", "DEC-005"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-008", "FLOW-009", "FLOW-010"],
+      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001"],
+      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION"]
+    },
+    {
+      "id": "REQ-CON-005",
+      "summary": "Cloud disclosure never occurs without explicit workflow-level authorization.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 5", "DEC-006", "DEC-017"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-007", "FLOW-009", "FLOW-011"],
+      "control_ids": ["CTRL-PRIVACY-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-REDACTION-CANARY"]
+    },
+    {
+      "id": "REQ-CON-006",
+      "summary": "Generated or edited YAML is not the primary product experience.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 6"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-005", "FLOW-011"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-OUTPUT-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-OUTPUT-SCHEMA", "TEST-COMPAT-LIFECYCLE"]
+    },
+    {
+      "id": "REQ-CON-007",
+      "summary": "No provider or Home Assistant capability is claimed without documentation or live validation.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 7", "DEC-010"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-004", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-COMPAT-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-COMPAT-LIFECYCLE", "TEST-LOCAL-AUTH-NETWORK"]
+    },
+    {
+      "id": "REQ-CON-008",
+      "summary": "No high-risk action policy is inferred for the owner.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 8"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-010"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-TOOL-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-TOOL-ALLOWLIST"]
+    },
+    {
+      "id": "REQ-ACC-001",
+      "summary": "A capability is accepted only when it is UI-configurable, side-effect safe to test, destination-transparent, offline-tolerant, and traceable with redaction.",
+      "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#definition-of-product-acceptance"],
+      "delivery_status": "planned",
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-006", "FLOW-007", "FLOW-010", "FLOW-011", "FLOW-013"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-PROVIDER-001", "CTRL-ACTION-001", "CTRL-RED-001", "CTRL-IDEMPOTENCY-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROVIDER-CONTRACT", "TEST-ACTION-CONFIRMATION", "TEST-REDACTION-CANARY", "TEST-IDEMPOTENT-RESTART"]
+    }
+  ],
+  "controls": [
+    {
+      "id": "CTRL-AUTH-001",
+      "summary": "Use Home Assistant authentication and context; restrict provider and published-workflow administration to authorized administrators and recheck authorization at use time.",
+      "source_refs": ["DD-02", "docs/quality/QUALITY-SECURITY-PLAN.md#43-action-authorization-and-execution"],
+      "implementation_status": "phase0_verified",
+      "evidence_refs": ["docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json", "docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json"]
+    },
+    {
+      "id": "CTRL-SECRET-001",
+      "summary": "Accept and use credentials only in the backend; never return, log, export, trace, or redirect them to another origin.",
+      "source_refs": ["DD-05", "docs/quality/QUALITY-SECURITY-PLAN.md#31-credential-handling"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-RED-001",
+      "summary": "Apply central recursive secret and household-data redaction to every egress artifact, with deterministic canary scanning.",
+      "source_refs": ["DD-05", "DD-06", "docs/quality/QUALITY-SECURITY-PLAN.md#32-redaction-rules"],
+      "implementation_status": "phase0_verified",
+      "evidence_refs": ["docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json", "docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json"]
+    },
+    {
+      "id": "CTRL-PRIVACY-001",
+      "summary": "Minimize context, default workflows to local-only, require explicit per-workflow cloud opt-in, and filter prohibited fields before destination selection.",
+      "source_refs": ["DD-04", "DEC-017", "DEC-019", "docs/quality/QUALITY-SECURITY-PLAN.md#41-prompt-construction"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-ENDPOINT-001",
+      "summary": "Normalize and validate provider schemes, origins, redirects, DNS and IP results, and credential destination before every provider request.",
+      "source_refs": ["docs/quality/QUALITY-SECURITY-PLAN.md#24-required-mitigations-by-threat", "docs/quality/QUALITY-SECURITY-PLAN.md#31-credential-handling"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-PROVIDER-001",
+      "summary": "Keep provider-specific behavior behind one contract with probed capabilities, bounded timeouts, cancellation, normalized errors, and truthful unknown states.",
+      "source_refs": ["DEC-010", "docs/architecture/ARCHITECTURE.md#provider-boundary"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-OUTPUT-001",
+      "summary": "Treat model output as untrusted and require strict structured validation before branch, tool, or action use.",
+      "source_refs": ["DD-06", "docs/quality/QUALITY-SECURITY-PLAN.md#41-prompt-construction", "docs/quality/QUALITY-SECURITY-PLAN.md#42-tool-contract"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-TOOL-001",
+      "summary": "Expose only typed, versioned, narrowly allowlisted tools; never expose a generic unrestricted Home Assistant action executor.",
+      "source_refs": ["DD-02", "DEC-005", "DEC-012", "docs/quality/QUALITY-SECURITY-PLAN.md#42-tool-contract"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-ACTION-001",
+      "summary": "Classify risk, prohibit critical model actions, bind confirmations exactly, and revalidate current context, target, arguments, policy, and state immediately before execution.",
+      "source_refs": ["docs/quality/QUALITY-SECURITY-PLAN.md#43-action-authorization-and-execution"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-IDEMPOTENCY-001",
+      "summary": "Journal side effects, prevent duplicate execution and recursive loops, and never automatically replay an unknown or committed outcome during retry, failover, reload, or restart.",
+      "source_refs": ["DD-07", "docs/quality/QUALITY-SECURITY-PLAN.md#43-action-authorization-and-execution"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-ALERT-001",
+      "summary": "Keep life-safety and security detection and primary alerts deterministic; AI enrichment cannot delay, suppress, downgrade, or recall them.",
+      "source_refs": ["DD-03", "docs/quality/QUALITY-SECURITY-PLAN.md#5-deterministic-security-and-safety-workflow-constraints"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-RETENTION-001",
+      "summary": "Apply owner-approved bounded retention and explicit deletion semantics to chat, execution metadata, diagnostics, and exports.",
+      "source_refs": ["DEC-018", "docs/quality/QUALITY-SECURITY-PLAN.md#33-retention-and-deletion"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-COMPAT-001",
+      "summary": "Claim compatibility only for named tested Home Assistant versions and verify setup, unload, reload, restart, panel ownership, and version-sensitive migrations.",
+      "source_refs": ["DD-10", "DEC-014", "docs/quality/QUALITY-SECURITY-PLAN.md#7-compatibility-and-regression"],
+      "implementation_status": "phase0_verified",
+      "evidence_refs": ["docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json", "docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json", "docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md"]
+    },
+    {
+      "id": "CTRL-BACKUP-001",
+      "summary": "Use encrypted automatic backups with off-device storage and protected recovery material; test restoration only on spare or isolated Home Assistant systems at the approved cadence.",
+      "source_refs": ["DEC-021", "DEC-022", "docs/evidence/2026-08-23-home-assistant-backup.md"],
+      "implementation_status": "phase0_verified",
+      "evidence_refs": ["docs/evidence/2026-08-23-home-assistant-backup.md"]
+    }
+  ],
+  "tests": [
+    {
+      "id": "TEST-AUTHORIZATION-MATRIX",
+      "summary": "Verify administrator and non-administrator read, configure, approve, and invoke behavior with preserved Home Assistant context.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-NO-BROWSER-PROVIDER",
+      "summary": "Prove browser code receives no provider credential and sends no provider request directly.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-SECRET-EGRESS",
+      "summary": "Exercise credential create, validation, error, rotation, removal, backup, diagnostics, UI, trace, log, and export paths without secret disclosure.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-REDACTION-CANARY",
+      "summary": "Scan supported artifacts for deterministic synthetic secret and household canaries.",
+      "verification_status": "phase0_passed",
+      "evidence_refs": ["docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json", "docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json"]
+    },
+    {
+      "id": "TEST-CLOUD-PRIVACY",
+      "summary": "Capture sanitized local and cloud requests proving destination preview, local default, explicit opt-in, field minimization, prohibited-field filtering, and policy-safe failover.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-ENDPOINT-SSRF",
+      "summary": "Test approved and denied URL, redirect, userinfo, IPv4, IPv6, DNS rebinding, metadata, loopback, LAN, and public endpoint cases.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-PROVIDER-CONTRACT",
+      "summary": "Run every provider adapter against common capability, timeout, cancellation, streaming, usage, tool, schema, and normalized-error cases.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-OUTPUT-SCHEMA",
+      "summary": "Reject malformed, extra-property, ambiguous, unavailable-target, stale-reference, and policy-expanding provider output.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-TOOL-ALLOWLIST",
+      "summary": "Prove prompts and provider output cannot add tools, actions, targets, fields, or permissions outside the typed allowlist.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-ACTION-CONFIRMATION",
+      "summary": "Verify risk policy, prohibited actions, exact confirmation binding, expiry, state recheck, target validation, and authorization immediately before action.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-IDEMPOTENT-RESTART",
+      "summary": "Exercise timeout, retry, failover, reload, restart, cancellation, recursive triggers, and unknown outcomes to prove zero-or-one side effects.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-DETERMINISTIC-ALERT",
+      "summary": "Prove primary life-safety and security alerts still occur under offline, slow, uncertain, malformed, injected, and failed AI paths.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-RETENTION-DELETION",
+      "summary": "Verify 30-day chat and 90-day execution-metadata defaults, deletion semantics, bounded exports, and no hidden reasoning retention.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-COMPAT-LIFECYCLE",
+      "summary": "Verify named-version setup, unload, reload, restart, panel ownership, non-admin behavior, schema migration, and actual Core upgrade survival.",
+      "verification_status": "phase0_passed",
+      "evidence_refs": ["docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json", "docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json", "docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md"]
+    },
+    {
+      "id": "TEST-LOCAL-AUTH-NETWORK",
+      "summary": "Verify local-provider authentication rejects missing and invalid credentials, accepts the secret-backed Home Assistant request, and remains reachable after source-scoped firewall hardening.",
+      "verification_status": "phase0_passed",
+      "evidence_refs": ["docs/evidence/2026-08-23-lm-studio-environment.md"]
+    },
+    {
+      "id": "TEST-BACKUP-CREATE",
+      "summary": "Verify encrypted automatic backup creation, off-device location, emergency-kit custody, and scheduled retention policy.",
+      "verification_status": "phase0_passed",
+      "evidence_refs": ["docs/evidence/2026-08-23-home-assistant-backup.md"]
+    },
+    {
+      "id": "TEST-BACKUP-RESTORE",
+      "summary": "Restore an approved backup on a spare or isolated Home Assistant system every six months and after major backup or migration changes; never use production merely to satisfy the test.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-CATALOG-INTEGRITY",
+      "summary": "Validate catalog schema, global ID uniqueness, reference resolution, requirement coverage, and evidence requirements for verified statuses.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    }
+  ]
+}
