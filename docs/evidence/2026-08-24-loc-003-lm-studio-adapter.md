@@ -41,6 +41,8 @@ This implementation does not add provider setup to the custom panel, streaming, 
 
 The earlier mounted-worktree full Linux run reached its final security scan but was interrupted after the scanner traversed the bind-mounted ignored Windows virtual environment. That attempt is not a passed full gate. The same run had already completed the Home Assistant and provider tests; a subsequent focused Linux run passed 56 tests. The immutable Git-archive run will not contain the ignored virtual environment and remains required.
 
+Immutable synthetic artifact `598a3259de25e9f1060a4b670a2b13dace4808ca` was reconstructed from a Git archive in clean Linux with Python `3.14.5`, Home Assistant `2026.8.3`, and pytest Home Assistant plugin `0.13.357`. It passed 315 full tests, 72 focused lifecycle tests, 192 provider tests, 54 LM Studio adapter tests, 30 security/evidence/traceability tests, and 222 pure tests. Ruff format/lint, canary, evidence schema, traceability, diff, and four canonical hashes passed. Five known upstream deprecations remain and no project failure occurred.
+
 ## Remaining gates
 
 1. Run the exact committed artifact in clean Linux for the full, adapter-focused, Home Assistant lifecycle, provider/security/quality, pure, Ruff, canary, schema, traceability, diff, and canonical-hash gates.
@@ -51,4 +53,4 @@ The earlier mounted-worktree full Linux run reached its final security scan but 
 
 ## Acceptance status
 
-`IN PROGRESS — SYNTHETIC GATES`. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until exact-source acceptance and redacted live Home Assistant revalidation both pass.
+`IN PROGRESS — PRE-LIVE REVIEW`. Artifact `598a3259de25e9f1060a4b670a2b13dace4808ca` passes its exact-source synthetic gates. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until independent pre-live acceptance and redacted live Home Assistant revalidation both pass.

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-003-LM-STUDIO-ADAPTER-001",
+  "task_id": "LOC-003",
+  "kind": "automated_test",
+  "captured_at": "2026-08-24T18:11:21Z",
+  "source_revision": {
+    "state": "committed",
+    "git_commit": "598a3259de25e9f1060a4b670a2b13dace4808ca",
+    "dirty": false
+  },
+  "traceability": {
+    "requirements": ["LOC-003", "REQ-CAP-001", "REQ-CON-003", "REQ-CON-007"],
+    "decisions": ["DEC-005", "DEC-010", "DEC-012", "DEC-020", "DEC-023"],
+    "controls": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-TOOL-001"],
+    "tests": [
+      "TEST-SECRET-EGRESS",
+      "TEST-ENDPOINT-SSRF",
+      "TEST-PROVIDER-CONTRACT",
+      "TEST-LOCAL-AUTH-NETWORK",
+      "TEST-TOOL-ALLOWLIST",
+      "LINUX_FULL_SUITE",
+      "PURE_TEST_SUITE",
+      "RUFF_FORMAT",
+      "RUFF_LINT",
+      "CANARY_SCAN",
+      "GIT_DIFF_CHECK"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "pytest_homeassistant_custom_component",
+        "status": "verified",
+        "version": "0.13.357"
+      },
+      {
+        "name": "docker",
+        "status": "verified",
+        "version": "29.5.2"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers/test_lm_studio.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/providers/lm_studio.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/translations/en.json tests/providers/test_lm_studio.py\"; git -c core.autocrlf=false archive --format=tar 598a3259de25e9f1060a4b670a2b13dace4808ca | docker run --rm -i --name ai-orchestrator-loc003-artifact --workdir /workspace --volume ai-orchestrator-loc003-artifact-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff", "--check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "lm-studio-provider-adapter",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/providers/lm_studio.py",
+      "sha256": "7edc7a3887f63a59046d64976d7e9da864a14701c19388af72967329706da9fb",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "lm-studio-registration",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/__init__.py",
+      "sha256": "e7024f6eec38a3f883bc3423cf46164c0c9e68b5f954056eb2bdd577764a6b2c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "lm-studio-form-translations",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/translations/en.json",
+      "sha256": "3376d688082e0fb3c2c49625b5c05c20b381e3a23719ed936e82b9d2af5c3850",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "lm-studio-adapter-tests",
+      "location_type": "repository",
+      "repository_path": "tests/providers/test_lm_studio.py",
+      "sha256": "08cb27e20b822e0296909688808190c6d6be1be4ded31fb2319a1fa4bce2f2e1",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "LIVE_ADAPTER_REVALIDATION",
+      "description": "The reviewed adapter has not yet made a redacted authenticated request from the named Home Assistant installation.",
+      "blocks": ["LOC-003"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "STREAMING_UNPROVEN",
+      "description": "Streaming is unavailable until separately implemented and proven; the adapter fails closed with unsupported.",
+      "blocks": []
+    },
+    {
+      "id": "NO_ACTION_AUTHORITY",
+      "description": "Tool calls are normalized provider data only; this adapter does not implement or authorize any Home Assistant action executor.",
+      "blocks": []
+    },
+    {
+      "id": "PROVIDER_PANEL_UI",
+      "description": "The custom panel provider setup and test experience remains LOC-004.",
+      "blocks": ["LOC-004"]
+    }
+  ],
+  "reviews": [
+    {
+      "role": "workflow_safety",
+      "status": "pending"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}
