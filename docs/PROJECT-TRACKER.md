@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **LOC-002 second-remediation artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` rejects duplicate exposed-tool names and revalidates historical continuation calls against the uniquely exposed tool schema. Exact committed gates passed 136 provider and 166 focused/pure tests plus Ruff, canary, traceability, manifest-schema, diff, and clean-worktree checks. Commit the replacement metadata candidate, then obtain fresh independent workflow/safety and test/release approvals. No endpoint, credential, network transport, tool executor, or Home Assistant action is authorized.**
+Current resume point: **LOC-002 is independently accepted. Continue LOC-001 by defining the provider-neutral one-config-entry-per-provider lifecycle on the existing foundation entry without adding LM Studio transport, an endpoint, or a credential. Expected implementation area: `config_flow.py`, integration setup/unload/runtime/constant types, translations, Home Assistant config-flow/lifecycle tests, and new LOC-001 evidence. First resolve the exact entry data/options and reauthentication contract from current Home Assistant APIs and recorded decisions; keep unknown provider values absent.**
 
 ## Status rules
 
@@ -21,12 +21,12 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | FND-010 current-version Phase 0 readiness review, independently accepted |
-| Active work | LOC-002 provider contract and normalized errors/capabilities |
+| Last completed | LOC-002 provider contract and normalized errors/capabilities, independently accepted |
+| Active work | LOC-001 provider-neutral config-entry lifecycle |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | LOC-002 remediated committed candidate, clean Linux suite, and independent acceptance review |
-| Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
-| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
+| Next gate | LOC-001 exact provider-entry data/options, validation, reauthentication, setup/unload, and failure-lifecycle contract plus Home Assistant tests |
+| Production code | FND-015 foundation, the FND-012 action-free lifecycle probe, and LOC-002 provider-neutral contract are implemented; live providers and product workflows remain absent |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; LOC-002 artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` and candidate `e8787b36ffc5af4525963ec55dda06e732188ad7` are independently accepted and awaiting the closeout push |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -52,8 +52,8 @@ No task may move to `DONE` based only on an assertion.
 
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
-| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `TODO` | FND-010, LOC-002 | Provider lifecycle requires the reviewed provider-neutral validation/authentication contract; implement after LOC-002 without adding provider-specific transport |
-| LOC-002 | Define provider contract and normalized errors/capabilities | `REVIEW` | FND-008 | Candidate `4de9a453b353e63332251869b31d6f6c05dee13b` was rejected by workflow/safety at `2026-08-24T07:31:55Z`. Second-remediation artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` rejects duplicate tool-definition names and revalidates historical continuation calls against exposed schemas. Exact committed local gates passed 136 provider and 166 focused/pure tests plus Ruff, canary, traceability, manifest-schema, diff, and clean tree. Next: replacement metadata candidate and fresh independent reviews. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
+| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `IN PROGRESS` | FND-010, LOC-002 | Claimed after reading the current foundation config flow/lifecycle and ADR-0005. Expected implementation area: `config_flow.py`, setup/unload/runtime/constants, translations, Home Assistant lifecycle tests, and LOC-001 evidence. Next: establish the exact provider-neutral data/options and reauthentication contract from current HA APIs and recorded decisions; do not add a provider-specific transport, endpoint, credential, model, or capability claim. |
+| LOC-002 | Define provider contract and normalized errors/capabilities | `DONE` | FND-008 | Artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4`, candidate `e8787b36ffc5af4525963ec55dda06e732188ad7`: workflow/safety approved `2026-08-24T07:39:29Z`; test/release approved `2026-08-24T07:41:11Z`. Clean Linux passed 198 full, 136 provider, 30 security/evidence/traceability, 166 pure, and six explicit remediation tests; Ruff, canary, schema, fixture-count, canonical-hash, Git, clean-tree, and sensitive-data checks passed. `CTRL-PROVIDER-001` remains design-only and `TEST-PROVIDER-CONTRACT` planned until every live adapter passes. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |
 | LOC-005 | Add read-only entity/area/device catalog | `TODO` | LOC-001 | Registry-change and rename tests |

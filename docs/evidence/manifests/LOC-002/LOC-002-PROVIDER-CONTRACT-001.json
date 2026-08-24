@@ -3,7 +3,7 @@
   "evidence_id": "LOC-002-PROVIDER-CONTRACT-001",
   "task_id": "LOC-002",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T07:36:42Z",
+  "captured_at": "2026-08-24T07:42:48Z",
   "source_revision": {
     "state": "committed",
     "git_commit": "eff9e40c07842b96a04cd73e57c938212b1eedf4",
@@ -37,9 +37,14 @@
         "version": "0.12.1"
       },
       {
-        "name": "home_assistant_runtime",
-        "status": "not_applicable",
-        "reason": "LOC-002 defines a zero-network provider-neutral contract; live adapter and Home Assistant config-entry behavior belong to LOC-003 and LOC-001."
+        "name": "home_assistant_test_dependency",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "docker",
+        "status": "verified",
+        "version": "29.5.2"
       }
     ]
   },
@@ -90,6 +95,17 @@
       "command_argv": ["git", "diff", "--check"],
       "exit_code": 0,
       "result": "passed"
+    },
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "git -c core.autocrlf=false archive --format=tar e8787b36ffc5af4525963ec55dda06e732188ad7 | docker run --rm -i --name ai-orchestrator-loc002-second-remediation-review --workdir /workspace --volume ai-orchestrator-loc002-second-remediation-review-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py\""
+      ],
+      "exit_code": 0,
+      "result": "passed"
     }
   ],
   "artifacts": [
@@ -121,7 +137,7 @@
       "redaction_status": "reviewed"
     }
   ],
-  "result": "incomplete",
+  "result": "passed",
   "unknowns": [],
   "residuals": [
     {
@@ -137,16 +153,14 @@
   ],
   "reviews": [
     {
-      "role": "provider_backend",
-      "status": "pending"
-    },
-    {
       "role": "workflow_safety",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T07:39:29Z"
     },
     {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T07:41:11Z"
     }
   ]
 }

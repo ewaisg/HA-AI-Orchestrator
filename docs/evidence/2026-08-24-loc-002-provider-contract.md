@@ -45,6 +45,15 @@ The first remediation preserves and validates call IDs, adds the closed schema a
 
 The second remediation rejects duplicate tool-definition names and revalidates every historical assistant tool call against the uniquely exposed definition and its closed argument schema before accepting the continuation. Direct contract tests and fake-provider fixture parsing cover unexposed historical calls, schema-invalid historical arguments, and duplicate definitions. Immutable artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` passed 136 provider tests and 166 focused/pure tests, with the same five known dependency deprecation warnings. Ruff format reported 60 files already formatted, Ruff lint passed, the canary scan had no findings, `git diff --check` passed, and the worktree was clean. Fresh independent reviews remain required on a committed metadata candidate.
 
+## Independent acceptance
+
+Candidate `e8787b36ffc5af4525963ec55dda06e732188ad7` and source artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` were independently accepted without modifying the clean worktree:
+
+- Workflow/safety approved at `2026-08-24T07:39:29Z`. The reviewer reconstructed all three former continuation failures and observed fail-closed rejection, then passed 136 provider and 166 focused/pure tests, Ruff, canary, Git/hash checks, and a sensitive-data scan.
+- Test/release approved at `2026-08-24T07:41:11Z` from a fresh Git archive in Docker `29.5.2` on `x86_64`, Python `3.14.5`, uv `0.12.1`, Home Assistant `2026.8.3`, and Home Assistant pytest plugin `0.13.357`. Results were 198 full-suite tests, 136 provider tests, 30 security/evidence/traceability tests, 166 pure tests, and six explicit continuation-remediation cases. Ruff format/lint, canary, fixture/schema, canonical-hash, Git provenance, clean-worktree, and sensitive-data checks passed. Exactly nineteen fixtures were present.
+
+The five observed warnings are upstream deprecations in Home Assistant/aiohttp and `backoff`; no project-source warning or test failure was observed. The every-live-adapter traceability control and test deliberately remain `design_only` and `planned` with no evidence references.
+
 ## Residual gates
 
 - Every live provider adapter must run the provider-neutral cases plus adapter-specific transport, authentication, endpoint, timeout, cancellation, raw-response normalization, and redaction tests. `TEST-PROVIDER-CONTRACT` remains planned until every implemented adapter passes; this task does not claim that every-adapter gate.
@@ -54,4 +63,4 @@ The second remediation rejects duplicate tool-definition names and revalidates e
 
 ## Acceptance status
 
-`IN REVIEW` after rejected candidates `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1` and `4de9a453b353e63332251869b31d6f6c05dee13b`. Second-remediation artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` passes its committed local gates. Commit the replacement metadata candidate, then obtain fresh workflow/safety and test/release approvals before LOC-002 can be `DONE`.
+`DONE`. Rejected candidates `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1` and `4de9a453b353e63332251869b31d6f6c05dee13b` remain recorded as work history. Second-remediation artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` and metadata candidate `e8787b36ffc5af4525963ec55dda06e732188ad7` passed the exact local and independent clean-Linux gates and received both required approvals.
