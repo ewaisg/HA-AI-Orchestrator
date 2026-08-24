@@ -3,10 +3,11 @@
   "evidence_id": "LOC-002-PROVIDER-CONTRACT-001",
   "task_id": "LOC-002",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T07:22:13Z",
+  "captured_at": "2026-08-24T07:25:26Z",
   "source_revision": {
-    "state": "working_tree",
-    "dirty": true
+    "state": "committed",
+    "git_commit": "9b5bd56667c27564244b456b7416ca125845db4e",
+    "dirty": false
   },
   "traceability": {
     "requirements": ["LOC-002", "REQ-CON-007"],

@@ -43,7 +43,7 @@ Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` reproduced the same
 
 The current working remediation preserves and validates call IDs, adds the closed schema and fixed safe-error boundaries, expands the synthetic common cases, and returns `CTRL-PROVIDER-001` to `design_only` and `TEST-PROVIDER-CONTRACT` to `planned`. A passing historical candidate is not inferred; all gates and independent reviews must run again on a new committed candidate.
 
-The remediated working tree passed 130 provider tests and 160 focused/pure tests, with the same five known dependency deprecation warnings. Ruff format reported 60 files formatted, Ruff lint passed, the canary scan had no findings, and `git diff --check` passed. These are working-tree results only until reproduced from the new committed artifact.
+The remediated working tree passed 130 provider tests and 160 focused/pure tests, with the same five known dependency deprecation warnings. Ruff format reported 60 files formatted, Ruff lint passed, the canary scan had no findings, and `git diff --check` passed. Remediated artifact `9b5bd56667c27564244b456b7416ca125845db4e` reproduced 160 focused/pure tests, Ruff, canary, diff, and clean-worktree gates from the exact commit.
 
 ## Residual gates
 
@@ -54,4 +54,4 @@ The remediated working tree passed 130 provider tests and 160 focused/pure tests
 
 ## Acceptance status
 
-`IN REVIEW` after rejected candidate `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1`. The working remediation passes its local gates. Create a new immutable artifact and metadata candidate, then obtain fresh workflow/safety and test/release approvals before LOC-002 can be `DONE`.
+`IN REVIEW` after rejected candidate `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1`. Remediated artifact `9b5bd56667c27564244b456b7416ca125845db4e` passes its committed local gates. Commit the replacement metadata candidate, then obtain fresh workflow/safety and test/release approvals before LOC-002 can be `DONE`.
