@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "evidence_id": "FND-010-PHASE0-READINESS-001",
+  "task_id": "FND-010",
+  "kind": "review",
+  "captured_at": "2026-08-24T06:27:50Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["FND-010"],
+    "decisions": [
+      "DEC-003",
+      "DEC-005",
+      "DEC-007",
+      "DEC-014",
+      "DEC-015",
+      "DEC-016",
+      "DEC-017",
+      "DEC-018",
+      "DEC-019",
+      "DEC-020",
+      "DEC-021",
+      "DEC-022",
+      "DEC-023"
+    ],
+    "controls": [
+      "DD-02",
+      "DD-03",
+      "DD-04",
+      "DD-05",
+      "DD-06",
+      "DD-07",
+      "DD-08",
+      "DD-09",
+      "DD-10"
+    ],
+    "tests": [
+      "PHASE0_DEPENDENCY_MATRIX",
+      "PURE_TEST_SUITE",
+      "FRONTEND_CHECK",
+      "EVIDENCE_TRACEABILITY_SUITE",
+      "RUFF_FORMAT",
+      "RUFF_LINT",
+      "CANARY_SCAN",
+      "NPM_AUDIT",
+      "GIT_DIFF_CHECK",
+      "LINUX_FULL_SUITE"
+    ]
+  },
+  "environment": {
+    "data_mode": "live_redacted",
+    "components": [
+      {
+        "name": "home_assistant_core",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "home_assistant_frontend",
+        "status": "verified",
+        "version": "20260729.7"
+      },
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "node",
+        "status": "verified",
+        "version": "24.16.0"
+      },
+      {
+        "name": "npm",
+        "status": "verified",
+        "version": "12.0.2"
+      },
+      {
+        "name": "uv",
+        "status": "verified",
+        "version": "0.12.1"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "UV_SYNC_FROZEN",
+      "command_argv": ["uv", "sync", "--frozen"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "FRONTEND_CHECK",
+      "command_argv": ["npm", "--prefix", "frontend", "run", "check"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "EVIDENCE_TRACEABILITY_SUITE",
+      "command_argv": [
+        "uv",
+        "run",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "tests/quality/test_evidence_schema.py",
+        "tests/quality/test_traceability.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "NPM_AUDIT",
+      "command_argv": ["npm", "--prefix", "frontend", "audit", "--audit-level=high"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff", "--check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "bundled-panel",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js",
+      "sha256": "32e8ab2dbc8c621b4cb8bea03db818b8feff205d1b0dc2457f18160814cdf2dd",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "python-lock",
+      "location_type": "repository",
+      "repository_path": "uv.lock",
+      "sha256": "d38315cfeed267abc8912394b4505a0b6abf75b97eea0f6239fae0280fd91a6c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "not_applicable"
+    },
+    {
+      "name": "frontend-lock",
+      "location_type": "repository",
+      "repository_path": "frontend/package-lock.json",
+      "sha256": "3ace8ea8f69652417ac525314287bd4830d01cda91219ee75ae8ef08dfd6846f",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "not_applicable"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "FND010_REVIEWS_PENDING",
+      "description": "Independent workflow/safety and test/release review, including a clean-source Linux full-suite run, is pending.",
+      "blocks": ["FND-010", "LOC-001"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "CROSS_CORE_UPGRADE_DEFERRED",
+      "description": "Cross-Core upgrade, migration, and rollback evidence remains unverified under TEST-COMPAT-CORE-UPGRADE. DEC-023 defers it until the owner chooses to evaluate an upgrade; no version other than Core 2026.8.3 is claimed.",
+      "blocks": []
+    },
+    {
+      "id": "BACKUP_RESTORE_FOLLOWUP",
+      "description": "The first spare or isolated restore artifact remains due by 2027-02-23 or earlier after a major backup or migration change.",
+      "blocks": []
+    },
+    {
+      "id": "PROCESSOR_ARCHITECTURE_UNKNOWN",
+      "description": "Exact processor architecture remains unknown and must be resolved before an architecture-sensitive dependency is selected; it does not block the architecture-independent current foundation.",
+      "blocks": []
+    },
+    {
+      "id": "HACS_SUPPORT_UNCLAIMED",
+      "description": "Manual copy remains the supported private development installation method. HACS installation and update support are not claimed.",
+      "blocks": []
+    }
+  ],
+  "reviews": [
+    {
+      "role": "workflow_safety",
+      "status": "pending"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}
