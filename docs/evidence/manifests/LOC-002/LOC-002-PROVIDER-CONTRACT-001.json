@@ -3,10 +3,10 @@
   "evidence_id": "LOC-002-PROVIDER-CONTRACT-001",
   "task_id": "LOC-002",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T07:25:26Z",
+  "captured_at": "2026-08-24T07:36:42Z",
   "source_revision": {
     "state": "committed",
-    "git_commit": "9b5bd56667c27564244b456b7416ca125845db4e",
+    "git_commit": "eff9e40c07842b96a04cd73e57c938212b1eedf4",
     "dirty": false
   },
   "traceability": {
@@ -97,7 +97,7 @@
       "name": "provider-contract-v1",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/providers/contract.py",
-      "sha256": "2cb38d10c2eccf3051713f14539aa50a9f5fbf48e409f593a31a094741f5efdd",
+      "sha256": "15e6555d456abb646a70d163bf6ec065b4741ff189f54d8fd4cc903ba2a530dc",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
