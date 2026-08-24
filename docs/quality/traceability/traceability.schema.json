@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ai-orchestrator.invalid/schemas/traceability.schema.json",
+  "$comment": "This evidence-hashed artifact is normalized to LF by .gitattributes.",
   "title": "AI Orchestrator data-flow and traceability catalog",
   "type": "object",
   "additionalProperties": false,

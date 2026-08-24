@@ -1,0 +1,6 @@
+# Keep evidence-hashed FND-013 artifacts byte-stable across Windows and Linux.
+.gitattributes text eol=lf
+docs/quality/DATA-FLOW-TRACEABILITY.md text eol=lf
+docs/quality/traceability/traceability.json text eol=lf
+docs/quality/traceability/traceability.schema.json text eol=lf
+tests/quality/test_traceability.py text eol=lf

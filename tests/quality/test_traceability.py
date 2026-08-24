@@ -151,6 +151,13 @@ def test_sensitive_directional_boundaries_are_explicit() -> None:
         assert "CTRL-INPUT-TRUST-001" in flows[flow_id]["control_ids"]
         assert "TEST-PROMPT-INJECTION" in flows[flow_id]["test_ids"]
 
+    for flow_id in ("FLOW-006", "FLOW-007", "FLOW-012"):
+        assert "CTRL-RATE-001" in flows[flow_id]["control_ids"]
+        assert "TEST-STORM-CONCURRENCY" in flows[flow_id]["test_ids"]
+
+    assert "CTRL-IDEMPOTENCY-001" in flows["FLOW-012"]["control_ids"]
+    assert "TEST-IDEMPOTENT-RESTART" in flows["FLOW-012"]["test_ids"]
+
     restore_flows = [
         flow for flow in catalog["flows"] if "TEST-BACKUP-RESTORE" in flow["test_ids"]
     ]

@@ -12,6 +12,7 @@ The artifacts contain synthetic design metadata and repository evidence referenc
 - Machine catalog: `docs/quality/traceability/traceability.json`
 - Catalog schema: `docs/quality/traceability/traceability.schema.json`
 - Integrity tests: `tests/quality/test_traceability.py`
+- Cross-platform hashed-artifact line-ending policy: `.gitattributes`
 - Acceptance manifest: `docs/evidence/manifests/FND-013/FND-013-DATA-FLOW-TRACEABILITY-001.json`
 
 ## Coverage and claim boundaries

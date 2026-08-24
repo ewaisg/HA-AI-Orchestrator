@@ -92,10 +92,19 @@
   ],
   "artifacts": [
     {
+      "name": "hashed-artifact-line-ending-policy",
+      "location_type": "repository",
+      "repository_path": ".gitattributes",
+      "sha256": "9841026cbea8abd486bb0ac8716fb112dd1cd421ff27f0f55d34f4eb863a7f00",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "not_applicable"
+    },
+    {
       "name": "readable-data-flow-traceability-map",
       "location_type": "repository",
       "repository_path": "docs/quality/DATA-FLOW-TRACEABILITY.md",
-      "sha256": "6a2230e844c966d14c146c0eba54daf91309b1c5f8923ba3de97afc6b8e65fbf",
+      "sha256": "eb39fcc098312fd190a32f218bd167f29a959c95ad9bb3cde8240a55b29ed0eb",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -104,7 +113,7 @@
       "name": "machine-traceability-catalog",
       "location_type": "repository",
       "repository_path": "docs/quality/traceability/traceability.json",
-      "sha256": "a2db376b75c10d4c3b4103691cb37fdeb13fa4fadd02b564b907221f2a6c35d4",
+      "sha256": "38ca6e2100bd4ea00ac747884498b5a3a6472561245fb8caf1dab190ba5ac07e",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -113,7 +122,7 @@
       "name": "traceability-catalog-schema",
       "location_type": "repository",
       "repository_path": "docs/quality/traceability/traceability.schema.json",
-      "sha256": "0fefaaeb3625b40e0fa2b7138a6216f90c313245cbce42d24a3805ee83f3c3e6",
+      "sha256": "86f05bdab9449b140dc038a8c8be9843d5655f87a3c8036a2539111530e013d8",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -122,7 +131,7 @@
       "name": "traceability-integrity-tests",
       "location_type": "repository",
       "repository_path": "tests/quality/test_traceability.py",
-      "sha256": "d48de2d13fa6dd054af700bb50bc3bac8365ddf29a15a93c754c4d5d382ed6ef",
+      "sha256": "e4f91db0a5433e148872605ca6a2a7023c82e8950736a55debec0dc26e3d94f0",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -139,7 +148,7 @@
   "residuals": [
     {
       "id": "FND011_CORE_UPGRADE",
-      "description": "The actual Home Assistant Core-upgrade artifact remains open and is accurately retained by TEST-COMPAT-LIFECYCLE; it does not block defining the traceability catalog.",
+      "description": "The actual Home Assistant Core-upgrade artifact remains open under TEST-COMPAT-CORE-UPGRADE; TEST-COMPAT-LIFECYCLE remains limited to the evidenced same-version scope. This does not block defining the traceability catalog.",
       "blocks": ["FND-010"]
     },
     {
