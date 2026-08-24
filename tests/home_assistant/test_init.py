@@ -34,9 +34,19 @@ from custom_components.ai_orchestrator.provider_entry import (
 )
 from custom_components.ai_orchestrator.providers.contract import (
     SAFE_ERROR_MESSAGES,
+    ConnectionValidationResult,
     ErrorCode,
     NormalizedError,
     ProviderError,
+)
+from custom_components.ai_orchestrator.providers.lm_studio import (
+    CONF_API_TOKEN,
+    CONF_BASE_URL,
+    CONF_MODEL_ID,
+    LMStudioProviderEntryAdapter,
+)
+from custom_components.ai_orchestrator.providers.lm_studio import (
+    PROVIDER_TYPE as LM_STUDIO_PROVIDER_TYPE,
 )
 from custom_components.ai_orchestrator.runtime import async_get_runtime
 from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_probe
@@ -56,6 +66,7 @@ from tests.home_assistant.provider_fakes import (
 
 async def test_async_setup_registers_global_surfaces(hass: HomeAssistant) -> None:
     """Static assets and the WebSocket command register at integration setup."""
+    shared_session = Mock()
     with (
         patch(
             "custom_components.ai_orchestrator.async_register_static_assets",
@@ -64,12 +75,23 @@ async def test_async_setup_registers_global_surfaces(hass: HomeAssistant) -> Non
         patch(
             "custom_components.ai_orchestrator.async_register_websocket_commands"
         ) as register_websocket,
+        patch(
+            "custom_components.ai_orchestrator.async_get_clientsession",
+            return_value=shared_session,
+        ) as get_clientsession,
     ):
         assert await async_setup(hass, {})
+        assert await async_setup(hass, {})
 
-    register_assets.assert_awaited_once_with(hass)
-    register_websocket.assert_called_once_with(hass)
-    assert async_get_runtime(hass).loaded_foundation_entry_ids == set()
+    assert register_assets.await_count == 2
+    assert register_websocket.call_count == 2
+    get_clientsession.assert_called_once_with(hass)
+    runtime = async_get_runtime(hass)
+    assert runtime.loaded_foundation_entry_ids == set()
+    adapter = runtime.provider_entry_adapters[LM_STUDIO_PROVIDER_TYPE]
+    assert isinstance(adapter, LMStudioProviderEntryAdapter)
+    assert adapter.session is shared_session
+    assert list(runtime.provider_entry_adapters) == [LM_STUDIO_PROVIDER_TYPE]
 
 
 async def test_entry_setup_and_unload_manage_panel(hass: HomeAssistant) -> None:
@@ -339,6 +361,49 @@ async def test_provider_entry_setup_and_unload_are_isolated_from_foundation(
     assert await async_unload_entry(hass, entry)
     assert runtime.loaded_provider_entry_ids == set()
     assert getattr(entry, "runtime_data", None) is None
+
+
+async def test_lm_studio_unload_drops_provider_without_closing_shared_session(
+    hass: HomeAssistant,
+) -> None:
+    """LM Studio connections reuse and never own Home Assistant's session."""
+    connection_id = "00000000-0000-4000-8000-00000000001c"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=LM_STUDIO_PROVIDER_TYPE,
+            provider_config={
+                CONF_BASE_URL: "http://10.255.255.254:1234/v1",
+                CONF_API_TOKEN: "synthetic-lifecycle-token",
+                CONF_MODEL_ID: "synthetic/model-one",
+            },
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    shared_session = Mock()
+    adapter = LMStudioProviderEntryAdapter(shared_session)  # type: ignore[arg-type]
+    async_register_provider_entry_adapter(hass, adapter)
+
+    with patch(
+        "custom_components.ai_orchestrator.providers.lm_studio.LMStudioProvider.validate_connection",
+        new=AsyncMock(
+            return_value=ConnectionValidationResult(
+                reachable=True,
+                authenticated=True,
+            )
+        ),
+    ) as validate:
+        assert await async_setup_entry(hass, entry)
+        assert entry.runtime_data is not None
+        assert entry.runtime_data.provider.session is shared_session
+        assert await async_unload_entry(hass, entry)
+        assert entry.runtime_data is None
+        assert await async_setup_entry(hass, entry)
+
+    assert validate.await_count == 2
+    shared_session.close.assert_not_called()
 
 
 @pytest.mark.parametrize(

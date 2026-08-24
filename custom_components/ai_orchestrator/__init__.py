@@ -9,6 +9,7 @@ from homeassistant.exceptions import (
     ConfigEntryError,
     ConfigEntryNotReady,
 )
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 
 from .const import FOUNDATION_ENTRY_UNIQUE_ID
@@ -19,6 +20,7 @@ from .panel import (
 )
 from .provider_entry import (
     LoadedProviderConnection,
+    async_register_provider_entry_adapter,
     copy_provider_config,
     foundation_entry_data,
     is_foundation_entry_data,
@@ -31,6 +33,12 @@ from .providers.contract import (
     ErrorCode,
     ProviderError,
     safe_provider_error_code,
+)
+from .providers.lm_studio import (
+    PROVIDER_TYPE as LM_STUDIO_PROVIDER_TYPE,
+)
+from .providers.lm_studio import (
+    LMStudioProviderEntryAdapter,
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
@@ -53,7 +61,12 @@ _TRANSIENT_SETUP_ERRORS = {
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up integration-wide static and authenticated API surfaces."""
-    async_get_runtime(hass)
+    runtime = async_get_runtime(hass)
+    if LM_STUDIO_PROVIDER_TYPE not in runtime.provider_entry_adapters:
+        async_register_provider_entry_adapter(
+            hass,
+            LMStudioProviderEntryAdapter(async_get_clientsession(hass)),
+        )
     await async_register_static_assets(hass)
     async_register_websocket_commands(hass)
     return True

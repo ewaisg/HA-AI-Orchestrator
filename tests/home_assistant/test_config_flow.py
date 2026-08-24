@@ -1,6 +1,6 @@
 """Tests for the AI Orchestrator config flow."""
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_RECONFIGURE, SOURCE_USER
@@ -26,9 +26,20 @@ from custom_components.ai_orchestrator.provider_entry import (
 )
 from custom_components.ai_orchestrator.providers.contract import (
     SAFE_ERROR_MESSAGES,
+    ConnectionValidationResult,
     ErrorCode,
     NormalizedError,
     ProviderError,
+)
+from custom_components.ai_orchestrator.providers.lm_studio import (
+    CONF_API_TOKEN,
+    CONF_BASE_URL,
+    CONF_MODEL_ID,
+    LMStudioProvider,
+    LMStudioProviderEntryAdapter,
+)
+from custom_components.ai_orchestrator.providers.lm_studio import (
+    PROVIDER_TYPE as LM_STUDIO_PROVIDER_TYPE,
 )
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
@@ -84,6 +95,67 @@ async def test_user_flow_reports_no_provider_adapters_after_foundation_exists(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "no_provider_adapters"
+
+
+async def test_lm_studio_flow_validates_and_stores_exact_backend_config(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """The built-in adapter exposes exact fields and stores validated values."""
+    MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+        version=2,
+    ).add_to_hass(hass)
+    async_register_provider_entry_adapter(
+        hass,
+        LMStudioProviderEntryAdapter(Mock()),  # type: ignore[arg-type]
+    )
+    token = "synthetic-flow-token"  # noqa: S105 -- synthetic fixture value.
+    provider_config = {
+        CONF_BASE_URL: "http://10.255.255.254:1234/v1",
+        CONF_API_TOKEN: token,
+        CONF_MODEL_ID: "synthetic/model-one",
+    }
+
+    with patch.object(
+        LMStudioProvider,
+        "validate_connection",
+        new=AsyncMock(
+            return_value=ConnectionValidationResult(
+                reachable=True,
+                authenticated=True,
+            )
+        ),
+    ) as validate:
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": SOURCE_USER},
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {CONF_PROVIDER_TYPE: LM_STUDIO_PROVIDER_TYPE},
+        )
+
+        assert result["type"] is FlowResultType.FORM
+        assert result["step_id"] == "provider"
+        assert {key.schema for key in result["data_schema"].schema} == set(
+            provider_config
+        )
+
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            provider_config,
+        )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"][CONF_PROVIDER_TYPE] == LM_STUDIO_PROVIDER_TYPE
+    assert result["data"][CONF_PROVIDER_CONFIG] == provider_config
+    assert validate.await_count == 2
+    assert all(
+        call.args == () and call.kwargs == {} for call in validate.await_args_list
+    )
 
 
 async def test_provider_flow_validates_and_creates_separate_entry(
