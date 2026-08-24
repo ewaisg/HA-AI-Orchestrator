@@ -19,11 +19,11 @@ The artifacts contain synthetic design metadata and repository evidence referenc
 The catalog assigns stable IDs to:
 
 - seven protected data classes;
-- ten trust-zone nodes;
-- fourteen data flows;
+- thirteen trust-zone nodes;
+- eighteen data flows;
 - all ten approved capabilities, all eight product constraints, and the product-acceptance definition;
-- fourteen security/quality controls; and
-- eighteen test specifications.
+- nineteen security/quality controls; and
+- twenty-three test specifications.
 
 Every requirement has at least one flow, control, and test link. Every flow references existing nodes, data classes, controls, and tests. All product requirements remain `planned`. Narrow existing Phase 0 evidence may set a control to `phase0_verified` or a test to `phase0_passed`; the readable map states the exact limitation and does not promote a product capability to delivered.
 
@@ -31,15 +31,28 @@ Every requirement has at least one flow, control, and test link. Every flow refe
 
 | Check | Result |
 |---|---|
-| `uv run python scripts/run_pure_tests.py` | `85 passed`, with five dependency deprecation warnings |
+| `uv run python scripts/run_pure_tests.py` | `87 passed`, with five dependency deprecation warnings after all workflow/safety corrections and artifact-hash verification |
 | `uv run ruff format --check tests/quality/test_traceability.py` | Passed after the new test file was formatted |
 | `uv run ruff check tests/quality/test_traceability.py` | Passed after one import-order issue was automatically corrected |
 | `uv run python scripts/canary_scan.py` | Passed with no findings |
 | `git diff --check` | Passed; only expected Windows line-ending notices were emitted |
 | Targeted sensitive-value scan | No checked private hostname/address/token/key patterns were found |
+| Focused corrected traceability suite with plugin autoload disabled | `6 passed`; one expected unknown `asyncio_mode` warning because the Home Assistant pytest plugin was deliberately not loaded |
 
 The first format check and first lint check correctly failed on the unformatted new test file. The project formatter changed that file, Ruff corrected the import order, and the complete check set above was rerun successfully. The initial results are not represented as passing runs.
 
-## Review state
+## First clean-commit review and corrections
 
-Independent workflow/safety and test/release reviews are pending. The working-tree manifest therefore remains `incomplete`; FND-013 must not be marked done until a clean committed revision is reviewed and its manifest is finalized.
+Clean revision `982c58009471fb32cbdd97f5a1a821ce4b5ce579` received an independent test/release approval at `2026-08-24T05:39:58Z`, but workflow/safety review rejected it at `2026-08-24T05:39:42Z`. Because the corrected artifacts differ from that revision, both roles must approve the next clean revision before completion.
+
+The workflow/safety findings and working-tree corrections are:
+
+| Finding | Correction |
+|---|---|
+| Backup egress and restore ingress were collapsed into one one-way flow | Split local backup, off-device backup, and recovery-runtime nodes; separate two backup egress and two restore ingress flows; require decrypt, integrity, compatibility, migration, and restored-secret controls |
+| Credential entry and provider authentication handling were contradictory | Model a newly typed secret as transient authenticated form data; prohibit browser return/persistence/echo/direct provider requests; limit backend transport auth to the normalized credential destination outside model-visible context |
+| Same-version lifecycle and actual Core-upgrade proof were combined under one passed test/control | Keep the evidenced same-version lifecycle IDs separate from planned Core-upgrade/migration/rollback IDs |
+| Prompt injection was not independently controlled/tested | Add immutable-policy/delimited-input control and adversarial injection test to HA-input and provider-output flows |
+| Storm/concurrency, dependency compromise, and device-side effects were not explicit | Add bounded-rate/concurrency, supply-chain, and device-target controls/flows/tests |
+
+The working-tree manifest remains `incomplete`. FND-013 must not be marked done until the corrected clean revision passes all checks and both independent reviewers approve it.

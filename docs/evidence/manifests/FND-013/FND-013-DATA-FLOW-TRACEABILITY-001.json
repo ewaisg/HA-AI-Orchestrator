@@ -3,7 +3,7 @@
   "evidence_id": "FND-013-DATA-FLOW-TRACEABILITY-001",
   "task_id": "FND-013",
   "kind": "review",
-  "captured_at": "2026-08-24T05:33:33Z",
+  "captured_at": "2026-08-24T05:49:37Z",
   "source_revision": {
     "state": "working_tree",
     "dirty": true
@@ -38,6 +38,8 @@
       "TEST_CATALOG_SCHEMA",
       "TEST_CATALOG_REFERENCES",
       "TEST_CATALOG_READABLE_MAP",
+      "TEST_SENSITIVE_DIRECTIONAL_BOUNDARIES",
+      "TEST_ARTIFACT_HASHES",
       "TEST_CANARY_SCAN"
     ]
   },
@@ -93,7 +95,7 @@
       "name": "readable-data-flow-traceability-map",
       "location_type": "repository",
       "repository_path": "docs/quality/DATA-FLOW-TRACEABILITY.md",
-      "sha256": "6d86dd2496775c00131ea8dae16325c801d31a5e173b8ea0077148773f3a6f1a",
+      "sha256": "6a2230e844c966d14c146c0eba54daf91309b1c5f8923ba3de97afc6b8e65fbf",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -102,7 +104,7 @@
       "name": "machine-traceability-catalog",
       "location_type": "repository",
       "repository_path": "docs/quality/traceability/traceability.json",
-      "sha256": "063161406edd8e2827be23eeac36c57e84edf1f8a48cc16a059c8df6a21c6ed7",
+      "sha256": "a2db376b75c10d4c3b4103691cb37fdeb13fa4fadd02b564b907221f2a6c35d4",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -111,7 +113,7 @@
       "name": "traceability-catalog-schema",
       "location_type": "repository",
       "repository_path": "docs/quality/traceability/traceability.schema.json",
-      "sha256": "157e5b645d58bb0cff5287cad6e5a5372955fe2fe72e5d7fc2160b259d52c31a",
+      "sha256": "0fefaaeb3625b40e0fa2b7138a6216f90c313245cbce42d24a3805ee83f3c3e6",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -120,7 +122,7 @@
       "name": "traceability-integrity-tests",
       "location_type": "repository",
       "repository_path": "tests/quality/test_traceability.py",
-      "sha256": "2752a3dc016e5a05a685ff157da6792b82222a675d0908a9d9d26c394b8ef2ba",
+      "sha256": "d48de2d13fa6dd054af700bb50bc3bac8365ddf29a15a93c754c4d5d382ed6ef",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -130,7 +132,7 @@
   "unknowns": [
     {
       "id": "FND013_REVIEW_PENDING",
-      "description": "Independent workflow/safety and test/release reviews of a clean committed revision are pending.",
+      "description": "Independent workflow/safety and test/release re-reviews of the corrected clean committed revision are pending.",
       "blocks": ["FND-013"]
     }
   ],

@@ -88,7 +88,8 @@
             "cloud_provider",
             "external_output",
             "artifact_egress",
-            "backup_storage"
+            "backup_storage",
+            "recovery_environment"
           ]
         }
       }

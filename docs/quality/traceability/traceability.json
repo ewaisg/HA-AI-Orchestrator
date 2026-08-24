@@ -6,7 +6,7 @@
     {
       "id": "DATA-CREDENTIAL",
       "summary": "Provider credentials, Home Assistant authentication context, approval tokens, and recovery keys.",
-      "handling": "Backend-only or platform-owned; never provider context, frontend state, logs, diagnostics, exports, fixtures, or committed evidence."
+      "handling": "A newly entered provider secret may exist transiently in the authenticated form until submitted to the backend, but is never returned, persisted, or echoed to browser state. Backend transport may send approved authentication material only to the normalized credential destination and never inside model-visible prompt context, logs, diagnostics, exports, fixtures, or committed evidence."
     },
     {
       "id": "DATA-HOUSEHOLD",
@@ -77,7 +77,12 @@
     },
     {
       "id": "NODE-OUTPUT",
-      "summary": "Home Assistant notification, media, voice, or other approved output target.",
+      "summary": "Home Assistant notification, media, or voice output target.",
+      "trust_zone": "external_output"
+    },
+    {
+      "id": "NODE-DEVICE",
+      "summary": "Home Assistant-controlled device target for an approved side effect.",
       "trust_zone": "external_output"
     },
     {
@@ -86,9 +91,19 @@
       "trust_zone": "artifact_egress"
     },
     {
-      "id": "NODE-BACKUP",
-      "summary": "Encrypted local and off-device backup locations plus isolated restore environment.",
+      "id": "NODE-BACKUP-LOCAL",
+      "summary": "Encrypted backup storage on the Home Assistant system.",
       "trust_zone": "backup_storage"
+    },
+    {
+      "id": "NODE-BACKUP-OFFSITE",
+      "summary": "Encrypted backup storage outside the Home Assistant device.",
+      "trust_zone": "backup_storage"
+    },
+    {
+      "id": "NODE-RESTORE-HA",
+      "summary": "Authorized spare, isolated, or replacement Home Assistant recovery environment.",
+      "trust_zone": "recovery_environment"
     }
   ],
   "flows": [
@@ -97,8 +112,8 @@
       "summary": "An authenticated user opens the panel, configures product state, tests, approves, or invokes an allowed feature.",
       "from_node": "NODE-USER",
       "to_node": "NODE-FRONTEND",
-      "boundary": "User intent enters the authenticated browser session.",
-      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
+      "boundary": "User intent and any newly typed provider secret enter the authenticated browser session; a secret may exist only transiently in the form.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
       "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001"],
       "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-NO-BROWSER-PROVIDER", "TEST-SECRET-EGRESS"]
     },
@@ -118,7 +133,7 @@
       "from_node": "NODE-FRONTEND",
       "to_node": "NODE-BACKEND",
       "boundary": "Browser-controlled input crosses into privileged integration code.",
-      "data_class_ids": ["DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-CONFIG", "DATA-CONTENT", "DATA-CONTROL"],
       "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-OUTPUT-001"],
       "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-OUTPUT-SCHEMA"]
     },
@@ -129,8 +144,8 @@
       "to_node": "NODE-BACKEND",
       "boundary": "Authoritative Home Assistant data becomes untrusted workflow context.",
       "data_class_ids": ["DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONTROL"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-TOOL-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-TOOL-ALLOWLIST"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-RATE-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-STORM-CONCURRENCY"]
     },
     {
       "id": "FLOW-005",
@@ -149,8 +164,8 @@
       "to_node": "NODE-LOCAL-PROVIDER",
       "boundary": "Selected context leaves Home Assistant for a LAN provider process.",
       "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONFIG"],
-      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
-      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-LOCAL-AUTH-NETWORK"]
+      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-SUPPLY-CHAIN-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-LOCAL-AUTH-NETWORK", "TEST-DEPENDENCY-REVIEW"]
     },
     {
       "id": "FLOW-007",
@@ -159,8 +174,8 @@
       "to_node": "NODE-CLOUD-PROVIDER",
       "boundary": "Approved context leaves the private network for a named cloud destination.",
       "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONFIG"],
-      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
-      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT"]
+      "control_ids": ["CTRL-SECRET-001", "CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-SUPPLY-CHAIN-001"],
+      "test_ids": ["TEST-SECRET-EGRESS", "TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-DEPENDENCY-REVIEW"]
     },
     {
       "id": "FLOW-008",
@@ -169,8 +184,8 @@
       "to_node": "NODE-BACKEND",
       "boundary": "Untrusted model output re-enters privileged integration code.",
       "data_class_ids": ["DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
-      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-RED-001"],
-      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
     },
     {
       "id": "FLOW-009",
@@ -179,8 +194,8 @@
       "to_node": "NODE-BACKEND",
       "boundary": "Untrusted remote model output re-enters privileged integration code.",
       "data_class_ids": ["DATA-CONTENT", "DATA-CONTROL", "DATA-TELEMETRY"],
-      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-RED-001"],
-      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-REDACTION-CANARY"]
     },
     {
       "id": "FLOW-010",
@@ -189,8 +204,8 @@
       "to_node": "NODE-HA",
       "boundary": "Model-influenced structured data approaches an authoritative side-effect runtime.",
       "data_class_ids": ["DATA-CONTROL", "DATA-HOUSEHOLD", "DATA-TELEMETRY"],
-      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-ALERT-001"],
-      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-DETERMINISTIC-ALERT"]
+      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-ALERT-001", "CTRL-RATE-001"],
+      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-DETERMINISTIC-ALERT", "TEST-STORM-CONCURRENCY"]
     },
     {
       "id": "FLOW-011",
@@ -207,7 +222,7 @@
       "summary": "Home Assistant delivers deterministic primary alerts and approved notifications or announcements to configured output targets.",
       "from_node": "NODE-HA",
       "to_node": "NODE-OUTPUT",
-      "boundary": "Home Assistant-controlled output leaves the core runtime for a device or notification service.",
+      "boundary": "Home Assistant-controlled notification, media, or voice output leaves the core runtime.",
       "data_class_ids": ["DATA-HOUSEHOLD", "DATA-CONTENT", "DATA-CONTROL"],
       "control_ids": ["CTRL-AUTH-001", "CTRL-ALERT-001", "CTRL-ACTION-001"],
       "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-DETERMINISTIC-ALERT", "TEST-ACTION-CONFIRMATION"]
@@ -224,13 +239,53 @@
     },
     {
       "id": "FLOW-014",
-      "summary": "Home Assistant creates encrypted backups to local and off-device locations and restores only under the approved recovery procedure.",
+      "summary": "Home Assistant writes an encrypted automatic backup to its local backup storage.",
       "from_node": "NODE-HA",
-      "to_node": "NODE-BACKUP",
-      "boundary": "Configuration and protected household state leave the live Home Assistant installation for recovery storage or an isolated restore target.",
+      "to_node": "NODE-BACKUP-LOCAL",
+      "boundary": "Configuration and protected household state leave the live runtime for local recovery storage.",
       "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY", "DATA-RECOVERY"],
       "control_ids": ["CTRL-BACKUP-001", "CTRL-SECRET-001", "CTRL-RED-001"],
-      "test_ids": ["TEST-BACKUP-CREATE", "TEST-BACKUP-RESTORE", "TEST-SECRET-EGRESS"]
+      "test_ids": ["TEST-BACKUP-CREATE", "TEST-SECRET-EGRESS"]
+    },
+    {
+      "id": "FLOW-015",
+      "summary": "Home Assistant applies an approved action to a device target after backend authorization and validation.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-DEVICE",
+      "boundary": "An authoritative Home Assistant action produces a physical or device-side effect.",
+      "data_class_ids": ["DATA-HOUSEHOLD", "DATA-CONTROL", "DATA-TELEMETRY"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-RATE-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-STORM-CONCURRENCY", "TEST-DEVICE-SIDE-EFFECT"]
+    },
+    {
+      "id": "FLOW-016",
+      "summary": "Home Assistant writes an encrypted automatic backup to an enabled off-device location.",
+      "from_node": "NODE-HA",
+      "to_node": "NODE-BACKUP-OFFSITE",
+      "boundary": "Configuration and protected household state leave the Home Assistant device for off-device recovery storage.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY", "DATA-RECOVERY"],
+      "control_ids": ["CTRL-BACKUP-001", "CTRL-SECRET-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-BACKUP-CREATE", "TEST-SECRET-EGRESS"]
+    },
+    {
+      "id": "FLOW-017",
+      "summary": "An authorized local encrypted backup enters a spare, isolated, or replacement Home Assistant recovery environment.",
+      "from_node": "NODE-BACKUP-LOCAL",
+      "to_node": "NODE-RESTORE-HA",
+      "boundary": "Stored recovery data re-enters an authoritative Home Assistant runtime and must be authenticated, decrypted, integrity-checked, version-checked, and migrated safely.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY", "DATA-RECOVERY"],
+      "control_ids": ["CTRL-RESTORE-001", "CTRL-SECRET-001", "CTRL-RED-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-BACKUP-RESTORE", "TEST-SECRET-EGRESS", "TEST-COMPAT-CORE-UPGRADE"]
+    },
+    {
+      "id": "FLOW-018",
+      "summary": "An authorized off-device encrypted backup enters a spare, isolated, or replacement Home Assistant recovery environment.",
+      "from_node": "NODE-BACKUP-OFFSITE",
+      "to_node": "NODE-RESTORE-HA",
+      "boundary": "Externally stored recovery data re-enters an authoritative Home Assistant runtime and must be authenticated, decrypted, integrity-checked, version-checked, and migrated safely.",
+      "data_class_ids": ["DATA-CREDENTIAL", "DATA-HOUSEHOLD", "DATA-CONFIG", "DATA-CONTROL", "DATA-TELEMETRY", "DATA-RECOVERY"],
+      "control_ids": ["CTRL-RESTORE-001", "CTRL-SECRET-001", "CTRL-RED-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-BACKUP-RESTORE", "TEST-SECRET-EGRESS", "TEST-COMPAT-CORE-UPGRADE"]
     }
   ],
   "requirements": [
@@ -240,8 +295,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 1"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-005", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-SUPPLY-CHAIN-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-SECRET-EGRESS", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-DEPENDENCY-REVIEW"]
     },
     {
       "id": "REQ-CAP-002",
@@ -257,18 +312,18 @@
       "summary": "Give every agent or workflow separate observation, action, privacy, and confirmation scopes.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 3"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-003", "FLOW-004", "FLOW-005", "FLOW-010"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-TOOL-001", "CTRL-ACTION-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION"]
+      "flow_ids": ["FLOW-003", "FLOW-004", "FLOW-005", "FLOW-010", "FLOW-015"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-ACTION-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-DEVICE-SIDE-EFFECT"]
     },
     {
       "id": "REQ-CAP-004",
       "summary": "Build versioned workflows from triggers, deterministic conditions, constrained AI steps, branches, Home Assistant actions, and explicit failure behavior.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 4"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-004", "FLOW-005", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-010"],
-      "control_ids": ["CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-COMPAT-LIFECYCLE"]
+      "flow_ids": ["FLOW-004", "FLOW-005", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-010", "FLOW-015"],
+      "control_ids": ["CTRL-INPUT-TRUST-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-RATE-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-PROMPT-INJECTION", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-STORM-CONCURRENCY", "TEST-DEVICE-SIDE-EFFECT", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE"]
     },
     {
       "id": "REQ-CAP-005",
@@ -276,8 +331,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 5"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
-      "control_ids": ["CTRL-PROVIDER-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001"],
-      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST"]
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-INPUT-TRUST-001", "CTRL-OUTPUT-001", "CTRL-TOOL-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-PROMPT-INJECTION", "TEST-OUTPUT-SCHEMA", "TEST-TOOL-ALLOWLIST"]
     },
     {
       "id": "REQ-CAP-006",
@@ -285,8 +340,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 6"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-004", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-011"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-PROVIDER-001", "CTRL-TOOL-001", "CTRL-RETENTION-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROVIDER-CONTRACT", "TEST-TOOL-ALLOWLIST", "TEST-RETENTION-DELETION"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-PROVIDER-001", "CTRL-TOOL-001", "CTRL-RETENTION-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-PROVIDER-CONTRACT", "TEST-TOOL-ALLOWLIST", "TEST-RETENTION-DELETION"]
     },
     {
       "id": "REQ-CAP-007",
@@ -294,8 +349,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 7"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-IDEMPOTENCY-001", "CTRL-RATE-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-IDEMPOTENT-RESTART", "TEST-STORM-CONCURRENCY"]
     },
     {
       "id": "REQ-CAP-008",
@@ -303,8 +358,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 8"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009", "FLOW-011"],
-      "control_ids": ["CTRL-PRIVACY-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-IDEMPOTENCY-001"],
-      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-IDEMPOTENT-RESTART"]
+      "control_ids": ["CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-IDEMPOTENCY-001"],
+      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-ENDPOINT-SSRF", "TEST-PROVIDER-CONTRACT", "TEST-IDEMPOTENT-RESTART"]
     },
     {
       "id": "REQ-CAP-009",
@@ -312,17 +367,17 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 9"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-003", "FLOW-005", "FLOW-010", "FLOW-011", "FLOW-013"],
-      "control_ids": ["CTRL-RED-001", "CTRL-PRIVACY-001", "CTRL-IDEMPOTENCY-001", "CTRL-RETENTION-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-REDACTION-CANARY", "TEST-CLOUD-PRIVACY", "TEST-IDEMPOTENT-RESTART", "TEST-RETENTION-DELETION", "TEST-COMPAT-LIFECYCLE"]
+      "control_ids": ["CTRL-RED-001", "CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-IDEMPOTENCY-001", "CTRL-RETENTION-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-REDACTION-CANARY", "TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-IDEMPOTENT-RESTART", "TEST-RETENTION-DELETION", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE"]
     },
     {
       "id": "REQ-CAP-010",
       "summary": "Support security and event workflows without making AI the primary life-safety detector or unrestricted action authority.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#required-capabilities item 10"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
-      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-ALERT-001", "CTRL-IDEMPOTENCY-001"],
-      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-DETERMINISTIC-ALERT", "TEST-IDEMPOTENT-RESTART"]
+      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012", "FLOW-015"],
+      "control_ids": ["CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-ACTION-001", "CTRL-ALERT-001", "CTRL-IDEMPOTENCY-001", "CTRL-RATE-001"],
+      "test_ids": ["TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-DETERMINISTIC-ALERT", "TEST-IDEMPOTENT-RESTART", "TEST-STORM-CONCURRENCY", "TEST-DEVICE-SIDE-EFFECT"]
     },
     {
       "id": "REQ-CON-001",
@@ -330,21 +385,21 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 1"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-001", "FLOW-002", "FLOW-003"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-COMPAT-LIFECYCLE"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001", "CTRL-SUPPLY-CHAIN-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE", "TEST-DEPENDENCY-REVIEW"]
     },
     {
       "id": "REQ-CON-002",
       "summary": "Home Assistant remains the source of truth for states and device actions.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 2", "DEC-003"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-COMPAT-LIFECYCLE"]
+      "flow_ids": ["FLOW-004", "FLOW-010", "FLOW-012", "FLOW-015"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-DEVICE-SIDE-EFFECT", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE"]
     },
     {
       "id": "REQ-CON-003",
-      "summary": "Provider credentials and requests never originate directly from the browser.",
+      "summary": "Stored provider credentials never return to browser state, and provider requests never originate from the browser; newly typed secrets are only transient authenticated form input.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 3"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-001", "FLOW-002", "FLOW-003", "FLOW-006", "FLOW-007"],
@@ -356,9 +411,9 @@
       "summary": "No unrestricted generic Home Assistant action tool is exposed to a model.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 4", "DEC-005"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-008", "FLOW-009", "FLOW-010"],
-      "control_ids": ["CTRL-TOOL-001", "CTRL-ACTION-001"],
-      "test_ids": ["TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION"]
+      "flow_ids": ["FLOW-008", "FLOW-009", "FLOW-010", "FLOW-015"],
+      "control_ids": ["CTRL-INPUT-TRUST-001", "CTRL-TOOL-001", "CTRL-ACTION-001"],
+      "test_ids": ["TEST-PROMPT-INJECTION", "TEST-TOOL-ALLOWLIST", "TEST-ACTION-CONFIRMATION", "TEST-DEVICE-SIDE-EFFECT"]
     },
     {
       "id": "REQ-CON-005",
@@ -366,8 +421,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 5", "DEC-006", "DEC-017"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-007", "FLOW-009", "FLOW-011"],
-      "control_ids": ["CTRL-PRIVACY-001", "CTRL-RED-001"],
-      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-REDACTION-CANARY"]
+      "control_ids": ["CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-RED-001"],
+      "test_ids": ["TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-REDACTION-CANARY"]
     },
     {
       "id": "REQ-CON-006",
@@ -375,8 +430,8 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 6"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-005", "FLOW-011"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-OUTPUT-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-OUTPUT-SCHEMA", "TEST-COMPAT-LIFECYCLE"]
+      "control_ids": ["CTRL-AUTH-001", "CTRL-OUTPUT-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-OUTPUT-SCHEMA", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE"]
     },
     {
       "id": "REQ-CON-007",
@@ -384,26 +439,26 @@
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 7", "DEC-010"],
       "delivery_status": "planned",
       "flow_ids": ["FLOW-004", "FLOW-006", "FLOW-007", "FLOW-008", "FLOW-009"],
-      "control_ids": ["CTRL-PROVIDER-001", "CTRL-COMPAT-001"],
-      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-COMPAT-LIFECYCLE", "TEST-LOCAL-AUTH-NETWORK"]
+      "control_ids": ["CTRL-PROVIDER-001", "CTRL-COMPAT-001", "CTRL-UPGRADE-001"],
+      "test_ids": ["TEST-PROVIDER-CONTRACT", "TEST-COMPAT-LIFECYCLE", "TEST-COMPAT-CORE-UPGRADE", "TEST-LOCAL-AUTH-NETWORK"]
     },
     {
       "id": "REQ-CON-008",
       "summary": "No high-risk action policy is inferred for the owner.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#product-constraints item 8"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-010"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-ACTION-001", "CTRL-TOOL-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-ACTION-CONFIRMATION", "TEST-TOOL-ALLOWLIST"]
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-010", "FLOW-015"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-INPUT-TRUST-001", "CTRL-ACTION-001", "CTRL-TOOL-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-PROMPT-INJECTION", "TEST-ACTION-CONFIRMATION", "TEST-TOOL-ALLOWLIST", "TEST-DEVICE-SIDE-EFFECT"]
     },
     {
       "id": "REQ-ACC-001",
       "summary": "A capability is accepted only when it is UI-configurable, side-effect safe to test, destination-transparent, offline-tolerant, and traceable with redaction.",
       "source_refs": ["docs/PRODUCT-REQUIREMENTS.md#definition-of-product-acceptance"],
       "delivery_status": "planned",
-      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-006", "FLOW-007", "FLOW-010", "FLOW-011", "FLOW-013"],
-      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-PROVIDER-001", "CTRL-ACTION-001", "CTRL-RED-001", "CTRL-IDEMPOTENCY-001"],
-      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROVIDER-CONTRACT", "TEST-ACTION-CONFIRMATION", "TEST-REDACTION-CANARY", "TEST-IDEMPOTENT-RESTART"]
+      "flow_ids": ["FLOW-001", "FLOW-003", "FLOW-006", "FLOW-007", "FLOW-010", "FLOW-011", "FLOW-013", "FLOW-015"],
+      "control_ids": ["CTRL-AUTH-001", "CTRL-PRIVACY-001", "CTRL-INPUT-TRUST-001", "CTRL-PROVIDER-001", "CTRL-ACTION-001", "CTRL-RED-001", "CTRL-IDEMPOTENCY-001", "CTRL-RATE-001", "CTRL-SUPPLY-CHAIN-001"],
+      "test_ids": ["TEST-AUTHORIZATION-MATRIX", "TEST-CLOUD-PRIVACY", "TEST-PROMPT-INJECTION", "TEST-PROVIDER-CONTRACT", "TEST-ACTION-CONFIRMATION", "TEST-DEVICE-SIDE-EFFECT", "TEST-REDACTION-CANARY", "TEST-IDEMPOTENT-RESTART", "TEST-STORM-CONCURRENCY", "TEST-DEPENDENCY-REVIEW"]
     }
   ],
   "controls": [
@@ -416,7 +471,7 @@
     },
     {
       "id": "CTRL-SECRET-001",
-      "summary": "Accept and use credentials only in the backend; never return, log, export, trace, or redirect them to another origin.",
+      "summary": "Allow a newly typed secret only transiently in the authenticated form, submit it only to the backend, never return or persist it in browser state, and send transport authentication only to the normalized credential destination outside model-visible context.",
       "source_refs": ["DD-05", "docs/quality/QUALITY-SECURITY-PLAN.md#31-credential-handling"],
       "implementation_status": "design_only",
       "evidence_refs": []
@@ -457,6 +512,13 @@
       "evidence_refs": []
     },
     {
+      "id": "CTRL-INPUT-TRUST-001",
+      "summary": "Construct prompts from immutable policy and separately typed, clearly delimited untrusted context; entity, event, calendar, message, provider, and tool-result text cannot alter policy or expand data, tools, targets, or actions.",
+      "source_refs": ["DD-06", "docs/quality/QUALITY-SECURITY-PLAN.md#41-prompt-construction", "docs/quality/QUALITY-SECURITY-PLAN.md#24-required-mitigations-by-threat"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
       "id": "CTRL-TOOL-001",
       "summary": "Expose only typed, versioned, narrowly allowlisted tools; never expose a generic unrestricted Home Assistant action executor.",
       "source_refs": ["DD-02", "DEC-005", "DEC-012", "docs/quality/QUALITY-SECURITY-PLAN.md#42-tool-contract"],
@@ -478,6 +540,13 @@
       "evidence_refs": []
     },
     {
+      "id": "CTRL-RATE-001",
+      "summary": "Apply debounce, deduplication, bounded concurrency, rate limits, circuit breakers, and re-entry guards to events, provider calls, actions, and notifications.",
+      "source_refs": ["docs/quality/QUALITY-SECURITY-PLAN.md#24-required-mitigations-by-threat", "docs/quality/QUALITY-SECURITY-PLAN.md#43-action-authorization-and-execution"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
       "id": "CTRL-ALERT-001",
       "summary": "Keep life-safety and security detection and primary alerts deterministic; AI enrichment cannot delay, suppress, downgrade, or recall them.",
       "source_refs": ["DD-03", "docs/quality/QUALITY-SECURITY-PLAN.md#5-deterministic-security-and-safety-workflow-constraints"],
@@ -493,17 +562,38 @@
     },
     {
       "id": "CTRL-COMPAT-001",
-      "summary": "Claim compatibility only for named tested Home Assistant versions and verify setup, unload, reload, restart, panel ownership, and version-sensitive migrations.",
+      "summary": "Claim same-version compatibility only for the named tested Home Assistant version after setup, unload, reload, restart, panel ownership, and non-admin behavior pass.",
       "source_refs": ["DD-10", "DEC-014", "docs/quality/QUALITY-SECURITY-PLAN.md#7-compatibility-and-regression"],
       "implementation_status": "phase0_verified",
       "evidence_refs": ["docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json", "docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json", "docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md"]
     },
     {
+      "id": "CTRL-UPGRADE-001",
+      "summary": "Require an actual supported-version Core upgrade artifact plus storage/config-entry migration and rollback evidence before claiming upgrade compatibility.",
+      "source_refs": ["DD-10", "docs/quality/QUALITY-SECURITY-PLAN.md#7-compatibility-and-regression", "FND-011"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
       "id": "CTRL-BACKUP-001",
-      "summary": "Use encrypted automatic backups with off-device storage and protected recovery material; test restoration only on spare or isolated Home Assistant systems at the approved cadence.",
+      "summary": "Create encrypted automatic backups in local and off-device locations and keep recovery material outside Home Assistant under the approved custody policy.",
       "source_refs": ["DEC-021", "DEC-022", "docs/evidence/2026-08-23-home-assistant-backup.md"],
       "implementation_status": "phase0_verified",
       "evidence_refs": ["docs/evidence/2026-08-23-home-assistant-backup.md"]
+    },
+    {
+      "id": "CTRL-RESTORE-001",
+      "summary": "Authenticate and decrypt the selected backup, verify integrity and compatibility, migrate safely, protect restored secrets, and test only in spare or isolated Home Assistant environments at the approved cadence unless performing an actual authorized recovery.",
+      "source_refs": ["DEC-022", "docs/evidence/2026-08-23-home-assistant-backup.md", "docs/quality/QUALITY-SECURITY-PLAN.md#24-required-mitigations-by-threat"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
+    },
+    {
+      "id": "CTRL-SUPPLY-CHAIN-001",
+      "summary": "Pin and minimize dependencies, use reproducible builds, review vulnerability and license results, and stop release for unmitigated high-impact delivered-path findings.",
+      "source_refs": ["docs/quality/QUALITY-SECURITY-PLAN.md#24-required-mitigations-by-threat", "docs/quality/QUALITY-SECURITY-PLAN.md#9-phase-gates-and-stop-ship-conditions"],
+      "implementation_status": "design_only",
+      "evidence_refs": []
     }
   ],
   "tests": [
@@ -515,7 +605,7 @@
     },
     {
       "id": "TEST-NO-BROWSER-PROVIDER",
-      "summary": "Prove browser code receives no provider credential and sends no provider request directly.",
+      "summary": "Prove the browser may hold a newly typed credential only transiently in the form, never receives a stored credential, never persists or echoes it, and never sends a provider request directly.",
       "verification_status": "planned",
       "evidence_refs": []
     },
@@ -556,6 +646,12 @@
       "evidence_refs": []
     },
     {
+      "id": "TEST-PROMPT-INJECTION",
+      "summary": "Run adversarial entity, event, calendar, message, provider-output, and tool-result text proving untrusted instructions cannot alter immutable policy or expand data, tools, targets, or actions.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
       "id": "TEST-TOOL-ALLOWLIST",
       "summary": "Prove prompts and provider output cannot add tools, actions, targets, fields, or permissions outside the typed allowlist.",
       "verification_status": "planned",
@@ -574,6 +670,12 @@
       "evidence_refs": []
     },
     {
+      "id": "TEST-STORM-CONCURRENCY",
+      "summary": "Exercise burst events, concurrent provider calls, recursive triggers, circuit breaking, and notification/action rate bounds with exact counts.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
       "id": "TEST-DETERMINISTIC-ALERT",
       "summary": "Prove primary life-safety and security alerts still occur under offline, slow, uncertain, malformed, injected, and failed AI paths.",
       "verification_status": "planned",
@@ -587,9 +689,15 @@
     },
     {
       "id": "TEST-COMPAT-LIFECYCLE",
-      "summary": "Verify named-version setup, unload, reload, restart, panel ownership, non-admin behavior, schema migration, and actual Core upgrade survival.",
+      "summary": "Verify setup, unload, reload, restart, panel ownership, and non-admin behavior on the exact named Home Assistant version.",
       "verification_status": "phase0_passed",
       "evidence_refs": ["docs/evidence/manifests/FND-015/FND-015-FOUNDATION-SKELETON-001.json", "docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json", "docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md"]
+    },
+    {
+      "id": "TEST-COMPAT-CORE-UPGRADE",
+      "summary": "Verify an actual supported Home Assistant Core upgrade, storage and config-entry migration, panel survival, rollback, and post-upgrade lifecycle behavior.",
+      "verification_status": "planned",
+      "evidence_refs": []
     },
     {
       "id": "TEST-LOCAL-AUTH-NETWORK",
@@ -606,6 +714,18 @@
     {
       "id": "TEST-BACKUP-RESTORE",
       "summary": "Restore an approved backup on a spare or isolated Home Assistant system every six months and after major backup or migration changes; never use production merely to satisfy the test.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-DEVICE-SIDE-EFFECT",
+      "summary": "Use an approved harmless device target to prove exact target and argument enforcement, Home Assistant context, confirmation where required, audit state, and zero-or-one physical side effect.",
+      "verification_status": "planned",
+      "evidence_refs": []
+    },
+    {
+      "id": "TEST-DEPENDENCY-REVIEW",
+      "summary": "Verify lockfile reproducibility, dependency diff, software bill of materials, vulnerability and license review, and mitigation of delivered-path findings.",
       "verification_status": "planned",
       "evidence_refs": []
     },
