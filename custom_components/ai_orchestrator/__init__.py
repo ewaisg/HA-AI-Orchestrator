@@ -164,7 +164,7 @@ async def _async_setup_provider_entry(
 
 def _raise_provider_setup_error(error: ProviderError) -> NoReturn:
     raw_code = getattr(error.error, "code", None)
-    code = raw_code if isinstance(raw_code, ErrorCode) else None
+    code = raw_code if type(raw_code) is ErrorCode else None
     message = (
         SAFE_ERROR_MESSAGES[code]
         if code is not None

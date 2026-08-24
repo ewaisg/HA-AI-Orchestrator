@@ -14,6 +14,7 @@ from custom_components.ai_orchestrator.providers.contract import (
     CapabilityRecord,
     CapabilityState,
     ConnectionValidationResult,
+    ErrorCode,
     HealthCheckResult,
     ModelCatalog,
     ProviderError,
@@ -133,6 +134,20 @@ class ExplodingHashCode:
 
     def __hash__(self) -> int:
         raise RuntimeError(self.marker)
+
+
+class TypeSpoofingHashCode(ExplodingHashCode):
+    """Malformed code that spoofs isinstance before raising from hashing."""
+
+    @property
+    def __class__(self) -> type[ErrorCode]:
+        return ErrorCode
+
+
+class UnhashableCode(ExplodingHashCode):
+    """Malformed error code with hashing explicitly unavailable."""
+
+    __hash__ = None  # type: ignore[assignment]
 
 
 def forged_provider_error(code: object, marker: str) -> ProviderError:

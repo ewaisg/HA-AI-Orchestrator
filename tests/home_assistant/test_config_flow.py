@@ -35,6 +35,8 @@ from tests.home_assistant.provider_fakes import (
     SYNTHETIC_PROVIDER_TYPE,
     ExplodingHashCode,
     SyntheticProviderEntryAdapter,
+    TypeSpoofingHashCode,
+    UnhashableCode,
     forged_provider_error,
 )
 
@@ -201,9 +203,13 @@ async def test_provider_flow_normalizes_auth_failure_without_secret_echo(
     assert synthetic_secret not in repr(result)
 
 
+@pytest.mark.parametrize(
+    "code_type", [ExplodingHashCode, TypeSpoofingHashCode, UnhashableCode]
+)
 async def test_provider_flow_bounds_malformed_error_code_without_hashing(
     hass: HomeAssistant,
     enable_custom_integrations: None,
+    code_type: type[ExplodingHashCode],
 ) -> None:
     """A hostile error-code object cannot bypass the config-flow boundary."""
     MockConfigEntry(
@@ -216,9 +222,7 @@ async def test_provider_flow_bounds_malformed_error_code_without_hashing(
     async_register_provider_entry_adapter(
         hass,
         SyntheticProviderEntryAdapter(
-            error=forged_provider_error(
-                ExplodingHashCode(synthetic_marker), synthetic_marker
-            )
+            error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
         ),
     )
     result = await hass.config_entries.flow.async_init(
@@ -418,10 +422,14 @@ async def test_update_schema_exception_is_safely_bounded(
 
 
 @pytest.mark.parametrize("source", [SOURCE_REAUTH, SOURCE_RECONFIGURE])
+@pytest.mark.parametrize(
+    "code_type", [ExplodingHashCode, TypeSpoofingHashCode, UnhashableCode]
+)
 async def test_update_bounds_malformed_error_code_without_hashing(
     hass: HomeAssistant,
     enable_custom_integrations: None,
     source: str,
+    code_type: type[ExplodingHashCode],
 ) -> None:
     """Update flows keep hostile error-code objects behind a fixed identifier."""
     connection_id = "00000000-0000-4000-8000-000000000005"
@@ -441,9 +449,7 @@ async def test_update_bounds_malformed_error_code_without_hashing(
     async_register_provider_entry_adapter(
         hass,
         SyntheticProviderEntryAdapter(
-            error=forged_provider_error(
-                ExplodingHashCode(synthetic_marker), synthetic_marker
-            )
+            error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
         ),
     )
     result = await hass.config_entries.flow.async_init(

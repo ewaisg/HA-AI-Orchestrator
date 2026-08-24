@@ -45,6 +45,8 @@ from tests.home_assistant.provider_fakes import (
     SYNTHETIC_PROVIDER_TYPE,
     ExplodingHashCode,
     SyntheticProviderEntryAdapter,
+    TypeSpoofingHashCode,
+    UnhashableCode,
     forged_provider_error,
 )
 
@@ -434,8 +436,12 @@ async def test_provider_setup_uses_safe_text_for_malformed_provider_error(
     assert synthetic_marker not in str(caught.value)
 
 
+@pytest.mark.parametrize(
+    "code_type", [ExplodingHashCode, TypeSpoofingHashCode, UnhashableCode]
+)
 async def test_provider_setup_bounds_malformed_error_code_without_hashing(
     hass: HomeAssistant,
+    code_type: type[ExplodingHashCode],
 ) -> None:
     """A hostile error-code object cannot bypass the setup safe-message path."""
     connection_id = "00000000-0000-4000-8000-000000000019"
@@ -453,9 +459,7 @@ async def test_provider_setup_bounds_malformed_error_code_without_hashing(
     async_register_provider_entry_adapter(
         hass,
         SyntheticProviderEntryAdapter(
-            error=forged_provider_error(
-                ExplodingHashCode(synthetic_marker), synthetic_marker
-            )
+            error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
         ),
     )
 

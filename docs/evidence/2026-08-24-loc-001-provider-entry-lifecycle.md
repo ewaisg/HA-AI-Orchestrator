@@ -48,6 +48,8 @@ Fresh test/release review approved candidate `29c7db552aea270b796057475ec8078eaa
 
 Immutable second-remediation artifact `b056d32c00860fe42369c86f90cee2b68493963d` was reconstructed from a Git archive in clean Linux. It passed 242 full tests, 54 focused lifecycle tests, 137 provider tests, 30 security/evidence/traceability tests, and 167 pure tests. Ruff format/lint, canary, evidence schema, traceability, diff, and canonical hashes passed. Five known upstream deprecations remain and no project failure occurred.
 
+The third independent reviews rejected candidate `62df5da1dd1e1b337b81bf65bd53fae4a888fadb`: workflow/safety at `2026-08-24T17:19:51Z` proved `isinstance` could be spoofed by an arbitrary `__class__` property before a throwing hash escaped; test/release at `2026-08-24T17:20:19Z` confirmed throwing-hash coverage but found zero distinct genuinely-unhashable cases. The current remediation uses exact `type(raw_code) is ErrorCode`, which does not dispatch to the forged object, and parameterizes setup, initial setup flow, reauthentication, and reconfiguration over three hostile code classes: `__hash__ = None`, raising `__hash__`, and spoofed `__class__` plus raising `__hash__`. All 62 focused clean-Linux tests pass; LOC-001 remains open pending a new artifact and reviews.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -57,4 +59,4 @@ Immutable second-remediation artifact `b056d32c00860fe42369c86f90cee2b68493963d`
 
 ## Acceptance status
 
-`SECOND REMEDIATION IN REVIEW`. Neither rejected candidate is accepted. Second-remediation artifact `b056d32c00860fe42369c86f90cee2b68493963d` passes its exact-commit gates. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
+`THIRD REMEDIATION IN REVIEW`. No rejected candidate is accepted. Create and verify a new immutable artifact containing exact-type enforcement and the complete three-class adversarial matrix, then obtain fresh workflow/safety plus test/release approvals before LOC-001 can be `DONE`.
