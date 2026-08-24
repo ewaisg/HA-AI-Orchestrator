@@ -22,7 +22,7 @@ This task does not add an LM Studio/OpenAI-compatible transport, endpoint, crede
 
 The first Linux attempt did not start because the installed Docker Desktop engine was stopped; starting the existing engine resolved that environment condition. Subsequent working-tree runs exposed and corrected three test-only issues: one incorrect health-enum import, assertions that assumed an unset `MockConfigEntry.runtime_data` attribute existed, and an uppercase-UUID negative vector containing no alphabetic characters. None was reported as a passing gate.
 
-The final working tree produced:
+The first artifact produced:
 
 | Check | Observed result |
 |---|---|
@@ -36,11 +36,13 @@ The final working tree produced:
 
 The five warnings are the already recorded Home Assistant/aiohttp inheritance warning and four `backoff` calls to deprecated `asyncio.iscoroutinefunction`; no project-source warning or test failure remains.
 
-Immutable artifact `4ea2595029e7ad7a953abb628bf38bd93060885f` reproduced the same 223-test clean-Linux full suite from a Git archive and reproduced 166 provider/security/quality tests, 166 pure tests, Ruff, canary, evidence-schema, traceability, diff, and clean-worktree checks locally. Artifact hashes in the manifest match the committed Git blobs.
+Immutable artifact `4ea2595029e7ad7a953abb628bf38bd93060885f` reproduced those initial checks, but the later workflow/safety rejection means it is not an accepted artifact.
 
 Independent test/release review approved candidate `5c260ae5cfb46a497db3be322fbd621e5a31baeb` at `2026-08-24T16:47:18Z`. Independent workflow/safety review rejected that candidate at `2026-08-24T16:49:22Z` after adversarial reconstruction proved four blockers: a forged `ProviderError` and schema exception could expose arbitrary text, an adapter could mutate the configuration that would later be stored, nested non-string keys and tuples could change across JSON persistence, and unsupported version-0 entries could pass migration. LOC-001 remained open.
 
-The current remediation requires a real `NormalizedError`, derives HA messages from the fixed mapping, bounds every provider-schema callback, isolates canonical validated configuration from adapter-owned copies, recursively enforces exact JSON shapes, and permits only the documented version-1.1-to-2.1 migration or exact current-version validation. Adversarial tests cover setup/reauth/reconfigure mutation, forged errors, schema exceptions, nested/circular/lossy JSON, and unsupported major/minor versions. The remediated working tree passes 50 focused clean-Linux tests, 167 local provider/security/quality tests, 167 pure tests, Ruff, canary, and diff checks. These are interim results, not an accepted artifact result.
+The remediation requires a real `NormalizedError`, derives HA messages from the fixed mapping, bounds every provider-schema callback, isolates canonical validated configuration from adapter-owned copies, recursively enforces exact JSON shapes, and permits only the documented version-1.1-to-2.1 migration or exact current-version validation. Adversarial tests cover setup/reauth/reconfigure mutation, forged errors, schema exceptions, nested/circular/lossy JSON, and unsupported major/minor versions.
+
+Immutable remediated artifact `623d61b6d8dffa5ce00a5f1e5c38f51e938a5351` was reconstructed from a Git archive in clean Linux with Python `3.14.5`, Home Assistant `2026.8.3`, and pytest Home Assistant plugin `0.13.357`. It passed 238 full tests, 50 focused provider-entry/config-flow/setup/migration tests, 137 provider tests, 30 security/evidence/traceability tests, and 167 pure tests. Ruff format and lint, canary scan, evidence schema, traceability, and canonical hash checks passed. Five known upstream dependency deprecation warnings remain; no project-source warning or failure occurred.
 
 ## Residual gates
 
@@ -51,4 +53,4 @@ The current remediation requires a real `NormalizedError`, derives HA messages f
 
 ## Acceptance status
 
-`REMEDIATION IN REVIEW`. The first candidate was rejected and is not accepted. Create a new immutable artifact from the remediated tree, reproduce the full exact-commit gates, and obtain fresh workflow/safety plus test/release approvals before LOC-001 can be `DONE`.
+`REMEDIATION IN REVIEW`. The first candidate was rejected and is not accepted. Remediated artifact `623d61b6d8dffa5ce00a5f1e5c38f51e938a5351` passes its exact-commit gates. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
