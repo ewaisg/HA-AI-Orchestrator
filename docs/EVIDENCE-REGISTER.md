@@ -21,7 +21,7 @@ The redacted read-only inspections are recorded in [`docs/evidence/2026-08-22-ho
 
 | ID | Resolution | Evidence | Remaining unknown |
 |---|---|---|---|
-| ENV-001 | `REVALIDATED FOR FND-011` | HA-LIVE-001 through HA-LIVE-003; FND-011-LIVE-001 and FND-011-LIVE-002 in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md` | Revalidate again for a later upgrade or release gate |
+| ENV-001 | `RESOLVED FOR CURRENT-VERSION MVP` | HA-LIVE-001 through HA-LIVE-003; FND-011-LIVE-001 through FND-011-LIVE-007 in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`; DEC-023 | Revalidate before claiming another Core version or when the owner chooses to evaluate an upgrade |
 | ENV-002 | `PARTIAL` | HA-LIVE-003 through HA-LIVE-005 | Exact processor architecture; not required for the architecture-independent Phase 0 skeleton |
 | ENV-004 | `RESOLVED FOR PHASE 0 DISCOVERY` | HA-LIVE-012 through HA-LIVE-016 and HA-LIVE-025 through HA-LIVE-027, plus the user's prior successful audible test | Exact identifiers were verified live but are intentionally not committed to the public repository; revalidate and select current targets from discovery for WFL-007 |
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
@@ -41,7 +41,7 @@ The redacted read-only inspections are recorded in [`docs/evidence/2026-08-22-ho
 
 | ID | Needed fact | Why needed | Safe evidence to provide | Blocks |
 |---|---|---|---|---|
-| ENV-001 | Current HA installation type and versions | Determines supported extension, app, and test paths | Settings → System → Repairs → System information, with identifiers redacted if desired | FND-010 |
+| ENV-001 | Current HA installation type and versions | Determines supported extension, app, and test paths | Settings → System → Repairs → System information, with identifiers redacted if desired | Resolved for FND-010 under DEC-023; future cross-Core compatibility claim |
 | ENV-002 | HA hardware architecture and available storage/memory | Sets dependency and performance limits | System information; no credentials | First architecture-sensitive dependency spike, especially Bedrock transport |
 | ENV-003 | Current LM Studio base URL, authentication enabled state, model ID, and tested capabilities | Required for the first real adapter | Redacted server settings and test response; never the token | LOC-003 |
 | ENV-004 | Exact window trigger entity and Echo/notification action target | Required to recreate the first workflow accurately | Entity/action names or screenshots from HA; no secrets | WFL-007 |

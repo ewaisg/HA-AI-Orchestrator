@@ -36,11 +36,15 @@ compatibility with another Home Assistant release.
 | Log review after clean reinstallation | Exact `ai_orchestrator` search reported no issues | Confirmed |
 | Config-entry removal and clean reinstallation | Direct project-owner report for the supplied itemized procedure | Confirmed |
 | Exact `panel_custom` YAML fallback | Fallback validated and loaded; subsequent removal restored automatic registration | Confirmed and reverted |
-| Survival across one Core upgrade | Requires results from two named Core versions | Pending |
+| Survival across one Core upgrade | Not observed; owner deferred this scenario until choosing to evaluate a Core upgrade | Deferred; no cross-version claim |
 
-## Next controlled action
+## Current-version acceptance boundary
 
-Upgrade survival remains the only pending FND-011 scenario. It requires results
-before and after an actual Core version change and must not be simulated by
-claiming another version. FND-012 proceeds as the next independent Phase 0
-implementation task while that external upgrade opportunity is unavailable.
+On 2026-08-24, the project owner explicitly chose to continue using the same
+Home Assistant Core version and revisit compatibility when deciding to check
+upgrades. FND-011 is therefore complete for the single named Core 2026.8.3
+boundary: every current-version lifecycle scenario above is confirmed. This
+decision does not convert the unobserved upgrade row into a pass and does not
+claim support for any other Core version. Before adding another version to the
+supported matrix, reopen this evidence record and capture real before/after
+upgrade, migration, panel, lifecycle, and rollback results.

@@ -1,8 +1,8 @@
 # Project tracker
 
 Last updated: 2026-08-24
-Overall state: **Phase 0 — readiness blocked on actual Core-upgrade evidence**
-Current resume point: **FND-013 is DONE at immutable artifact revision `a7495b08c42c395cb15f6a30fb4956d38b091b53` and accepted metadata candidate `1c353554ad25eec4c424d122dc78cb728473c638`. Workflow/safety approved at `2026-08-24T06:14:09Z`; test/release approved at `2026-08-24T06:15:36Z` after a clean-source Linux run. The next unresolved Phase 0 item is FND-011: observe the already-installed panel across an actual Home Assistant Core upgrade and record migration, panel, lifecycle, and rollback evidence. Until that real upgrade occurs, FND-010 is BLOCKED and LOC-001 must not begin.**
+Overall state: **Phase 0 — current-version readiness review**
+Current resume point: **FND-010 is IN PROGRESS for the owner-approved, exactly pinned Home Assistant Core 2026.8.3 boundary. DEC-023 defers cross-Core upgrade proof until the owner chooses to evaluate an upgrade; no other Core version is claimed. FND-011 is DONE for the verified current-version lifecycle matrix. Complete the Phase 0 repository/readiness checks and independent reviews before marking FND-010 done or starting LOC-001.**
 
 ## Status rules
 
@@ -22,9 +22,9 @@ No task may move to `DONE` based only on an assertion.
 | Field | Current value |
 |---|---|
 | Last completed | FND-013 redacted data-flow and exact requirement/control/test traceability, independently accepted |
-| Active work | FND-011 actual Home Assistant Core-upgrade evidence; FND-010 readiness review is blocked on it |
-| Evidence/input needed | Later FND-011 Core-upgrade evidence; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | Actual Core upgrade observation, then the FND-010 Phase 0 readiness review |
+| Active work | FND-010 current-version Phase 0 readiness review |
+| Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
+| Next gate | Independent FND-010 workflow/safety and test/release approval |
 | Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
 
@@ -41,8 +41,8 @@ No task may move to `DONE` based only on an assertion.
 | FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `DONE` | — | ENV-001, ENV-003, ENV-004 discovery/action contract, Phase 0 ENV-007, ENV-009, and Phase 0 ENV-010 are resolved. `docs/evidence/2026-08-23-lm-studio-environment.md` records the authenticated, firewall-scoped same-subnet provider path. `docs/evidence/2026-08-23-home-assistant-backup.md` records the Recommended daily encrypted backup policy, first successful `87.89 MB` automatic backup to two locations, owner-confirmed off-system emergency-kit custody, and approved isolated restore cadence. Exact private identifiers and recovery material were withheld. First restore artifact due by 2027-02-23 or earlier after a major change |
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
-| FND-010 | Phase 0 readiness review | Test/release | `BLOCKED` | FND-007, FND-011 through FND-015 | FND-011 still requires actual Core-upgrade evidence; do not infer it or begin LOC-001 |
-| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `NEEDS INPUT` | FND-015, ENV-001 | All same-version scenarios are confirmed on the exact matrix in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`, including Home Assistant Companion App for Android. Only survival across an actual Core upgrade remains; do not infer or force that result. |
+| FND-010 | Phase 0 readiness review | Test/release | `IN PROGRESS` | FND-007, FND-011 through FND-015 | Review exactly the current-version boundary approved by DEC-023; run repository gates and obtain independent workflow/safety and test/release approval before LOC-001 |
+| FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `DONE` | FND-015, ENV-001 | Current-version Core 2026.8.3 lifecycle matrix is confirmed in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`, including Companion App Android. DEC-023 defers real cross-Core upgrade evidence; no other Core version is claimed, and the matrix must reopen before such a claim |
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `DONE` | FND-015 | Committed revision `8994784ce4b3ad8d0368185e031cc57e233aae8f`: Linux full suite 113 passed; focused lifecycle suite 22 passed; frontend 29 passed; independent workflow/safety review approved. Project-owner live result on the named target was execution `1` initially, `2` after reload, and `1` after full restart; Home remained healthy and the log search showed no issue. Independent clean-source test/release review approved 2026-08-23T17:13:05Z. Manifest: `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json`. |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `DONE` | FND-007 | Artifact `a7495b08c42c395cb15f6a30fb4956d38b091b53`, candidate `1c353554ad25eec4c424d122dc78cb728473c638`: 7 data classes, 13 nodes, 18 flows, 19 requirements, 19 controls, 23 tests; exact readable/catalog mapping guarded for all requirements. Workflow/safety approved `2026-08-24T06:14:09Z`; test/release approved `2026-08-24T06:15:36Z`. Clean Linux: 23 focused-plus-schema and 88 pure tests passed; Ruff/canary/diff/privacy/hash checks passed |
 | FND-014 | Establish redacted evidence conventions and fake-provider fixture schema | Primary + Test/release | `DONE` | FND-009 | Independent review approved; 35-test current-tree verification passed; acceptance manifest: `docs/evidence/manifests/FND-014/FND-014-FIXTURE-HARNESS-001.json`. Runtime zero-network and repeatability proof belongs to FND-015. |
