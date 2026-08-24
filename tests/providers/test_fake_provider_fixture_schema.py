@@ -30,7 +30,7 @@ SCHEMA_PATH = (
     / "fake-provider-fixture.schema.json"
 )
 FIXTURE_DIR = ROOT / "tests" / "fixtures" / "providers" / "v1"
-REQUIRED_PHASE0_FIXTURES = {
+REQUIRED_CONTRACT_FIXTURES = {
     "capabilities.unknown",
     "error.authentication",
     "error.rate_limit_with_retry_hint",
@@ -38,6 +38,10 @@ REQUIRED_PHASE0_FIXTURES = {
     "generate.empty_response",
     "generate.malformed_response",
     "generate.text_success",
+    "generate.tool_call_success",
+    "generate.tool_continuation_success",
+    "health.healthy",
+    "models.discovery_success",
     "request.cancelled",
     "stream.chunked_success",
     "validate.connection_success",
@@ -81,11 +85,17 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
     expected = fixture["expected"]
 
     if expected["request_count"] != 1:
-        errors.append("Phase 0 fixtures must describe exactly one provider request")
+        errors.append("Fixtures must describe exactly one provider request")
 
     for capability in fixture["required_capabilities"]:
         if fixture["capabilities"][capability] != "supported":
             errors.append(f"required capability {capability} is not supported")
+
+    tools = fixture["request_match"]["tools"]
+    if tools and fixture["capabilities"]["tool_calling"] != "supported":
+        errors.append("fixtures exposing tools must support tool calling")
+    if tools and fixture["capabilities"]["structured_output"] != "supported":
+        errors.append("fixtures exposing tools must support structured output")
 
     terminal_type = terminal["type"]
     if operation == "validate_connection":
@@ -96,6 +106,14 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
             and terminal.get("result", {}).get("kind") != "connection_validation"
         ):
             errors.append("validate_connection must return connection_validation")
+    elif operation == "discover_models":
+        if terminal_type not in {"return", "raise_normalized_error"}:
+            errors.append("discover_models has an invalid terminal event")
+        if (
+            terminal_type == "return"
+            and terminal.get("result", {}).get("kind") != "model_catalog"
+        ):
+            errors.append("discover_models must return model_catalog")
     elif operation == "discover_capabilities":
         if terminal_type not in {"return", "raise_normalized_error"}:
             errors.append("discover_capabilities has an invalid terminal event")
@@ -104,6 +122,14 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
             and terminal.get("result", {}).get("kind") != "capability_record"
         ):
             errors.append("discover_capabilities must return capability_record")
+    elif operation == "check_health":
+        if terminal_type not in {"return", "raise_normalized_error"}:
+            errors.append("check_health has an invalid terminal event")
+        if (
+            terminal_type == "return"
+            and terminal.get("result", {}).get("kind") != "health"
+        ):
+            errors.append("check_health must return health")
     elif operation == "generate":
         allowed = {
             "return",
@@ -115,6 +141,11 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
             errors.append("generate has an invalid terminal event")
         if terminal_type == "return" and terminal["result"]["kind"] != "message":
             errors.append("generate must return a message")
+        if (
+            terminal_type == "return"
+            and fixture["capabilities"]["text_generation"] != "supported"
+        ):
+            errors.append("successful generate must support text generation")
     elif operation == "stream":
         if terminal_type not in {
             "complete_stream",
@@ -124,6 +155,8 @@ def _semantic_errors(fixture: dict[str, Any]) -> list[str]:
             errors.append("stream has an invalid terminal event")
         if any(step["type"] != "emit_delta" for step in steps[:-1]):
             errors.append("stream pre-terminal events must be emit_delta")
+        if fixture["capabilities"]["text_generation"] != "supported":
+            errors.append("stream must support text generation")
 
     if terminal_type == "return":
         if expected["outcome"] != "success":
@@ -174,11 +207,11 @@ def fixtures() -> list[tuple[Path, dict[str, Any]]]:
     return [(path, _load_json(path)) for path in _fixture_paths()]
 
 
-def test_phase0_fixture_catalogue_is_present(
+def test_contract_fixture_catalogue_is_present(
     fixtures: list[tuple[Path, dict[str, Any]]],
 ) -> None:
     fixture_ids = {fixture["fixture_id"] for _, fixture in fixtures}
-    assert fixture_ids == REQUIRED_PHASE0_FIXTURES
+    assert fixture_ids == REQUIRED_CONTRACT_FIXTURES
 
 
 def test_all_fixtures_match_schema(

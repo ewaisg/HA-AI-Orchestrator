@@ -23,7 +23,7 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"
     },
-    "provider_contract_version": { "const": "phase0-draft-1" },
+    "provider_contract_version": { "const": "1" },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
@@ -42,7 +42,9 @@
     "operation": {
       "enum": [
         "validate_connection",
+        "discover_models",
         "discover_capabilities",
+        "check_health",
         "generate",
         "stream"
       ]
@@ -67,7 +69,14 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["streaming", "structured_output", "tool_calling", "usage"]
+        "enum": [
+          "text_generation",
+          "model_discovery",
+          "streaming",
+          "structured_output",
+          "tool_calling",
+          "usage"
+        ]
       }
     }
   },
@@ -78,8 +87,17 @@
     "capabilities": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["streaming", "structured_output", "tool_calling", "usage"],
+      "required": [
+        "text_generation",
+        "model_discovery",
+        "streaming",
+        "structured_output",
+        "tool_calling",
+        "usage"
+      ],
       "properties": {
+        "text_generation": { "$ref": "#/$defs/support_state" },
+        "model_discovery": { "$ref": "#/$defs/support_state" },
         "streaming": { "$ref": "#/$defs/support_state" },
         "structured_output": { "$ref": "#/$defs/support_state" },
         "tool_calling": { "$ref": "#/$defs/support_state" },
@@ -212,10 +230,32 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["kind", "reachable"],
+          "required": ["kind", "reachable", "authenticated"],
           "properties": {
             "kind": { "const": "connection_validation" },
-            "reachable": { "type": "boolean" }
+            "reachable": { "const": true },
+            "authenticated": { "const": true }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "models"],
+          "properties": {
+            "kind": { "const": "model_catalog" },
+            "models": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/provider_model" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "state"],
+          "properties": {
+            "kind": { "const": "health" },
+            "state": { "enum": ["healthy", "degraded"] }
           }
         },
         {
@@ -228,6 +268,15 @@
           }
         }
       ]
+    },
+    "provider_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "display_name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "display_name": { "type": "string", "minLength": 1 }
+      }
     },
     "tool_call": {
       "type": "object",

@@ -1,7 +1,7 @@
 # Evidence, fixture, and canary conventions
 
-Status: FND-014 implementation baseline
-Recorded: 2026-08-22
+Status: FND-014 baseline; LOC-002 provider contract version 1 extension
+Recorded: 2026-08-24
 
 ## Committed evidence
 
@@ -23,11 +23,12 @@ Committed fake-provider fixtures follow `tests/fixtures/providers/schema/fake-pr
 - Provenance is always `synthetic`.
 - Capability state is `supported`, `unsupported`, or `unknown`; missing evidence never becomes support.
 - The clock is manual and steps are explicitly sequenced.
-- Fixtures contain no provider endpoint, account, tenant, region, model, Home Assistant entity, or usable credential.
+- Fixtures contain no provider endpoint, account, tenant, region, live model identifier, Home Assistant entity, or usable credential. Model-discovery fixtures may contain clearly synthetic provider-model records.
 - The allowed event vocabulary is closed by schema.
 - Fixtures describe provider behavior but never perform network access or Home Assistant actions.
+- Typed synthetic tools and tool calls are contract data only. The fake provider never executes a tool, and no fixture may name or invoke a Home Assistant action.
 
-The runtime fake-provider adapter belongs to FND-015. FND-014 defines and verifies its inputs; it does not claim the runtime exists.
+FND-014 established the fixture/evidence baseline and FND-015 added the runtime fake. LOC-002 extends both to provider contract version 1; every future live adapter must rerun the common contract cases before its own task can pass.
 
 ## Canary handling
 

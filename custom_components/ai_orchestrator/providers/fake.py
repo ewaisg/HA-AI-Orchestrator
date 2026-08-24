@@ -13,15 +13,20 @@ from types import MappingProxyType
 
 from .contract import (
     EMPTY_REQUEST,
+    PROVIDER_CONTRACT_VERSION,
     CapabilityRecord,
     CapabilityState,
     ConnectionValidationResult,
     ErrorCode,
     FinishReason,
+    HealthCheckResult,
     Message,
     MessageRole,
+    ModelCatalog,
     NormalizedError,
     ProviderError,
+    ProviderHealthState,
+    ProviderModel,
     ProviderRequest,
     ProviderResult,
     StreamCompleted,
@@ -34,14 +39,15 @@ from .contract import (
 )
 
 FIXTURE_SCHEMA_VERSION = 1
-PROVIDER_CONTRACT_VERSION = "phase0-draft-1"
 
 
 class FixtureOperation(StrEnum):
-    """Operations admitted by the Phase 0 fixture schema."""
+    """Operations admitted by provider contract version 1 fixtures."""
 
     VALIDATE_CONNECTION = "validate_connection"
+    DISCOVER_MODELS = "discover_models"
     DISCOVER_CAPABILITIES = "discover_capabilities"
+    CHECK_HEALTH = "check_health"
     GENERATE = "generate"
     STREAM = "stream"
 
@@ -234,6 +240,28 @@ class FakeProvider:
             )
         return result
 
+    async def discover_models(
+        self, request: ProviderRequest = EMPTY_REQUEST
+    ) -> ModelCatalog:
+        """Execute a synthetic model-discovery fixture."""
+        result = await self._execute_single(FixtureOperation.DISCOVER_MODELS, request)
+        if not isinstance(result, ModelCatalog):
+            raise FixtureValidationError(
+                "Model-discovery fixture returned the wrong result type"
+            )
+        return result
+
+    async def check_health(
+        self, request: ProviderRequest = EMPTY_REQUEST
+    ) -> HealthCheckResult:
+        """Execute a synthetic provider-health fixture."""
+        result = await self._execute_single(FixtureOperation.CHECK_HEALTH, request)
+        if not isinstance(result, HealthCheckResult):
+            raise FixtureValidationError(
+                "Health fixture returned the wrong result type"
+            )
+        return result
+
     async def generate(self, request: ProviderRequest) -> TextGenerationResult:
         """Execute a deterministic non-streaming generation fixture."""
         result = await self._execute_single(FixtureOperation.GENERATE, request)
@@ -373,11 +401,6 @@ def parse_fake_provider_fixture(
     operation = _enum(FixtureOperation, payload["operation"], "operation")
     capabilities = _parse_capabilities(payload["capabilities"])
     request = _parse_request(payload["request_match"])
-    if request.tools:
-        raise FixtureValidationError(
-            "Phase 0 fake-provider fixtures cannot expose tools"
-        )
-
     script = _mapping(payload["script"], "script")
     _exact_keys(script, required={"clock", "steps"}, context="script")
     if script["clock"] != "manual":
@@ -393,7 +416,13 @@ def parse_fake_provider_fixture(
 
     expected = _parse_expectation(payload["expected"])
     if expected.request_count != 1:
-        raise FixtureValidationError("Phase 0 fixtures must script exactly one request")
+        raise FixtureValidationError("Fake-provider fixtures must script one request")
+    if (
+        expected.error is not None
+        and expected.error.retry_hint_ms is not None
+        and not expected.retry_allowed
+    ):
+        raise FixtureValidationError("A retry hint requires retry_allowed")
 
     required_capabilities = tuple(
         _string(value, "required capability")
@@ -405,6 +434,8 @@ def parse_fake_provider_fixture(
         raise FixtureValidationError("Required capabilities must be unique")
     for capability in required_capabilities:
         if capability not in {
+            "text_generation",
+            "model_discovery",
             "streaming",
             "structured_output",
             "tool_calling",
@@ -431,9 +462,22 @@ def parse_fake_provider_fixture(
 
 def _parse_capabilities(value: object) -> CapabilityRecord:
     mapping = _mapping(value, "capabilities")
-    names = {"streaming", "structured_output", "tool_calling", "usage"}
+    names = {
+        "text_generation",
+        "model_discovery",
+        "streaming",
+        "structured_output",
+        "tool_calling",
+        "usage",
+    }
     _exact_keys(mapping, required=names, context="capabilities")
     return CapabilityRecord(
+        text_generation=_enum(
+            CapabilityState, mapping["text_generation"], "text generation"
+        ),
+        model_discovery=_enum(
+            CapabilityState, mapping["model_discovery"], "model discovery"
+        ),
         streaming=_enum(CapabilityState, mapping["streaming"], "streaming"),
         structured_output=_enum(
             CapabilityState, mapping["structured_output"], "structured output"
@@ -469,11 +513,16 @@ def _parse_tool(value: object) -> ToolDefinition:
         required={"name", "description", "parameters"},
         context="tool",
     )
-    return ToolDefinition(
-        name=_string(mapping["name"], "tool name"),
-        description=_string(mapping["description"], "tool description"),
-        parameters=_freeze_mapping(_mapping(mapping["parameters"], "tool parameters")),
-    )
+    try:
+        return ToolDefinition(
+            name=_string(mapping["name"], "tool name"),
+            description=_string(mapping["description"], "tool description"),
+            parameters=_freeze_mapping(
+                _mapping(mapping["parameters"], "tool parameters")
+            ),
+        )
+    except ValueError as err:
+        raise FixtureValidationError(str(err)) from err
 
 
 def _parse_step(value: object, expected_sequence: int) -> ScriptStep:
@@ -528,19 +577,49 @@ def _parse_result(value: object) -> ProviderResult:
             for item in _sequence(mapping["tool_calls"], "tool calls")
         )
         usage = _parse_usage(mapping["usage"]) if "usage" in mapping else None
-        return TextGenerationResult(
-            text=_string(mapping["text"], "result text"),
-            tool_calls=calls,
-            usage=usage,
-        )
+        try:
+            return TextGenerationResult(
+                text=_string(mapping["text"], "result text"),
+                tool_calls=calls,
+                usage=usage,
+            )
+        except (TypeError, ValueError) as err:
+            raise FixtureValidationError(str(err)) from err
     if kind == "connection_validation":
         _exact_keys(
             mapping,
-            required={"kind", "reachable"},
+            required={"kind", "reachable", "authenticated"},
             context="connection validation result",
         )
-        return ConnectionValidationResult(
-            reachable=_boolean(mapping["reachable"], "reachable")
+        try:
+            return ConnectionValidationResult(
+                reachable=_boolean(mapping["reachable"], "reachable"),
+                authenticated=_boolean(mapping["authenticated"], "authenticated"),
+            )
+        except ValueError as err:
+            raise FixtureValidationError(str(err)) from err
+    if kind == "model_catalog":
+        _exact_keys(
+            mapping,
+            required={"kind", "models"},
+            context="model catalog result",
+        )
+        models = tuple(
+            _parse_model(item)
+            for item in _sequence(mapping["models"], "provider models")
+        )
+        try:
+            return ModelCatalog(models=models)
+        except ValueError as err:
+            raise FixtureValidationError(str(err)) from err
+    if kind == "health":
+        _exact_keys(
+            mapping,
+            required={"kind", "state"},
+            context="health result",
+        )
+        return HealthCheckResult(
+            state=_enum(ProviderHealthState, mapping["state"], "health state")
         )
     if kind == "capability_record":
         _exact_keys(
@@ -552,6 +631,24 @@ def _parse_result(value: object) -> ProviderResult:
     raise FixtureValidationError(f"Unknown result kind {kind!r}")
 
 
+def _parse_model(value: object) -> ProviderModel:
+    mapping = _mapping(value, "provider model")
+    _exact_keys(
+        mapping,
+        required={"id", "display_name"},
+        context="provider model",
+    )
+    try:
+        return ProviderModel(
+            id=_string(mapping["id"], "provider model ID"),
+            display_name=_string(
+                mapping["display_name"], "provider model display name"
+            ),
+        )
+    except ValueError as err:
+        raise FixtureValidationError(str(err)) from err
+
+
 def _parse_tool_call(value: object) -> ToolCall:
     mapping = _mapping(value, "tool call")
     _exact_keys(
@@ -559,11 +656,14 @@ def _parse_tool_call(value: object) -> ToolCall:
         required={"id", "name", "arguments"},
         context="tool call",
     )
-    return ToolCall(
-        id=_string(mapping["id"], "tool call ID"),
-        name=_string(mapping["name"], "tool call name"),
-        arguments=_freeze_mapping(_mapping(mapping["arguments"], "tool arguments")),
-    )
+    try:
+        return ToolCall(
+            id=_string(mapping["id"], "tool call ID"),
+            name=_string(mapping["name"], "tool call name"),
+            arguments=_freeze_mapping(_mapping(mapping["arguments"], "tool arguments")),
+        )
+    except ValueError as err:
+        raise FixtureValidationError(str(err)) from err
 
 
 def _parse_usage(value: object) -> Usage:
@@ -678,6 +778,18 @@ def _validate_fixture_semantics(fixture: FakeProviderFixture) -> None:
         raise FixtureValidationError(
             "Capability operation requires a result or normalized error"
         )
+    if fixture.operation is FixtureOperation.DISCOVER_MODELS and not isinstance(
+        terminal, ReturnStep | RaiseErrorStep
+    ):
+        raise FixtureValidationError(
+            "Model discovery operation requires a result or normalized error"
+        )
+    if fixture.operation is FixtureOperation.CHECK_HEALTH and not isinstance(
+        terminal, ReturnStep | RaiseErrorStep
+    ):
+        raise FixtureValidationError(
+            "Health operation requires a result or normalized error"
+        )
     if fixture.operation is FixtureOperation.GENERATE and not isinstance(
         terminal, ReturnStep | RaiseErrorStep | MalformedStep | AwaitCancellationStep
     ):
@@ -727,6 +839,18 @@ def _validate_fixture_semantics(fixture: FakeProviderFixture) -> None:
     ):
         raise FixtureValidationError("Capability operation requires capability record")
     if (
+        fixture.operation is FixtureOperation.DISCOVER_MODELS
+        and isinstance(terminal, ReturnStep)
+        and not isinstance(expected.result, ModelCatalog)
+    ):
+        raise FixtureValidationError("Model discovery operation requires model catalog")
+    if (
+        fixture.operation is FixtureOperation.CHECK_HEALTH
+        and isinstance(terminal, ReturnStep)
+        and not isinstance(expected.result, HealthCheckResult)
+    ):
+        raise FixtureValidationError("Health operation requires health result")
+    if (
         fixture.operation is FixtureOperation.DISCOVER_CAPABILITIES
         and isinstance(terminal, ReturnStep)
         and expected.result != fixture.capabilities
@@ -738,18 +862,42 @@ def _validate_fixture_semantics(fixture: FakeProviderFixture) -> None:
         fixture.operation
         in {
             FixtureOperation.VALIDATE_CONNECTION,
+            FixtureOperation.DISCOVER_MODELS,
             FixtureOperation.DISCOVER_CAPABILITIES,
+            FixtureOperation.CHECK_HEALTH,
         }
         and fixture.request != ProviderRequest()
     ):
         raise FixtureValidationError(
-            "Validation and capability fixtures require an empty request"
+            "Validation, discovery, and health fixtures require an empty request"
         )
     if fixture.operation is FixtureOperation.GENERATE and expected.result is not None:
         if not isinstance(expected.result, TextGenerationResult):
             raise FixtureValidationError("Generate operation requires message result")
+        if fixture.capabilities.text_generation is not CapabilityState.SUPPORTED:
+            raise FixtureValidationError(
+                "Successful generate fixture must support text generation"
+            )
+    if fixture.operation is FixtureOperation.STREAM:
+        if fixture.capabilities.text_generation is not CapabilityState.SUPPORTED:
+            raise FixtureValidationError(
+                "Successful stream fixture must support text generation"
+            )
+    if fixture.request.tools:
+        if fixture.capabilities.tool_calling is not CapabilityState.SUPPORTED:
+            raise FixtureValidationError(
+                "Fixture exposing tools must support tool calling"
+            )
+        if fixture.capabilities.structured_output is not CapabilityState.SUPPORTED:
+            raise FixtureValidationError(
+                "Fixture exposing tools must support structured output"
+            )
     if isinstance(expected.result, TextGenerationResult) and expected.result.tool_calls:
-        raise FixtureValidationError("Phase 0 fake provider cannot return tool calls")
+        exposed_names = {tool.name for tool in fixture.request.tools}
+        if any(call.name not in exposed_names for call in expected.result.tool_calls):
+            raise FixtureValidationError(
+                "Provider tool call must match a request tool definition"
+            )
 
 
 def _validate_stream_result(
@@ -766,7 +914,7 @@ def _validate_stream_result(
     if text != expected.result.text or terminal.usage != expected.result.usage:
         raise FixtureValidationError("Stream events and expected message differ")
     if expected.result.tool_calls:
-        raise FixtureValidationError("Phase 0 stream cannot return tool calls")
+        raise FixtureValidationError("Stream fixture cannot return tool calls")
 
 
 def _mapping(value: object, context: str) -> Mapping[str, object]:

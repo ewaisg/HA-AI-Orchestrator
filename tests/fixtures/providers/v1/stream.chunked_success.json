@@ -1,11 +1,13 @@
 {
   "fixture_schema_version": 1,
   "fixture_id": "stream.chunked_success",
-  "provider_contract_version": "phase0-draft-1",
+  "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
   "operation": "stream",
   "capabilities": {
+    "text_generation": "supported",
+    "model_discovery": "unknown",
     "streaming": "supported",
     "structured_output": "unknown",
     "tool_calling": "unsupported",
@@ -42,5 +44,5 @@
     "failover_allowed": false,
     "request_count": 1
   },
-  "required_capabilities": ["streaming"]
+  "required_capabilities": ["text_generation", "streaming", "usage"]
 }

@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-002-PROVIDER-CONTRACT-001",
+  "task_id": "LOC-002",
+  "kind": "automated_test",
+  "captured_at": "2026-08-24T06:57:05Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["LOC-002", "REQ-CON-007"],
+    "decisions": ["DEC-005", "DEC-010", "DEC-012"],
+    "controls": ["CTRL-PROVIDER-001", "CTRL-TOOL-001"],
+    "tests": [
+      "TEST-PROVIDER-CONTRACT",
+      "PURE_TEST_SUITE",
+      "RUFF_FORMAT",
+      "RUFF_LINT",
+      "CANARY_SCAN",
+      "GIT_DIFF_CHECK",
+      "LINUX_FULL_SUITE"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "uv",
+        "status": "verified",
+        "version": "0.12.1"
+      },
+      {
+        "name": "home_assistant_runtime",
+        "status": "not_applicable",
+        "reason": "LOC-002 defines a zero-network provider-neutral contract; live adapter and Home Assistant config-entry behavior belong to LOC-003 and LOC-001."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "PROVIDER_FOCUSED_SUITE",
+      "command_argv": [
+        "uv",
+        "run",
+        "pytest",
+        "-p",
+        "pytest_asyncio.plugin",
+        "tests/providers",
+        "tests/security",
+        "tests/quality/test_evidence_schema.py",
+        "tests/quality/test_traceability.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff", "--check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "provider-contract-v1",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/providers/contract.py",
+      "sha256": "6817ba63ea0e9cc350f0af80c693686e2fefc07ba701d86b45c0af1fdc90b9d4",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "zero-network-fake-provider",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/providers/fake.py",
+      "sha256": "b1543fbd035f4e26eff5048a96f770da09ed80935f458fcf2f9fa98de01f7833",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-fixture-schema-v1",
+      "location_type": "repository",
+      "repository_path": "tests/fixtures/providers/schema/fake-provider-fixture.schema.json",
+      "sha256": "985f07d985246e4cde344c46f3cca19788947fc4b1a63a00bab1de2fc0e64306",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [],
+  "residuals": [
+    {
+      "id": "LIVE_ADAPTER_REVALIDATION",
+      "description": "Every live adapter must rerun the common contract cases plus its own transport, authentication, endpoint, timeout, cancellation, and redaction acceptance tests.",
+      "blocks": ["LOC-003"]
+    },
+    {
+      "id": "NO_ACTION_AUTHORITY",
+      "description": "Tool calls are typed provider data only; this contract does not implement or authorize any Home Assistant action executor.",
+      "blocks": []
+    }
+  ],
+  "reviews": [
+    {
+      "role": "provider_backend",
+      "status": "pending"
+    },
+    {
+      "role": "workflow_safety",
+      "status": "pending"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

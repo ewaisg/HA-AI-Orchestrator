@@ -1,39 +1,35 @@
 {
   "fixture_schema_version": 1,
-  "fixture_id": "request.cancelled",
+  "fixture_id": "health.healthy",
   "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
-  "operation": "generate",
+  "operation": "check_health",
   "capabilities": {
-    "text_generation": "supported",
+    "text_generation": "unknown",
     "model_discovery": "unknown",
     "streaming": "unknown",
     "structured_output": "unknown",
     "tool_calling": "unknown",
     "usage": "unknown"
   },
-  "request_match": {
-    "messages": [
-      { "role": "user", "content": "Wait for synthetic cancellation." }
-    ],
-    "tools": []
-  },
+  "request_match": { "messages": [], "tools": [] },
   "script": {
     "clock": "manual",
     "steps": [
-      { "sequence": 0, "type": "await_cancellation" }
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": { "kind": "health", "state": "healthy" }
+      }
     ]
   },
   "expected": {
-    "outcome": "cancelled",
-    "normalized_error": {
-      "code": "cancelled",
-      "message": "Synthetic request was cancelled."
-    },
+    "outcome": "success",
+    "normalized_result": { "kind": "health", "state": "healthy" },
     "retry_allowed": false,
     "failover_allowed": false,
     "request_count": 1
   },
-  "required_capabilities": ["text_generation"]
+  "required_capabilities": []
 }

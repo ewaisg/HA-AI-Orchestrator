@@ -24,6 +24,8 @@ from custom_components.ai_orchestrator.providers.contract import (
     CapabilityRecord,
     ConnectionValidationResult,
     ErrorCode,
+    HealthCheckResult,
+    ModelCatalog,
     ProviderError,
     ProviderRequest,
     StreamCompleted,
@@ -115,8 +117,12 @@ async def _exercise(provider: FakeProvider, fixture: FakeProviderFixture) -> obj
     try:
         if fixture.operation is FixtureOperation.VALIDATE_CONNECTION:
             return await provider.validate_connection(fixture.request)
+        if fixture.operation is FixtureOperation.DISCOVER_MODELS:
+            return await provider.discover_models(fixture.request)
         if fixture.operation is FixtureOperation.DISCOVER_CAPABILITIES:
             return await provider.discover_capabilities(fixture.request)
+        if fixture.operation is FixtureOperation.CHECK_HEALTH:
+            return await provider.check_health(fixture.request)
         if fixture.operation is FixtureOperation.GENERATE:
             if fixture.fixture_id == "request.cancelled":
                 task = asyncio.create_task(provider.generate(fixture.request))
@@ -138,10 +144,9 @@ async def _exercise(provider: FakeProvider, fixture: FakeProviderFixture) -> obj
 def test_every_committed_fixture_loads_to_typed_runtime_data() -> None:
     fixtures = [load_fake_provider_fixture(path) for path in _fixture_paths()]
 
-    assert len(fixtures) == 10
+    assert len(fixtures) == 14
     assert len({fixture.fixture_id for fixture in fixtures}) == len(fixtures)
     assert all(fixture.expected.request_count == 1 for fixture in fixtures)
-    assert all(not fixture.request.tools for fixture in fixtures)
 
 
 @pytest.mark.asyncio
@@ -159,6 +164,8 @@ async def test_fixture_execution_is_repeatable(path: Path) -> None:
 async def test_success_results_are_normalized_types() -> None:
     connection = _load("validate.connection_success")
     capabilities = _load("capabilities.unknown")
+    models = _load("models.discovery_success")
+    health = _load("health.healthy")
     generation = _load("generate.text_success")
 
     assert isinstance(
@@ -168,6 +175,14 @@ async def test_success_results_are_normalized_types() -> None:
     assert isinstance(
         await FakeProvider(capabilities).discover_capabilities(capabilities.request),
         CapabilityRecord,
+    )
+    assert isinstance(
+        await FakeProvider(models).discover_models(models.request),
+        ModelCatalog,
+    )
+    assert isinstance(
+        await FakeProvider(health).check_health(health.request),
+        HealthCheckResult,
     )
     assert isinstance(
         await FakeProvider(generation).generate(generation.request),
@@ -229,7 +244,9 @@ async def test_malformed_payload_becomes_normalized_invalid_response() -> None:
     ("fixture_id", "method_name"),
     [
         ("validate.connection_success", "validate_connection"),
+        ("models.discovery_success", "discover_models"),
         ("capabilities.unknown", "discover_capabilities"),
+        ("health.healthy", "check_health"),
     ],
 )
 async def test_validation_and_discovery_can_raise_normalized_errors(
@@ -370,17 +387,44 @@ def test_runtime_rejects_unsafe_or_mismatched_fixture_metadata(
         parse_fake_provider_fixture(payload)
 
 
-def test_runtime_rejects_tools_even_when_fixture_shape_is_valid() -> None:
-    payload = deepcopy(_load_mapping(FIXTURE_DIR / "generate.text_success.json"))
-    payload["request_match"]["tools"] = [
-        {
-            "name": "synthetic_tool",
-            "description": "A tool that must remain unavailable in Phase 0.",
-            "parameters": {"type": "object"},
-        }
-    ]
+@pytest.mark.asyncio
+async def test_tool_call_is_typed_data_and_fake_provider_never_executes_it() -> None:
+    fixture = _load("generate.tool_call_success")
+    provider = FakeProvider(fixture)
 
-    with pytest.raises(FixtureValidationError, match="cannot expose tools"):
+    result = await provider.generate(fixture.request)
+
+    assert result.tool_calls[0].name == "synthetic_lookup"
+    assert result.tool_calls[0].arguments == {"key": "synthetic-key"}
+    assert provider.request_count == 1
+
+
+@pytest.mark.asyncio
+async def test_tool_result_continuation_remains_provider_request_data() -> None:
+    fixture = _load("generate.tool_continuation_success")
+
+    result = await FakeProvider(fixture).generate(fixture.request)
+
+    assert fixture.request.messages[-1].role.value == "tool"
+    assert result.text == "Synthetic lookup completed."
+    assert result.tool_calls == ()
+
+
+def test_runtime_rejects_tools_without_proven_capabilities() -> None:
+    payload = deepcopy(_load_mapping(FIXTURE_DIR / "generate.tool_call_success.json"))
+    payload["capabilities"]["tool_calling"] = "unknown"
+    payload["required_capabilities"].remove("tool_calling")
+
+    with pytest.raises(FixtureValidationError, match="must support tool calling"):
+        parse_fake_provider_fixture(payload)
+
+
+def test_runtime_rejects_unexposed_provider_tool_call() -> None:
+    payload = deepcopy(_load_mapping(FIXTURE_DIR / "generate.tool_call_success.json"))
+    payload["script"]["steps"][0]["result"]["tool_calls"][0]["name"] = "unexposed_tool"
+    payload["expected"]["normalized_result"]["tool_calls"][0]["name"] = "unexposed_tool"
+
+    with pytest.raises(FixtureValidationError, match="request tool definition"):
         parse_fake_provider_fixture(payload)
 
 
@@ -421,6 +465,16 @@ def test_runtime_rejects_capability_record_disagreement() -> None:
         parse_fake_provider_fixture(payload)
 
 
+def test_runtime_rejects_retry_hint_without_retry_permission() -> None:
+    payload = deepcopy(
+        _load_mapping(FIXTURE_DIR / "error.rate_limit_with_retry_hint.json")
+    )
+    payload["expected"]["retry_allowed"] = False
+
+    with pytest.raises(FixtureValidationError, match="requires retry_allowed"):
+        parse_fake_provider_fixture(payload)
+
+
 @pytest.mark.parametrize("message", ["", "   "])
 def test_runtime_rejects_empty_normalized_error_messages(message: str) -> None:
     payload = deepcopy(_load_mapping(FIXTURE_DIR / "error.authentication.json"))
@@ -435,7 +489,7 @@ def test_runtime_rejects_empty_normalized_error_messages(message: str) -> None:
 async def test_runtime_does_not_call_network_helpers(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Trip known stdlib network entry points for the Phase 0 fake only."""
+    """Trip known stdlib network entry points for the contract fake only."""
 
     async def fail_open_connection(*_args: object, **_kwargs: object) -> None:
         pytest.fail("The fake provider attempted to open a network connection")
@@ -452,7 +506,7 @@ async def test_runtime_does_not_call_network_helpers(
         await _exercise(FakeProvider(fixture), fixture)
 
 
-def test_phase0_fake_provider_imports_are_explicitly_allowlisted() -> None:
+def test_contract_fake_provider_imports_are_explicitly_allowlisted() -> None:
     """Constrain this fake module; future live adapters need separate proofs."""
 
     tree = ast.parse(FAKE_PROVIDER_PATH.read_text(encoding="utf-8"))

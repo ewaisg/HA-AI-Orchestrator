@@ -1,13 +1,13 @@
 {
   "fixture_schema_version": 1,
-  "fixture_id": "validate.connection_success",
+  "fixture_id": "models.discovery_success",
   "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
-  "operation": "validate_connection",
+  "operation": "discover_models",
   "capabilities": {
     "text_generation": "unknown",
-    "model_discovery": "unknown",
+    "model_discovery": "supported",
     "streaming": "unknown",
     "structured_output": "unknown",
     "tool_calling": "unknown",
@@ -21,9 +21,14 @@
         "sequence": 0,
         "type": "return",
         "result": {
-          "kind": "connection_validation",
-          "reachable": true,
-          "authenticated": true
+          "kind": "model_catalog",
+          "models": [
+            { "id": "synthetic-chat", "display_name": "Synthetic Chat" },
+            {
+              "id": "synthetic-structured",
+              "display_name": "Synthetic Structured"
+            }
+          ]
         }
       }
     ]
@@ -31,13 +36,18 @@
   "expected": {
     "outcome": "success",
     "normalized_result": {
-      "kind": "connection_validation",
-      "reachable": true,
-      "authenticated": true
+      "kind": "model_catalog",
+      "models": [
+        { "id": "synthetic-chat", "display_name": "Synthetic Chat" },
+        {
+          "id": "synthetic-structured",
+          "display_name": "Synthetic Structured"
+        }
+      ]
     },
     "retry_allowed": false,
     "failover_allowed": false,
     "request_count": 1
   },
-  "required_capabilities": []
+  "required_capabilities": ["model_discovery"]
 }

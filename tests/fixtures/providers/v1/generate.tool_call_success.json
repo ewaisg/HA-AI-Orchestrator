@@ -1,0 +1,75 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "generate.tool_call_success",
+  "provider_contract_version": "1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "text_generation": "supported",
+    "model_discovery": "unknown",
+    "streaming": "unknown",
+    "structured_output": "supported",
+    "tool_calling": "supported",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Request one typed synthetic lookup." }
+    ],
+    "tools": [
+      {
+        "name": "synthetic_lookup",
+        "description": "Return synthetic test data without external access.",
+        "parameters": {
+          "type": "object",
+          "properties": { "key": { "type": "string" } },
+          "required": ["key"],
+          "additionalProperties": false
+        }
+      }
+    ]
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": {
+          "kind": "message",
+          "text": "",
+          "tool_calls": [
+            {
+              "id": "synthetic-call-1",
+              "name": "synthetic_lookup",
+              "arguments": { "key": "synthetic-key" }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": {
+      "kind": "message",
+      "text": "",
+      "tool_calls": [
+        {
+          "id": "synthetic-call-1",
+          "name": "synthetic_lookup",
+          "arguments": { "key": "synthetic-key" }
+        }
+      ]
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": [
+    "text_generation",
+    "structured_output",
+    "tool_calling"
+  ]
+}

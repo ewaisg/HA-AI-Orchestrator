@@ -1,11 +1,13 @@
 {
   "fixture_schema_version": 1,
   "fixture_id": "error.authentication",
-  "provider_contract_version": "phase0-draft-1",
+  "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
   "operation": "generate",
   "capabilities": {
+    "text_generation": "unknown",
+    "model_discovery": "unknown",
     "streaming": "unknown",
     "structured_output": "unknown",
     "tool_calling": "unknown",

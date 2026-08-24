@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Protocol
+from typing import Final, Protocol
+
+PROVIDER_CONTRACT_VERSION: Final = "1"
+_IDENTIFIER_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 
 
 class MessageRole(StrEnum):
@@ -24,6 +28,13 @@ class CapabilityState(StrEnum):
     SUPPORTED = "supported"
     UNSUPPORTED = "unsupported"
     UNKNOWN = "unknown"
+
+
+class ProviderHealthState(StrEnum):
+    """Successful provider health states returned by an adapter."""
+
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
 
 
 class FinishReason(StrEnum):
@@ -61,6 +72,11 @@ class Message:
     role: MessageRole
     content: str
 
+    def __post_init__(self) -> None:
+        """Reject non-normalized message data."""
+        _require_instance(self.role, MessageRole, "message role")
+        _require_instance(self.content, str, "message content")
+
 
 @dataclass(frozen=True, slots=True)
 class ToolDefinition:
@@ -71,7 +87,10 @@ class ToolDefinition:
     parameters: Mapping[str, object]
 
     def __post_init__(self) -> None:
-        """Detach and deeply freeze the caller-owned parameter schema."""
+        """Validate the public tool identity and freeze its parameter schema."""
+        _validate_identifier(self.name, "tool name")
+        if not self.description.strip():
+            raise ValueError("Tool description cannot be empty")
         object.__setattr__(self, "parameters", _freeze_mapping(self.parameters))
 
 
@@ -82,6 +101,15 @@ class ProviderRequest:
     messages: tuple[Message, ...] = ()
     tools: tuple[ToolDefinition, ...] = ()
 
+    def __post_init__(self) -> None:
+        """Detach caller-owned request sequences."""
+        object.__setattr__(self, "messages", tuple(self.messages))
+        object.__setattr__(self, "tools", tuple(self.tools))
+        if any(not isinstance(message, Message) for message in self.messages):
+            raise TypeError("Provider request messages must use Message")
+        if any(not isinstance(tool, ToolDefinition) for tool in self.tools):
+            raise TypeError("Provider request tools must use ToolDefinition")
+
 
 @dataclass(frozen=True, slots=True)
 class Usage:
@@ -89,6 +117,11 @@ class Usage:
 
     input_tokens: int
     output_tokens: int
+
+    def __post_init__(self) -> None:
+        """Reject invalid accounting rather than normalizing it silently."""
+        if self.input_tokens < 0 or self.output_tokens < 0:
+            raise ValueError("Usage token counts cannot be negative")
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,7 +133,10 @@ class ToolCall:
     arguments: Mapping[str, object]
 
     def __post_init__(self) -> None:
-        """Detach and deeply freeze the caller-owned argument object."""
+        """Validate the requested tool identity and freeze its arguments."""
+        if not self.id.strip():
+            raise ValueError("Tool call ID cannot be empty")
+        _validate_identifier(self.name, "tool call name")
         object.__setattr__(self, "arguments", _freeze_mapping(self.arguments))
 
 
@@ -112,22 +148,95 @@ class TextGenerationResult:
     tool_calls: tuple[ToolCall, ...] = ()
     usage: Usage | None = None
 
+    def __post_init__(self) -> None:
+        """Detach caller-owned tool-call sequences."""
+        object.__setattr__(self, "tool_calls", tuple(self.tool_calls))
+        if any(not isinstance(call, ToolCall) for call in self.tool_calls):
+            raise TypeError("Generation tool calls must use ToolCall")
+        call_ids = [call.id for call in self.tool_calls]
+        if len(call_ids) != len(set(call_ids)):
+            raise ValueError("Tool call IDs must be unique")
+        if self.usage is not None and not isinstance(self.usage, Usage):
+            raise TypeError("Generation usage must use Usage")
+
 
 @dataclass(frozen=True, slots=True)
 class ConnectionValidationResult:
-    """Synthetic connection validation outcome."""
+    """Successful reachability and authentication validation."""
 
     reachable: bool
+    authenticated: bool
+
+    def __post_init__(self) -> None:
+        """Require failures to use the normalized error channel."""
+        if not self.reachable or not self.authenticated:
+            raise ValueError(
+                "Connection validation failures must use a normalized provider error"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderModel:
+    """One provider-supplied model identity, with no inferred capability claim."""
+
+    id: str
+    display_name: str
+
+    def __post_init__(self) -> None:
+        """Reject unusable model records."""
+        if not self.id.strip():
+            raise ValueError("Provider model ID cannot be empty")
+        if not self.display_name.strip():
+            raise ValueError("Provider model display name cannot be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class ModelCatalog:
+    """Immutable discovered model list with stable, unique provider IDs."""
+
+    models: tuple[ProviderModel, ...]
+
+    def __post_init__(self) -> None:
+        """Reject ambiguous duplicate model identities."""
+        object.__setattr__(self, "models", tuple(self.models))
+        model_ids = [model.id for model in self.models]
+        if len(model_ids) != len(set(model_ids)):
+            raise ValueError("Provider model IDs must be unique")
+
+
+@dataclass(frozen=True, slots=True)
+class HealthCheckResult:
+    """Successful provider health observation."""
+
+    state: ProviderHealthState
+
+    def __post_init__(self) -> None:
+        """Reject adapter-specific health values at the contract boundary."""
+        _require_instance(self.state, ProviderHealthState, "provider health state")
 
 
 @dataclass(frozen=True, slots=True)
 class CapabilityRecord:
     """Explicit capability states; an unproven capability remains unknown."""
 
+    text_generation: CapabilityState
+    model_discovery: CapabilityState
     streaming: CapabilityState
     structured_output: CapabilityState
     tool_calling: CapabilityState
     usage: CapabilityState
+
+    def __post_init__(self) -> None:
+        """Require every capability to use the explicit evidence-state enum."""
+        for value in (
+            self.text_generation,
+            self.model_discovery,
+            self.streaming,
+            self.structured_output,
+            self.tool_calling,
+            self.usage,
+        ):
+            _require_instance(value, CapabilityState, "capability state")
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +246,11 @@ class StreamDelta:
     sequence: int
     text: str
 
+    def __post_init__(self) -> None:
+        """Reject invalid stream ordering metadata."""
+        if self.sequence < 0:
+            raise ValueError("Stream sequence cannot be negative")
+
 
 @dataclass(frozen=True, slots=True)
 class StreamCompleted:
@@ -145,6 +259,14 @@ class StreamCompleted:
     sequence: int
     finish_reason: FinishReason
     usage: Usage | None = None
+
+    def __post_init__(self) -> None:
+        """Reject invalid terminal ordering metadata."""
+        if self.sequence < 0:
+            raise ValueError("Stream sequence cannot be negative")
+        _require_instance(self.finish_reason, FinishReason, "finish reason")
+        if self.usage is not None and not isinstance(self.usage, Usage):
+            raise TypeError("Stream usage must use Usage")
 
 
 @dataclass(frozen=True, slots=True)
@@ -157,8 +279,11 @@ class NormalizedError:
 
     def __post_init__(self) -> None:
         """Reject unusable errors at the provider-neutral boundary."""
+        _require_instance(self.code, ErrorCode, "error code")
         if not self.message.strip():
             raise ValueError("Normalized error message cannot be empty")
+        if self.retry_hint_ms is not None and self.retry_hint_ms < 0:
+            raise ValueError("Retry hint cannot be negative")
 
 
 class ProviderError(Exception):
@@ -173,13 +298,19 @@ class ProviderError(Exception):
     ) -> None:
         """Initialize a normalized provider failure."""
         super().__init__(error.message)
+        if error.retry_hint_ms is not None and not retry_allowed:
+            raise ValueError("A retry hint requires retry_allowed")
         self.error = error
         self.retry_allowed = retry_allowed
         self.failover_allowed = failover_allowed
 
 
 type ProviderResult = (
-    TextGenerationResult | ConnectionValidationResult | CapabilityRecord
+    TextGenerationResult
+    | ConnectionValidationResult
+    | ModelCatalog
+    | HealthCheckResult
+    | CapabilityRecord
 )
 type StreamEvent = StreamDelta | StreamCompleted
 EMPTY_REQUEST = ProviderRequest()
@@ -198,6 +329,18 @@ class Provider(Protocol):
         self, request: ProviderRequest = EMPTY_REQUEST
     ) -> CapabilityRecord:
         """Return capability states supported by evidence."""
+        ...
+
+    async def discover_models(
+        self, request: ProviderRequest = EMPTY_REQUEST
+    ) -> ModelCatalog:
+        """Return discovered model identities without inferring capabilities."""
+        ...
+
+    async def check_health(
+        self, request: ProviderRequest = EMPTY_REQUEST
+    ) -> HealthCheckResult:
+        """Return a successful health observation or raise a normalized error."""
         ...
 
     async def generate(self, request: ProviderRequest) -> TextGenerationResult:
@@ -221,3 +364,13 @@ def _freeze_value(value: object) -> object:
     if isinstance(value, set | frozenset):
         return frozenset(_freeze_value(item) for item in value)
     return value
+
+
+def _validate_identifier(value: str, label: str) -> None:
+    if _IDENTIFIER_PATTERN.fullmatch(value) is None:
+        raise ValueError(f"{label.capitalize()} has an invalid format")
+
+
+def _require_instance(value: object, expected: type, label: str) -> None:
+    if not isinstance(value, expected):
+        raise TypeError(f"{label.capitalize()} must use {expected.__name__}")

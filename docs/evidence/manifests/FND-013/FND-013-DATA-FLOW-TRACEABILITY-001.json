@@ -106,7 +106,7 @@
       "name": "readable-data-flow-traceability-map",
       "location_type": "repository",
       "repository_path": "docs/quality/DATA-FLOW-TRACEABILITY.md",
-      "sha256": "5382c9b97bf20dcd2e00b757e62e6a8ef861539b9e2bc8f535a4db76d17ec2e3",
+      "sha256": "7c98d5a0e9fa12df84081a1bc179e388fd949f3c8f00b61aa524bd1d04c1ae85",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -115,7 +115,7 @@
       "name": "machine-traceability-catalog",
       "location_type": "repository",
       "repository_path": "docs/quality/traceability/traceability.json",
-      "sha256": "38ca6e2100bd4ea00ac747884498b5a3a6472561245fb8caf1dab190ba5ac07e",
+      "sha256": "a7cc7079f49344ddc91b3a478168892636e0f27ebe46a0db77387ad5af41d7e3",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
