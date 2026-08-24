@@ -3,7 +3,7 @@
   "evidence_id": "FND-010-PHASE0-READINESS-001",
   "task_id": "FND-010",
   "kind": "review",
-  "captured_at": "2026-08-24T06:30:05Z",
+  "captured_at": "2026-08-24T06:40:03Z",
   "source_revision": {
     "state": "committed",
     "git_commit": "2af1077ecca4c894938efeddc0364aba5c7ca126",
@@ -148,6 +148,17 @@
       "command_argv": ["git", "diff", "--check"],
       "exit_code": 0,
       "result": "passed"
+    },
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "git archive --format=tar 0e72551c18177f72f75c37d9037e6a0bee557bb6 | docker run --rm -i --name ai-orchestrator-fnd010-test-release --workdir /workspace --volume ai-orchestrator-fnd010-review-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py\""
+      ],
+      "exit_code": 0,
+      "result": "passed"
     }
   ],
   "artifacts": [
@@ -179,14 +190,8 @@
       "redaction_status": "not_applicable"
     }
   ],
-  "result": "incomplete",
-  "unknowns": [
-    {
-      "id": "FND010_REVIEWS_PENDING",
-      "description": "Independent workflow/safety and test/release review, including a clean-source Linux full-suite run, is pending.",
-      "blocks": ["FND-010", "LOC-001"]
-    }
-  ],
+  "result": "passed",
+  "unknowns": [],
   "residuals": [
     {
       "id": "CROSS_CORE_UPGRADE_DEFERRED",
@@ -212,11 +217,13 @@
   "reviews": [
     {
       "role": "workflow_safety",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T06:35:08Z"
     },
     {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T06:39:04Z"
     }
   ]
 }

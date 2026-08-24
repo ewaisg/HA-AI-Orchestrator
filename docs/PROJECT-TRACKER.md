@@ -1,8 +1,8 @@
 # Project tracker
 
 Last updated: 2026-08-24
-Overall state: **Phase 0 — current-version readiness review**
-Current resume point: **FND-010 is in REVIEW for the owner-approved, exactly pinned Home Assistant Core 2026.8.3 boundary. Clean artifact revision `2af1077ecca4c894938efeddc0364aba5c7ca126` records the dependency matrix, known limitations, and passing local gates: 88 pure tests, 29 frontend tests, 23 evidence/traceability tests, Ruff, canary, bundle identity, and zero npm audit vulnerabilities. DEC-023 defers cross-Core proof without claiming another version. Obtain fresh independent workflow/safety and test/release approval before marking FND-010 done or starting LOC-001.**
+Overall state: **Phase 1 — local provider and onboarding MVP**
+Current resume point: **FND-010 is DONE for exactly Home Assistant Core 2026.8.3. Artifact `2af1077ecca4c894938efeddc0364aba5c7ca126` and candidate `0e72551c18177f72f75c37d9037e6a0bee557bb6` were approved by workflow/safety at `2026-08-24T06:35:08Z` and test/release at `2026-08-24T06:39:04Z`; clean Linux passed 120 full, 23 focused, and 88 pure tests, plus frontend 29, Ruff, canary, bundle, and audit gates. LOC-001 is now IN PROGRESS. Read the local-provider/onboarding plans and define the exact config-entry lifecycle files/tests before editing production code. Cross-Core compatibility remains deferred and unclaimed under DEC-023.**
 
 ## Status rules
 
@@ -21,10 +21,10 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | FND-013 redacted data-flow and exact requirement/control/test traceability, independently accepted |
-| Active work | Independent FND-010 current-version Phase 0 readiness review |
+| Last completed | FND-010 current-version Phase 0 readiness review, independently accepted |
+| Active work | LOC-001 local provider connection lifecycle on the validated skeleton |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | Independent FND-010 workflow/safety and test/release approval |
+| Next gate | LOC-001 committed lifecycle implementation and independent acceptance review |
 | Production code | FND-015 foundation plus the FND-012 action-free lifecycle probe are implemented; real providers and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; FND-012 implementation revision `8994784ce4b3ad8d0368185e031cc57e233aae8f` is pushed and independently workflow/safety reviewed |
 
@@ -41,7 +41,7 @@ No task may move to `DONE` based only on an assertion.
 | FND-007 | Gather Phase 0 live environment facts | User + HA specialist | `DONE` | — | ENV-001, ENV-003, ENV-004 discovery/action contract, Phase 0 ENV-007, ENV-009, and Phase 0 ENV-010 are resolved. `docs/evidence/2026-08-23-lm-studio-environment.md` records the authenticated, firewall-scoped same-subnet provider path. `docs/evidence/2026-08-23-home-assistant-backup.md` records the Recommended daily encrypted backup policy, first successful `87.89 MB` automatic backup to two locations, owner-confirmed off-system emergency-kit custody, and approved isolated restore cadence. Exact private identifiers and recovery material were withheld. First restore artifact due by 2027-02-23 or earlier after a major change |
 | FND-008 | Create ADRs for implementation-sensitive choices | Primary + reviewers | `DONE` | FND-004, FND-005, FND-006 | Six initial records in `docs/architecture/adrs/`; provisional mechanisms have named validation gates |
 | FND-009 | Define repository bootstrap and dependency policy | Primary + Backend/UI | `DONE` | FND-008 | `docs/architecture/REPOSITORY-BOOTSTRAP.md`; exact HA/Python/Node/package baseline, permanent domain, manual Phase 0 bundle, HACS boundary, and build/test commands independently reviewed 2026-08-22 |
-| FND-010 | Phase 0 readiness review | Test/release | `REVIEW` | FND-007, FND-011 through FND-015 | Artifact `2af1077ecca4c894938efeddc0364aba5c7ca126`: dependency matrix and current-version limits recorded; 88 pure, 29 frontend, and 23 evidence/traceability tests passed; Ruff/canary/bundle/npm audit passed. Pending independent workflow/safety and clean-source test/release approval before LOC-001 |
+| FND-010 | Phase 0 readiness review | Test/release | `DONE` | FND-007, FND-011 through FND-015 | Artifact `2af1077ecca4c894938efeddc0364aba5c7ca126`, candidate `0e72551c18177f72f75c37d9037e6a0bee557bb6`: workflow/safety approved `2026-08-24T06:35:08Z`; test/release approved `2026-08-24T06:39:04Z`. Clean Linux passed 120 full, 23 focused, and 88 pure tests; frontend 29, Ruff, canary, bundle identity, canonical hashes, and npm audit passed. Scope is exactly Core 2026.8.3 under DEC-023 |
 | FND-011 | Prove bundled panel registration and compatibility boundary | HA + UI | `DONE` | FND-015, ENV-001 | Current-version Core 2026.8.3 lifecycle matrix is confirmed in `docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`, including Companion App Android. DEC-023 defers real cross-Core upgrade evidence; no other Core version is claimed, and the matrix must reopen before such a claim |
 | FND-012 | Prove restricted workflow lifecycle | HA + workflow | `DONE` | FND-015 | Committed revision `8994784ce4b3ad8d0368185e031cc57e233aae8f`: Linux full suite 113 passed; focused lifecycle suite 22 passed; frontend 29 passed; independent workflow/safety review approved. Project-owner live result on the named target was execution `1` initially, `2` after reload, and `1` after full restart; Home remained healthy and the log search showed no issue. Independent clean-source test/release review approved 2026-08-23T17:13:05Z. Manifest: `docs/evidence/manifests/FND-012/FND-012-WORKFLOW-LIFECYCLE-001.json`. |
 | FND-013 | Define data-flow and control-to-test traceability records | Security + tracker | `DONE` | FND-007 | Artifact `a7495b08c42c395cb15f6a30fb4956d38b091b53`, candidate `1c353554ad25eec4c424d122dc78cb728473c638`: 7 data classes, 13 nodes, 18 flows, 19 requirements, 19 controls, 23 tests; exact readable/catalog mapping guarded for all requirements. Workflow/safety approved `2026-08-24T06:14:09Z`; test/release approved `2026-08-24T06:15:36Z`. Clean Linux: 23 focused-plus-schema and 88 pure tests passed; Ruff/canary/diff/privacy/hash checks passed |
@@ -52,7 +52,7 @@ No task may move to `DONE` based only on an assertion.
 
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
-| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `TODO` | FND-010 | HA integration tests and live dev-instance setup/reload/reauthentication |
+| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `IN PROGRESS` | FND-010 | Claimed for backend/Home Assistant lifecycle work. Next: read the provider/onboarding plans, state exact files and checks, then implement config-entry setup/reload/reauthentication without adding provider-specific transport |
 | LOC-002 | Define provider contract and normalized errors/capabilities | `TODO` | FND-008 | Contract tests with fake providers |
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |

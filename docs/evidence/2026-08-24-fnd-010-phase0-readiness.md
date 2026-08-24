@@ -49,3 +49,11 @@ The Windows pure runner deliberately excludes the Home Assistant pytest plugin b
 ## Acceptance status
 
 Artifact revision `2af1077ecca4c894938efeddc0364aba5c7ca126` contains this readiness record and its incomplete manifest. The local current-version checks pass, but FND-010 remains in review until the clean metadata candidate receives independent workflow/safety and test/release approval. LOC-001 must not begin before that closeout.
+
+## Final independent acceptance
+
+Metadata candidate `0e72551c18177f72f75c37d9037e6a0bee557bb6` received workflow/safety approval at `2026-08-24T06:35:08Z` and test/release approval at `2026-08-24T06:39:04Z`. Workflow/safety confirmed that DEC-023 is a legitimate current-version scope decision, not a fabricated upgrade pass, and that the existing privacy, credential, action, deterministic-safety, backup, and isolated-restore boundaries remain intact.
+
+The independent clean-source Linux run passed 120 full pytest tests, 23 focused evidence/traceability tests, 88 pure tests with five known dependency deprecation warnings, Ruff format/lint, and the canary scan. The reviewer also reproduced 29 frontend tests, the production build and byte-identical bundle, zero npm audit vulnerabilities, clean diff/show checks, and all three manifest hashes from canonical Git/Linux bytes. No sensitive value was found.
+
+FND-010 is accepted for exactly Home Assistant Core 2026.8.3. Phase 1 may begin, but all known limitations and future gates above remain active.
