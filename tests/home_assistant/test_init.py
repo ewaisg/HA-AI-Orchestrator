@@ -43,11 +43,13 @@ from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
     SYNTHETIC_PROVIDER_TYPE,
+    ExplodingCodeAccess,
     ExplodingHashCode,
     SyntheticProviderEntryAdapter,
     TypeSpoofingHashCode,
     UnhashableCode,
     forged_provider_error,
+    forged_provider_error_payload,
 )
 
 
@@ -429,10 +431,10 @@ async def test_provider_setup_uses_safe_text_for_malformed_provider_error(
         SyntheticProviderEntryAdapter(error=forged),
     )
 
-    with pytest.raises(ConfigEntryAuthFailed) as caught:
+    with pytest.raises(ConfigEntryError) as caught:
         await async_setup_entry(hass, entry)
 
-    assert str(caught.value) == SAFE_ERROR_MESSAGES[ErrorCode.AUTHENTICATION]
+    assert str(caught.value) == "Provider setup failed safely"
     assert synthetic_marker not in str(caught.value)
 
 
@@ -460,6 +462,38 @@ async def test_provider_setup_bounds_malformed_error_code_without_hashing(
         hass,
         SyntheticProviderEntryAdapter(
             error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
+        ),
+    )
+
+    with pytest.raises(ConfigEntryError) as caught:
+        await async_setup_entry(hass, entry)
+
+    assert str(caught.value) == "Provider setup failed safely"
+    assert synthetic_marker not in str(caught.value)
+
+
+async def test_provider_setup_does_not_dispatch_nested_error_code_property(
+    hass: HomeAssistant,
+) -> None:
+    """Setup validates the nested error type before reading its code."""
+    connection_id = "00000000-0000-4000-8000-00000000001a"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    synthetic_marker = "synthetic-setup-nested-code-access-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error_payload(
+                ExplodingCodeAccess(synthetic_marker), synthetic_marker
+            )
         ),
     )
 

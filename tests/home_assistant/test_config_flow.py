@@ -33,11 +33,13 @@ from custom_components.ai_orchestrator.providers.contract import (
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
     SYNTHETIC_PROVIDER_TYPE,
+    ExplodingCodeAccess,
     ExplodingHashCode,
     SyntheticProviderEntryAdapter,
     TypeSpoofingHashCode,
     UnhashableCode,
     forged_provider_error,
+    forged_provider_error_payload,
 )
 
 
@@ -223,6 +225,45 @@ async def test_provider_flow_bounds_malformed_error_code_without_hashing(
         hass,
         SyntheticProviderEntryAdapter(
             error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
+        ),
+    )
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": SOURCE_USER},
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {CONF_PROVIDER_TYPE: SYNTHETIC_PROVIDER_TYPE},
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_config"}
+    assert synthetic_marker not in repr(result)
+
+
+async def test_provider_flow_does_not_dispatch_nested_error_code_property(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """A forged nested error property cannot run during initial setup."""
+    MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+        version=2,
+    ).add_to_hass(hass)
+    synthetic_marker = "synthetic-nested-code-access-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error_payload(
+                ExplodingCodeAccess(synthetic_marker), synthetic_marker
+            )
         ),
     )
     result = await hass.config_entries.flow.async_init(
@@ -450,6 +491,52 @@ async def test_update_bounds_malformed_error_code_without_hashing(
         hass,
         SyntheticProviderEntryAdapter(
             error=forged_provider_error(code_type(synthetic_marker), synthetic_marker)
+        ),
+    )
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": source, "entry_id": entry.entry_id},
+        data=dict(entry.data) if source == SOURCE_REAUTH else None,
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {SYNTHETIC_CONFIG_FIELD: "replacement-synthetic-value"},
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_config"}
+    assert synthetic_marker not in repr(result)
+    assert entry.data[CONF_PROVIDER_CONFIG] == original_config
+
+
+@pytest.mark.parametrize("source", [SOURCE_REAUTH, SOURCE_RECONFIGURE])
+async def test_update_does_not_dispatch_nested_error_code_property(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+    source: str,
+) -> None:
+    """A forged nested error property stays behind the shared update boundary."""
+    connection_id = "00000000-0000-4000-8000-000000000006"
+    original_config = {SYNTHETIC_CONFIG_FIELD: "old-synthetic-value"}
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config=original_config,
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    entry.add_to_hass(hass)
+    synthetic_marker = "synthetic-update-nested-code-access-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error_payload(
+                ExplodingCodeAccess(synthetic_marker), synthetic_marker
+            )
         ),
     )
     result = await hass.config_entries.flow.async_init(

@@ -30,6 +30,7 @@ from .providers.contract import (
     ConnectionValidationResult,
     ErrorCode,
     ProviderError,
+    safe_provider_error_code,
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
@@ -163,8 +164,7 @@ async def _async_setup_provider_entry(
 
 
 def _raise_provider_setup_error(error: ProviderError) -> NoReturn:
-    raw_code = getattr(error.error, "code", None)
-    code = raw_code if type(raw_code) is ErrorCode else None
+    code = safe_provider_error_code(error)
     message = (
         SAFE_ERROR_MESSAGES[code]
         if code is not None

@@ -385,6 +385,18 @@ class ProviderError(Exception):
         self.failover_allowed = failover_allowed
 
 
+def safe_provider_error_code(error: object) -> ErrorCode | None:
+    """Read only an exact normalized error without invoking forged properties."""
+    if type(error) is not ProviderError:
+        return None
+    state = object.__getattribute__(error, "__dict__")
+    normalized = state.get("error")
+    if type(normalized) is not NormalizedError:
+        return None
+    raw_code = object.__getattribute__(normalized, "code")
+    return raw_code if type(raw_code) is ErrorCode else None
+
+
 type ProviderResult = (
     TextGenerationResult
     | ConnectionValidationResult

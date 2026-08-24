@@ -150,15 +150,29 @@ class UnhashableCode(ExplodingHashCode):
     __hash__ = None  # type: ignore[assignment]
 
 
+class ExplodingCodeAccess:
+    """Malformed nested error whose code property must never be dispatched."""
+
+    def __init__(self, marker: str) -> None:
+        self.marker = marker
+
+    @property
+    def code(self) -> object:
+        raise RuntimeError(self.marker)
+
+
 def forged_provider_error(code: object, marker: str) -> ProviderError:
     """Bypass construction only to exercise a hostile adapter exception object."""
+    return forged_provider_error_payload(
+        SimpleNamespace(code=code, message=marker, retry_hint_ms=None), marker
+    )
+
+
+def forged_provider_error_payload(payload: object, marker: str) -> ProviderError:
+    """Attach a hostile nested object without invoking ProviderError validation."""
     forged = ProviderError.__new__(ProviderError)
     Exception.__init__(forged, marker)
-    forged.error = SimpleNamespace(  # type: ignore[assignment]
-        code=code,
-        message=marker,
-        retry_hint_ms=None,
-    )
+    forged.error = payload  # type: ignore[assignment]
     forged.retry_allowed = False
     forged.failover_allowed = False
     return forged

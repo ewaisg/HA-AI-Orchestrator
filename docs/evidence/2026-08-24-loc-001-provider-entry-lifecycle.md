@@ -52,6 +52,8 @@ The third independent reviews rejected candidate `62df5da1dd1e1b337b81bf65bd53fa
 
 Immutable exact-type artifact `9dd98896fc61b8b6ff35aa5b032f5b6e13286926` was reconstructed from a Git archive in clean Linux. It passed 250 full tests, 62 focused lifecycle tests, 137 provider tests, 30 security/evidence/traceability tests, and 167 pure tests. Ruff format/lint, canary, evidence schema, traceability, diff, and canonical hashes passed. Five known upstream deprecations remain and no project failure occurred.
 
+Both fourth reviews rejected candidate `2fbc55afd5d51e05ff861e1f900ee9781100bdea`: workflow/safety at `2026-08-24T17:28:20Z` and test/release at `2026-08-24T17:31:33Z` independently proved the mapper still dispatched an attacker-controlled nested `.code` property before exact code-type validation. The current remediation centralizes extraction: it requires the exact outer `ProviderError`, reads its instance dictionary without invoking a forged property, requires the exact immutable `NormalizedError`, retrieves its slot with `object.__getattribute__`, and only then accepts an exact `ErrorCode`. Setup, initial setup flow, reauthentication, and reconfiguration tests use a nested `.code` property that throws secret-bearing text and prove bounded outputs and atomic updates. All 66 focused clean-Linux tests pass.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -61,4 +63,4 @@ Immutable exact-type artifact `9dd98896fc61b8b6ff35aa5b032f5b6e13286926` was rec
 
 ## Acceptance status
 
-`THIRD REMEDIATION IN REVIEW`. No rejected candidate is accepted. Exact-type artifact `9dd98896fc61b8b6ff35aa5b032f5b6e13286926` passes its exact-commit gates with the complete three-class adversarial matrix. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
+`FOURTH REMEDIATION IN REVIEW`. No rejected candidate is accepted. Create and verify a new immutable artifact containing the non-dispatching full-envelope extractor and property-throwing regressions, then obtain fresh workflow/safety plus test/release approvals before LOC-001 can be `DONE`.

@@ -22,7 +22,7 @@ from .provider_entry import (
     provider_entry_unique_id,
     validate_provider_entry_identity,
 )
-from .providers.contract import ErrorCode, ProviderError
+from .providers.contract import ErrorCode, ProviderError, safe_provider_error_code
 from .runtime import async_get_runtime
 
 _TRANSIENT_ERRORS = {
@@ -266,8 +266,7 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 def _flow_error_for_provider_error(error: ProviderError) -> str:
-    raw_code = getattr(error.error, "code", None)
-    code = raw_code if type(raw_code) is ErrorCode else None
+    code = safe_provider_error_code(error)
     if code is ErrorCode.AUTHENTICATION:
         return "invalid_auth"
     if code is ErrorCode.AUTHORIZATION:
