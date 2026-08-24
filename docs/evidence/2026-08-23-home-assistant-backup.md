@@ -14,6 +14,8 @@ This record captures redacted live evidence for the backup portion of `FND-007` 
 | HA-BACKUP-004 | After selection, the Backup page reported a daily schedule retaining three backups, Home Assistant settings and history included, all apps included, and Home Assistant Cloud enabled as a backup location | Redacted live Backup overview inspection |
 | HA-BACKUP-005 | The first automatic backup completed successfully. Home Assistant reported one automatic backup of `87.89 MB`, stored in two locations, with the next automatic backup scheduled for the following day | Redacted live Backup overview inspection |
 | HA-BACKUP-006 | No restore was attempted against the live Home Assistant system, and no spare-system restore artifact was supplied | Explicitly bounded observation; no destructive test inferred |
+| HA-BACKUP-007 | The owner confirmed that the emergency kit was downloaded and securely stored outside Home Assistant | Direct owner statement; storage location and recovery material deliberately not requested or retained |
+| HA-BACKUP-008 | The owner approved a restore test every six months and after major backup or migration changes, using only a spare or isolated Home Assistant instance and never the production instance merely to satisfy a test | Direct owner statement |
 
 ## Official contract checked
 
@@ -22,13 +24,12 @@ This record captures redacted live evidence for the backup portion of `FND-007` 
 
 ## Disposition
 
-The automatic-backup portion of `ENV-010` is verified for the observed installation: Home Assistant's Recommended policy is configured and its first encrypted automatic backup completed to two locations, including Home Assistant Cloud. The repository does not contain the encryption key or emergency kit.
+The backup-policy portion of `ENV-010` is resolved for Phase 0: Home Assistant's Recommended policy is configured, its first encrypted automatic backup completed to two locations including Home Assistant Cloud, emergency-kit custody outside Home Assistant is owner-confirmed, and a bounded restore-test policy is approved. The repository does not contain the encryption key, emergency kit, or its storage location.
 
-The following remain open and are not represented as passed:
+Operational follow-up that is not represented as already passed:
 
-1. Owner confirmation that the emergency kit was downloaded and is securely stored outside Home Assistant.
-2. A written restore-test policy and a safe restore artifact from a spare or isolated Home Assistant environment; no restore will be attempted on the production installation merely to close Phase 0.
-3. Router/VLAN segmentation and access-control facts for the Home Assistant-to-LM Studio path.
+1. Complete the first spare/isolated restore test by `2027-02-23`, or earlier after a major backup or migration change, and retain a redacted success/failure artifact.
+2. Revalidate automatic-backup success, emergency-kit custody, and restore-test cadence after material backup-location, encryption, account, or installation changes.
 
 ## Repository-update verification
 
@@ -38,4 +39,4 @@ The following remain open and are not represented as passed:
 | `uv run python scripts/canary_scan.py` | Passed with no findings |
 | `uv run python scripts/run_pure_tests.py` | `81 passed`, with five dependency deprecation warnings |
 | Targeted sensitive-value scan | No custom domain, observed private address range, Bearer-token pattern, unique chat-completion ID, or observed encryption-key prefix was found in the checked repository paths |
-| Independent workflow/safety review | Approved with no blocking findings; confirmed bounded claims, redaction, retained unknowns, and the prohibition on using the production installation merely to close the restore-test item |
+| Independent workflow/safety review | Approved the final FND-007 / ENV-010 closure: owner-confirmed emergency-kit custody and isolated restore cadence, bounded same-subnet topology claim, retained 2027-02-23-or-earlier restore follow-up, no production-restore recommendation, and no sensitive-value exposure |

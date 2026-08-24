@@ -25,6 +25,7 @@ This record captures local inspection, two synthetic capability probes, and a re
 | LM-LIVE-015 | The temporary command was removed. The saved configuration was verified to contain exactly `lmstudio_test` and `lmstudio_chat`, two secret-backed authorization headers, two endpoint lines, no negative-probe command, and no placeholder. The owner then reran `lmstudio_test` and received HTTP `200` with the same model, completion text, and 20/7/27 usage. The panel remained healthy with `None contacted`; `ai_orchestrator` still had no scoped log issue | Live File Editor, owner-supplied Actions response, scoped log review, and live panel inspection |
 | LM-LIVE-016 | Effective Windows Firewall reinspection found exactly two LM Studio inbound rules. The enabled TCP allow rule is scoped to the Private profile, local port `1234`, one remote source address, and blocked edge traversal. The UDP rule is disabled | Read-only local firewall rule, port-filter, and address-filter inspection; program path, rule identifiers, network name, and private source address withheld |
 | LM-LIVE-017 | After LM-LIVE-016, Home Assistant reran `rest_command.lmstudio_test` and received HTTP `200` with the same model, completion text, and 20/7/27 usage | Owner-supplied Home Assistant Actions response; unique response ID, timestamp, headers, endpoint, and credential omitted |
+| LM-LIVE-018 | Home Assistant and the LM Studio host each reported an active IPv4 interface in the same private `/24` subnet. The destination is therefore on-link for the observed IPv4 configuration and does not require an inter-subnet router hop | Redacted live Home Assistant Network UI plus read-only Windows interface inspection; exact addresses, interface identifiers, IPv6 values, hostname, and external URLs withheld |
 
 The complete model inventory is intentionally unnecessary for the first adapter. The loaded model identifier above is recorded because it was actually probed; it is not a promise that the same model will remain loaded after restart.
 
@@ -63,11 +64,13 @@ Completed owner security steps:
 6. An isolated Home Assistant-origin invalid-credential request returned HTTP `401` with `invalid_api_key`; the valid secret was not overwritten or exposed.
 7. The saved file no longer contains the temporary negative command and again contains the intended two commands. A later positive request returned HTTP `200` and the foundation panel remained healthy.
 8. The effective host firewall is restricted to Private-profile TCP `1234` from one remote source; edge traversal is blocked, UDP is disabled, and the Home Assistant test still returns HTTP `200` afterward.
+9. The Home Assistant and LM Studio interfaces are in the same private IPv4 `/24`; no inter-subnet router route is required for the observed provider path.
 
 Current network/authentication precondition disposition:
 
 1. The Phase 0 live authentication, positive/negative Home Assistant transport, provider-side MCP-denial, and host-firewall evidence required by `ENV-003` is complete for the observed setup.
 2. `LOC-003` still requires implementation and adapter-level contract, secret-handling, timeout, normalized-error, redirect/SSRF, unload/reload, and live revalidation tests. The evidence here does not mark that future implementation task done.
+3. The same-subnet observation resolves the router/VLAN-path question for the current Phase 0 IPv4 topology; revalidate if either host moves to a different subnet, VLAN, interface, or address policy.
 
 Authentication is enabled and both existing Home Assistant `rest_command` definitions now use the secret-backed header. LM-LIVE-012 through LM-LIVE-015 prove current positive and invalid-credential Home Assistant-origin transport behavior plus cleanup restoration; they do not substitute for adapter-level secret handling or timeout behavior. Firewall narrowing and post-change reachability are separately evidenced by LM-LIVE-016 and LM-LIVE-017.
 
@@ -80,9 +83,9 @@ The exact Home Assistant LAN source address was observed in its Network page on 
 - Whether the LM Studio server and loaded model automatically recover after host or application restart.
 - Real timeout, cancellation, streaming, and concurrent-request behavior.
 - Performance and reliability thresholds for the selected workflow classes.
-- Router/VLAN policy plus emergency-kit custody and restore-test readiness tracked under `ENV-010`; automatic backups are now evidenced separately in `docs/evidence/2026-08-23-home-assistant-backup.md`.
+- The first approved spare/isolated restore test is due by `2027-02-23` or earlier after a major backup or migration change; it is tracked in `docs/evidence/2026-08-23-home-assistant-backup.md` and is not represented as already passed.
 
-These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FND-007`; none is represented as passed.
+The provider-behavior unknowns remain assigned to `LOC-003` and `LOC-007`. The scheduled restore follow-up is governed by DEC-022 and the backup evidence record; none of these future checks is represented as already passed or as reopening FND-007.
 
 ## Repository-update verification
 
@@ -98,6 +101,7 @@ These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FN
 | Final scoped log interpretation | `ai_orchestrator` returned `No issues found`; `rest_command` retained the intentional `401` and intervening operator-test errors, with no later error after the final positive request |
 | Effective firewall reinspection | Enabled TCP allow is Private-only, local port `1234`, one remote source, and edge traversal blocked; UDP rule disabled; see LM-LIVE-016 |
 | Post-firewall Home Assistant request | HTTP `200`; see LM-LIVE-017 |
+| Same-subnet path inspection | Home Assistant and the LM Studio host reported active IPv4 interfaces in the same private `/24`; exact addresses withheld; see LM-LIVE-018 |
 | `git diff --check` | Passed; only expected Windows line-ending notices were emitted |
 | `uv run python scripts/canary_scan.py` | Passed with no findings |
 | `uv run python scripts/run_pure_tests.py` | `81 passed`, with five dependency deprecation warnings |
