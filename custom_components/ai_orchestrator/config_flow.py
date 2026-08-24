@@ -266,7 +266,8 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 def _flow_error_for_provider_error(error: ProviderError) -> str:
-    code = getattr(error.error, "code", None)
+    raw_code = getattr(error.error, "code", None)
+    code = raw_code if isinstance(raw_code, ErrorCode) else None
     if code is ErrorCode.AUTHENTICATION:
         return "invalid_auth"
     if code is ErrorCode.AUTHORIZATION:

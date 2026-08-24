@@ -163,8 +163,13 @@ async def _async_setup_provider_entry(
 
 
 def _raise_provider_setup_error(error: ProviderError) -> NoReturn:
-    code = getattr(error.error, "code", None)
-    message = SAFE_ERROR_MESSAGES.get(code, "Provider setup failed safely")
+    raw_code = getattr(error.error, "code", None)
+    code = raw_code if isinstance(raw_code, ErrorCode) else None
+    message = (
+        SAFE_ERROR_MESSAGES[code]
+        if code is not None
+        else "Provider setup failed safely"
+    )
     if code is ErrorCode.AUTHENTICATION:
         raise ConfigEntryAuthFailed(message) from None
     if code in _TRANSIENT_SETUP_ERRORS:

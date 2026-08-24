@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 
 import voluptuous as vol
 
@@ -122,3 +123,27 @@ class SyntheticProviderEntryAdapter:
 def provider_error(error: ProviderError) -> BaseException:
     """Retain a narrow return type for parameterized lifecycle outcomes."""
     return error
+
+
+class ExplodingHashCode:
+    """Malformed error code that raises if lifecycle code tries to hash it."""
+
+    def __init__(self, marker: str) -> None:
+        self.marker = marker
+
+    def __hash__(self) -> int:
+        raise RuntimeError(self.marker)
+
+
+def forged_provider_error(code: object, marker: str) -> ProviderError:
+    """Bypass construction only to exercise a hostile adapter exception object."""
+    forged = ProviderError.__new__(ProviderError)
+    Exception.__init__(forged, marker)
+    forged.error = SimpleNamespace(  # type: ignore[assignment]
+        code=code,
+        message=marker,
+        retry_hint_ms=None,
+    )
+    forged.retry_allowed = False
+    forged.failover_allowed = False
+    return forged

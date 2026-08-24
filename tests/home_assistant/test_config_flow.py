@@ -33,7 +33,9 @@ from custom_components.ai_orchestrator.providers.contract import (
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
     SYNTHETIC_PROVIDER_TYPE,
+    ExplodingHashCode,
     SyntheticProviderEntryAdapter,
+    forged_provider_error,
 )
 
 
@@ -197,6 +199,45 @@ async def test_provider_flow_normalizes_auth_failure_without_secret_echo(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "invalid_auth"}
     assert synthetic_secret not in repr(result)
+
+
+async def test_provider_flow_bounds_malformed_error_code_without_hashing(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """A hostile error-code object cannot bypass the config-flow boundary."""
+    MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+        version=2,
+    ).add_to_hass(hass)
+    synthetic_marker = "synthetic-exploding-code-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error(
+                ExplodingHashCode(synthetic_marker), synthetic_marker
+            )
+        ),
+    )
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": SOURCE_USER},
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {CONF_PROVIDER_TYPE: SYNTHETIC_PROVIDER_TYPE},
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_config"}
+    assert synthetic_marker not in repr(result)
 
 
 async def test_reauth_replaces_adapter_config_and_preserves_identity(
@@ -374,3 +415,49 @@ async def test_update_schema_exception_is_safely_bounded(
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "provider_schema_error"
     assert synthetic_marker not in repr(result)
+
+
+@pytest.mark.parametrize("source", [SOURCE_REAUTH, SOURCE_RECONFIGURE])
+async def test_update_bounds_malformed_error_code_without_hashing(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+    source: str,
+) -> None:
+    """Update flows keep hostile error-code objects behind a fixed identifier."""
+    connection_id = "00000000-0000-4000-8000-000000000005"
+    original_config = {SYNTHETIC_CONFIG_FIELD: "old-synthetic-value"}
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config=original_config,
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    entry.add_to_hass(hass)
+    synthetic_marker = "synthetic-update-exploding-code-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error(
+                ExplodingHashCode(synthetic_marker), synthetic_marker
+            )
+        ),
+    )
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": source, "entry_id": entry.entry_id},
+        data=dict(entry.data) if source == SOURCE_REAUTH else None,
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {SYNTHETIC_CONFIG_FIELD: "replacement-synthetic-value"},
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "invalid_config"}
+    assert synthetic_marker not in repr(result)
+    assert entry.data[CONF_PROVIDER_CONFIG] == original_config

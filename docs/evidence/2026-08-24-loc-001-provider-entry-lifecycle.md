@@ -44,6 +44,8 @@ The remediation requires a real `NormalizedError`, derives HA messages from the 
 
 Immutable remediated artifact `623d61b6d8dffa5ce00a5f1e5c38f51e938a5351` was reconstructed from a Git archive in clean Linux with Python `3.14.5`, Home Assistant `2026.8.3`, and pytest Home Assistant plugin `0.13.357`. It passed 238 full tests, 50 focused provider-entry/config-flow/setup/migration tests, 137 provider tests, 30 security/evidence/traceability tests, and 167 pure tests. Ruff format and lint, canary scan, evidence schema, traceability, and canonical hash checks passed. Five known upstream dependency deprecation warnings remain; no project-source warning or failure occurred.
 
+Fresh test/release review approved candidate `29c7db552aea270b796057475ec8078eaa75a119` at `2026-08-24T17:09:53Z`. Workflow/safety re-review rejected it at `2026-08-24T17:11:01Z`: a forged `ProviderError.error.code` object whose `__hash__` raised could still escape when used directly in a safe-message mapping or transient-code set lookup. LOC-001 again remained open. The current remediation first accepts only a real `ErrorCode` via `isinstance` and uses `None` for every malformed code before any mapping or set operation. New setup, initial setup-flow, reauthentication, and reconfiguration tests use a code object with a secret-bearing throwing hash and prove bounded messages/reasons plus atomic stored data. Interim checks pass 54 focused clean-Linux tests, 167 local provider/security/quality tests, 167 pure tests, Ruff, canary, and diff.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -53,4 +55,4 @@ Immutable remediated artifact `623d61b6d8dffa5ce00a5f1e5c38f51e938a5351` was rec
 
 ## Acceptance status
 
-`REMEDIATION IN REVIEW`. The first candidate was rejected and is not accepted. Remediated artifact `623d61b6d8dffa5ce00a5f1e5c38f51e938a5351` passes its exact-commit gates. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
+`SECOND REMEDIATION IN REVIEW`. Neither rejected candidate is accepted. Create and reproduce a new immutable artifact containing the malformed-code fix, then obtain fresh workflow/safety plus test/release approvals before LOC-001 can be `DONE`.

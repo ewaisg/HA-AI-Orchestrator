@@ -1,6 +1,5 @@
 """Tests for the AI Orchestrator integration lifecycle."""
 
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -44,7 +43,9 @@ from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
     SYNTHETIC_PROVIDER_TYPE,
+    ExplodingHashCode,
     SyntheticProviderEntryAdapter,
+    forged_provider_error,
 )
 
 
@@ -420,15 +421,7 @@ async def test_provider_setup_uses_safe_text_for_malformed_provider_error(
         version=2,
     )
     synthetic_marker = "synthetic-forged-provider-private-marker"
-    forged = ProviderError.__new__(ProviderError)
-    Exception.__init__(forged, synthetic_marker)
-    forged.error = SimpleNamespace(  # type: ignore[assignment]
-        code=ErrorCode.AUTHENTICATION,
-        message=synthetic_marker,
-        retry_hint_ms=None,
-    )
-    forged.retry_allowed = False
-    forged.failover_allowed = False
+    forged = forged_provider_error(ErrorCode.AUTHENTICATION, synthetic_marker)
     async_register_provider_entry_adapter(
         hass,
         SyntheticProviderEntryAdapter(error=forged),
@@ -438,6 +431,38 @@ async def test_provider_setup_uses_safe_text_for_malformed_provider_error(
         await async_setup_entry(hass, entry)
 
     assert str(caught.value) == SAFE_ERROR_MESSAGES[ErrorCode.AUTHENTICATION]
+    assert synthetic_marker not in str(caught.value)
+
+
+async def test_provider_setup_bounds_malformed_error_code_without_hashing(
+    hass: HomeAssistant,
+) -> None:
+    """A hostile error-code object cannot bypass the setup safe-message path."""
+    connection_id = "00000000-0000-4000-8000-000000000019"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    synthetic_marker = "synthetic-setup-exploding-code-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_provider_error(
+                ExplodingHashCode(synthetic_marker), synthetic_marker
+            )
+        ),
+    )
+
+    with pytest.raises(ConfigEntryError) as caught:
+        await async_setup_entry(hass, entry)
+
+    assert str(caught.value) == "Provider setup failed safely"
     assert synthetic_marker not in str(caught.value)
 
 
