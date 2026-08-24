@@ -36,7 +36,7 @@ After those corrections, the working-tree checks produced:
 | Canary scan | Passed with no findings |
 | `git diff --check` | Passed |
 
-These working-tree results are not acceptance evidence. They must be reproduced from the committed candidate, including the clean Linux full suite.
+Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` reproduced the same Ruff, 120 focused/pure, canary, traceability, manifest-schema, diff, and clean-worktree results. A clean Linux full suite and independent reviews remain required.
 
 ## Residual gates
 
@@ -47,4 +47,4 @@ These working-tree results are not acceptance evidence. They must be reproduced 
 
 ## Acceptance status
 
-`IN REVIEW`. A committed artifact and metadata candidate, clean Linux full-suite result, and independent provider/safety and test/release approvals are required before LOC-002 can be `DONE`.
+`IN REVIEW`. Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` is committed and locally reproduced. The metadata candidate, clean Linux full-suite result, and independent provider/safety and test/release approvals are still required before LOC-002 can be `DONE`.

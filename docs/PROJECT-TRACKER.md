@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **LOC-002 is in REVIEW before LOC-001. Provider contract version 1 and fourteen deterministic zero-network fixtures are implemented; local Ruff, 120 focused/pure tests, canary, traceability, manifest-schema, and diff gates pass. Commit the artifact and metadata candidate, reproduce the full suite from clean Linux, obtain independent provider/safety and test/release approvals, then close LOC-002 and begin LOC-001. No endpoint, credential, network transport, tool executor, or Home Assistant action was added. Cross-Core compatibility remains deferred and unclaimed under DEC-023.**
+Current resume point: **LOC-002 artifact `755935eded9180ad4649eec0f2060af2958b3f4e` is in REVIEW before LOC-001. Provider contract version 1 and fourteen deterministic zero-network fixtures are implemented; committed local Ruff, 120 focused/pure tests, canary, traceability, manifest-schema, diff, and clean-worktree gates pass. Commit the metadata candidate, reproduce the full suite from clean Linux, obtain independent provider/safety and test/release approvals, then close LOC-002 and begin LOC-001. No endpoint, credential, network transport, tool executor, or Home Assistant action was added. Cross-Core compatibility remains deferred and unclaimed under DEC-023.**
 
 ## Status rules
 
@@ -53,7 +53,7 @@ No task may move to `DONE` based only on an assertion.
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
 | LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `TODO` | FND-010, LOC-002 | Provider lifecycle requires the reviewed provider-neutral validation/authentication contract; implement after LOC-002 without adding provider-specific transport |
-| LOC-002 | Define provider contract and normalized errors/capabilities | `REVIEW` | FND-008 | Provider contract v1 and fourteen zero-network fixtures implemented. Working-tree Ruff, 120 focused/pure tests, canary, traceability, manifest-schema, and diff gates passed. Next: committed candidate, clean Linux suite, independent provider/safety and test/release approval. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
+| LOC-002 | Define provider contract and normalized errors/capabilities | `REVIEW` | FND-008 | Artifact `755935eded9180ad4649eec0f2060af2958b3f4e`: provider contract v1 and fourteen zero-network fixtures implemented; committed local Ruff, 120 focused/pure tests, canary, traceability, manifest-schema, diff, and clean-worktree gates passed. Next: metadata candidate, clean Linux suite, independent provider/safety and test/release approval. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |
 | LOC-005 | Add read-only entity/area/device catalog | `TODO` | LOC-001 | Registry-change and rename tests |
