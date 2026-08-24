@@ -2,6 +2,7 @@
 
 from .contract import (
     PROVIDER_CONTRACT_VERSION,
+    SAFE_ERROR_MESSAGES,
     CapabilityRecord,
     CapabilityState,
     ConnectionValidationResult,
@@ -21,10 +22,13 @@ from .contract import (
     StreamCompleted,
     StreamDelta,
     StreamEvent,
+    StructuredOutputDefinition,
     TextGenerationResult,
     ToolCall,
     ToolDefinition,
     Usage,
+    validate_generation_result,
+    validate_schema_value,
 )
 
 __all__ = [
@@ -40,6 +44,7 @@ __all__ = [
     "NormalizedError",
     "Provider",
     "PROVIDER_CONTRACT_VERSION",
+    "SAFE_ERROR_MESSAGES",
     "ProviderError",
     "ProviderHealthState",
     "ProviderModel",
@@ -48,8 +53,11 @@ __all__ = [
     "StreamCompleted",
     "StreamDelta",
     "StreamEvent",
+    "StructuredOutputDefinition",
     "TextGenerationResult",
     "ToolCall",
     "ToolDefinition",
     "Usage",
+    "validate_generation_result",
+    "validate_schema_value",
 ]

@@ -25,7 +25,7 @@
       {
         "sequence": 0,
         "type": "raise_normalized_error",
-        "error": { "code": "timeout", "message": "Synthetic provider timeout." }
+        "error": { "code": "timeout", "message": "Provider request timed out." }
       }
     ]
   },
@@ -33,7 +33,7 @@
     "outcome": "error",
     "normalized_error": {
       "code": "timeout",
-      "message": "Synthetic provider timeout."
+      "message": "Provider request timed out."
     },
     "retry_allowed": true,
     "failover_allowed": true,

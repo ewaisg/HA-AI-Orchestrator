@@ -1,31 +1,35 @@
 {
   "fixture_schema_version": 1,
-  "fixture_id": "generate.malformed_response",
+  "fixture_id": "stream.invalid_terminal",
   "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
-  "operation": "generate",
+  "operation": "stream",
   "capabilities": {
     "text_generation": "supported",
     "model_discovery": "unknown",
-    "streaming": "unknown",
+    "streaming": "supported",
     "structured_output": "unknown",
     "tool_calling": "unknown",
     "usage": "unknown"
   },
   "request_match": {
     "messages": [
-      { "role": "user", "content": "Exercise synthetic malformed output." }
+      { "role": "user", "content": "Return an invalid synthetic terminal chunk." }
     ],
     "tools": []
   },
   "script": {
     "clock": "manual",
     "steps": [
+      { "sequence": 0, "type": "emit_delta", "text": "Synthetic " },
       {
-        "sequence": 0,
-        "type": "return_malformed",
-        "payload": { "unexpected": ["synthetic", "shape"] }
+        "sequence": 1,
+        "type": "raise_normalized_error",
+        "error": {
+          "code": "invalid_response",
+          "message": "Provider returned an invalid response."
+        }
       }
     ]
   },
@@ -39,5 +43,5 @@
     "failover_allowed": false,
     "request_count": 1
   },
-  "required_capabilities": ["text_generation"]
+  "required_capabilities": ["text_generation", "streaming"]
 }

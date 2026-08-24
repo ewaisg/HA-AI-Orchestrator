@@ -7,7 +7,7 @@ from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Final, Protocol
+from typing import Final, Protocol, cast
 
 PROVIDER_CONTRACT_VERSION: Final = "1"
 _IDENTIFIER_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
@@ -65,17 +65,54 @@ class ErrorCode(StrEnum):
     UNSUPPORTED = "unsupported"
 
 
+SAFE_ERROR_MESSAGES: Final[Mapping[ErrorCode, str]] = MappingProxyType(
+    {
+        ErrorCode.AUTHENTICATION: "Provider authentication failed.",
+        ErrorCode.AUTHORIZATION: "Provider authorization failed.",
+        ErrorCode.NOT_FOUND: "Provider model or deployment was not found.",
+        ErrorCode.RATE_LIMITED: "Provider rate limit was reached.",
+        ErrorCode.CONTEXT_OVERFLOW: "Provider context limit was exceeded.",
+        ErrorCode.SAFETY_REFUSAL: "Provider refused the request for safety reasons.",
+        ErrorCode.PROVIDER_UNAVAILABLE: "Provider is unavailable.",
+        ErrorCode.INVALID_RESPONSE: "Provider returned an invalid response.",
+        ErrorCode.TIMEOUT: "Provider request timed out.",
+        ErrorCode.CONNECTION: "Provider connection failed.",
+        ErrorCode.TLS: "Provider TLS validation failed.",
+        ErrorCode.DNS: "Provider name resolution failed.",
+        ErrorCode.CANCELLED: "Provider request was cancelled.",
+        ErrorCode.UNSUPPORTED: "Provider does not support the requested capability.",
+    }
+)
+
+
 @dataclass(frozen=True, slots=True)
 class Message:
     """One provider-neutral chat message."""
 
     role: MessageRole
     content: str
+    tool_calls: tuple[ToolCall, ...] = ()
+    tool_call_id: str | None = None
 
     def __post_init__(self) -> None:
         """Reject non-normalized message data."""
         _require_instance(self.role, MessageRole, "message role")
         _require_instance(self.content, str, "message content")
+        object.__setattr__(self, "tool_calls", tuple(self.tool_calls))
+        if any(not isinstance(call, ToolCall) for call in self.tool_calls):
+            raise TypeError("Assistant tool calls must use ToolCall")
+        if self.role is MessageRole.ASSISTANT:
+            if self.tool_call_id is not None:
+                raise ValueError("Assistant message cannot carry a tool-call result ID")
+        elif self.role is MessageRole.TOOL:
+            if self.tool_calls:
+                raise ValueError("Tool-result message cannot request tool calls")
+            if self.tool_call_id is None or not self.tool_call_id.strip():
+                raise ValueError("Tool-result message requires a tool-call ID")
+        elif self.tool_calls or self.tool_call_id is not None:
+            raise ValueError(
+                "Only assistant and tool-result messages may carry tool metadata"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,7 +128,26 @@ class ToolDefinition:
         _validate_identifier(self.name, "tool name")
         if not self.description.strip():
             raise ValueError("Tool description cannot be empty")
+        _validate_schema(self.parameters, "tool parameter schema")
+        if self.parameters.get("type") != "object":
+            raise ValueError("Tool parameter schema must have an object root")
         object.__setattr__(self, "parameters", _freeze_mapping(self.parameters))
+
+
+@dataclass(frozen=True, slots=True)
+class StructuredOutputDefinition:
+    """Closed provider-neutral object schema requested from an adapter."""
+
+    name: str
+    schema: Mapping[str, object]
+
+    def __post_init__(self) -> None:
+        """Validate and freeze the closed output schema."""
+        _validate_identifier(self.name, "structured output name")
+        _validate_schema(self.schema, "structured output schema")
+        if self.schema.get("type") != "object":
+            raise ValueError("Structured output schema must have an object root")
+        object.__setattr__(self, "schema", _freeze_mapping(self.schema))
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +156,7 @@ class ProviderRequest:
 
     messages: tuple[Message, ...] = ()
     tools: tuple[ToolDefinition, ...] = ()
+    output_schema: StructuredOutputDefinition | None = None
 
     def __post_init__(self) -> None:
         """Detach caller-owned request sequences."""
@@ -109,6 +166,13 @@ class ProviderRequest:
             raise TypeError("Provider request messages must use Message")
         if any(not isinstance(tool, ToolDefinition) for tool in self.tools):
             raise TypeError("Provider request tools must use ToolDefinition")
+        if self.output_schema is not None and not isinstance(
+            self.output_schema, StructuredOutputDefinition
+        ):
+            raise TypeError(
+                "Provider output schema must use StructuredOutputDefinition"
+            )
+        _validate_tool_continuation(self.messages)
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +211,7 @@ class TextGenerationResult:
     text: str
     tool_calls: tuple[ToolCall, ...] = ()
     usage: Usage | None = None
+    structured_output: Mapping[str, object] | None = None
 
     def __post_init__(self) -> None:
         """Detach caller-owned tool-call sequences."""
@@ -158,6 +223,14 @@ class TextGenerationResult:
             raise ValueError("Tool call IDs must be unique")
         if self.usage is not None and not isinstance(self.usage, Usage):
             raise TypeError("Generation usage must use Usage")
+        if self.structured_output is not None:
+            if not isinstance(self.structured_output, Mapping):
+                raise TypeError("Generation structured output must be a mapping")
+            object.__setattr__(
+                self,
+                "structured_output",
+                _freeze_mapping(self.structured_output),
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -280,8 +353,8 @@ class NormalizedError:
     def __post_init__(self) -> None:
         """Reject unusable errors at the provider-neutral boundary."""
         _require_instance(self.code, ErrorCode, "error code")
-        if not self.message.strip():
-            raise ValueError("Normalized error message cannot be empty")
+        if self.message != SAFE_ERROR_MESSAGES[self.code]:
+            raise ValueError("Normalized error message must use the safe contract text")
         if self.retry_hint_ms is not None and self.retry_hint_ms < 0:
             raise ValueError("Retry hint cannot be negative")
 
@@ -313,6 +386,31 @@ type ProviderResult = (
     | CapabilityRecord
 )
 type StreamEvent = StreamDelta | StreamCompleted
+
+
+def _validate_tool_continuation(messages: tuple[Message, ...]) -> None:
+    pending: dict[str, str] = {}
+    seen: set[str] = set()
+    for message in messages:
+        if message.role is MessageRole.ASSISTANT:
+            for call in message.tool_calls:
+                if call.id in seen:
+                    raise ValueError("Tool call IDs must be unique across the request")
+                seen.add(call.id)
+                pending[call.id] = call.name
+        elif message.role is MessageRole.TOOL:
+            tool_call_id = message.tool_call_id
+            if tool_call_id not in pending:
+                raise ValueError(
+                    "Tool-result message references an unknown tool-call ID"
+                )
+            del pending[tool_call_id]
+    if pending:
+        raise ValueError(
+            "Every assistant tool call requires one correlated tool result"
+        )
+
+
 EMPTY_REQUEST = ProviderRequest()
 
 
@@ -374,3 +472,120 @@ def _validate_identifier(value: str, label: str) -> None:
 def _require_instance(value: object, expected: type, label: str) -> None:
     if not isinstance(value, expected):
         raise TypeError(f"{label.capitalize()} must use {expected.__name__}")
+
+
+def validate_schema_value(schema: Mapping[str, object], value: object) -> None:
+    """Validate one value against the deliberately small internal schema dialect."""
+    _validate_schema_value(schema, value, "value")
+
+
+def validate_generation_result(
+    request: ProviderRequest, result: TextGenerationResult
+) -> None:
+    """Validate provider output against only the tools and schema in its request."""
+    exposed_tools = {tool.name: tool for tool in request.tools}
+    for call in result.tool_calls:
+        tool = exposed_tools.get(call.name)
+        if tool is None:
+            raise ValueError("Provider tool call was not exposed by the request")
+        validate_schema_value(tool.parameters, call.arguments)
+    if request.output_schema is None:
+        if result.structured_output is not None:
+            raise ValueError("Provider returned unrequested structured output")
+    else:
+        if result.structured_output is None:
+            raise ValueError("Provider omitted requested structured output")
+        validate_schema_value(request.output_schema.schema, result.structured_output)
+
+
+def _validate_schema(schema: Mapping[str, object], label: str) -> None:
+    if not isinstance(schema, Mapping):
+        raise TypeError(f"{label.capitalize()} must be a mapping")
+    allowed = {
+        "type",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "enum",
+    }
+    unknown = set(schema) - allowed
+    if unknown:
+        raise ValueError(f"{label.capitalize()} contains unsupported keywords")
+    schema_type = schema.get("type")
+    if schema_type not in {"object", "array", "string", "integer", "number", "boolean"}:
+        raise ValueError(f"{label.capitalize()} has an unsupported type")
+    if "enum" in schema:
+        enum_values = schema["enum"]
+        if not isinstance(enum_values, list | tuple) or not enum_values:
+            raise ValueError(f"{label.capitalize()} enum must be a nonempty sequence")
+    if schema_type == "object":
+        properties = schema.get("properties")
+        if not isinstance(properties, Mapping):
+            raise ValueError(f"{label.capitalize()} object requires properties")
+        if schema.get("additionalProperties") is not False:
+            raise ValueError(
+                f"{label.capitalize()} object must reject additional properties"
+            )
+        required = schema.get("required", ())
+        if not isinstance(required, list | tuple) or any(
+            not isinstance(item, str) for item in required
+        ):
+            raise ValueError(f"{label.capitalize()} required must be a string sequence")
+        if len(required) != len(set(required)) or not set(required) <= set(properties):
+            raise ValueError(f"{label.capitalize()} required fields are invalid")
+        for name, child in properties.items():
+            if not isinstance(name, str) or not isinstance(child, Mapping):
+                raise ValueError(f"{label.capitalize()} properties are invalid")
+            _validate_schema(child, f"{label} property")
+    elif schema_type == "array":
+        items = schema.get("items")
+        if not isinstance(items, Mapping):
+            raise ValueError(f"{label.capitalize()} array requires an item schema")
+        _validate_schema(items, f"{label} item")
+    elif any(
+        key in schema
+        for key in ("properties", "required", "additionalProperties", "items")
+    ):
+        raise ValueError(
+            f"{label.capitalize()} has keywords incompatible with its type"
+        )
+
+
+def _validate_schema_value(
+    schema: Mapping[str, object], value: object, label: str
+) -> None:
+    _validate_schema(schema, f"{label} schema")
+    schema_type = schema["type"]
+    valid_type = {
+        "object": lambda item: isinstance(item, Mapping),
+        "array": lambda item: isinstance(item, list | tuple),
+        "string": lambda item: isinstance(item, str),
+        "integer": lambda item: isinstance(item, int) and not isinstance(item, bool),
+        "number": lambda item: (
+            isinstance(item, int | float) and not isinstance(item, bool)
+        ),
+        "boolean": lambda item: isinstance(item, bool),
+    }[schema_type]
+    if not valid_type(value):
+        raise ValueError(f"{label.capitalize()} has the wrong type")
+    if "enum" in schema and value not in schema["enum"]:
+        raise ValueError(f"{label.capitalize()} is not an allowed enum value")
+    if schema_type == "object":
+        mapping_value = cast(Mapping[str, object], value)
+        properties = cast(Mapping[str, Mapping[str, object]], schema["properties"])
+        required = cast(list[str] | tuple[str, ...], schema.get("required", ()))
+        missing = set(required) - set(mapping_value)
+        extra = set(mapping_value) - set(properties)
+        if missing:
+            raise ValueError(f"{label.capitalize()} is missing required fields")
+        if extra:
+            raise ValueError(f"{label.capitalize()} has additional fields")
+        for name, item in mapping_value.items():
+            child = properties[name]
+            _validate_schema_value(child, item, f"{label} field {name}")
+    elif schema_type == "array":
+        sequence_value = cast(list[object] | tuple[object, ...], value)
+        items = cast(Mapping[str, object], schema["items"])
+        for item in sequence_value:
+            _validate_schema_value(items, item, f"{label} item")

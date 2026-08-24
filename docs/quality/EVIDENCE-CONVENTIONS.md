@@ -26,7 +26,9 @@ Committed fake-provider fixtures follow `tests/fixtures/providers/schema/fake-pr
 - Fixtures contain no provider endpoint, account, tenant, region, live model identifier, Home Assistant entity, or usable credential. Model-discovery fixtures may contain clearly synthetic provider-model records.
 - The allowed event vocabulary is closed by schema.
 - Fixtures describe provider behavior but never perform network access or Home Assistant actions.
-- Typed synthetic tools and tool calls are contract data only. The fake provider never executes a tool, and no fixture may name or invoke a Home Assistant action.
+- Typed synthetic tools and tool calls are contract data only. Assistant calls and tool results preserve an exact synthetic correlation ID, use the closed internal schema dialect, and never execute a tool.
+- Normalized error messages use the fixed safe text for their category; raw provider error bodies are not fixture output.
+- No fixture may name or invoke a Home Assistant action.
 
 FND-014 established the fixture/evidence baseline and FND-015 added the runtime fake. LOC-002 extends both to provider contract version 1; every future live adapter must rerun the common contract cases before its own task can pass.
 

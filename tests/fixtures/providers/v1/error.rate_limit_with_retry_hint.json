@@ -27,7 +27,7 @@
         "type": "raise_normalized_error",
         "error": {
           "code": "rate_limited",
-          "message": "Synthetic provider rate limit.",
+          "message": "Provider rate limit was reached.",
           "retry_hint_ms": 250
         }
       }
@@ -37,7 +37,7 @@
     "outcome": "error",
     "normalized_error": {
       "code": "rate_limited",
-      "message": "Synthetic provider rate limit.",
+      "message": "Provider rate limit was reached.",
       "retry_hint_ms": 250
     },
     "retry_allowed": true,

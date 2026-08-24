@@ -104,7 +104,7 @@ Backup egress and restore ingress are deliberately different flows. `FLOW-014` a
 | CTRL-RED-001 | Recursive secret/household redaction plus deterministic canary scanning | Phase 0 canary/evidence harness verified; product redactor not implemented |
 | CTRL-PRIVACY-001 | Minimal explicit context, local default, cloud opt-in, prohibited-field filtering | Design only; owner defaults recorded |
 | CTRL-ENDPOINT-001 | Validate provider scheme/origin/redirect/DNS/IP and credential destination | Design only |
-| CTRL-PROVIDER-001 | One provider contract with probed capability and normalized failure behavior | Provider contract v1 and zero-network fake verified; every live adapter still requires its own acceptance evidence |
+| CTRL-PROVIDER-001 | One provider contract with probed capability and normalized failure behavior | Design only |
 | CTRL-OUTPUT-001 | Strictly validate all provider output before structured use | Design only |
 | CTRL-INPUT-TRUST-001 | Immutable policy plus typed, delimited untrusted context; injected text cannot expand data/tools/targets/actions | Design only |
 | CTRL-TOOL-001 | Typed narrow tools only; no generic action executor | Design only; Phase 0 probe is action-free but product tools do not exist |
@@ -155,7 +155,7 @@ All rows remain `planned`. The IDs map the approved source text; they do not rep
 | TEST-REDACTION-CANARY | Synthetic secret/household canary absent from artifacts | Phase 0 passed for existing harness/artifacts only |
 | TEST-CLOUD-PRIVACY | Sanitized requests prove local default, opt-in, minimization, deny rules, failover boundary | Planned |
 | TEST-ENDPOINT-SSRF | URL/redirect/DNS/IP/userinfo/metadata corpus | Planned |
-| TEST-PROVIDER-CONTRACT | Common capability/error/timeout/cancel/stream/tool/schema behavior | Provider contract v1 fake suite passed; rerun for every live adapter |
+| TEST-PROVIDER-CONTRACT | Common capability/error/timeout/cancel/stream/tool/schema behavior | Planned |
 | TEST-OUTPUT-SCHEMA | Malformed/extra/ambiguous/stale/policy-expanding output rejected | Planned |
 | TEST-PROMPT-INJECTION | Adversarial entity/event/calendar/message/provider/tool-result text cannot change immutable policy or expand access | Planned |
 | TEST-TOOL-ALLOWLIST | Prompt/output cannot expand tool, target, argument, or permission scope | Planned |

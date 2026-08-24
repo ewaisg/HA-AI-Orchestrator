@@ -37,6 +37,8 @@ REQUIRED_CONTRACT_FIXTURES = {
     "error.timeout",
     "generate.empty_response",
     "generate.malformed_response",
+    "generate.multiple_tool_calls",
+    "generate.structured_success",
     "generate.text_success",
     "generate.tool_call_success",
     "generate.tool_continuation_success",
@@ -44,6 +46,9 @@ REQUIRED_CONTRACT_FIXTURES = {
     "models.discovery_success",
     "request.cancelled",
     "stream.chunked_success",
+    "stream.cancelled",
+    "stream.interrupted",
+    "stream.invalid_terminal",
     "validate.connection_success",
 }
 FORBIDDEN_FIXTURE_KEYS = {
@@ -356,7 +361,7 @@ def test_schema_and_runtime_reject_empty_error_messages(
 
     with pytest.raises(ValidationError):
         validator.validate(altered)
-    with pytest.raises(FixtureValidationError, match="message cannot be empty"):
+    with pytest.raises(FixtureValidationError, match="safe contract text"):
         parse_fake_provider_fixture(altered)
 
 

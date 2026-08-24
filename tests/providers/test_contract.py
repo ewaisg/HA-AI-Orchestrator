@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT))
 
 from custom_components.ai_orchestrator.providers.contract import (
     PROVIDER_CONTRACT_VERSION,
+    SAFE_ERROR_MESSAGES,
     CapabilityRecord,
     CapabilityState,
     ConnectionValidationResult,
@@ -31,10 +32,12 @@ from custom_components.ai_orchestrator.providers.contract import (
     ProviderRequest,
     StreamCompleted,
     StreamDelta,
+    StructuredOutputDefinition,
     TextGenerationResult,
     ToolCall,
     ToolDefinition,
     Usage,
+    validate_schema_value,
 )
 
 
@@ -79,23 +82,80 @@ def test_request_rejects_non_contract_message_data() -> None:
         ProviderRequest(messages=({"role": "user"},))  # type: ignore[arg-type]
 
 
+def test_tool_result_requires_exact_prior_call_correlation() -> None:
+    call = ToolCall(id="synthetic-call-1", name="synthetic_tool", arguments={})
+    messages = (
+        Message(MessageRole.ASSISTANT, "", tool_calls=(call,)),
+        Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-1"),
+    )
+
+    request = ProviderRequest(messages=messages)
+
+    assert request.messages[-1].tool_call_id == request.messages[0].tool_calls[0].id
+
+
+def test_multiple_tool_results_preserve_each_correlation_id() -> None:
+    calls = (
+        ToolCall(id="synthetic-call-1", name="synthetic_tool", arguments={}),
+        ToolCall(id="synthetic-call-2", name="synthetic_tool", arguments={}),
+    )
+    request = ProviderRequest(
+        messages=(
+            Message(MessageRole.ASSISTANT, "", tool_calls=calls),
+            Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-2"),
+            Message(MessageRole.TOOL, "{}", tool_call_id="synthetic-call-1"),
+        )
+    )
+
+    assert {message.tool_call_id for message in request.messages[1:]} == {
+        "synthetic-call-1",
+        "synthetic-call-2",
+    }
+
+
+@pytest.mark.parametrize(
+    "messages",
+    [
+        (Message(MessageRole.TOOL, "{}", tool_call_id="unknown-call"),),
+        (
+            Message(
+                MessageRole.ASSISTANT,
+                "",
+                tool_calls=(
+                    ToolCall(
+                        id="synthetic-call-1",
+                        name="synthetic_tool",
+                        arguments={},
+                    ),
+                ),
+            ),
+        ),
+    ],
+)
+def test_tool_continuation_rejects_unknown_or_missing_results(
+    messages: tuple[Message, ...],
+) -> None:
+    with pytest.raises(ValueError):
+        ProviderRequest(messages=messages)
+
+
 def test_provider_error_exposes_only_normalized_failure_data() -> None:
     error = NormalizedError(
         code=ErrorCode.RATE_LIMITED,
-        message="Synthetic rate limit.",
+        message=SAFE_ERROR_MESSAGES[ErrorCode.RATE_LIMITED],
         retry_hint_ms=250,
     )
     failure = ProviderError(error, retry_allowed=True, failover_allowed=False)
 
     assert failure.error == error
-    assert str(failure) == "Synthetic rate limit."
+    assert str(failure) == "Provider rate limit was reached."
     assert failure.retry_allowed is True
     assert failure.failover_allowed is False
 
 
-@pytest.mark.parametrize("message", ["", "   "])
-def test_normalized_error_rejects_empty_messages(message: str) -> None:
-    with pytest.raises(ValueError, match="message cannot be empty"):
+@pytest.mark.parametrize("message", ["", "   ", "Bearer synthetic-secret"])
+def test_normalized_error_rejects_noncanonical_messages(message: str) -> None:
+    with pytest.raises(ValueError, match="safe contract text"):
         NormalizedError(code=ErrorCode.INVALID_RESPONSE, message=message)
 
 
@@ -106,7 +166,10 @@ def test_connection_failure_must_use_normalized_error_channel() -> None:
 
 def test_contract_rejects_adapter_specific_string_enums() -> None:
     with pytest.raises(TypeError, match="must use ErrorCode"):
-        NormalizedError(code="timeout", message="Synthetic.")  # type: ignore[arg-type]
+        NormalizedError(
+            code="timeout",  # type: ignore[arg-type]
+            message=SAFE_ERROR_MESSAGES[ErrorCode.TIMEOUT],
+        )
 
 
 @pytest.mark.parametrize(
@@ -116,7 +179,7 @@ def test_contract_rejects_adapter_specific_string_enums() -> None:
         (
             lambda: NormalizedError(
                 code=ErrorCode.RATE_LIMITED,
-                message="Synthetic rate limit.",
+                message=SAFE_ERROR_MESSAGES[ErrorCode.RATE_LIMITED],
                 retry_hint_ms=-1,
             ),
             "cannot be negative",
@@ -138,7 +201,7 @@ def test_contract_rejects_negative_accounting_and_sequences(
 def test_retry_hint_requires_explicit_retry_permission() -> None:
     error = NormalizedError(
         code=ErrorCode.RATE_LIMITED,
-        message="Synthetic rate limit.",
+        message=SAFE_ERROR_MESSAGES[ErrorCode.RATE_LIMITED],
         retry_hint_ms=250,
     )
 
@@ -154,6 +217,30 @@ def test_generation_rejects_duplicate_tool_call_ids() -> None:
 
     with pytest.raises(ValueError, match="must be unique"):
         TextGenerationResult(text="", tool_calls=calls)
+
+
+def test_structured_output_schema_rejects_wrong_types_and_extra_fields() -> None:
+    definition = StructuredOutputDefinition(
+        name="synthetic_record",
+        schema={
+            "type": "object",
+            "properties": {
+                "label": {"type": "string"},
+                "count": {"type": "integer"},
+            },
+            "required": ["label", "count"],
+            "additionalProperties": False,
+        },
+    )
+
+    validate_schema_value(definition.schema, {"label": "synthetic", "count": 1})
+    with pytest.raises(ValueError, match="wrong type"):
+        validate_schema_value(definition.schema, {"label": "synthetic", "count": "one"})
+    with pytest.raises(ValueError, match="additional fields"):
+        validate_schema_value(
+            definition.schema,
+            {"label": "synthetic", "count": 1, "extra": True},
+        )
 
 
 @pytest.mark.parametrize(
@@ -200,6 +287,20 @@ def test_tool_definition_rejects_invalid_public_schema(
         ToolDefinition(name=name, description=description, parameters={})
 
 
+def test_tool_and_structured_schemas_require_closed_object_roots() -> None:
+    with pytest.raises(ValueError, match="object root"):
+        ToolDefinition(
+            name="synthetic_tool",
+            description="Synthetic.",
+            parameters={"type": "string"},
+        )
+    with pytest.raises(ValueError, match="object root"):
+        StructuredOutputDefinition(
+            name="synthetic_output",
+            schema={"type": "array", "items": {"type": "string"}},
+        )
+
+
 @pytest.mark.parametrize("name", ["Bad Name", "", "synthetic-hyphen"])
 def test_tool_call_rejects_invalid_public_name(name: str) -> None:
     with pytest.raises(ValueError, match="invalid format"):
@@ -208,11 +309,12 @@ def test_tool_call_rejects_invalid_public_name(name: str) -> None:
 
 def test_tool_definition_deep_freezes_caller_owned_parameters() -> None:
     enum_values = ["synthetic_one", "synthetic_two"]
-    mode_schema: dict[str, object] = {"enum": enum_values}
+    mode_schema: dict[str, object] = {"type": "string", "enum": enum_values}
     properties: dict[str, object] = {"mode": mode_schema}
     parameters: dict[str, object] = {
         "type": "object",
         "properties": properties,
+        "additionalProperties": False,
     }
 
     tool = ToolDefinition(
@@ -226,7 +328,10 @@ def test_tool_definition_deep_freezes_caller_owned_parameters() -> None:
 
     frozen_properties = cast(Mapping[str, object], tool.parameters["properties"])
     frozen_mode = cast(Mapping[str, object], frozen_properties["mode"])
-    assert frozen_mode == {"enum": ("synthetic_one", "synthetic_two")}
+    assert frozen_mode == {
+        "type": "string",
+        "enum": ("synthetic_one", "synthetic_two"),
+    }
     assert "new_property" not in frozen_properties
     with pytest.raises(TypeError):
         frozen_mode["extra"] = True  # type: ignore[index]
@@ -261,6 +366,7 @@ def test_provider_contract_has_no_endpoint_or_credential_fields() -> None:
             NormalizedError,
             ToolDefinition,
             ToolCall,
+            StructuredOutputDefinition,
         )
         for field in fields(contract_type)
     }

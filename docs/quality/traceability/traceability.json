@@ -501,8 +501,8 @@
       "id": "CTRL-PROVIDER-001",
       "summary": "Keep provider-specific behavior behind one contract with probed capabilities, bounded timeouts, cancellation, normalized errors, and truthful unknown states.",
       "source_refs": ["DEC-010", "docs/architecture/ARCHITECTURE.md#provider-boundary"],
-      "implementation_status": "phase0_verified",
-      "evidence_refs": ["docs/evidence/2026-08-24-loc-002-provider-contract.md"]
+      "implementation_status": "design_only",
+      "evidence_refs": []
     },
     {
       "id": "CTRL-OUTPUT-001",
@@ -636,8 +636,8 @@
     {
       "id": "TEST-PROVIDER-CONTRACT",
       "summary": "Run every provider adapter against common capability, timeout, cancellation, streaming, usage, tool, schema, and normalized-error cases.",
-      "verification_status": "phase0_passed",
-      "evidence_refs": ["docs/evidence/2026-08-24-loc-002-provider-contract.md"]
+      "verification_status": "planned",
+      "evidence_refs": []
     },
     {
       "id": "TEST-OUTPUT-SCHEMA",

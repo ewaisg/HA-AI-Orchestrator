@@ -3,11 +3,10 @@
   "evidence_id": "LOC-002-PROVIDER-CONTRACT-001",
   "task_id": "LOC-002",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T07:01:55Z",
+  "captured_at": "2026-08-24T07:22:13Z",
   "source_revision": {
-    "state": "committed",
-    "git_commit": "755935eded9180ad4649eec0f2060af2958b3f4e",
-    "dirty": false
+    "state": "working_tree",
+    "dirty": true
   },
   "traceability": {
     "requirements": ["LOC-002", "REQ-CON-007"],
@@ -97,7 +96,7 @@
       "name": "provider-contract-v1",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/providers/contract.py",
-      "sha256": "6817ba63ea0e9cc350f0af80c693686e2fefc07ba701d86b45c0af1fdc90b9d4",
+      "sha256": "2cb38d10c2eccf3051713f14539aa50a9f5fbf48e409f593a31a094741f5efdd",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -106,7 +105,7 @@
       "name": "zero-network-fake-provider",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/providers/fake.py",
-      "sha256": "b1543fbd035f4e26eff5048a96f770da09ed80935f458fcf2f9fa98de01f7833",
+      "sha256": "06ee3489ccde92c49eb256e758baf25e11029555a6eb0b917fc9419ac03bf93c",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -115,7 +114,7 @@
       "name": "provider-fixture-schema-v1",
       "location_type": "repository",
       "repository_path": "tests/fixtures/providers/schema/fake-provider-fixture.schema.json",
-      "sha256": "985f07d985246e4cde344c46f3cca19788947fc4b1a63a00bab1de2fc0e64306",
+      "sha256": "54bb08f2f7975cae709a16b7f12ef5292877465aabae13ef5683f762c4eb7653",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"

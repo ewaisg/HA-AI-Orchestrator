@@ -116,7 +116,8 @@
         "tools": {
           "type": "array",
           "items": { "$ref": "#/$defs/tool" }
-        }
+        },
+        "output_schema": { "$ref": "#/$defs/output_schema" }
       }
     },
     "message": {
@@ -125,7 +126,52 @@
       "required": ["role", "content"],
       "properties": {
         "role": { "enum": ["system", "user", "assistant", "tool"] },
-        "content": { "type": "string" }
+        "content": { "type": "string" },
+        "tool_calls": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool_call" }
+        },
+        "tool_call_id": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "role": { "const": "assistant" } } },
+          "then": { "not": { "required": ["tool_call_id"] } }
+        },
+        {
+          "if": { "properties": { "role": { "const": "tool" } } },
+          "then": {
+            "required": ["tool_call_id"],
+            "not": { "required": ["tool_calls"] }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": { "enum": ["system", "user"] }
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["tool_calls"] },
+                { "required": ["tool_call_id"] }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "output_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "schema"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "schema": { "type": "object" }
       }
     },
     "tool": {
@@ -224,7 +270,8 @@
               "type": "array",
               "items": { "$ref": "#/$defs/tool_call" }
             },
-            "usage": { "$ref": "#/$defs/usage" }
+            "usage": { "$ref": "#/$defs/usage" },
+            "structured_output": { "type": "object" }
           }
         },
         {

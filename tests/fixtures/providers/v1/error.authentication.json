@@ -27,7 +27,7 @@
         "type": "raise_normalized_error",
         "error": {
           "code": "authentication",
-          "message": "Synthetic credentials were rejected."
+          "message": "Provider authentication failed."
         }
       }
     ]
@@ -36,7 +36,7 @@
     "outcome": "error",
     "normalized_error": {
       "code": "authentication",
-      "message": "Synthetic credentials were rejected."
+      "message": "Provider authentication failed."
     },
     "retry_allowed": false,
     "failover_allowed": false,

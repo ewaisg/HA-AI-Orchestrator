@@ -32,10 +32,12 @@ from .contract import (
     StreamCompleted,
     StreamDelta,
     StreamEvent,
+    StructuredOutputDefinition,
     TextGenerationResult,
     ToolCall,
     ToolDefinition,
     Usage,
+    validate_generation_result,
 )
 
 FIXTURE_SCHEMA_VERSION = 1
@@ -489,21 +491,73 @@ def _parse_capabilities(value: object) -> CapabilityRecord:
 
 def _parse_request(value: object) -> ProviderRequest:
     mapping = _mapping(value, "request")
-    _exact_keys(mapping, required={"messages", "tools"}, context="request")
+    _exact_keys(
+        mapping,
+        required={"messages", "tools"},
+        optional={"output_schema"},
+        context="request",
+    )
     messages = tuple(
         _parse_message(item) for item in _sequence(mapping["messages"], "messages")
     )
     tools = tuple(_parse_tool(item) for item in _sequence(mapping["tools"], "tools"))
-    return ProviderRequest(messages=messages, tools=tools)
+    output_schema = (
+        _parse_output_schema(mapping["output_schema"])
+        if "output_schema" in mapping
+        else None
+    )
+    try:
+        return ProviderRequest(
+            messages=messages,
+            tools=tools,
+            output_schema=output_schema,
+        )
+    except (TypeError, ValueError) as err:
+        raise FixtureValidationError(str(err)) from err
 
 
 def _parse_message(value: object) -> Message:
     mapping = _mapping(value, "message")
-    _exact_keys(mapping, required={"role", "content"}, context="message")
-    return Message(
-        role=_enum(MessageRole, mapping["role"], "message role"),
-        content=_string(mapping["content"], "message content"),
+    _exact_keys(
+        mapping,
+        required={"role", "content"},
+        optional={"tool_calls", "tool_call_id"},
+        context="message",
     )
+    calls = tuple(
+        _parse_tool_call(item)
+        for item in _sequence(mapping.get("tool_calls", ()), "message tool calls")
+    )
+    tool_call_id = (
+        _string(mapping["tool_call_id"], "message tool-call ID")
+        if "tool_call_id" in mapping
+        else None
+    )
+    try:
+        return Message(
+            role=_enum(MessageRole, mapping["role"], "message role"),
+            content=_string(mapping["content"], "message content"),
+            tool_calls=calls,
+            tool_call_id=tool_call_id,
+        )
+    except (TypeError, ValueError) as err:
+        raise FixtureValidationError(str(err)) from err
+
+
+def _parse_output_schema(value: object) -> StructuredOutputDefinition:
+    mapping = _mapping(value, "output schema")
+    _exact_keys(
+        mapping,
+        required={"name", "schema"},
+        context="output schema",
+    )
+    try:
+        return StructuredOutputDefinition(
+            name=_string(mapping["name"], "output schema name"),
+            schema=_mapping(mapping["schema"], "output schema value"),
+        )
+    except (TypeError, ValueError) as err:
+        raise FixtureValidationError(str(err)) from err
 
 
 def _parse_tool(value: object) -> ToolDefinition:
@@ -569,7 +623,7 @@ def _parse_result(value: object) -> ProviderResult:
         _exact_keys(
             mapping,
             required={"kind", "text", "tool_calls"},
-            optional={"usage"},
+            optional={"usage", "structured_output"},
             context="message result",
         )
         calls = tuple(
@@ -577,11 +631,19 @@ def _parse_result(value: object) -> ProviderResult:
             for item in _sequence(mapping["tool_calls"], "tool calls")
         )
         usage = _parse_usage(mapping["usage"]) if "usage" in mapping else None
+        structured_output = (
+            _freeze_mapping(
+                _mapping(mapping["structured_output"], "structured output result")
+            )
+            if "structured_output" in mapping
+            else None
+        )
         try:
             return TextGenerationResult(
                 text=_string(mapping["text"], "result text"),
                 tool_calls=calls,
                 usage=usage,
+                structured_output=structured_output,
             )
         except (TypeError, ValueError) as err:
             raise FixtureValidationError(str(err)) from err
@@ -694,13 +756,14 @@ def _parse_error(value: object) -> NormalizedError:
         if retry_hint < 0:
             raise FixtureValidationError("Retry hint cannot be negative")
     message = _string(mapping["message"], "error message")
-    if not message.strip():
-        raise FixtureValidationError("Error message cannot be empty")
-    return NormalizedError(
-        code=_enum(ErrorCode, mapping["code"], "error code"),
-        message=message,
-        retry_hint_ms=retry_hint,
-    )
+    try:
+        return NormalizedError(
+            code=_enum(ErrorCode, mapping["code"], "error code"),
+            message=message,
+            retry_hint_ms=retry_hint,
+        )
+    except (TypeError, ValueError) as err:
+        raise FixtureValidationError(str(err)) from err
 
 
 def _parse_expectation(value: object) -> FixtureExpectation:
@@ -892,12 +955,13 @@ def _validate_fixture_semantics(fixture: FakeProviderFixture) -> None:
             raise FixtureValidationError(
                 "Fixture exposing tools must support structured output"
             )
-    if isinstance(expected.result, TextGenerationResult) and expected.result.tool_calls:
-        exposed_names = {tool.name for tool in fixture.request.tools}
-        if any(call.name not in exposed_names for call in expected.result.tool_calls):
+    if isinstance(expected.result, TextGenerationResult):
+        try:
+            validate_generation_result(fixture.request, expected.result)
+        except ValueError as err:
             raise FixtureValidationError(
-                "Provider tool call must match a request tool definition"
-            )
+                f"Provider generation result is invalid: {err}"
+            ) from err
 
 
 def _validate_stream_result(

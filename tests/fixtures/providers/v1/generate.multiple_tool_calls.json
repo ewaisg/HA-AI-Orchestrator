@@ -1,6 +1,6 @@
 {
   "fixture_schema_version": 1,
-  "fixture_id": "generate.tool_continuation_success",
+  "fixture_id": "generate.multiple_tool_calls",
   "provider_contract_version": "1",
   "provenance": { "type": "synthetic" },
   "redaction": { "contains_live_data": false, "status": "reviewed" },
@@ -15,23 +15,7 @@
   },
   "request_match": {
     "messages": [
-      { "role": "user", "content": "Request one typed synthetic lookup." },
-      {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
-          {
-            "id": "synthetic-call-1",
-            "name": "synthetic_lookup",
-            "arguments": { "key": "synthetic-key" }
-          }
-        ]
-      },
-      {
-        "role": "tool",
-        "tool_call_id": "synthetic-call-1",
-        "content": "{\"key\":\"synthetic-key\",\"value\":\"synthetic-value\"}"
-      }
+      { "role": "user", "content": "Request two typed synthetic lookups." }
     ],
     "tools": [
       {
@@ -54,8 +38,19 @@
         "type": "return",
         "result": {
           "kind": "message",
-          "text": "Synthetic lookup completed.",
-          "tool_calls": []
+          "text": "",
+          "tool_calls": [
+            {
+              "id": "synthetic-call-1",
+              "name": "synthetic_lookup",
+              "arguments": { "key": "synthetic-one" }
+            },
+            {
+              "id": "synthetic-call-2",
+              "name": "synthetic_lookup",
+              "arguments": { "key": "synthetic-two" }
+            }
+          ]
         }
       }
     ]
@@ -64,8 +59,19 @@
     "outcome": "success",
     "normalized_result": {
       "kind": "message",
-      "text": "Synthetic lookup completed.",
-      "tool_calls": []
+      "text": "",
+      "tool_calls": [
+        {
+          "id": "synthetic-call-1",
+          "name": "synthetic_lookup",
+          "arguments": { "key": "synthetic-one" }
+        },
+        {
+          "id": "synthetic-call-2",
+          "name": "synthetic_lookup",
+          "arguments": { "key": "synthetic-two" }
+        }
+      ]
     },
     "retry_allowed": false,
     "failover_allowed": false,

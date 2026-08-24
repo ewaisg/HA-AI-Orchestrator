@@ -29,7 +29,7 @@
     "outcome": "cancelled",
     "normalized_error": {
       "code": "cancelled",
-      "message": "Synthetic request was cancelled."
+      "message": "Provider request was cancelled."
     },
     "retry_allowed": false,
     "failover_allowed": false,

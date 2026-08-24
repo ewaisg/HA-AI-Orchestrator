@@ -1,0 +1,62 @@
+{
+  "fixture_schema_version": 1,
+  "fixture_id": "generate.structured_success",
+  "provider_contract_version": "1",
+  "provenance": { "type": "synthetic" },
+  "redaction": { "contains_live_data": false, "status": "reviewed" },
+  "operation": "generate",
+  "capabilities": {
+    "text_generation": "supported",
+    "model_discovery": "unknown",
+    "streaming": "unknown",
+    "structured_output": "supported",
+    "tool_calling": "unknown",
+    "usage": "unknown"
+  },
+  "request_match": {
+    "messages": [
+      { "role": "user", "content": "Return one synthetic structured record." }
+    ],
+    "tools": [],
+    "output_schema": {
+      "name": "synthetic_record",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "count": { "type": "integer" }
+        },
+        "required": ["label", "count"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "script": {
+    "clock": "manual",
+    "steps": [
+      {
+        "sequence": 0,
+        "type": "return",
+        "result": {
+          "kind": "message",
+          "text": "",
+          "tool_calls": [],
+          "structured_output": { "label": "synthetic", "count": 1 }
+        }
+      }
+    ]
+  },
+  "expected": {
+    "outcome": "success",
+    "normalized_result": {
+      "kind": "message",
+      "text": "",
+      "tool_calls": [],
+      "structured_output": { "label": "synthetic", "count": 1 }
+    },
+    "retry_allowed": false,
+    "failover_allowed": false,
+    "request_count": 1
+  },
+  "required_capabilities": ["text_generation", "structured_output"]
+}

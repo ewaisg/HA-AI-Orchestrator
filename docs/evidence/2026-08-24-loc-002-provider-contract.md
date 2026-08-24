@@ -13,13 +13,16 @@ This task does not implement an LM Studio transport, store a provider URL or cre
 - Validation success requires both reachability and authentication. Every failure uses the normalized error channel.
 - Discovered model records carry only provider-supplied identity and display name; they do not imply model capabilities.
 - Health success is `healthy` or `degraded`; unavailable and authentication states are normalized failures for the caller to present.
-- Usage, stream sequences, tool identities, retry hints, model identities, and duplicate model records are fail-closed at construction or fixture parsing.
-- Typed tool definitions, provider-requested tool calls, and tool-result continuation are data only. The provider contract has no executor, and the fake provider performs no tool or Home Assistant action.
+- Usage, stream sequences, tool identities, retry hints, model identities, duplicate model records, and duplicate tool-call IDs are fail-closed at construction or fixture parsing.
+- Assistant tool calls and tool-result messages preserve the exact provider-neutral call ID. A continuation rejects missing, duplicate, or unknown correlations, including multi-call histories.
+- Tool parameters and structured output use a deliberately small closed schema dialect. Unknown schema keywords, extra fields, missing fields, wrong types, invalid arguments, unrequested structured output, and calls to unexposed tools fail closed.
+- Normalized error text is selected from a fixed safe mapping by error category. Raw provider error text, including secret-bearing text, cannot enter `NormalizedError`.
+- Typed tool definitions, provider-requested tool calls, correlated tool-result continuation, and structured output are data only. The provider contract has no executor, and the fake provider performs no tool or Home Assistant action.
 - The fake provider remains one-shot, manually clocked, synthetic, exact-match, and zero-network.
 
 ## Synthetic fixture catalogue
 
-Fourteen reviewed fixtures cover validation success, model discovery, health, unknown capabilities, text and empty success, streaming with usage, a typed tool call, tool-result continuation, authentication failure, rate limiting with retry hint, timeout, malformed response, and cancellation. Fixtures contain no live provider endpoint, credential, account, household identifier, entity ID, or live model ID.
+Nineteen committed reviewed fixtures cover validation success, model discovery, health, unknown capabilities, text and empty success, structured output, streaming success/cancellation/interruption/invalid terminal normalization, single and multiple typed tool calls, correlated tool-result continuation, authentication failure, rate limiting with retry hint, timeout, malformed response, and request cancellation. Parameterized synthetic cases additionally cover chunk boundaries, structured extra/missing/wrong/markdown/refusal outcomes, missing/duplicate/invalid/unknown/unsupported tool calls, the normalized error taxonomy, usage present/absent/provider-specific rejection, capability absence/contradiction/drift, unsafe error text, and prompt-injection text remaining untrusted data. Fixtures contain no live provider endpoint, credential, account, household identifier, entity ID, or live model ID.
 
 ## Verification status
 
@@ -36,15 +39,19 @@ After those corrections, the working-tree checks produced:
 | Canary scan | Passed with no findings |
 | `git diff --check` | Passed |
 
-Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` reproduced the same Ruff, 120 focused/pure, canary, traceability, manifest-schema, diff, and clean-worktree results. A clean Linux full suite and independent reviews remain required.
+Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` reproduced the same Ruff, 120 focused/pure, canary, traceability, manifest-schema, diff, and clean-worktree results. Candidate `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1` was then rejected by independent workflow/safety review at `2026-08-24T07:06:43Z` for two P1 findings: tool-result continuation did not preserve the original structured call ID, and traceability falsely marked the every-adapter control/test verified from only the fake suite.
+
+The current working remediation preserves and validates call IDs, adds the closed schema and fixed safe-error boundaries, expands the synthetic common cases, and returns `CTRL-PROVIDER-001` to `design_only` and `TEST-PROVIDER-CONTRACT` to `planned`. A passing historical candidate is not inferred; all gates and independent reviews must run again on a new committed candidate.
+
+The remediated working tree passed 130 provider tests and 160 focused/pure tests, with the same five known dependency deprecation warnings. Ruff format reported 60 files formatted, Ruff lint passed, the canary scan had no findings, and `git diff --check` passed. These are working-tree results only until reproduced from the new committed artifact.
 
 ## Residual gates
 
-- Every live provider adapter must run the common contract suite plus adapter-specific transport, authentication, endpoint, cancellation, timeout, and redaction tests.
+- Every live provider adapter must run the provider-neutral cases plus adapter-specific transport, authentication, endpoint, timeout, cancellation, raw-response normalization, and redaction tests. `TEST-PROVIDER-CONTRACT` remains planned until every implemented adapter passes; this task does not claim that every-adapter gate.
 - LOC-003 must revalidate the already observed LM Studio environment through the implemented backend adapter. This synthetic task does not reuse or disclose the live token, URL, model identifier, or response.
 - Provider-side MCP remains excluded from version 1.
 - The contract does not authorize any Home Assistant action. Workflow tool allowlists, confirmations, action policy, and deterministic life-safety behavior remain later safety tasks.
 
 ## Acceptance status
 
-`IN REVIEW`. Artifact revision `755935eded9180ad4649eec0f2060af2958b3f4e` is committed and locally reproduced. The metadata candidate, clean Linux full-suite result, and independent provider/safety and test/release approvals are still required before LOC-002 can be `DONE`.
+`IN REVIEW` after rejected candidate `e8a5acd2a99c8cb446e924bd75e8dccf9fc202a1`. The working remediation passes its local gates. Create a new immutable artifact and metadata candidate, then obtain fresh workflow/safety and test/release approvals before LOC-002 can be `DONE`.
