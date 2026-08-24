@@ -3,10 +3,10 @@
   "evidence_id": "LOC-001-PROVIDER-ENTRY-LIFECYCLE-001",
   "task_id": "LOC-001",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T17:34:17Z",
+  "captured_at": "2026-08-24T17:44:09Z",
   "source_revision": {
     "state": "committed",
-    "git_commit": "39d75467a51a6d669e2dc9e2fc7261b5c2079d1e",
+    "git_commit": "7921806f9e47ea83f2ae7a7707aeba0dc1a31c22",
     "dirty": false
   },
   "traceability": {
@@ -55,7 +55,7 @@
         "powershell",
         "-NoProfile",
         "-Command",
-        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/provider_entry.py custom_components/ai_orchestrator/config_flow.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/providers/contract.py\"; git -c core.autocrlf=false archive --format=tar 39d75467a51a6d669e2dc9e2fc7261b5c2079d1e | docker run --rm -i --name ai-orchestrator-loc001-envelope-artifact --workdir /workspace --volume ai-orchestrator-loc001-envelope-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
+        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/provider_entry.py custom_components/ai_orchestrator/config_flow.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/providers/contract.py\"; git -c core.autocrlf=false archive --format=tar 7921806f9e47ea83f2ae7a7707aeba0dc1a31c22 | docker run --rm -i --name ai-orchestrator-loc001-slot-artifact --workdir /workspace --volume ai-orchestrator-loc001-slot-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
       ],
       "exit_code": 0,
       "result": "passed"
@@ -123,7 +123,7 @@
       "name": "provider-error-contract",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/providers/contract.py",
-      "sha256": "9f9023807a509b0ab17284f88477b328ad25fd1e283b1e35ebee6a6cc0a1f946",
+      "sha256": "f426a5566f7e4d027e8630059607821f550152f4e941410c66bbfa635a6dd2dd",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
