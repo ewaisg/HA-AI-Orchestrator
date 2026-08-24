@@ -26,7 +26,7 @@ No task may move to `DONE` based only on an assertion.
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
 | Next gate | LOC-001 exact provider-entry data/options, validation, reauthentication, setup/unload, and failure-lifecycle contract plus Home Assistant tests |
 | Production code | FND-015 foundation, the FND-012 action-free lifecycle probe, and LOC-002 provider-neutral contract are implemented; live providers and product workflows remain absent |
-| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; LOC-002 artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4` and candidate `e8787b36ffc5af4525963ec55dda06e732188ad7` are independently accepted and awaiting the closeout push |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; the independently accepted LOC-002 artifact, candidate, and closeout are pushed, and local/remote equality was verified before LOC-001 planning resumed |
 
 ## Phase 0 — foundation and architecture validation
 
