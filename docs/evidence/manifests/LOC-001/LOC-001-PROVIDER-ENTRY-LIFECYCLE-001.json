@@ -3,10 +3,11 @@
   "evidence_id": "LOC-001-PROVIDER-ENTRY-LIFECYCLE-001",
   "task_id": "LOC-001",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T16:38:55Z",
+  "captured_at": "2026-08-24T16:42:47Z",
   "source_revision": {
-    "state": "working_tree",
-    "dirty": true
+    "state": "committed",
+    "git_commit": "4ea2595029e7ad7a953abb628bf38bd93060885f",
+    "dirty": false
   },
   "traceability": {
     "requirements": ["LOC-001", "REQ-CAP-001"],
@@ -54,7 +55,7 @@
         "powershell",
         "-NoProfile",
         "-Command",
-        "docker run --rm --name ai-orchestrator-loc001-working-review --workdir /workspace --volume ${PWD}:/source:ro --volume ai-orchestrator-loc001-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc 'python -m pip install --no-cache-dir uv==0.12.1 && tar --exclude=.git --exclude=.venv --exclude=frontend/node_modules --exclude=frontend/dist -C /source -cf - . | tar -xf - -C /workspace && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider'"
+        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider\"; git -c core.autocrlf=false archive --format=tar 4ea2595029e7ad7a953abb628bf38bd93060885f | docker run --rm -i --name ai-orchestrator-loc001-artifact-review --workdir /workspace --volume ai-orchestrator-loc001-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
       ],
       "exit_code": 0,
       "result": "passed"

@@ -36,6 +36,8 @@ The final working tree produced:
 
 The five warnings are the already recorded Home Assistant/aiohttp inheritance warning and four `backoff` calls to deprecated `asyncio.iscoroutinefunction`; no project-source warning or test failure remains.
 
+Immutable artifact `4ea2595029e7ad7a953abb628bf38bd93060885f` reproduced the same 223-test clean-Linux full suite from a Git archive and reproduced 166 provider/security/quality tests, 166 pure tests, Ruff, canary, evidence-schema, traceability, diff, and clean-worktree checks locally. Artifact hashes in the manifest match the committed Git blobs.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -45,4 +47,4 @@ The five warnings are the already recorded Home Assistant/aiohttp inheritance wa
 
 ## Acceptance status
 
-`IN REVIEW`. The working tree passes its local and clean-Linux checks. Freeze an immutable artifact, reproduce the gates from that commit, then obtain independent workflow/safety and test/release approval before LOC-001 can be `DONE`.
+`IN REVIEW`. Artifact `4ea2595029e7ad7a953abb628bf38bd93060885f` passes its exact-commit local and clean-Linux checks. Commit the metadata candidate, then obtain independent workflow/safety and test/release approval before LOC-001 can be `DONE`.
