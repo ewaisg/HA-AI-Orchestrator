@@ -3,7 +3,7 @@
   "evidence_id": "FND-013-DATA-FLOW-TRACEABILITY-001",
   "task_id": "FND-013",
   "kind": "review",
-  "captured_at": "2026-08-24T06:11:33Z",
+  "captured_at": "2026-08-24T06:16:30Z",
   "source_revision": {
     "state": "committed",
     "git_commit": "a7495b08c42c395cb15f6a30fb4956d38b091b53",
@@ -139,14 +139,8 @@
       "redaction_status": "reviewed"
     }
   ],
-  "result": "incomplete",
-  "unknowns": [
-    {
-      "id": "FND013_REVIEW_PENDING",
-      "description": "Independent workflow/safety and test/release reviews of corrected committed artifact revision a7495b08c42c395cb15f6a30fb4956d38b091b53 are pending.",
-      "blocks": ["FND-013"]
-    }
-  ],
+  "result": "passed",
+  "unknowns": [],
   "residuals": [
     {
       "id": "FND011_CORE_UPGRADE",
@@ -162,11 +156,13 @@
   "reviews": [
     {
       "role": "workflow_safety",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T06:14:09Z"
     },
     {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T06:15:36Z"
     }
   ]
 }
