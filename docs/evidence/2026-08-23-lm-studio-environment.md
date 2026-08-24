@@ -80,7 +80,7 @@ The exact Home Assistant LAN source address was observed in its Network page on 
 - Whether the LM Studio server and loaded model automatically recover after host or application restart.
 - Real timeout, cancellation, streaming, and concurrent-request behavior.
 - Performance and reliability thresholds for the selected workflow classes.
-- Router/VLAN policy and backup/restore readiness tracked under `ENV-010`.
+- Router/VLAN policy plus emergency-kit custody and restore-test readiness tracked under `ENV-010`; automatic backups are now evidenced separately in `docs/evidence/2026-08-23-home-assistant-backup.md`.
 
 These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FND-007`; none is represented as passed.
 

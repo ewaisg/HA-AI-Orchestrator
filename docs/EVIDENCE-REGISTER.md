@@ -17,7 +17,7 @@ This register prevents environment details from being guessed or silently copied
 
 ## Live Home Assistant verification
 
-The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home-assistant-environment.md`](evidence/2026-08-22-home-assistant-environment.md). The source UI remains authoritative; the snapshot must be revalidated where a fact can drift.
+The redacted read-only inspections are recorded in [`docs/evidence/2026-08-22-home-assistant-environment.md`](evidence/2026-08-22-home-assistant-environment.md) and [`docs/evidence/2026-08-23-home-assistant-backup.md`](evidence/2026-08-23-home-assistant-backup.md). The source UI remains authoritative; the snapshots must be revalidated where a fact can drift.
 
 | ID | Resolution | Evidence | Remaining unknown |
 |---|---|---|---|
@@ -26,7 +26,7 @@ The redacted read-only inspection is recorded in [`docs/evidence/2026-08-22-home
 | ENV-004 | `RESOLVED FOR PHASE 0 DISCOVERY` | HA-LIVE-012 through HA-LIVE-016 and HA-LIVE-025 through HA-LIVE-027, plus the user's prior successful audible test | Exact identifiers were verified live but are intentionally not committed to the public repository; revalidate and select current targets from discovery for WFL-007 |
 | ENV-007 | `RESOLVED FOR PHASE 0` | HA-LIVE-008 through HA-LIVE-011 plus DEC-016 | Manual-copy development bundle; later HACS distribution is tracked by ENV-011 |
 | ENV-009 | `RESOLVED` | HA-OWNER-004 through HA-OWNER-006; DEC-017 through DEC-019 | Revalidate only if the owner changes the policy; workflow-specific cloud opt-ins remain future explicit decisions |
-| ENV-010 | `PARTIAL` | HA-LIVE-006, HA-LIVE-022 through HA-LIVE-024, HA-LIVE-028 through HA-LIVE-029, HA-OWNER-001 through HA-OWNER-003, LM-LIVE-008, and LM-LIVE-016 through LM-LIVE-017 | The LM Studio host firewall is now narrowly scoped and revalidated. Backup encryption/emergency-kit/restore readiness and router/VLAN policy remain unknown |
+| ENV-010 | `PARTIAL` | HA-LIVE-006, HA-LIVE-022 through HA-LIVE-024, HA-LIVE-028 through HA-LIVE-029, HA-OWNER-001 through HA-OWNER-003, LM-LIVE-008, LM-LIVE-016 through LM-LIVE-017, and HA-BACKUP-001 through HA-BACKUP-006 in `docs/evidence/2026-08-23-home-assistant-backup.md` | The LM Studio host firewall is narrowly scoped. Recommended daily encrypted automatic backups retain three copies, include settings/history and all apps, use Home Assistant Cloud, and completed once to two locations. Emergency-kit custody confirmation, restore-test policy/evidence, and router/VLAN policy remain unknown |
 | ENV-003 | `RESOLVED FOR PHASE 0` | LM-LIVE-001 through LM-LIVE-017 and LM-PROBE-001 through LM-PROBE-002 in `docs/evidence/2026-08-23-lm-studio-environment.md` | Revalidate after server, model, credential, endpoint, Home Assistant transport, or network-policy changes and during LOC-003 implementation/release gates |
 
 ## Prior proof requiring live revalidation

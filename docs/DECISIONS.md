@@ -26,6 +26,7 @@ This file records product-level decisions. Implementation-sensitive decisions wi
 | DEC-018 | Retain chat content for 30 days and execution metadata for 90 days by default | Establishes bounded owner-approved defaults while allowing future explicit workflow-specific reductions | 2026-08-23 |
 | DEC-019 | Exclude credentials, cameras, precise location, person/presence data, calendars, locks, alarms, and garage/security state from cloud routes by default | Records the owner's accepted sensitive-data baseline; credentials remain prohibited from provider payloads | 2026-08-23 |
 | DEC-020 | Connect Home Assistant to LM Studio over the local network; do not make OpenVPN or public LM Studio exposure a runtime dependency | Home Assistant and LM Studio share the LAN. OpenVPN is reserved for the owner's remote administration of the LM Studio host | 2026-08-23 |
+| DEC-021 | Use Home Assistant's built-in Recommended automatic-backup policy: back up everything daily, retain three backups, and use the available Home Assistant Cloud location | The owner explicitly selected the live wizard's Recommended choice, and the first backup completed to two locations | 2026-08-23 |
 
 ## Proposed — requires Phase 0 ADR
 
@@ -47,5 +48,5 @@ The accepted/provisional ADR records now live in [`docs/architecture/adrs/`](arc
 - Which medium- and high-risk Home Assistant actions will ever be eligible for AI control.
 - Whether confirmation must occur in chat, Companion notification, or both.
 - Which specific workflows, if any, will opt in to cloud and whether any future exception to the default sensitive-data exclusions will be allowed.
-- Automatic-backup, encryption, emergency-kit, and restore-test policy for the live Home Assistant installation.
+- Emergency-kit custody confirmation and restore-test policy for the live Home Assistant installation.
 - Whether Azure and AWS credentials will be static least-privilege credentials or brokered/rotated identities.
