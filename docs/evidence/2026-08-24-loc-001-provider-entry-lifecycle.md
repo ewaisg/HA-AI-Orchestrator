@@ -60,6 +60,8 @@ The fifth test/release review approved candidate `e6a4f8fcec547f05bf9e9c2b1d24b2
 
 Immutable missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` was reconstructed from a Git archive in clean Linux. It passed 259 full tests, 70 focused lifecycle tests, 138 provider tests, 30 security/evidence/traceability tests, and 168 pure tests. Ruff format/lint, canary, evidence schema, traceability, diff, and canonical hashes passed. Five known upstream deprecations remain and no project failure occurred.
 
+Independent workflow/safety review approved candidate `b13c1d6724e431ce88a7d0aee1c55d1592c53a35` at `2026-08-24T17:47:35Z` with no actionable findings. Independent test/release review approved the same candidate at `2026-08-24T17:48:22Z` with no actionable findings. Each reviewer independently reconstructed committed source in clean Linux and reproduced the 259/70/138/30/168 test matrix plus Ruff, canary, hashes, schema, traceability, diff, provenance, and sensitive-data checks. The candidate differs from the immutable implementation artifact only in tracker, evidence narrative, and manifest metadata.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -69,4 +71,4 @@ Immutable missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` was r
 
 ## Acceptance status
 
-`FIFTH REMEDIATION IN REVIEW`. No rejected candidate is accepted. Missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` passes its exact-commit gates. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
+`DONE`. Missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` and evidence candidate `b13c1d6724e431ce88a7d0aee1c55d1592c53a35` passed all required gates and both independent reviews. Prior rejected candidates remain unaccepted historical evidence.

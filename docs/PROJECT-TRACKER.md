@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **LOC-001 missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` fails closed when an exact `NormalizedError.code` slot is unset. Exact clean Linux passes 259 full, 70 focused lifecycle, 138 provider, 30 security/evidence/traceability, and 168 pure tests plus Ruff, canary, canonical hashes, schema, traceability, and diff. Obtain fresh independent workflow/safety and test/release approvals. No LM Studio transport, endpoint, credential, model, provider UI, or Home Assistant action is present.**
+Current resume point: **LOC-003 is claimed for the authenticated LM Studio/OpenAI-compatible adapter. Expected implementation files are a provider transport/adapter module, lifecycle registration wiring, translations, adapter and Home Assistant tests, and redacted evidence/manifest updates. Verification will cover the common provider contract, shared Home Assistant async session, URL/redirect policy, Bearer-secret containment, authentication/error normalization, timeout/cancellation, unload/reload cleanup, synthetic HTTP behavior, exact Core 2026.8.3 Linux gates, and redacted live revalidation before completion. LOC-001 is independently accepted.**
 
 ## Status rules
 
@@ -21,12 +21,12 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | LOC-002 provider contract and normalized errors/capabilities, independently accepted |
-| Active work | LOC-001 provider-neutral config-entry lifecycle |
+| Last completed | LOC-001 provider-neutral config-entry lifecycle, independently accepted |
+| Active work | LOC-003 authenticated LM Studio/OpenAI-compatible adapter |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | LOC-001 immutable artifact, exact-commit Linux/local gates, and independent workflow/safety plus test/release acceptance |
-| Production code | The foundation, action-free lifecycle probe, provider-neutral contract, and working LOC-001 provider config-entry lifecycle are implemented; live provider transport, provider UI, and product workflows remain absent |
-| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; the independently accepted LOC-002 artifact, candidate, and closeout are pushed, and local/remote equality was verified before LOC-001 planning resumed |
+| Next gate | LOC-003 bounded adapter implementation, synthetic transport/security matrix, redacted live Home Assistant revalidation, and independent acceptance |
+| Production code | The foundation, action-free lifecycle probe, provider-neutral contract, and provider config-entry lifecycle are implemented; live provider transport, provider UI, and product workflows remain absent |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; LOC-001 is accepted and its closeout push is the immediate next repository action |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -52,9 +52,9 @@ No task may move to `DONE` based only on an assertion.
 
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
-| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `REVIEW` | FND-010, LOC-002 | All prior candidates remain unaccepted. Missing-slot artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22` makes exact-envelope extraction total and passes exact clean-Linux 259 full, 70 focused lifecycle, 138 provider, 30 security/evidence/traceability, and 168 pure tests plus Ruff, canary, hashes, schema, traceability, and diff. Next: fresh independent reviews. Evidence: `docs/evidence/2026-08-24-loc-001-provider-entry-lifecycle.md`. |
+| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `DONE` | FND-010, LOC-002 | Artifact `7921806f9e47ea83f2ae7a7707aeba0dc1a31c22`, candidate `b13c1d6724e431ce88a7d0aee1c55d1592c53a35`: workflow/safety approved `2026-08-24T17:47:35Z`; test/release approved `2026-08-24T17:48:22Z`. Clean Linux passed 259 full, 70 focused lifecycle, 138 provider, 30 security/evidence/traceability, and 168 pure tests; Ruff, canary, hashes, schema, traceability, and diff passed. Evidence: `docs/evidence/2026-08-24-loc-001-provider-entry-lifecycle.md`. |
 | LOC-002 | Define provider contract and normalized errors/capabilities | `DONE` | FND-008 | Artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4`, candidate `e8787b36ffc5af4525963ec55dda06e732188ad7`: workflow/safety approved `2026-08-24T07:39:29Z`; test/release approved `2026-08-24T07:41:11Z`. Clean Linux passed 198 full, 136 provider, 30 security/evidence/traceability, 166 pure, and six explicit remediation tests; Ruff, canary, schema, fixture-count, canonical-hash, Git, clean-tree, and sensitive-data checks passed. `CTRL-PROVIDER-001` remains design-only and `TEST-PROVIDER-CONTRACT` planned until every live adapter passes. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
-| LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
+| LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `IN PROGRESS` | LOC-001, LOC-002, ENV-003 | Claimed by provider/backend specialist. Expected files: provider transport/adapter, lifecycle registration, translations, adapter/HA tests, and redacted evidence manifest. Required gates: shared HA async session; URL/redirect and secret boundaries; auth/error normalization; timeout/cancellation; unload/reload cleanup; synthetic transport matrix; exact Core 2026.8.3 Linux checks; redacted live connectivity revalidation; independent reviews. |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |
 | LOC-005 | Add read-only entity/area/device catalog | `TODO` | LOC-001 | Registry-change and rename tests |
 | LOC-006 | Add read-only panel chat | `TODO` | LOC-003, LOC-005 | Streaming/non-streaming tests and tool access proven absent |
