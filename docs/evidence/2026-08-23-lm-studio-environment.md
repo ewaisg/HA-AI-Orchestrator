@@ -23,6 +23,8 @@ This record captures local inspection, two synthetic capability probes, and a re
 | LM-LIVE-013 | After LM-LIVE-012, Home Assistant log searches returned `No issues found` for both `ai_orchestrator` and `rest_command`; the AI Orchestrator Home panel still loaded and displayed `None contacted` | Live Home Assistant logs and panel inspection |
 | LM-LIVE-014 | An isolated temporary Home Assistant `rest_command` used an intentionally invalid, non-secret credential against the same endpoint. LM Studio returned HTTP `401`, error type `invalid_request_error`, and code `invalid_api_key`; its message masked the submitted test value | Owner-supplied Home Assistant Actions response; temporary command, private endpoint, unique response metadata, and complete submitted test value omitted |
 | LM-LIVE-015 | The temporary command was removed. The saved configuration was verified to contain exactly `lmstudio_test` and `lmstudio_chat`, two secret-backed authorization headers, two endpoint lines, no negative-probe command, and no placeholder. The owner then reran `lmstudio_test` and received HTTP `200` with the same model, completion text, and 20/7/27 usage. The panel remained healthy with `None contacted`; `ai_orchestrator` still had no scoped log issue | Live File Editor, owner-supplied Actions response, scoped log review, and live panel inspection |
+| LM-LIVE-016 | Effective Windows Firewall reinspection found exactly two LM Studio inbound rules. The enabled TCP allow rule is scoped to the Private profile, local port `1234`, one remote source address, and blocked edge traversal. The UDP rule is disabled | Read-only local firewall rule, port-filter, and address-filter inspection; program path, rule identifiers, network name, and private source address withheld |
+| LM-LIVE-017 | After LM-LIVE-016, Home Assistant reran `rest_command.lmstudio_test` and received HTTP `200` with the same model, completion text, and 20/7/27 usage | Owner-supplied Home Assistant Actions response; unique response ID, timestamp, headers, endpoint, and credential omitted |
 
 The complete model inventory is intentionally unnecessary for the first adapter. The loaded model identifier above is recorded because it was actually probed; it is not a promise that the same model will remain loaded after restart.
 
@@ -49,7 +51,7 @@ These results prove the observed loaded model/server combination can produce the
 
 ## Security disposition
 
-The original combination of an all-interface listener, plain HTTP, no API token, enabled per-request MCPs, and broad LM Studio application allow rules was not accepted as the final product connection posture. LM-LIVE-010 proves application-layer authentication rejects a missing token and the created token denies both MCP permission classes. LM-LIVE-011 and LM-LIVE-012 prove the current secret-backed Home Assistant path authenticates successfully over the LAN. The remaining broad TCP firewall rule still permits inbound traffic to the application from any remote IP on any local port on both Private and Public profiles; it is not a Home-Assistant-only boundary. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
+The original combination of an all-interface listener, plain HTTP, no API token, enabled per-request MCPs, and broad LM Studio application allow rules was not accepted as the final product connection posture. LM-LIVE-010 proves application-layer authentication rejects a missing token and the created token denies both MCP permission classes. LM-LIVE-011 through LM-LIVE-015 prove current positive and invalid-credential Home Assistant-origin behavior. LM-LIVE-016 proves the former broad firewall posture was replaced by an enabled Private-only TCP `1234` rule restricted to one remote source with blocked edge traversal, while the UDP rule is disabled. LM-LIVE-017 proves Home Assistant still reaches LM Studio after that restriction. The project must not publish port `1234` to the internet or make OpenVPN a runtime dependency.
 
 Completed owner security steps:
 
@@ -60,13 +62,14 @@ Completed owner security steps:
 5. A synthetic Home Assistant-origin authenticated request returned HTTP `200`; both scoped log searches remained clear and the AI Orchestrator foundation panel remained healthy.
 6. An isolated Home Assistant-origin invalid-credential request returned HTTP `401` with `invalid_api_key`; the valid secret was not overwritten or exposed.
 7. The saved file no longer contains the temporary negative command and again contains the intended two commands. A later positive request returned HTTP `200` and the foundation panel remained healthy.
+8. The effective host firewall is restricted to Private-profile TCP `1234` from one remote source; edge traversal is blocked, UDP is disabled, and the Home Assistant test still returns HTTP `200` afterward.
 
-Before `LOC-003` can complete:
+Current network/authentication precondition disposition:
 
-1. Replace or disable the broad LM Studio inbound rules and create the narrowest rule that permits the actual Home Assistant source to reach TCP port `1234` on the intended private profile only. UDP is not required by the observed API contract.
-2. Reinspect the effective firewall rule after the change rather than infer success from the settings UI.
+1. The Phase 0 live authentication, positive/negative Home Assistant transport, provider-side MCP-denial, and host-firewall evidence required by `ENV-003` is complete for the observed setup.
+2. `LOC-003` still requires implementation and adapter-level contract, secret-handling, timeout, normalized-error, redirect/SSRF, unload/reload, and live revalidation tests. The evidence here does not mark that future implementation task done.
 
-Authentication is enabled and both existing Home Assistant `rest_command` definitions now use the secret-backed header. LM-LIVE-012 through LM-LIVE-015 prove current positive and invalid-credential Home Assistant-origin transport behavior plus cleanup restoration; they do not substitute for adapter-level secret handling, timeout behavior, or firewall narrowing.
+Authentication is enabled and both existing Home Assistant `rest_command` definitions now use the secret-backed header. LM-LIVE-012 through LM-LIVE-015 prove current positive and invalid-credential Home Assistant-origin transport behavior plus cleanup restoration; they do not substitute for adapter-level secret handling or timeout behavior. Firewall narrowing and post-change reachability are separately evidenced by LM-LIVE-016 and LM-LIVE-017.
 
 During cleanup, an endpoint placeholder was briefly saved and tested, and `lmstudio_chat` was invoked once without its required `system_prompt` and `prompt` inputs. Home Assistant Actions reported those operator-test errors. The scoped RESTful Command log retained the placeholder errors and intentional `401`. The final saved configuration contains no placeholder, and the later positive `200` occurred after those errors. The retained historical log entries are not represented as a clean log or as failures of the final positive request.
 
@@ -77,7 +80,7 @@ The exact Home Assistant LAN source address was observed in its Network page on 
 - Whether the LM Studio server and loaded model automatically recover after host or application restart.
 - Real timeout, cancellation, streaming, and concurrent-request behavior.
 - Performance and reliability thresholds for the selected workflow classes.
-- Router/VLAN policy and backup/restore readiness tracked under `ENV-010`; the current Windows Firewall application rules are verified but require narrowing.
+- Router/VLAN policy and backup/restore readiness tracked under `ENV-010`.
 
 These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FND-007`; none is represented as passed.
 
@@ -93,10 +96,12 @@ These unknowns remain assigned to `LOC-003`, `LOC-007`, and the open part of `FN
 | Isolated invalid-credential Home Assistant-origin request | HTTP `401` with `invalid_api_key`; see LM-LIVE-014 |
 | Cleanup restoration | Temporary command and placeholder absent; intended two commands and two secret-backed headers present; final `lmstudio_test` returned HTTP `200`; see LM-LIVE-015 |
 | Final scoped log interpretation | `ai_orchestrator` returned `No issues found`; `rest_command` retained the intentional `401` and intervening operator-test errors, with no later error after the final positive request |
+| Effective firewall reinspection | Enabled TCP allow is Private-only, local port `1234`, one remote source, and edge traversal blocked; UDP rule disabled; see LM-LIVE-016 |
+| Post-firewall Home Assistant request | HTTP `200`; see LM-LIVE-017 |
 | `git diff --check` | Passed; only expected Windows line-ending notices were emitted |
 | `uv run python scripts/canary_scan.py` | Passed with no findings |
 | `uv run python scripts/run_pure_tests.py` | `81 passed`, with five dependency deprecation warnings |
 | Sensitive-value review of the repository | No custom domain, observed private address range, LM Studio token prefix/value, Bearer credential, unique chat-completion ID, or unredacted credential-bearing RTSP URL retained |
-| Independent workflow/safety review | Approved the current negative-authentication and cleanup documentation diff with no blocking findings; confirmed conservative claims, redaction, and retained blockers |
+| Independent workflow/safety review | Approved the current authentication, cleanup, and effective-firewall documentation with no blocking findings; confirmed the bounded ENV-003 resolution, redaction, and retained blockers |
 
 An initial unqualified `python scripts/run_pure_tests.py` attempt did not start the suite because the workstation's default Python interpreter did not have `pytest`. The documented project environment command above was then used successfully; the failed environment lookup is not represented as a test failure or a passing check.
