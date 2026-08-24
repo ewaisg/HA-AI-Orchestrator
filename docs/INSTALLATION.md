@@ -48,8 +48,10 @@ automation or the product workflow runtime.
 
 - If Home Assistant cannot find the integration, verify the exact manifest path
   and restart Home Assistant again.
-- Only one foundation config entry is permitted. A second setup attempt returns
-  `already_configured`.
+- Only one foundation config entry is permitted. Until a real provider adapter
+  is installed by a later phase, a second setup attempt reports that no
+  provider adapters are available; it does not create placeholder provider
+  data.
 - The panel and status command require an administrator.
 - If the panel reports an unsupported status response, replace the whole
   `ai_orchestrator` directory from one repository revision; do not mix backend

@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **LOC-002 is independently accepted. Continue LOC-001 by defining the provider-neutral one-config-entry-per-provider lifecycle on the existing foundation entry without adding LM Studio transport, an endpoint, or a credential. Expected implementation area: `config_flow.py`, integration setup/unload/runtime/constant types, translations, Home Assistant config-flow/lifecycle tests, and new LOC-001 evidence. First resolve the exact entry data/options and reauthentication contract from current Home Assistant APIs and recorded decisions; keep unknown provider values absent.**
+Current resume point: **LOC-001 provider-neutral config-entry lifecycle is implemented in the working tree and passes 223 clean-Linux full-suite tests, 166 provider/security/quality tests, 166 pure tests, Ruff, canary, manifest-schema, traceability, and diff checks. Freeze the implementation and incomplete evidence as an immutable artifact, reproduce all gates from the exact commit, record a metadata candidate, then obtain independent workflow/safety and test/release approvals. No LM Studio transport, endpoint, credential, model, provider UI, or Home Assistant action is present.**
 
 ## Status rules
 
@@ -24,8 +24,8 @@ No task may move to `DONE` based only on an assertion.
 | Last completed | LOC-002 provider contract and normalized errors/capabilities, independently accepted |
 | Active work | LOC-001 provider-neutral config-entry lifecycle |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | LOC-001 exact provider-entry data/options, validation, reauthentication, setup/unload, and failure-lifecycle contract plus Home Assistant tests |
-| Production code | FND-015 foundation, the FND-012 action-free lifecycle probe, and LOC-002 provider-neutral contract are implemented; live providers and product workflows remain absent |
+| Next gate | LOC-001 immutable artifact, exact-commit Linux/local gates, and independent workflow/safety plus test/release acceptance |
+| Production code | The foundation, action-free lifecycle probe, provider-neutral contract, and working LOC-001 provider config-entry lifecycle are implemented; live provider transport, provider UI, and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository; the independently accepted LOC-002 artifact, candidate, and closeout are pushed, and local/remote equality was verified before LOC-001 planning resumed |
 
 ## Phase 0 — foundation and architecture validation
@@ -52,7 +52,7 @@ No task may move to `DONE` based only on an assertion.
 
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
-| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `IN PROGRESS` | FND-010, LOC-002 | Claimed after reading the current foundation config flow/lifecycle and ADR-0005. Expected implementation area: `config_flow.py`, setup/unload/runtime/constants, translations, Home Assistant lifecycle tests, and LOC-001 evidence. Next: establish the exact provider-neutral data/options and reauthentication contract from current HA APIs and recorded decisions; do not add a provider-specific transport, endpoint, credential, model, or capability claim. |
+| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `REVIEW` | FND-010, LOC-002 | Working tree implements closed foundation/provider entry shapes, adapter-owned setup/reauth/reconfigure schemas, validation before save/update, safe normalized HA failure mapping, entry-local runtime, unload/removal, and fail-closed v1 foundation migration. Working checks: 223 clean-Linux full, 166 provider/security/quality, and 166 pure tests plus Ruff, canary, manifest-schema, traceability, and diff. Next: immutable artifact, exact-commit reproduction, metadata candidate, and independent reviews. Evidence: `docs/evidence/2026-08-24-loc-001-provider-entry-lifecycle.md`. |
 | LOC-002 | Define provider contract and normalized errors/capabilities | `DONE` | FND-008 | Artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4`, candidate `e8787b36ffc5af4525963ec55dda06e732188ad7`: workflow/safety approved `2026-08-24T07:39:29Z`; test/release approved `2026-08-24T07:41:11Z`. Clean Linux passed 198 full, 136 provider, 30 security/evidence/traceability, 166 pure, and six explicit remediation tests; Ruff, canary, schema, fixture-count, canonical-hash, Git, clean-tree, and sensitive-data checks passed. `CTRL-PROVIDER-001` remains design-only and `TEST-PROVIDER-CONTRACT` planned until every live adapter passes. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |

@@ -2,10 +2,14 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
+
+if TYPE_CHECKING:
+    from .provider_entry import ProviderEntryAdapter
 
 
 @dataclass(slots=True)
@@ -13,6 +17,10 @@ class AIOrchestratorRuntime:
     """Track resources shared by every loaded foundation entry."""
 
     loaded_foundation_entry_ids: set[str] = field(default_factory=set)
+    loaded_provider_entry_ids: set[str] = field(default_factory=set)
+    provider_entry_adapters: dict[str, ProviderEntryAdapter] = field(
+        default_factory=dict
+    )
     owns_panel: bool = False
     workflow_probe_unsubscribe: Callable[[], None] | None = None
     workflow_probe_execution_count: int = 0

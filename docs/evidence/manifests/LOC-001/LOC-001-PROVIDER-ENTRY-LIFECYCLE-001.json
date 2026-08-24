@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-001-PROVIDER-ENTRY-LIFECYCLE-001",
+  "task_id": "LOC-001",
+  "kind": "automated_test",
+  "captured_at": "2026-08-24T16:38:55Z",
+  "source_revision": {
+    "state": "working_tree",
+    "dirty": true
+  },
+  "traceability": {
+    "requirements": ["LOC-001", "REQ-CAP-001"],
+    "decisions": ["DEC-001", "DEC-010", "DEC-023"],
+    "controls": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-PROVIDER-001"],
+    "tests": [
+      "CONFIG_ENTRY_LIFECYCLE",
+      "LINUX_FULL_SUITE",
+      "PURE_TEST_SUITE",
+      "RUFF_FORMAT",
+      "RUFF_LINT",
+      "CANARY_SCAN",
+      "GIT_DIFF_CHECK"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {
+        "name": "python",
+        "status": "verified",
+        "version": "3.14.5"
+      },
+      {
+        "name": "home_assistant",
+        "status": "verified",
+        "version": "2026.8.3"
+      },
+      {
+        "name": "pytest_homeassistant_custom_component",
+        "status": "verified",
+        "version": "0.13.357"
+      },
+      {
+        "name": "docker",
+        "status": "verified",
+        "version": "29.5.2"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "docker run --rm --name ai-orchestrator-loc001-working-review --workdir /workspace --volume ${PWD}:/source:ro --volume ai-orchestrator-loc001-uv-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc 'python -m pip install --no-cache-dir uv==0.12.1 && tar --exclude=.git --exclude=.venv --exclude=frontend/node_modules --exclude=frontend/dist -C /source -cf - . | tar -xf - -C /workspace && uv sync --frozen --link-mode=copy && uv run pytest -p no:cacheprovider'"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "PURE_TEST_SUITE",
+      "command_argv": ["uv", "run", "python", "scripts/run_pure_tests.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_FORMAT",
+      "command_argv": ["uv", "run", "ruff", "format", "--check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "RUFF_LINT",
+      "command_argv": ["uv", "run", "ruff", "check", "."],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "CANARY_SCAN",
+      "command_argv": ["uv", "run", "python", "scripts/canary_scan.py"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff", "--check"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "provider-entry-contract",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/provider_entry.py",
+      "sha256": "8cc789595b19383d576c7fe12aeb21368d4050dd289fb5dc95aa00605fc1b7ac",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-config-flow",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/config_flow.py",
+      "sha256": "d5c6bc0615a31cc49b59015692723ec38156b8ed8daf04fee9d071341032ee85",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-setup-unload-lifecycle",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/__init__.py",
+      "sha256": "15bb3b16d50e535e1a01b3b4821f23c373d5c2859254ae86fc170b0200c1bb5d",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [],
+  "residuals": [
+    {
+      "id": "LIVE_ADAPTER_IMPLEMENTATION",
+      "description": "The LM Studio/OpenAI-compatible adapter must define and verify its exact endpoint, authentication, transport, resource cleanup, and redaction behavior.",
+      "blocks": ["LOC-003"]
+    },
+    {
+      "id": "PROVIDER_PANEL_UI",
+      "description": "The product panel must expose provider setup and testing without returning credentials or secret-derived masks to the browser.",
+      "blocks": ["LOC-004"]
+    }
+  ],
+  "reviews": [
+    {
+      "role": "workflow_safety",
+      "status": "pending"
+    },
+    {
+      "role": "test_release",
+      "status": "pending"
+    }
+  ]
+}

@@ -4,12 +4,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from homeassistant.components import frontend, panel_custom
-from homeassistant.config_entries import ConfigEntryState
+from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntryState
 from homeassistant.core import Context, HomeAssistant
-from homeassistant.exceptions import ConfigEntryError
+from homeassistant.exceptions import (
+    ConfigEntryAuthFailed,
+    ConfigEntryError,
+    ConfigEntryNotReady,
+)
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ai_orchestrator import (
+    async_migrate_entry,
     async_setup,
     async_setup_entry,
     async_unload_entry,
@@ -20,8 +25,26 @@ from custom_components.ai_orchestrator.const import (
     PANEL_URL_PATH,
     WORKFLOW_PROBE_EVENT,
 )
+from custom_components.ai_orchestrator.provider_entry import (
+    CONF_ENTRY_KIND,
+    ENTRY_KIND_FOUNDATION,
+    async_register_provider_entry_adapter,
+    build_provider_entry_data,
+    provider_entry_unique_id,
+)
+from custom_components.ai_orchestrator.providers.contract import (
+    SAFE_ERROR_MESSAGES,
+    ErrorCode,
+    NormalizedError,
+    ProviderError,
+)
 from custom_components.ai_orchestrator.runtime import async_get_runtime
 from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_probe
+from tests.home_assistant.provider_fakes import (
+    SYNTHETIC_CONFIG_FIELD,
+    SYNTHETIC_PROVIDER_TYPE,
+    SyntheticProviderEntryAdapter,
+)
 
 
 async def test_async_setup_registers_global_surfaces(hass: HomeAssistant) -> None:
@@ -148,7 +171,7 @@ async def test_non_foundation_entry_fails_without_loaded_state(
     """An unrecognized Phase 0 entry cannot make the foundation look loaded."""
     entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id="not_the_foundation")
 
-    with pytest.raises(ConfigEntryError, match="not a foundation entry"):
+    with pytest.raises(ConfigEntryError, match="data is invalid"):
         await async_setup_entry(hass, entry)
 
     assert async_get_runtime(hass).loaded_foundation_entry_ids == set()
@@ -278,3 +301,232 @@ async def test_config_entry_manager_reports_foreign_panel_collision(
     assert async_get_runtime(hass).loaded_foundation_entry_ids == set()
     assert async_get_runtime(hass).workflow_probe_unsubscribe is None
     assert hass.data[frontend.DATA_PANELS][PANEL_URL_PATH] is foreign_panel
+
+
+async def test_provider_entry_setup_and_unload_are_isolated_from_foundation(
+    hass: HomeAssistant,
+) -> None:
+    """A validated provider lives only in its entry runtime until unload."""
+    connection_id = "00000000-0000-4000-8000-000000000010"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    async_register_provider_entry_adapter(hass, SyntheticProviderEntryAdapter())
+
+    assert await async_setup_entry(hass, entry)
+    runtime = async_get_runtime(hass)
+    assert runtime.loaded_provider_entry_ids == {entry.entry_id}
+    assert runtime.loaded_foundation_entry_ids == set()
+    assert entry.runtime_data is not None
+    assert entry.runtime_data.connection_id == connection_id
+    assert entry.runtime_data.provider_type == SYNTHETIC_PROVIDER_TYPE
+    assert entry.runtime_data.validation.authenticated is True
+
+    assert await async_unload_entry(hass, entry)
+    assert runtime.loaded_provider_entry_ids == set()
+    assert getattr(entry, "runtime_data", None) is None
+
+
+@pytest.mark.parametrize(
+    ("code", "exception_type"),
+    [
+        (ErrorCode.AUTHENTICATION, ConfigEntryAuthFailed),
+        (ErrorCode.TIMEOUT, ConfigEntryNotReady),
+        (ErrorCode.AUTHORIZATION, ConfigEntryError),
+    ],
+)
+async def test_provider_setup_maps_only_safe_normalized_failures(
+    hass: HomeAssistant,
+    code: ErrorCode,
+    exception_type: type[Exception],
+) -> None:
+    """Authentication, transient, and terminal failures have distinct HA states."""
+    connection_id = "00000000-0000-4000-8000-000000000011"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    adapter = SyntheticProviderEntryAdapter(
+        error=ProviderError(
+            NormalizedError(code=code, message=SAFE_ERROR_MESSAGES[code]),
+            retry_allowed=code is ErrorCode.TIMEOUT,
+            failover_allowed=False,
+        )
+    )
+    async_register_provider_entry_adapter(hass, adapter)
+
+    with pytest.raises(exception_type, match=SAFE_ERROR_MESSAGES[code]):
+        await async_setup_entry(hass, entry)
+
+    assert async_get_runtime(hass).loaded_provider_entry_ids == set()
+    assert getattr(entry, "runtime_data", None) is None
+
+
+async def test_provider_setup_hides_unexpected_adapter_exception(
+    hass: HomeAssistant,
+) -> None:
+    """Unexpected adapter text cannot cross the setup error boundary."""
+    connection_id = "00000000-0000-4000-8000-000000000012"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    synthetic_secret = "synthetic-secret-adapter-body"  # noqa: S105
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(error=RuntimeError(synthetic_secret)),
+    )
+
+    with pytest.raises(ConfigEntryError, match="failed safely") as caught:
+        await async_setup_entry(hass, entry)
+
+    assert synthetic_secret not in str(caught.value)
+    assert caught.value.__cause__ is None
+
+
+async def test_foundation_version_one_migrates_without_provider_data(
+    hass: HomeAssistant,
+) -> None:
+    """The installed empty foundation entry has one explicit migration."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+        version=1,
+    )
+    entry.add_to_hass(hass)
+
+    assert await async_migrate_entry(hass, entry)
+    assert entry.version == 2
+    assert entry.minor_version == 1
+    assert entry.data == {CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION}
+
+
+async def test_migration_rejects_unknown_or_corrupt_entry_shapes(
+    hass: HomeAssistant,
+) -> None:
+    """No pre-contract provider entry or mismatched identity is guessed."""
+    unknown_v1 = MockConfigEntry(
+        domain=DOMAIN,
+        data={"unknown": True},
+        unique_id="unknown-provider",
+        version=1,
+    )
+    mismatched_v2 = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id="00000000-0000-4000-8000-000000000013",
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id("00000000-0000-4000-8000-000000000014"),
+        version=2,
+    )
+
+    assert not await async_migrate_entry(hass, unknown_v1)
+    assert not await async_migrate_entry(hass, mismatched_v2)
+
+
+async def test_config_entry_manager_removes_loaded_provider_runtime(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """Home Assistant removal unloads provider runtime and deletes the entry."""
+    connection_id = "00000000-0000-4000-8000-000000000015"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    entry.add_to_hass(hass)
+    async_register_provider_entry_adapter(hass, SyntheticProviderEntryAdapter())
+
+    with patch(
+        "custom_components.ai_orchestrator.async_register_static_assets",
+        new_callable=AsyncMock,
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.LOADED
+    assert async_get_runtime(hass).loaded_provider_entry_ids == {entry.entry_id}
+
+    assert await hass.config_entries.async_remove(entry.entry_id) == {
+        "require_restart": False
+    }
+    await hass.async_block_till_done()
+
+    assert async_get_runtime(hass).loaded_provider_entry_ids == set()
+    assert hass.config_entries.async_get_entry(entry.entry_id) is None
+
+
+async def test_config_entry_manager_starts_reauth_on_authentication_failure(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """The real HA manager converts normalized authentication into reauth."""
+    connection_id = "00000000-0000-4000-8000-000000000016"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    entry.add_to_hass(hass)
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=ProviderError(
+                NormalizedError(
+                    code=ErrorCode.AUTHENTICATION,
+                    message=SAFE_ERROR_MESSAGES[ErrorCode.AUTHENTICATION],
+                ),
+                retry_allowed=False,
+                failover_allowed=False,
+            )
+        ),
+    )
+
+    with patch(
+        "custom_components.ai_orchestrator.async_register_static_assets",
+        new_callable=AsyncMock,
+    ):
+        assert not await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+    matching_flows = [
+        flow
+        for flow in hass.config_entries.flow.async_progress_by_handler(DOMAIN)
+        if flow["context"].get("source") == SOURCE_REAUTH
+        and flow["context"].get("entry_id") == entry.entry_id
+    ]
+    assert len(matching_flows) == 1
