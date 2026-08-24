@@ -393,7 +393,10 @@ def safe_provider_error_code(error: object) -> ErrorCode | None:
     normalized = state.get("error")
     if type(normalized) is not NormalizedError:
         return None
-    raw_code = object.__getattribute__(normalized, "code")
+    try:
+        raw_code = object.__getattribute__(normalized, "code")
+    except AttributeError:
+        return None
     return raw_code if type(raw_code) is ErrorCode else None
 
 

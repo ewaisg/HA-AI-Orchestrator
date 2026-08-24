@@ -50,6 +50,7 @@ from tests.home_assistant.provider_fakes import (
     UnhashableCode,
     forged_provider_error,
     forged_provider_error_payload,
+    forged_uninitialized_normalized_error,
 )
 
 
@@ -494,6 +495,36 @@ async def test_provider_setup_does_not_dispatch_nested_error_code_property(
             error=forged_provider_error_payload(
                 ExplodingCodeAccess(synthetic_marker), synthetic_marker
             )
+        ),
+    )
+
+    with pytest.raises(ConfigEntryError) as caught:
+        await async_setup_entry(hass, entry)
+
+    assert str(caught.value) == "Provider setup failed safely"
+    assert synthetic_marker not in str(caught.value)
+
+
+async def test_provider_setup_bounds_uninitialized_normalized_error(
+    hass: HomeAssistant,
+) -> None:
+    """Setup fails closed when an exact nested error has an unset code slot."""
+    connection_id = "00000000-0000-4000-8000-00000000001b"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    synthetic_marker = "synthetic-setup-uninitialized-normalized-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(
+            error=forged_uninitialized_normalized_error(synthetic_marker)
         ),
     )
 

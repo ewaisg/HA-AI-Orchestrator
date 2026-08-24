@@ -17,6 +17,7 @@ from custom_components.ai_orchestrator.providers.contract import (
     ErrorCode,
     HealthCheckResult,
     ModelCatalog,
+    NormalizedError,
     ProviderError,
     ProviderHealthState,
     ProviderRequest,
@@ -176,3 +177,8 @@ def forged_provider_error_payload(payload: object, marker: str) -> ProviderError
     forged.retry_allowed = False
     forged.failover_allowed = False
     return forged
+
+
+def forged_uninitialized_normalized_error(marker: str) -> ProviderError:
+    """Attach an exact NormalizedError whose required slots were never initialized."""
+    return forged_provider_error_payload(object.__new__(NormalizedError), marker)

@@ -56,6 +56,8 @@ Both fourth reviews rejected candidate `2fbc55afd5d51e05ff861e1f900ee9781100bdea
 
 Immutable full-envelope artifact `39d75467a51a6d669e2dc9e2fc7261b5c2079d1e` was reconstructed from a Git archive in clean Linux. It passed 254 full tests, 66 focused lifecycle tests, 137 provider tests, 30 security/evidence/traceability tests, and 167 pure tests. Ruff format/lint, canary, evidence schema, traceability, diff, and canonical hashes passed. Five known upstream deprecations remain and no project failure occurred.
 
+The fifth test/release review approved candidate `e6a4f8fcec547f05bf9e9c2b1d24b27fb9a6b9ba` at `2026-08-24T17:38:41Z`. Workflow/safety review rejected it at `2026-08-24T17:38:03Z` because exact-envelope extraction was not total when an exact `NormalizedError` instance had been allocated without initializing its required `code` slot. LOC-001 remained open. The fifth remediation catches that missing-slot `AttributeError` and returns no code before any message mapping or transient-code lookup. A direct helper regression plus setup, initial setup flow, reauthentication, and reconfiguration tests prove bounded failures, no marker disclosure, and atomic stored configuration. Working-tree checks pass 70 focused clean-Linux lifecycle tests and 168 local provider/security/quality plus pure tests; Ruff, canary, and diff checks pass.
+
 ## Residual gates
 
 - LOC-003 must register the actual LM Studio/OpenAI-compatible adapter, define its exact endpoint/authentication fields, use the Home Assistant shared async HTTP session, pass the common provider contract, and revalidate the already observed live environment without committing private values.
@@ -65,4 +67,4 @@ Immutable full-envelope artifact `39d75467a51a6d669e2dc9e2fc7261b5c2079d1e` was 
 
 ## Acceptance status
 
-`FOURTH REMEDIATION IN REVIEW`. No rejected candidate is accepted. Full-envelope artifact `39d75467a51a6d669e2dc9e2fc7261b5c2079d1e` passes its exact-commit gates. Fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.
+`FIFTH REMEDIATION IN REVIEW`. No rejected candidate is accepted. The missing-slot remediation passes its working-tree gates. An immutable exact-source artifact and fresh workflow/safety plus test/release approvals are required before LOC-001 can be `DONE`.

@@ -38,6 +38,7 @@ from custom_components.ai_orchestrator.providers.contract import (
     ToolCall,
     ToolDefinition,
     Usage,
+    safe_provider_error_code,
     validate_schema_value,
 )
 
@@ -248,6 +249,16 @@ def test_provider_error_rejects_forged_error_objects_without_echo() -> None:
         )
 
     assert synthetic_marker not in str(caught.value)
+
+
+def test_safe_provider_error_code_rejects_uninitialized_normalized_error() -> None:
+    forged = ProviderError.__new__(ProviderError)
+    Exception.__init__(forged, "synthetic-uninitialized-normalized-error")
+    forged.error = object.__new__(NormalizedError)  # type: ignore[assignment]
+    forged.retry_allowed = False
+    forged.failover_allowed = False
+
+    assert safe_provider_error_code(forged) is None
 
 
 @pytest.mark.parametrize("message", ["", "   ", "Bearer synthetic-secret"])

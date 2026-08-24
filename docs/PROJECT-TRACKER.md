@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-24
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **LOC-001 full-envelope artifact `39d75467a51a6d669e2dc9e2fc7261b5c2079d1e` centrally requires exact `ProviderError` and `NormalizedError`, retrieves stored payload without property dispatch, then accepts only an exact `ErrorCode`. Exact clean Linux passes 254 full, 66 focused lifecycle, 137 provider, 30 security/evidence/traceability, and 167 pure tests plus Ruff, canary, hashes, schema, traceability, and diff. Obtain fresh independent workflow/safety and test/release approvals. No LM Studio transport, endpoint, credential, model, provider UI, or Home Assistant action is present.**
+Current resume point: **LOC-001 fifth remediation catches an unset `NormalizedError.code` slot and fails closed before any mapping or set lookup. Working-tree checks pass 70 focused clean-Linux lifecycle tests and 168 local provider/security/quality plus pure tests with Ruff, canary, and diff clean. Commit and reconstruct an immutable artifact, then obtain fresh independent workflow/safety and test/release approvals. No LM Studio transport, endpoint, credential, model, provider UI, or Home Assistant action is present.**
 
 ## Status rules
 
@@ -52,7 +52,7 @@ No task may move to `DONE` based only on an assertion.
 
 | ID | Task | Status | Depends on | Required evidence |
 |---|---|---|---|---|
-| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `REVIEW` | FND-010, LOC-002 | Prior candidates were rejected and remain unaccepted. Full-envelope artifact `39d75467a51a6d669e2dc9e2fc7261b5c2079d1e` uses centralized non-dispatching exact outer/nested/code extraction and passes exact clean-Linux 254 full, 66 focused, 137 provider, 30 security/evidence/traceability, and 167 pure tests plus Ruff, canary, hashes, schema, traceability, and diff. Next: fresh independent reviews. Evidence: `docs/evidence/2026-08-24-loc-001-provider-entry-lifecycle.md`. |
+| LOC-001 | Complete local provider connection lifecycle on the validated skeleton | `REVIEW` | FND-010, LOC-002 | All prior candidates remain unaccepted. The fifth remediation makes exact-envelope extraction total when a genuine `NormalizedError` has an unset slot. Working-tree checks pass 70 focused clean-Linux lifecycle tests and 168 local provider/security/quality plus pure tests. Next: immutable exact-source reconstruction and fresh independent reviews. Evidence: `docs/evidence/2026-08-24-loc-001-provider-entry-lifecycle.md`. |
 | LOC-002 | Define provider contract and normalized errors/capabilities | `DONE` | FND-008 | Artifact `eff9e40c07842b96a04cd73e57c938212b1eedf4`, candidate `e8787b36ffc5af4525963ec55dda06e732188ad7`: workflow/safety approved `2026-08-24T07:39:29Z`; test/release approved `2026-08-24T07:41:11Z`. Clean Linux passed 198 full, 136 provider, 30 security/evidence/traceability, 166 pure, and six explicit remediation tests; Ruff, canary, schema, fixture-count, canonical-hash, Git, clean-tree, and sensitive-data checks passed. `CTRL-PROVIDER-001` remains design-only and `TEST-PROVIDER-CONTRACT` planned until every live adapter passes. Evidence: `docs/evidence/2026-08-24-loc-002-provider-contract.md` |
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `TODO` | LOC-001, LOC-002, ENV-003 | Redacted real connectivity test plus failure tests |
 | LOC-004 | Add provider setup/test UI | `TODO` | LOC-001, LOC-002 | Frontend tests and setup recording/screenshots |
