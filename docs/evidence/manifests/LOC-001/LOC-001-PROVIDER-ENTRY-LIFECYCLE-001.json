@@ -3,10 +3,10 @@
   "evidence_id": "LOC-001-PROVIDER-ENTRY-LIFECYCLE-001",
   "task_id": "LOC-001",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T17:22:44Z",
+  "captured_at": "2026-08-24T17:24:56Z",
   "source_revision": {
     "state": "committed",
-    "git_commit": "b056d32c00860fe42369c86f90cee2b68493963d",
+    "git_commit": "9dd98896fc61b8b6ff35aa5b032f5b6e13286926",
     "dirty": false
   },
   "traceability": {
@@ -55,7 +55,7 @@
         "powershell",
         "-NoProfile",
         "-Command",
-        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/provider_entry.py custom_components/ai_orchestrator/config_flow.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/providers/contract.py\"; git -c core.autocrlf=false archive --format=tar b056d32c00860fe42369c86f90cee2b68493963d | docker run --rm -i --name ai-orchestrator-loc001-second-remediation-artifact --workdir /workspace --volume ai-orchestrator-loc001-second-remediation-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
+        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/provider_entry.py custom_components/ai_orchestrator/config_flow.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/providers/contract.py\"; git -c core.autocrlf=false archive --format=tar 9dd98896fc61b8b6ff35aa5b032f5b6e13286926 | docker run --rm -i --name ai-orchestrator-loc001-exact-type-artifact --workdir /workspace --volume ai-orchestrator-loc001-exact-type-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
       ],
       "exit_code": 0,
       "result": "passed"
@@ -105,7 +105,7 @@
       "name": "provider-config-flow",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/config_flow.py",
-      "sha256": "2042b8f51b3059ce50c6850242b9a62f2e5b2a7733c36724599916ffad83dbed",
+      "sha256": "9cd19557b88214ed6d40962016afdf9f87eb41c7ba565438cbaf63c7573fa310",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -114,7 +114,7 @@
       "name": "provider-setup-unload-lifecycle",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/__init__.py",
-      "sha256": "dc049f717fe6c592ae7b2e42270b5a69aeed61bc38d4c65fadd8242f48e49f01",
+      "sha256": "350de43d0f3ba854fc9bd48c139b46542e7f1333911fcbbd3963ad4ae760020c",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -146,13 +146,11 @@
   "reviews": [
     {
       "role": "workflow_safety",
-      "status": "rejected",
-      "reviewed_at": "2026-08-24T17:19:51Z"
+      "status": "pending"
     },
     {
       "role": "test_release",
-      "status": "rejected",
-      "reviewed_at": "2026-08-24T17:20:19Z"
+      "status": "pending"
     }
   ]
 }
