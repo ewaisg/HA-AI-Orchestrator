@@ -3,10 +3,10 @@
   "evidence_id": "FND-013-DATA-FLOW-TRACEABILITY-001",
   "task_id": "FND-013",
   "kind": "review",
-  "captured_at": "2026-08-24T06:01:23Z",
+  "captured_at": "2026-08-24T06:11:33Z",
   "source_revision": {
     "state": "committed",
-    "git_commit": "6ba4793a3d5b283c91fc5a78dc141c80644f2c20",
+    "git_commit": "a7495b08c42c395cb15f6a30fb4956d38b091b53",
     "dirty": false
   },
   "traceability": {
@@ -143,7 +143,7 @@
   "unknowns": [
     {
       "id": "FND013_REVIEW_PENDING",
-      "description": "Independent workflow/safety and test/release reviews of committed artifact revision 6ba4793a3d5b283c91fc5a78dc141c80644f2c20 are pending.",
+      "description": "Independent workflow/safety and test/release reviews of corrected committed artifact revision a7495b08c42c395cb15f6a30fb4956d38b091b53 are pending.",
       "blocks": ["FND-013"]
     }
   ],
