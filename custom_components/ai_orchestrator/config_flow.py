@@ -94,9 +94,8 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if adapter is None:
             return self.async_abort(reason="unsupported_provider")
         if user_input is None:
-            return self.async_show_form(
-                step_id="provider",
-                data_schema=adapter.config_schema(ProviderConfigMode.SETUP),
+            return self._show_provider_form(
+                "provider", adapter, ProviderConfigMode.SETUP
             )
         config, error = await self._async_normalize_and_validate(
             adapter,
@@ -105,15 +104,17 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input,
         )
         if error is not None:
-            return self.async_show_form(
-                step_id="provider",
-                data_schema=adapter.config_schema(ProviderConfigMode.SETUP),
+            return self._show_provider_form(
+                "provider",
+                adapter,
+                ProviderConfigMode.SETUP,
                 errors={"base": error},
             )
         if config is None:
-            return self.async_show_form(
-                step_id="provider",
-                data_schema=adapter.config_schema(ProviderConfigMode.SETUP),
+            return self._show_provider_form(
+                "provider",
+                adapter,
+                ProviderConfigMode.SETUP,
                 errors={"base": "unknown"},
             )
         connection_id = str(uuid4())
@@ -186,10 +187,7 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             "reauth_confirm" if mode is ProviderConfigMode.REAUTH else "reconfigure"
         )
         if user_input is None:
-            return self.async_show_form(
-                step_id=step_id,
-                data_schema=adapter.config_schema(mode),
-            )
+            return self._show_provider_form(step_id, adapter, mode)
         config, error = await self._async_normalize_and_validate(
             adapter,
             mode,
@@ -197,15 +195,17 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             user_input,
         )
         if error is not None:
-            return self.async_show_form(
-                step_id=step_id,
-                data_schema=adapter.config_schema(mode),
+            return self._show_provider_form(
+                step_id,
+                adapter,
+                mode,
                 errors={"base": error},
             )
         if config is None:
-            return self.async_show_form(
-                step_id=step_id,
-                data_schema=adapter.config_schema(mode),
+            return self._show_provider_form(
+                step_id,
+                adapter,
+                mode,
                 errors={"base": "unknown"},
             )
         updated_data = build_provider_entry_data(
@@ -220,6 +220,27 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self._get_reauth_entry()
         return self._get_reconfigure_entry()
 
+    def _show_provider_form(
+        self,
+        step_id: str,
+        adapter: ProviderEntryAdapter,
+        mode: ProviderConfigMode,
+        *,
+        errors: dict[str, str] | None = None,
+    ) -> ConfigFlowResult:
+        """Build an adapter form without exposing schema callback failures."""
+        try:
+            schema = adapter.config_schema(mode)
+            if not isinstance(schema, vol.Schema):
+                raise TypeError("Provider schema must use voluptuous Schema")
+        except Exception:  # noqa: BLE001 -- adapter details must not reach the UI.
+            return self.async_abort(reason="provider_schema_error")
+        return self.async_show_form(
+            step_id=step_id,
+            data_schema=schema,
+            errors=errors,
+        )
+
     async def _async_normalize_and_validate(
         self,
         adapter: ProviderEntryAdapter,
@@ -228,10 +249,12 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: Mapping[str, object],
     ) -> tuple[Mapping[str, object] | None, str | None]:
         try:
-            config = copy_provider_config(
+            canonical_config = copy_provider_config(
                 adapter.normalize_config(mode, current_config, user_input)
             )
-            provider = await adapter.async_create_provider(config)
+            provider = await adapter.async_create_provider(
+                copy_provider_config(canonical_config)
+            )
             await provider.validate_connection()
         except ProviderError as err:
             return None, _flow_error_for_provider_error(err)
@@ -239,14 +262,15 @@ class AIOrchestratorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return None, "invalid_config"
         except Exception:  # noqa: BLE001 -- raw adapter failures never reach the UI.
             return None, "unknown"
-        return config, None
+        return copy_provider_config(canonical_config), None
 
 
 def _flow_error_for_provider_error(error: ProviderError) -> str:
-    if error.error.code is ErrorCode.AUTHENTICATION:
+    code = getattr(error.error, "code", None)
+    if code is ErrorCode.AUTHENTICATION:
         return "invalid_auth"
-    if error.error.code is ErrorCode.AUTHORIZATION:
+    if code is ErrorCode.AUTHORIZATION:
         return "insufficient_permissions"
-    if error.error.code in _TRANSIENT_ERRORS:
+    if code in _TRANSIENT_ERRORS:
         return "cannot_connect"
     return "invalid_config"

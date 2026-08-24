@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import math
 import re
 from collections.abc import Callable, Mapping
 from copy import deepcopy
@@ -199,8 +199,35 @@ def _copy_json_mapping(value: Mapping[str, object]) -> dict[str, object]:
     if any(not isinstance(key, str) for key in value):
         raise TypeError("Provider configuration keys must be strings")
     copied = deepcopy(dict(value))
-    try:
-        json.dumps(copied, allow_nan=False)
-    except (TypeError, ValueError) as err:
-        raise ValueError("Provider configuration must be JSON serializable") from err
+    _validate_json_value(copied, set())
     return copied
+
+
+def _validate_json_value(value: object, active_container_ids: set[int]) -> None:
+    """Reject values whose Python shape cannot survive HA JSON storage exactly."""
+    if value is None or type(value) in {str, bool, int}:
+        return
+    if type(value) is float:
+        if not math.isfinite(value):
+            raise ValueError("Provider configuration numbers must be finite")
+        return
+    if type(value) not in {dict, list}:
+        raise TypeError(
+            "Provider configuration must contain only canonical JSON values"
+        )
+
+    container_id = id(value)
+    if container_id in active_container_ids:
+        raise ValueError("Provider configuration cannot contain circular values")
+    active_container_ids.add(container_id)
+    try:
+        if type(value) is dict:
+            for key, item in value.items():
+                if type(key) is not str:
+                    raise TypeError("Provider configuration keys must be strings")
+                _validate_json_value(item, active_container_ids)
+        else:
+            for item in value:
+                _validate_json_value(item, active_container_ids)
+    finally:
+        active_container_ids.remove(container_id)

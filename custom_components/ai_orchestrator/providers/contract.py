@@ -376,6 +376,7 @@ class ProviderError(Exception):
         failover_allowed: bool,
     ) -> None:
         """Initialize a normalized provider failure."""
+        _require_instance(error, NormalizedError, "normalized provider error")
         super().__init__(error.message)
         if error.retry_hint_ms is not None and not retry_allowed:
             raise ValueError("A retry hint requires retry_allowed")

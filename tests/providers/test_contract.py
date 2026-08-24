@@ -8,6 +8,7 @@ import sys
 from collections.abc import Callable, Mapping
 from dataclasses import FrozenInstanceError, fields
 from pathlib import Path
+from types import SimpleNamespace
 from typing import cast
 
 import pytest
@@ -229,6 +230,24 @@ def test_provider_error_exposes_only_normalized_failure_data() -> None:
     assert str(failure) == "Provider rate limit was reached."
     assert failure.retry_allowed is True
     assert failure.failover_allowed is False
+
+
+def test_provider_error_rejects_forged_error_objects_without_echo() -> None:
+    synthetic_marker = "synthetic-forged-provider-marker"
+    forged = SimpleNamespace(
+        code=ErrorCode.AUTHENTICATION,
+        message=synthetic_marker,
+        retry_hint_ms=None,
+    )
+
+    with pytest.raises(TypeError, match="must use NormalizedError") as caught:
+        ProviderError(  # type: ignore[arg-type]
+            forged,
+            retry_allowed=False,
+            failover_allowed=False,
+        )
+
+    assert synthetic_marker not in str(caught.value)
 
 
 @pytest.mark.parametrize("message", ["", "   ", "Bearer synthetic-secret"])

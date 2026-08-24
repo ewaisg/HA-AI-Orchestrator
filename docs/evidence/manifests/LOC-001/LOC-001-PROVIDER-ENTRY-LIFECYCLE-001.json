@@ -3,7 +3,7 @@
   "evidence_id": "LOC-001-PROVIDER-ENTRY-LIFECYCLE-001",
   "task_id": "LOC-001",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T16:42:47Z",
+  "captured_at": "2026-08-24T17:01:03Z",
   "source_revision": {
     "state": "committed",
     "git_commit": "4ea2595029e7ad7a953abb628bf38bd93060885f",
@@ -137,11 +137,13 @@
   "reviews": [
     {
       "role": "workflow_safety",
-      "status": "pending"
+      "status": "rejected",
+      "reviewed_at": "2026-08-24T16:49:22Z"
     },
     {
       "role": "test_release",
-      "status": "pending"
+      "status": "approved",
+      "reviewed_at": "2026-08-24T16:47:18Z"
     }
   ]
 }

@@ -79,7 +79,10 @@ def test_provider_entry_parser_rejects_ambiguous_shapes(mutation: object) -> Non
         ("AAAAAAAA-0000-4000-8000-000000000020", SYNTHETIC_PROVIDER_TYPE, {}),
         (CONNECTION_ID, "Invalid Provider", {}),
         (CONNECTION_ID, SYNTHETIC_PROVIDER_TYPE, {1: "invalid-key"}),
+        (CONNECTION_ID, SYNTHETIC_PROVIDER_TYPE, {"nested": {1: "invalid-key"}}),
+        (CONNECTION_ID, SYNTHETIC_PROVIDER_TYPE, {"items": ("one", "two")}),
         (CONNECTION_ID, SYNTHETIC_PROVIDER_TYPE, {"value": float("nan")}),
+        (CONNECTION_ID, SYNTHETIC_PROVIDER_TYPE, {"value": float("inf")}),
     ],
 )
 def test_provider_entry_builder_rejects_noncanonical_or_non_json_data(
@@ -93,6 +96,19 @@ def test_provider_entry_builder_rejects_noncanonical_or_non_json_data(
             connection_id=connection_id,
             provider_type=provider_type,
             provider_config=provider_config,  # type: ignore[arg-type]
+        )
+
+
+def test_provider_entry_builder_rejects_circular_json_data() -> None:
+    """Circular containers cannot be persisted as canonical JSON."""
+    circular: dict[str, object] = {}
+    circular["self"] = circular
+
+    with pytest.raises(ValueError, match="circular"):
+        build_provider_entry_data(
+            connection_id=CONNECTION_ID,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config=circular,
         )
 
 

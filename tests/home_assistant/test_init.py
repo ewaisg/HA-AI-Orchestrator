@@ -1,5 +1,6 @@
 """Tests for the AI Orchestrator integration lifecycle."""
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -403,6 +404,43 @@ async def test_provider_setup_hides_unexpected_adapter_exception(
     assert caught.value.__cause__ is None
 
 
+async def test_provider_setup_uses_safe_text_for_malformed_provider_error(
+    hass: HomeAssistant,
+) -> None:
+    """Even a forged ProviderError cannot control a Home Assistant message."""
+    connection_id = "00000000-0000-4000-8000-000000000017"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    synthetic_marker = "synthetic-forged-provider-private-marker"
+    forged = ProviderError.__new__(ProviderError)
+    Exception.__init__(forged, synthetic_marker)
+    forged.error = SimpleNamespace(  # type: ignore[assignment]
+        code=ErrorCode.AUTHENTICATION,
+        message=synthetic_marker,
+        retry_hint_ms=None,
+    )
+    forged.retry_allowed = False
+    forged.failover_allowed = False
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(error=forged),
+    )
+
+    with pytest.raises(ConfigEntryAuthFailed) as caught:
+        await async_setup_entry(hass, entry)
+
+    assert str(caught.value) == SAFE_ERROR_MESSAGES[ErrorCode.AUTHENTICATION]
+    assert synthetic_marker not in str(caught.value)
+
+
 async def test_foundation_version_one_migrates_without_provider_data(
     hass: HomeAssistant,
 ) -> None:
@@ -444,6 +482,50 @@ async def test_migration_rejects_unknown_or_corrupt_entry_shapes(
 
     assert not await async_migrate_entry(hass, unknown_v1)
     assert not await async_migrate_entry(hass, mismatched_v2)
+
+
+@pytest.mark.parametrize(
+    ("version", "minor_version", "foundation"),
+    [
+        (0, 1, True),
+        (0, 1, False),
+        (-1, 1, True),
+        (2, 0, True),
+        (2, 2, False),
+        (3, 1, False),
+    ],
+)
+async def test_migration_rejects_every_unsupported_version(
+    hass: HomeAssistant,
+    version: int,
+    minor_version: int,
+    foundation: bool,
+) -> None:
+    """Only v1.1 foundation migration and exact current v2.1 are accepted."""
+    connection_id = "00000000-0000-4000-8000-000000000018"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=(
+            {CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION}
+            if foundation
+            else build_provider_entry_data(
+                connection_id=connection_id,
+                provider_type=SYNTHETIC_PROVIDER_TYPE,
+                provider_config={SYNTHETIC_CONFIG_FIELD: "synthetic-value"},
+            )
+        ),
+        unique_id=(
+            FOUNDATION_ENTRY_UNIQUE_ID
+            if foundation
+            else provider_entry_unique_id(connection_id)
+        ),
+        version=version,
+        minor_version=minor_version,
+    )
+
+    assert not await async_migrate_entry(hass, entry)
+    assert entry.version == version
+    assert entry.minor_version == minor_version
 
 
 async def test_config_entry_manager_removes_loaded_provider_runtime(

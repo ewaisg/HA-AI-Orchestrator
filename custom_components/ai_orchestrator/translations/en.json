@@ -37,6 +37,7 @@
       "already_configured": "This AI Orchestrator entry is already configured.",
       "invalid_provider_entry": "The provider entry data is invalid and cannot be updated.",
       "no_provider_adapters": "No provider adapters are installed yet.",
+      "provider_schema_error": "The provider configuration form is unavailable.",
       "unsupported_provider": "The selected provider adapter is not available."
     }
   }

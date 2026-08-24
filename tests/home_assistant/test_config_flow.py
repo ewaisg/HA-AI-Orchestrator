@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+import pytest
 from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_RECONFIGURE, SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -89,7 +90,7 @@ async def test_provider_flow_validates_and_creates_separate_entry(
         unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
         version=2,
     ).add_to_hass(hass)
-    adapter = SyntheticProviderEntryAdapter()
+    adapter = SyntheticProviderEntryAdapter(mutate_config_on_create=True)
     async_register_provider_entry_adapter(hass, adapter)
 
     result = await hass.config_entries.flow.async_init(
@@ -120,6 +121,41 @@ async def test_provider_flow_validates_and_creates_separate_entry(
     connection_id = result["data"][CONF_CONNECTION_ID]
     assert result["result"].unique_id == provider_entry_unique_id(connection_id)
     assert adapter.normalized_configs == [{SYNTHETIC_CONFIG_FIELD: "synthetic-value"}]
+    assert adapter.created_config_snapshots == [
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-adapter-mutation"},
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-adapter-mutation"},
+    ]
+
+
+async def test_provider_schema_exception_is_safely_bounded(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+) -> None:
+    """Adapter form failures abort without reflecting their exception body."""
+    MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_ENTRY_KIND: ENTRY_KIND_FOUNDATION},
+        unique_id=FOUNDATION_ENTRY_UNIQUE_ID,
+        version=2,
+    ).add_to_hass(hass)
+    synthetic_marker = "synthetic-schema-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(schema_error=RuntimeError(synthetic_marker)),
+    )
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": SOURCE_USER},
+    )
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {CONF_PROVIDER_TYPE: SYNTHETIC_PROVIDER_TYPE},
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "provider_schema_error"
+    assert synthetic_marker not in repr(result)
 
 
 async def test_provider_flow_normalizes_auth_failure_without_secret_echo(
@@ -181,7 +217,8 @@ async def test_reauth_replaces_adapter_config_and_preserves_identity(
         version=2,
     )
     entry.add_to_hass(hass)
-    async_register_provider_entry_adapter(hass, SyntheticProviderEntryAdapter())
+    adapter = SyntheticProviderEntryAdapter(mutate_config_on_create=True)
+    async_register_provider_entry_adapter(hass, adapter)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
@@ -203,6 +240,9 @@ async def test_reauth_replaces_adapter_config_and_preserves_identity(
     assert entry.data[CONF_PROVIDER_CONFIG] == {
         SYNTHETIC_CONFIG_FIELD: "new-synthetic-value"
     }
+    assert adapter.created_config_snapshots == [
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-adapter-mutation"}
+    ]
     reload_entry.assert_called_once_with(entry.entry_id)
 
 
@@ -274,7 +314,8 @@ async def test_reconfigure_replaces_complete_adapter_config(
         version=2,
     )
     entry.add_to_hass(hass)
-    async_register_provider_entry_adapter(hass, SyntheticProviderEntryAdapter())
+    adapter = SyntheticProviderEntryAdapter(mutate_config_on_create=True)
+    async_register_provider_entry_adapter(hass, adapter)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
@@ -294,3 +335,42 @@ async def test_reconfigure_replaces_complete_adapter_config(
     assert entry.data[CONF_PROVIDER_CONFIG] == {
         SYNTHETIC_CONFIG_FIELD: "reconfigured-synthetic-value"
     }
+    assert adapter.created_config_snapshots == [
+        {SYNTHETIC_CONFIG_FIELD: "synthetic-adapter-mutation"}
+    ]
+
+
+@pytest.mark.parametrize("source", [SOURCE_REAUTH, SOURCE_RECONFIGURE])
+async def test_update_schema_exception_is_safely_bounded(
+    hass: HomeAssistant,
+    enable_custom_integrations: None,
+    source: str,
+) -> None:
+    """Reauth and reconfigure schema failures cannot expose adapter details."""
+    connection_id = "00000000-0000-4000-8000-000000000004"
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=build_provider_entry_data(
+            connection_id=connection_id,
+            provider_type=SYNTHETIC_PROVIDER_TYPE,
+            provider_config={SYNTHETIC_CONFIG_FIELD: "old-synthetic-value"},
+        ),
+        unique_id=provider_entry_unique_id(connection_id),
+        version=2,
+    )
+    entry.add_to_hass(hass)
+    synthetic_marker = "synthetic-update-schema-private-marker"
+    async_register_provider_entry_adapter(
+        hass,
+        SyntheticProviderEntryAdapter(schema_error=RuntimeError(synthetic_marker)),
+    )
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": source, "entry_id": entry.entry_id},
+        data=dict(entry.data) if source == SOURCE_REAUTH else None,
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "provider_schema_error"
+    assert synthetic_marker not in repr(result)

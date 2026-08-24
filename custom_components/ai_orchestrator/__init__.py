@@ -19,12 +19,18 @@ from .panel import (
 )
 from .provider_entry import (
     LoadedProviderConnection,
+    copy_provider_config,
     foundation_entry_data,
     is_foundation_entry_data,
     parse_provider_entry_data,
     validate_provider_entry_identity,
 )
-from .providers.contract import ConnectionValidationResult, ErrorCode, ProviderError
+from .providers.contract import (
+    SAFE_ERROR_MESSAGES,
+    ConnectionValidationResult,
+    ErrorCode,
+    ProviderError,
+)
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
 from .workflow_probe import (
@@ -99,9 +105,7 @@ async def async_migrate_entry(
     hass: HomeAssistant, entry: AIOrchestratorConfigEntry
 ) -> bool:
     """Migrate only the known version-1 foundation entry to version 2."""
-    if entry.version > 2:
-        return False
-    if entry.version == 1:
+    if entry.version == 1 and entry.minor_version == 1:
         if entry.unique_id != FOUNDATION_ENTRY_UNIQUE_ID or entry.data:
             return False
         hass.config_entries.async_update_entry(
@@ -111,6 +115,8 @@ async def async_migrate_entry(
             minor_version=1,
         )
         return True
+    if entry.version != 2 or entry.minor_version != 1:
+        return False
     if entry.unique_id == FOUNDATION_ENTRY_UNIQUE_ID:
         return is_foundation_entry_data(entry.data)
     try:
@@ -136,7 +142,9 @@ async def _async_setup_provider_entry(
     if adapter is None:
         raise ConfigEntryError("Provider type is not registered")
     try:
-        provider = await adapter.async_create_provider(parsed.provider_config)
+        provider = await adapter.async_create_provider(
+            copy_provider_config(parsed.provider_config)
+        )
         validation = await provider.validate_connection()
     except ProviderError as err:
         _raise_provider_setup_error(err)
@@ -155,8 +163,10 @@ async def _async_setup_provider_entry(
 
 
 def _raise_provider_setup_error(error: ProviderError) -> NoReturn:
-    if error.error.code is ErrorCode.AUTHENTICATION:
-        raise ConfigEntryAuthFailed(error.error.message) from None
-    if error.error.code in _TRANSIENT_SETUP_ERRORS:
-        raise ConfigEntryNotReady(error.error.message) from None
-    raise ConfigEntryError(error.error.message) from None
+    code = getattr(error.error, "code", None)
+    message = SAFE_ERROR_MESSAGES.get(code, "Provider setup failed safely")
+    if code is ErrorCode.AUTHENTICATION:
+        raise ConfigEntryAuthFailed(message) from None
+    if code in _TRANSIENT_SETUP_ERRORS:
+        raise ConfigEntryNotReady(message) from None
+    raise ConfigEntryError(message) from None

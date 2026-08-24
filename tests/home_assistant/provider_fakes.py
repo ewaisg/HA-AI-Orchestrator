@@ -82,13 +82,18 @@ class SyntheticProviderEntryAdapter:
     provider_type: str = SYNTHETIC_PROVIDER_TYPE
     display_name: str = "Synthetic Provider"
     error: BaseException | None = None
+    schema_error: BaseException | None = None
+    mutate_config_on_create: bool = False
     normalized_configs: list[dict[str, object]] = field(default_factory=list)
+    created_config_snapshots: list[dict[str, object]] = field(default_factory=list)
 
     def config_schema(
         self,
         mode: ProviderConfigMode,
     ) -> vol.Schema:
         del mode
+        if self.schema_error is not None:
+            raise self.schema_error
         return vol.Schema({vol.Required(SYNTHETIC_CONFIG_FIELD): str})
 
     def normalize_config(
@@ -108,7 +113,9 @@ class SyntheticProviderEntryAdapter:
     async def async_create_provider(
         self, config: Mapping[str, object]
     ) -> SyntheticLifecycleProvider:
-        del config
+        if self.mutate_config_on_create and isinstance(config, dict):
+            config[SYNTHETIC_CONFIG_FIELD] = "synthetic-adapter-mutation"
+        self.created_config_snapshots.append(dict(config))
         return SyntheticLifecycleProvider(error=self.error)
 
 
