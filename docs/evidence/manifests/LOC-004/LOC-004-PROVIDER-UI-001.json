@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-004-PROVIDER-UI-001",
+  "task_id": "LOC-004",
+  "kind": "automated_test",
+  "captured_at": "2026-08-25T21:58:07Z",
+  "source_revision": {
+    "state": "committed",
+    "git_commit": "079d93f14fbbe9bd2da0658072d65a969f8b954d",
+    "dirty": false
+  },
+  "traceability": {
+    "requirements": ["REQ-CAP-001", "REQ-CON-003"],
+    "decisions": ["DEC-001", "DEC-005", "DEC-010", "DEC-020", "DEC-023"],
+    "controls": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-RATE-001"],
+    "tests": [
+      "TEST-AUTHORIZATION-MATRIX",
+      "TEST-NO-BROWSER-PROVIDER",
+      "TEST-SECRET-EGRESS",
+      "TEST-ENDPOINT-SSRF",
+      "TEST-PROVIDER-CONTRACT",
+      "TEST-STORM-CONCURRENCY",
+      "LINUX_FULL_SUITE",
+      "FRONTEND_CHECK",
+      "RUFF_FORMAT",
+      "RUFF_LINT",
+      "CANARY_SCAN",
+      "GIT_DIFF_CHECK"
+    ]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {"name": "python", "status": "verified", "version": "3.14.5"},
+      {"name": "home_assistant", "status": "verified", "version": "2026.8.3"},
+      {"name": "pytest_homeassistant_custom_component", "status": "verified", "version": "0.13.357"},
+      {"name": "node", "status": "verified", "version": "24.16.0"},
+      {"name": "npm", "status": "verified", "version": "12.0.2"}
+    ]
+  },
+  "checks": [
+    {
+      "id": "LINUX_FULL_SUITE",
+      "command_argv": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "$artifactScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_websocket_api.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/websocket_api.py custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js frontend/src/api/provider-client.ts frontend/src/panel/providers-view.ts tests/home_assistant/test_websocket_api.py\"; git -c core.autocrlf=false archive --format=tar 079d93f14fbbe9bd2da0658072d65a969f8b954d | docker run --rm -i --name ai-orchestrator-loc004-artifact --workdir /workspace --volume ai-orchestrator-loc004-cache:/uv-cache --volume ai-orchestrator-loc004-venv:/uv-venv --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/uv-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $artifactScript"
+      ],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "FRONTEND_CHECK",
+      "command_argv": ["npm", "run", "check"],
+      "exit_code": 0,
+      "result": "passed"
+    },
+    {
+      "id": "GIT_DIFF_CHECK",
+      "command_argv": ["git", "diff-tree", "--check", "079d93f14fbbe9bd2da0658072d65a969f8b954d^", "079d93f14fbbe9bd2da0658072d65a969f8b954d"],
+      "exit_code": 0,
+      "result": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "provider-websocket-api",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/websocket_api.py",
+      "sha256": "5ef95d67a04468889a7cd8771979932f5fd8d5e4c30d531f5d28504de0635537",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "bundled-provider-panel",
+      "location_type": "repository",
+      "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js",
+      "sha256": "934b0339a19e219311a11a569601ce2804ed85c2ce266ede85d80518b57561b9",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-frontend-client",
+      "location_type": "repository",
+      "repository_path": "frontend/src/api/provider-client.ts",
+      "sha256": "ba0841b62effd0d88bf97bdec64d0eb5634064d00f1fbae6ff89d1104e0c121c",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-frontend-view",
+      "location_type": "repository",
+      "repository_path": "frontend/src/panel/providers-view.ts",
+      "sha256": "6448ef02a6981002b48bec46ca50567dc2398bccff4f1c8d92ad1a05a35e39a5",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    },
+    {
+      "name": "provider-websocket-tests",
+      "location_type": "repository",
+      "repository_path": "tests/home_assistant/test_websocket_api.py",
+      "sha256": "ce2148428ae2d2deff2772af33b274f69009c80ba2bcbb7d612b02ec32f42102",
+      "classification": "synthetic",
+      "contains_live_data": false,
+      "redaction_status": "reviewed"
+    }
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {
+      "id": "LIVE_PROVIDER_UI_REVALIDATION",
+      "description": "The reviewed provider UI has not been installed or used for a redacted live connection test on the named Home Assistant installation.",
+      "blocks": ["LOC-004"]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "NO_BROWSER_PROVIDER_TRANSPORT",
+      "description": "The browser requests only authenticated Home Assistant commands; provider transport remains backend-only.",
+      "blocks": []
+    },
+    {
+      "id": "SETUP_USES_NATIVE_CONFIG_FLOW",
+      "description": "Credential entry remains in Home Assistant's native backend config flow; the custom panel links to the current-Core integration management route.",
+      "blocks": []
+    }
+  ],
+  "reviews": [
+    {"role": "workflow_safety", "status": "pending"},
+    {"role": "test_release", "status": "pending"}
+  ]
+}

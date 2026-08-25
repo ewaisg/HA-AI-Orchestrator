@@ -14,6 +14,7 @@ This register prevents environment details from being guessed or silently copied
 | PRJ-006 | `SUPERSEDED`: development is currently on local `main`, not `codex/foundation-skeleton` | Local Git inspection | 2026-08-23 |
 | PRJ-007 | Native Windows still cannot initialize the Home Assistant pytest helper because it imports Unix-only `fcntl`; Docker Desktop 4.75.0 Linux engine now provides the approved isolated path, where the full pinned suite passed 102 tests | Real Windows and Docker Linux command output; FND-015 manifest | 2026-08-23 |
 | PRJ-008 | The project owner manually installed the Phase 0 bundle and reported the sidebar panel, default Home section, and placeholder sections visible | `docs/evidence/2026-08-23-fnd-015-live-install.md` | 2026-08-23 |
+| PRJ-009 | On the named Core 2026.8.3 target, the current AI Orchestrator integration management route is `/config/integrations/integration/ai_orchestrator`; the read-only live UI inspection showed the existing entry and an `Add hub` control | `docs/evidence/2026-08-25-loc-004-provider-ui.md`; live authenticated DOM inspection with no form submission | 2026-08-25 |
 
 ## Live Home Assistant verification
 
