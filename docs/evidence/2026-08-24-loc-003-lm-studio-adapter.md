@@ -50,10 +50,10 @@ The workflow/safety and test/release reviewers then reached an external reviewer
 ## Remaining gates
 
 1. Obtain independent workflow/safety and test/release pre-live re-reviews of exact artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` when reviewer capacity is available.
-2. Push the reviewed bundle and install it on the named Home Assistant Core `2026.8.3` target.
+2. The review candidate is published on `origin/main` for handoff. After both approvals, install the accepted bundle on the named Home Assistant Core `2026.8.3` target.
 3. Through the integration config flow, enter the owner's existing exact private API base URL, token value without the `Bearer` prefix, and exact currently available model identifier. None may be copied into evidence.
 4. Record redacted positive validation, isolated invalid-credential behavior, reload/unload/restart behavior, cancellation/timeout behavior where safely reproducible, panel/foundation health, and scoped logs. Never expose the token or full private endpoint.
 
 ## Acceptance status
 
-`REVIEW — PRE-LIVE RE-REVIEW PENDING`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates. Independent reviewer capacity is temporarily unavailable, so neither required approval exists. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until independent pre-live acceptance and redacted live Home Assistant revalidation both pass.
+`REVIEW — PRE-LIVE RE-REVIEW PENDING`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates and is published on `origin/main` as a review candidate. Publication is not acceptance. Independent reviewer capacity is temporarily unavailable, so neither required approval exists. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until independent pre-live acceptance and redacted live Home Assistant revalidation both pass.

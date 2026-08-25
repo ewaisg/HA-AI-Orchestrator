@@ -54,11 +54,11 @@ Immutable implementation artifact `079d93f14fbbe9bd2da0658072d65a969f8b954d` was
 ## Remaining gates
 
 1. Obtain independent workflow/safety and test/release review of exact artifact `079d93f14fbbe9bd2da0658072d65a969f8b954d` when reviewer capacity is available.
-2. Push the reviewed LOC-003 and LOC-004 bundle and install it on the named Home Assistant Core `2026.8.3` target.
+2. The LOC-003 and LOC-004 review candidates are published on `origin/main` for handoff. After both approvals, install the accepted bundle on the named Home Assistant Core `2026.8.3` target.
 3. Record desktop and Companion App Android screenshots for empty and configured provider states, with private identifiers redacted.
 4. Use the owner's existing backend config flow to add the LM Studio connection. Never copy the token or full private endpoint into evidence.
 5. Record redacted positive connection-test behavior, isolated invalid-credential behavior, duplicate-click behavior, reload/unload/restart behavior, Home/foundation health, mobile layout, and scoped logs.
 
 ## Acceptance status
 
-`REVIEW — PRE-LIVE`. The exact synthetic artifact passes its recorded gates. Independent approvals are pending because reviewer capacity previously reached an external usage limit. The UI has not been pushed or installed, and no provider call from this implementation is claimed. LOC-004 cannot be `DONE` until independent acceptance and redacted live Home Assistant revalidation both pass.
+`REVIEW — PRE-LIVE`. The exact synthetic artifact passes its recorded gates and is published on `origin/main` as a review candidate. Publication is not acceptance. Independent approvals are pending because reviewer capacity previously reached an external usage limit. The UI has not been installed, and no provider call from this implementation is claimed. LOC-004 cannot be `DONE` until independent acceptance and redacted live Home Assistant revalidation both pass.
