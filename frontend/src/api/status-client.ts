@@ -56,7 +56,7 @@ export function parseOrchestratorStatus(value: unknown): OrchestratorStatus {
     value.schema_version !== STATUS_SCHEMA_VERSION ||
     value.phase !== "foundation" ||
     typeof value.configured !== "boolean" ||
-    STATUS_FEATURE_KEYS.some((key) => features[key] !== false)
+    STATUS_FEATURE_KEYS.some((key) => typeof features[key] !== "boolean")
   ) {
     throw new StatusContractError();
   }

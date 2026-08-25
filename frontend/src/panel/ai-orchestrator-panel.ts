@@ -18,6 +18,7 @@ import type {
   HomeAssistantRoute,
 } from "../ha/hass-contract";
 import { panelStyles } from "../styles/panel-styles";
+import "./providers-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -152,7 +153,9 @@ export class AiOrchestratorPanel extends LitElement {
               ? this._renderHome()
               : this._activeSection === "automations"
                 ? this._renderWorkflowProbe()
-                : this._renderPlaceholder(this._activeSection)}
+                : this._activeSection === "providers"
+                  ? this._renderProviders()
+                  : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
@@ -166,7 +169,7 @@ export class AiOrchestratorPanel extends LitElement {
           <span class="brand-mark" aria-hidden="true">AI</span>
           <div class="brand-copy">
             <p class="brand-title">AI Orchestrator</p>
-            <p class="brand-subtitle">Foundation preview</p>
+          <p class="brand-subtitle">Local provider preview</p>
           </div>
         </div>
 
@@ -187,9 +190,9 @@ export class AiOrchestratorPanel extends LitElement {
         </nav>
 
         <div class="sidebar-note">
-          <strong>No provider calls</strong>
-          This foundation panel reads one authenticated Home Assistant status command. It does not
-          send household data to an AI service.
+          <strong>Explicit provider tests only</strong>
+          Status and provider lists stay inside Home Assistant. A provider is contacted only after
+          an administrator selects Test connection; no entity state or prompt is sent.
         </div>
       </aside>
     `;
@@ -365,6 +368,24 @@ export class AiOrchestratorPanel extends LitElement {
           </div>
         </div>
       </section>
+    `;
+  }
+
+  private _renderProviders(): TemplateResult {
+    return html`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Providers</p>
+          <h1>Provider connections</h1>
+          <p class="page-intro">
+            Configure credentials through Home Assistant's backend config flow. This panel receives
+            no stored secret. Use "Test connection" to verify reachability, authentication, and the
+            configured model without sending entity state or a prompt.
+          </p>
+        </div>
+        <span class="privacy-badge">Local status only</span>
+      </header>
+      <ai-orchestrator-providers-view .hass=${this.hass}></ai-orchestrator-providers-view>
     `;
   }
 

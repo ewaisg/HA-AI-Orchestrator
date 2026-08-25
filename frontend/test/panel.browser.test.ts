@@ -74,8 +74,9 @@ describe("AI Orchestrator panel shell", () => {
     providerButton?.click();
     await panel.updateComplete;
 
-    expect(shadowText(panel)).toContain("Provider setup is not enabled yet");
-    expect(shadowText(panel)).toContain("No endpoint, credential, model identifier");
+    expect(shadowText(panel)).toContain("Provider connections");
+    expect(shadowText(panel)).toContain("Test connection");
+    expect(shadowText(panel)).toContain("no stored secret");
   });
 
   it("does not write panel state to browser storage", async () => {

@@ -21,6 +21,15 @@ describe("foundation status client", () => {
     expect(status).toEqual(FOUNDATION_STATUS);
   });
 
+  it("accepts a response with providers enabled", () => {
+    const withProviders = {
+      ...FOUNDATION_STATUS,
+      features: { ...FOUNDATION_STATUS.features, providers: true },
+    };
+    const parsed = parseOrchestratorStatus(withProviders);
+    expect(parsed.features.providers).toBe(true);
+  });
+
   it.each([
     undefined,
     {},
@@ -30,10 +39,6 @@ describe("foundation status client", () => {
     {
       ...FOUNDATION_STATUS,
       features: { ...FOUNDATION_STATUS.features, providers: "unknown" },
-    },
-    {
-      ...FOUNDATION_STATUS,
-      features: { ...FOUNDATION_STATUS.features, providers: true },
     },
     { ...FOUNDATION_STATUS, unexpected: "field" },
     {

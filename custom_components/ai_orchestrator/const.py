@@ -17,6 +17,9 @@ WORKFLOW_PROBE_SCHEMA_VERSION: Final = 1
 WORKFLOW_PROBE_TRIGGER_TYPE: Final = "integration_event"
 WORKFLOW_PROBE_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflow/probe/run"
 
+PROVIDER_LIST_WEBSOCKET_TYPE: Final = f"{DOMAIN}/providers/list"
+PROVIDER_TEST_WEBSOCKET_TYPE: Final = f"{DOMAIN}/providers/test"
+
 PANEL_ELEMENT_NAME: Final = "ai-orchestrator-panel"
 PANEL_FILENAME: Final = "ai-orchestrator-panel.js"
 PANEL_URL_PATH: Final = "ai-orchestrator"

@@ -21,6 +21,7 @@ class AIOrchestratorRuntime:
     provider_entry_adapters: dict[str, ProviderEntryAdapter] = field(
         default_factory=dict
     )
+    provider_test_in_progress_connection_ids: set[str] = field(default_factory=set)
     owns_panel: bool = False
     workflow_probe_unsubscribe: Callable[[], None] | None = None
     workflow_probe_execution_count: int = 0
