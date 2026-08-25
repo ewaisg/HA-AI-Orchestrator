@@ -3,10 +3,10 @@
   "evidence_id": "LOC-003-LM-STUDIO-ADAPTER-001",
   "task_id": "LOC-003",
   "kind": "automated_test",
-  "captured_at": "2026-08-24T18:11:21Z",
+  "captured_at": "2026-08-25T21:40:30Z",
   "source_revision": {
     "state": "committed",
-    "git_commit": "598a3259de25e9f1060a4b670a2b13dace4808ca",
+    "git_commit": "53fe6781930f9264daf96ddd9f79f3aa7f691c33",
     "dirty": false
   },
   "traceability": {
@@ -59,7 +59,7 @@
         "powershell",
         "-NoProfile",
         "-Command",
-        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers/test_lm_studio.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/providers/lm_studio.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/translations/en.json tests/providers/test_lm_studio.py\"; git -c core.autocrlf=false archive --format=tar 598a3259de25e9f1060a4b670a2b13dace4808ca | docker run --rm -i --name ai-orchestrator-loc003-artifact --workdir /workspace --volume ai-orchestrator-loc003-artifact-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
+        "$innerScript = \"tar -xf - && python -m pip install --no-cache-dir uv==0.12.1 >/dev/null && uv sync --frozen --link-mode=copy >/dev/null && uv run pytest -p no:cacheprovider && uv run pytest -p no:cacheprovider tests/home_assistant/test_provider_entry.py tests/home_assistant/test_config_flow.py tests/home_assistant/test_init.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/providers/test_lm_studio.py -q && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q && uv run python scripts/run_pure_tests.py && uv run ruff format --check . && uv run ruff check . && uv run python scripts/canary_scan.py && sha256sum custom_components/ai_orchestrator/providers/lm_studio.py custom_components/ai_orchestrator/__init__.py custom_components/ai_orchestrator/translations/en.json tests/providers/test_lm_studio.py\"; git -c core.autocrlf=false archive --format=tar 53fe6781930f9264daf96ddd9f79f3aa7f691c33 | docker run --rm -i --name ai-orchestrator-loc003-final --workdir /workspace --volume ai-orchestrator-loc003-remediation-cache:/uv-cache --env UV_CACHE_DIR=/uv-cache --env UV_PROJECT_ENVIRONMENT=/tmp/ai-orchestrator-venv --env PYTHONDONTWRITEBYTECODE=1 python:3.14-slim sh -lc $innerScript"
       ],
       "exit_code": 0,
       "result": "passed"
@@ -90,7 +90,7 @@
     },
     {
       "id": "GIT_DIFF_CHECK",
-      "command_argv": ["git", "diff", "--check"],
+      "command_argv": ["git", "diff-tree", "--check", "53fe6781930f9264daf96ddd9f79f3aa7f691c33^", "53fe6781930f9264daf96ddd9f79f3aa7f691c33"],
       "exit_code": 0,
       "result": "passed"
     }
@@ -100,7 +100,7 @@
       "name": "lm-studio-provider-adapter",
       "location_type": "repository",
       "repository_path": "custom_components/ai_orchestrator/providers/lm_studio.py",
-      "sha256": "7edc7a3887f63a59046d64976d7e9da864a14701c19388af72967329706da9fb",
+      "sha256": "ee8c187043d3ac0ec34d8596ac4cc917fc54ce099ff6810fb421c26d519dda1b",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
@@ -127,7 +127,7 @@
       "name": "lm-studio-adapter-tests",
       "location_type": "repository",
       "repository_path": "tests/providers/test_lm_studio.py",
-      "sha256": "08cb27e20b822e0296909688808190c6d6be1be4ded31fb2319a1fa4bce2f2e1",
+      "sha256": "0335c066ae029262794d4d138bbef2bdd60ee3f82c2c54cadf245f52687b99be",
       "classification": "synthetic",
       "contains_live_data": false,
       "redaction_status": "reviewed"
