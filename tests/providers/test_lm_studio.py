@@ -304,6 +304,8 @@ async def test_timeout_is_bounded_and_cancellation_propagates() -> None:
         b"[]",
         b'{"data":[],"data":[]}',
         b'{"data":[{"id":"model","score":NaN}]}',
+        b'{"data":[{"id":"model","score":1e1000000}]}',
+        (b'{"data":' + b"[" * 1000 + b"]" * 1000 + b"}"),
         b'{"data":"not-a-list"}',
         b'{"data":[{}]}',
         b'{"data":[{"id":"duplicate"},{"id":"duplicate"}]}',
@@ -409,6 +411,49 @@ async def test_generate_returns_tool_request_without_executing_it() -> None:
     assert body["tools"][0]["function"]["name"] == "lookup_value"
 
 
+async def test_generate_rejects_nonfinite_tool_arguments() -> None:
+    provider, _ = provider_with(
+        json_response(
+            {
+                "choices": [
+                    {
+                        "finish_reason": "tool_calls",
+                        "message": {
+                            "role": "assistant",
+                            "content": None,
+                            "tool_calls": [
+                                {
+                                    "id": "synthetic-call-2",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "use_number",
+                                        "arguments": '{"value":1e1000000}',
+                                    },
+                                }
+                            ],
+                        },
+                    }
+                ]
+            }
+        )
+    )
+    tool = ToolDefinition(
+        name="use_number",
+        description="Accept a synthetic number.",
+        parameters={
+            "type": "object",
+            "properties": {"value": {"type": "number"}},
+            "required": ["value"],
+            "additionalProperties": False,
+        },
+    )
+
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(ProviderRequest(tools=(tool,)))
+
+    assert error_code(caught.value) is ErrorCode.INVALID_RESPONSE
+
+
 async def test_generate_parses_and_validates_structured_output() -> None:
     provider, session = provider_with(
         json_response(
@@ -444,6 +489,38 @@ async def test_generate_parses_and_validates_structured_output() -> None:
     assert dict(result.structured_output or {}) == {"value": "BLUE"}
     response_format = cast_json(session.requests[0]["json"])["response_format"]
     assert response_format["json_schema"]["strict"] is True
+
+
+async def test_generate_rejects_nonfinite_structured_number() -> None:
+    provider, _ = provider_with(
+        json_response(
+            {
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {
+                            "role": "assistant",
+                            "content": '{"value":1e1000000}',
+                        },
+                    }
+                ]
+            }
+        )
+    )
+    output = StructuredOutputDefinition(
+        name="synthetic_number",
+        schema={
+            "type": "object",
+            "properties": {"value": {"type": "number"}},
+            "required": ["value"],
+            "additionalProperties": False,
+        },
+    )
+
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(ProviderRequest(output_schema=output))
+
+    assert error_code(caught.value) is ErrorCode.INVALID_RESPONSE
 
 
 @pytest.mark.parametrize(

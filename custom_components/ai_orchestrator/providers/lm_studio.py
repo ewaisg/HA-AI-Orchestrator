@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import json
+import math
 import ssl
 from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass, field
@@ -55,6 +56,7 @@ _CONFIG_KEYS: Final = {CONF_BASE_URL, CONF_API_TOKEN, CONF_MODEL_ID}
 _REQUEST_TIMEOUT_SECONDS: Final = 60
 _MAX_RESPONSE_BYTES: Final = 2 * 1024 * 1024
 _READ_CHUNK_BYTES: Final = 64 * 1024
+_MAX_JSON_DEPTH: Final = 64
 _ALLOWED_LAN_NETWORKS: Final = (
     ipaddress.ip_network("10.0.0.0/8"),
     ipaddress.ip_network("172.16.0.0/12"),
@@ -538,16 +540,29 @@ def _to_json_value(value: object) -> object:
 
 
 def _loads_json(value: str | bytes) -> object:
-    return json.loads(
-        value,
-        parse_constant=_reject_json_constant,
-        object_pairs_hook=_reject_duplicate_json_keys,
-    )
+    try:
+        parsed = json.loads(
+            value,
+            parse_constant=_reject_json_constant,
+            parse_float=_parse_json_float,
+            object_pairs_hook=_reject_duplicate_json_keys,
+        )
+    except RecursionError:
+        raise ValueError("JSON nesting is too deep") from None
+    _validate_json_depth(parsed)
+    return parsed
 
 
 def _reject_json_constant(value: str) -> NoReturn:
     del value
     raise ValueError("Nonfinite JSON number")
+
+
+def _parse_json_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed):
+        raise ValueError("Nonfinite JSON number")
+    return parsed
 
 
 def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
@@ -557,3 +572,15 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, ob
             raise ValueError("Duplicate JSON object key")
         result[key] = value
     return result
+
+
+def _validate_json_depth(value: object) -> None:
+    pending = [(value, 0)]
+    while pending:
+        item, depth = pending.pop()
+        if depth > _MAX_JSON_DEPTH:
+            raise ValueError("JSON nesting is too deep")
+        if type(item) is dict:
+            pending.extend((child, depth + 1) for child in item.values())
+        elif type(item) is list:
+            pending.extend((child, depth + 1) for child in item)
