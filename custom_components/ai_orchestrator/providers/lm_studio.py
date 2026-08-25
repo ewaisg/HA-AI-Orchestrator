@@ -405,6 +405,10 @@ def _build_chat_request(model_id: str, request: ProviderRequest) -> dict[str, ob
                 "schema": _to_json_value(request.output_schema.schema),
             },
         }
+    try:
+        _validate_json_value(body)
+    except ValueError:
+        _raise_provider_error(ErrorCode.UNSUPPORTED)
     return body
 
 
@@ -549,7 +553,7 @@ def _loads_json(value: str | bytes) -> object:
         )
     except RecursionError:
         raise ValueError("JSON nesting is too deep") from None
-    _validate_json_depth(parsed)
+    _validate_json_value(parsed)
     return parsed
 
 
@@ -574,13 +578,20 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, ob
     return result
 
 
-def _validate_json_depth(value: object) -> None:
+def _validate_json_value(value: object) -> None:
     pending = [(value, 0)]
     while pending:
         item, depth = pending.pop()
         if depth > _MAX_JSON_DEPTH:
             raise ValueError("JSON nesting is too deep")
         if type(item) is dict:
+            if any(type(key) is not str for key in item):
+                raise ValueError("JSON object keys must be strings")
             pending.extend((child, depth + 1) for child in item.values())
         elif type(item) is list:
             pending.extend((child, depth + 1) for child in item)
+        elif type(item) is float:
+            if not math.isfinite(item):
+                raise ValueError("Nonfinite JSON number")
+        elif item is not None and type(item) not in {str, bool, int}:
+            raise ValueError("Unsupported JSON value")

@@ -454,6 +454,48 @@ async def test_generate_rejects_nonfinite_tool_arguments() -> None:
     assert error_code(caught.value) is ErrorCode.INVALID_RESPONSE
 
 
+@pytest.mark.parametrize(
+    "provider_request",
+    [
+        ProviderRequest(
+            tools=(
+                ToolDefinition(
+                    name="outbound_number",
+                    description="Synthetic outbound schema.",
+                    parameters={
+                        "type": "object",
+                        "properties": {
+                            "value": {"type": "number", "enum": [float("inf")]}
+                        },
+                        "additionalProperties": False,
+                    },
+                ),
+            )
+        ),
+        ProviderRequest(
+            output_schema=StructuredOutputDefinition(
+                name="outbound_schema",
+                schema={
+                    "type": "object",
+                    "properties": {"value": {"type": "number", "enum": [float("inf")]}},
+                    "additionalProperties": False,
+                },
+            )
+        ),
+    ],
+)
+async def test_generate_rejects_noncanonical_outbound_json(
+    provider_request: ProviderRequest,
+) -> None:
+    provider, session = provider_with()
+
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(provider_request)
+
+    assert error_code(caught.value) is ErrorCode.UNSUPPORTED
+    assert session.requests == []
+
+
 async def test_generate_parses_and_validates_structured_output() -> None:
     provider, session = provider_with(
         json_response(
