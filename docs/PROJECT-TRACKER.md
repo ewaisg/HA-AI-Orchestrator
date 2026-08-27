@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-27
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **Exact artifacts `53fe6781930f9264daf96ddd9f79f3aa7f691c33` (LOC-003) and `079d93f14fbbe9bd2da0658072d65a969f8b954d` (LOC-004) have both independent workflow/safety and test/release approvals recorded on 2026-08-27. The approved bundle is installed on the owner's local Home Assistant. Live positive setup/test, invalid-key rejection without saving, valid-key reconfiguration, and post-browser-reload persistence passed; Home still reports `None contacted`. Remaining: duplicate-click, integration reload/unload/restart, Companion App Android, screenshot, and scoped-log acceptance.**
+Current resume point: **Exact artifacts `53fe6781930f9264daf96ddd9f79f3aa7f691c33` (LOC-003) and `079d93f14fbbe9bd2da0658072d65a969f8b954d` (LOC-004) have both independent workflow/safety and test/release approvals recorded on 2026-08-27. The provider-capable bundle is installed on the owner's local Home Assistant, and live positive setup/test, invalid-key rejection without saving, valid-key reconfiguration, and post-browser-reload persistence passed. A live reconfigure dialog still serves the pre-`80bd533` `{name}` translation, so the translation-fix commit must be copied into the installed integration and Home Assistant restarted before remaining acceptance.**
 
 ## Status rules
 
@@ -24,7 +24,7 @@ No task may move to `DONE` based only on an assertion.
 | Last completed | LOC-001 provider-neutral config-entry lifecycle, independently accepted |
 | Active work | LOC-003 and LOC-004 exact artifacts approved for synthetic quality; live acceptance partially passed, remaining checks pending |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | Complete remaining redacted live acceptance on Core 2026.8.3: duplicate clicks, reload/unload/restart, Companion Android, screenshots, and scoped logs |
+| Next gate | Install translation fix `80bd533`, restart Home Assistant, then complete remaining redacted live acceptance on Core 2026.8.3: duplicate clicks, reload/unload/restart, Companion Android, screenshots, and scoped logs |
 | Production code | The foundation, action-free lifecycle probe, provider-neutral contract, provider config-entry lifecycle, authenticated LM Studio transport, and bounded provider list/test panel are implemented locally; LOC-003/LOC-004 remain unaccepted and product workflows remain absent |
 | Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository. LOC-003 and LOC-004 review candidates are published on `origin/main`; both have independent synthetic-quality approvals, but remain in review pending live acceptance. The unrelated untracked `AI Orchestrator.iml` file is excluded from all commits and artifacts. |
 
