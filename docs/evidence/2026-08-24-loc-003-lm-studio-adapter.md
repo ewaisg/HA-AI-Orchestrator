@@ -45,15 +45,14 @@ The first implementation artifact `598a3259de25e9f1060a4b670a2b13dace4808ca` pas
 
 Remediated immutable synthetic artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` was reconstructed from a Git archive in clean Linux with Python `3.14.5`, Home Assistant `2026.8.3`, and pytest Home Assistant plugin `0.13.357`. It passed 321 full tests, 72 focused lifecycle tests, 198 provider tests, 60 LM Studio adapter tests, 30 security/evidence/traceability tests, and 228 pure tests. Ruff format/lint, canary, evidence schema, traceability, artifact diff, and four canonical hashes passed. Five known upstream deprecations remain and no project failure occurred. A prior verification command stopped after all tests, Ruff, and canary had passed because the minimal container lacked `git`; the final artifact command removed that unavailable in-container check, and the revision diff check was executed separately on the host with exit code zero.
 
-The workflow/safety and test/release reviewers then reached an external reviewer usage limit before they could re-review the remediated artifact. No approval is inferred from synthetic test success. Both review statuses remain pending.
+Independent workflow/safety review approved exact artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` at `2026-08-27T03:45:04Z`. The review found no acceptance-blocking safety defect: secrets remain backend-only, the provider boundary is private-address-only and redirect-disabled, requests and responses are bounded, errors are normalized, configured-model validation is enforced, and tool calls remain data only. Independent test/release review approved the same artifact at `2026-08-27T03:45:05Z` after reproducing the clean archive gates. Review approval covers synthetic artifact quality only; it does not imply live provider behavior.
 
 ## Remaining gates
 
-1. Obtain independent workflow/safety and test/release pre-live re-reviews of exact artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` when reviewer capacity is available.
-2. The review candidate is published on `origin/main` for handoff. After both approvals, install the accepted bundle on the named Home Assistant Core `2026.8.3` target.
-3. Through the integration config flow, enter the owner's existing exact private API base URL, token value without the `Bearer` prefix, and exact currently available model identifier. None may be copied into evidence.
-4. Record redacted positive validation, isolated invalid-credential behavior, reload/unload/restart behavior, cancellation/timeout behavior where safely reproducible, panel/foundation health, and scoped logs. Never expose the token or full private endpoint.
+1. Install the accepted artifact bundle on the named Home Assistant Core `2026.8.3` target.
+2. Through the integration config flow, enter the owner's existing exact private API base URL, token value without the `Bearer` prefix, and exact currently available model identifier. None may be copied into evidence.
+3. Record redacted positive validation, isolated invalid-credential behavior, reload/unload/restart behavior, cancellation/timeout behavior where safely reproducible, panel/foundation health, and scoped logs. Never expose the token or full private endpoint.
 
 ## Acceptance status
 
-`REVIEW — PRE-LIVE RE-REVIEW PENDING`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates and is published on `origin/main` as a review candidate. Publication is not acceptance. Independent reviewer capacity is temporarily unavailable, so neither required approval exists. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until independent pre-live acceptance and redacted live Home Assistant revalidation both pass.
+`REVIEW — LIVE ACCEPTANCE PENDING`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates and has both independent pre-live approvals recorded above. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until redacted live Home Assistant revalidation passes.

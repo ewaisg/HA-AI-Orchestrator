@@ -131,7 +131,7 @@
     }
   ],
   "reviews": [
-    {"role": "workflow_safety", "status": "pending"},
-    {"role": "test_release", "status": "pending"}
+    {"role": "workflow_safety", "status": "approved", "reviewed_at": "2026-08-27T03:45:04Z"},
+    {"role": "test_release", "status": "approved", "reviewed_at": "2026-08-27T03:45:05Z"}
   ]
 }
