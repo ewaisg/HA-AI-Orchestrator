@@ -1,6 +1,7 @@
 """Tests for the bounded AI Orchestrator WebSocket API."""
 
 import json
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -11,6 +12,7 @@ from pytest_homeassistant_custom_component.typing import WebSocketGenerator
 
 from custom_components.ai_orchestrator import async_setup_entry
 from custom_components.ai_orchestrator.const import (
+    CATALOG_WEBSOCKET_TYPE,
     DOMAIN,
     FOUNDATION_ENTRY_UNIQUE_ID,
     PROVIDER_LIST_WEBSOCKET_TYPE,
@@ -32,6 +34,7 @@ from custom_components.ai_orchestrator.providers.contract import (
 )
 from custom_components.ai_orchestrator.runtime import async_get_runtime
 from custom_components.ai_orchestrator.websocket_api import (
+    CATALOG_SCHEMA_VERSION,
     PROVIDER_NOT_FOUND,
     PROVIDER_TEST_IN_PROGRESS,
     WORKFLOW_PROBE_INVARIANT_FAILED,
@@ -285,9 +288,101 @@ async def test_admin_provider_list_has_exact_secret_free_contract(
     assert status_response["result"]["features"]["providers"] is True
 
 
+async def test_admin_catalog_returns_sorted_registry_identity_only(
+    hass: HomeAssistant,
+    hass_ws_client: WebSocketGenerator,
+) -> None:
+    """The catalog exposes registry identity metadata without state or actions."""
+    async_register_websocket_commands(hass)
+    fake_areas = SimpleNamespace(
+        async_entries=lambda: [
+            SimpleNamespace(id="area-b", name="Bedroom"),
+            SimpleNamespace(id="area-a", name="Kitchen"),
+        ]
+    )
+    fake_devices = SimpleNamespace(
+        devices={
+            "device-b": SimpleNamespace(
+                id="device-b", name="Zigbee device", name_by_user=None, area_id=None
+            ),
+            "device-a": SimpleNamespace(
+                id="device-a", name=None, name_by_user="Named device", area_id="area-a"
+            ),
+        }
+    )
+    fake_entities = SimpleNamespace(
+        entities={
+            "sensor.z": SimpleNamespace(
+                entity_id="sensor.z",
+                name=None,
+                original_name="Z sensor",
+                area_id=None,
+                device_id="device-b",
+                disabled_by=None,
+            ),
+            "sensor.a": SimpleNamespace(
+                entity_id="sensor.a",
+                name="A sensor",
+                original_name="Original A",
+                area_id="area-a",
+                device_id="device-a",
+                disabled_by="user",
+            ),
+        }
+    )
+
+    with (
+        patch(
+            "custom_components.ai_orchestrator.websocket_api.ar.async_get",
+            return_value=fake_areas,
+        ),
+        patch(
+            "custom_components.ai_orchestrator.websocket_api.dr.async_get",
+            return_value=fake_devices,
+        ),
+        patch(
+            "custom_components.ai_orchestrator.websocket_api.er.async_get",
+            return_value=fake_entities,
+        ),
+    ):
+        client = await hass_ws_client(hass)
+        await client.send_json_auto_id({"type": CATALOG_WEBSOCKET_TYPE})
+        response = await client.receive_json()
+
+    assert response["success"] is True
+    assert response["result"] == {
+        "schema_version": CATALOG_SCHEMA_VERSION,
+        "areas": [
+            {"area_id": "area-a", "name": "Kitchen"},
+            {"area_id": "area-b", "name": "Bedroom"},
+        ],
+        "devices": [
+            {"device_id": "device-a", "name": "Named device", "area_id": "area-a"},
+            {"device_id": "device-b", "name": "Zigbee device", "area_id": None},
+        ],
+        "entities": [
+            {
+                "entity_id": "sensor.a",
+                "name": "A sensor",
+                "area_id": "area-a",
+                "device_id": "device-a",
+                "disabled": True,
+            },
+            {
+                "entity_id": "sensor.z",
+                "name": "Z sensor",
+                "area_id": None,
+                "device_id": "device-b",
+                "disabled": False,
+            },
+        ],
+    }
+
+
 @pytest.mark.parametrize(
     "message",
     [
+        {"type": CATALOG_WEBSOCKET_TYPE},
         {"type": PROVIDER_LIST_WEBSOCKET_TYPE},
         {
             "type": PROVIDER_TEST_WEBSOCKET_TYPE,

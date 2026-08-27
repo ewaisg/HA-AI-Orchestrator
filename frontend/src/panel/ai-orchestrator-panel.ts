@@ -19,6 +19,7 @@ import type {
 } from "../ha/hass-contract";
 import { panelStyles } from "../styles/panel-styles";
 import "./providers-view";
+import "./catalog-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -155,6 +156,8 @@ export class AiOrchestratorPanel extends LitElement {
                 ? this._renderWorkflowProbe()
                 : this._activeSection === "providers"
                   ? this._renderProviders()
+                    : this._activeSection === "permissions"
+                      ? this._renderCatalog()
                   : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
@@ -386,6 +389,20 @@ export class AiOrchestratorPanel extends LitElement {
         <span class="privacy-badge">Local status only</span>
       </header>
       <ai-orchestrator-providers-view .hass=${this.hass}></ai-orchestrator-providers-view>
+    `;
+  }
+
+  private _renderCatalog(): TemplateResult {
+    return html`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Entities & Permissions</p>
+          <h1>Home Assistant catalog</h1>
+          <p class="page-intro">Browse registry identity and relationships only. Current state and actions remain outside this read-only catalog.</p>
+        </div>
+        <span class="privacy-badge">Read-only registry data</span>
+      </header>
+      <ai-orchestrator-catalog-view .hass=${this.hass}></ai-orchestrator-catalog-view>
     `;
   }
 

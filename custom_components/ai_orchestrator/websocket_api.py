@@ -5,8 +5,13 @@ from typing import Any
 import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import area_registry as ar
+from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
+    CATALOG_SCHEMA_VERSION,
+    CATALOG_WEBSOCKET_TYPE,
     DOMAIN,
     PROVIDER_LIST_WEBSOCKET_TYPE,
     PROVIDER_TEST_WEBSOCKET_TYPE,
@@ -35,6 +40,52 @@ PROVIDER_RESPONSE_SCHEMA_VERSION = 1
 PROVIDER_HEALTH_HEALTHY = "healthy"
 PROVIDER_HEALTH_UNAVAILABLE = "unavailable"
 PROVIDER_HEALTH_AUTHENTICATION_REQUIRED = "authentication_required"
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    vol.All(vol.Schema({vol.Required("type"): CATALOG_WEBSOCKET_TYPE}))
+)
+@callback
+def websocket_catalog(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return read-only registry identity metadata for the administrator panel."""
+    areas = ar.async_get(hass)
+    devices = dr.async_get(hass)
+    entities = er.async_get(hass)
+    connection.send_result(
+        msg["id"],
+        {
+            "schema_version": CATALOG_SCHEMA_VERSION,
+            "areas": [
+                {"area_id": area.id, "name": area.name}
+                for area in sorted(areas.async_entries(), key=lambda item: item.id)
+            ],
+            "devices": [
+                {
+                    "device_id": device.id,
+                    "name": device.name_by_user or device.name or device.id,
+                    "area_id": device.area_id,
+                }
+                for device in sorted(devices.devices.values(), key=lambda item: item.id)
+            ],
+            "entities": [
+                {
+                    "entity_id": entity.entity_id,
+                    "name": entity.name or entity.original_name or entity.entity_id,
+                    "area_id": entity.area_id,
+                    "device_id": entity.device_id,
+                    "disabled": entity.disabled_by is not None,
+                }
+                for entity in sorted(
+                    entities.entities.values(), key=lambda item: item.entity_id
+                )
+            ],
+        },
+    )
 
 
 @websocket_api.require_admin
@@ -232,5 +283,6 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     """Register integration-wide WebSocket commands once during setup."""
     websocket_api.async_register_command(hass, websocket_status)
     websocket_api.async_register_command(hass, websocket_run_workflow_probe)
+    websocket_api.async_register_command(hass, websocket_catalog)
     websocket_api.async_register_command(hass, websocket_provider_list)
     websocket_api.async_register_command(hass, websocket_provider_test)

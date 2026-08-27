@@ -29,11 +29,11 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: ee, getOwnPropertySymbols: te, getPrototypeOf: ne } = Object, f = globalThis, p = f.trustedTypes, re = p ? p.emptyScript : "", ie = f.reactiveElementPolyfillSupport, m = (e, t) => e, h = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: ee, getOwnPropertySymbols: te, getPrototypeOf: ne } = Object, f = globalThis, re = f.trustedTypes, ie = re ? re.emptyScript : "", ae = f.reactiveElementPolyfillSupport, p = (e, t) => e, m = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? re : null;
+				e = e ? ie : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, g = (e, t) => !l(e, t), _ = {
+}, h = (e, t) => !l(e, t), oe = {
 	attribute: !0,
 	type: String,
-	converter: h,
+	converter: m,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: g
+	hasChanged: h
 };
 Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var v = class extends HTMLElement {
+var g = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = _) {
+	static createProperty(e, t = oe) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,16 +100,16 @@ var v = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? _;
+		return this.elementProperties.get(e) ?? oe;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(m("elementProperties"))) return;
+		if (this.hasOwnProperty(p("elementProperties"))) return;
 		let e = ne(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(m("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(m("properties"))) {
+		if (this.hasOwnProperty(p("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(p("properties"))) {
 			let e = this.properties, t = [...ee(e), ...te(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
@@ -171,14 +171,14 @@ var v = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? h : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? m : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? h : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? m : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var v = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? g)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? h)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,89 +251,89 @@ var v = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[m("elementProperties")] = /* @__PURE__ */ new Map(), v[m("finalized")] = /* @__PURE__ */ new Map(), ie?.({ ReactiveElement: v }), (f.reactiveElementVersions ??= []).push("2.1.2");
+g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[p("elementProperties")] = /* @__PURE__ */ new Map(), g[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: g }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, ae = "?" + w, oe = `<${ae}>`, T = document, E = () => T.createComment(""), D = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, se = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", k = "[ 	\n\f\r]", A = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, j = /-->/g, ce = />/g, M = RegExp(`>|${k}(?:([^\\s"'>=/]+)(${k}*=${k}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), N = /'/g, P = /"/g, F = /^(?:script|style|textarea|title)$/i, I = ((e) => (t, ...n) => ({
+var _ = globalThis, v = (e) => e, y = _.trustedTypes, b = y ? y.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, x = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, se = "?" + S, ce = `<${se}>`, C = document, w = () => C.createComment(""), T = (e) => e === null || typeof e != "object" && typeof e != "function", E = Array.isArray, le = (e) => E(e) || typeof e?.[Symbol.iterator] == "function", D = "[ 	\n\f\r]", O = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ue = /-->/g, de = />/g, k = RegExp(`>|${D}(?:([^\\s"'>=/]+)(${D}*=${D}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), A = /'/g, j = /"/g, M = /^(?:script|style|textarea|title)$/i, N = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), L = Symbol.for("lit-noChange"), R = Symbol.for("lit-nothing"), le = /* @__PURE__ */ new WeakMap(), z = T.createTreeWalker(T, 129);
-function ue(e, t) {
-	if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return S === void 0 ? t : S.createHTML(t);
+}))(1), P = Symbol.for("lit-noChange"), F = Symbol.for("lit-nothing"), fe = /* @__PURE__ */ new WeakMap(), I = C.createTreeWalker(C, 129);
+function pe(e, t) {
+	if (!E(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return b === void 0 ? t : b.createHTML(t);
 }
-var de = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = A;
+var me = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = O;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === A ? c[1] === "!--" ? o = j : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = M) : (F.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = M) : o = ce : o === M ? c[0] === ">" ? (o = i ?? A, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? M : c[3] === "\"" ? P : N) : o === P || o === N ? o = M : o === j || o === ce ? o = A : (o = M, i = void 0);
-		let d = o === M && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === A ? n + oe : l >= 0 ? (r.push(s), n.slice(0, l) + C + n.slice(l) + w + d) : n + w + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === O ? c[1] === "!--" ? o = ue : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = k) : (M.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = k) : o = de : o === k ? c[0] === ">" ? (o = i ?? O, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? k : c[3] === "\"" ? j : A) : o === j || o === A ? o = k : o === ue || o === de ? o = O : (o = k, i = void 0);
+		let d = o === k && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === O ? n + ce : l >= 0 ? (r.push(s), n.slice(0, l) + x + n.slice(l) + S + d) : n + S + (l === -2 ? t : d);
 	}
-	return [ue(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, B = class e {
+	return [pe(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, L = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = de(t, n);
-		if (this.el = e.createElement(l, r), z.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = me(t, n);
+		if (this.el = e.createElement(l, r), I.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = z.nextNode()) !== null && c.length < s;) {
+		for (; (i = I.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(C)) {
-					let t = u[o++], n = i.getAttribute(e).split(w), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(x)) {
+					let t = u[o++], n = i.getAttribute(e).split(S), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? pe : r[1] === "?" ? me : r[1] === "@" ? he : U
+						ctor: r[1] === "." ? ge : r[1] === "?" ? _e : r[1] === "@" ? ve : B
 					}), i.removeAttribute(e);
-				} else e.startsWith(w) && (c.push({
+				} else e.startsWith(S) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (F.test(i.tagName)) {
-					let e = i.textContent.split(w), t = e.length - 1;
+				if (M.test(i.tagName)) {
+					let e = i.textContent.split(S), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = x ? x.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], E()), z.nextNode(), c.push({
+						i.textContent = y ? y.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], w()), I.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], E());
+						i.append(e[t], w());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === ae) c.push({
+				if (i.data === se) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(w, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(S, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += w.length - 1;
+					}), e += S.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = T.createElement("template");
+		let n = C.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function V(e, t, n = e, r) {
-	if (t === L) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = D(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = V(e, i._$AS(e, t.values), i, r)), t;
+function R(e, t, n = e, r) {
+	if (t === P) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = T(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = R(e, i._$AS(e, t.values), i, r)), t;
 }
-var fe = class {
+var he = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? T).importNode(t, !0);
-		z.currentNode = r;
-		let i = z.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? C).importNode(t, !0);
+		I.currentNode = r;
+		let i = I.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new H(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ge(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new z(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ye(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = z.nextNode(), a++);
+			a !== s?.index && (i = I.nextNode(), a++);
 		}
-		return z.currentNode = T, r;
+		return I.currentNode = C, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, H = class e {
+}, z = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = R, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = F, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var fe = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = V(this, e, t), D(e) ? e === R || e == null || e === "" ? (this._$AH !== R && this._$AR(), this._$AH = R) : e !== this._$AH && e !== L && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = R(this, e, t), T(e) ? e === F || e == null || e === "" ? (this._$AH !== F && this._$AR(), this._$AH = F) : e !== this._$AH && e !== P && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? le(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var fe = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== R && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(T.createTextNode(e)), this._$AH = e;
+		this._$AH !== F && T(this._$AH) ? this._$AA.nextSibling.data = e : this.T(C.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = B.createElement(ue(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = L.createElement(pe(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new fe(r, this), n = e.u(this.options);
+			let e = new he(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = le.get(e.strings);
-		return t === void 0 && le.set(e.strings, t = new B(e)), t;
+		let t = fe.get(e.strings);
+		return t === void 0 && fe.set(e.strings, t = new L(e)), t;
 	}
 	k(t) {
-		O(this._$AH) || (this._$AH = [], this._$AR());
+		E(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(E()), this.O(E()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(w()), this.O(w()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = b(e).nextSibling;
-			b(e).remove(), e = t;
+			let t = v(e).nextSibling;
+			v(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, U = class {
+}, B = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = R, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = R;
+		this.type = 1, this._$AH = F, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = F;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = V(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== L, a && (this._$AH = e);
+		if (i === void 0) e = R(this, e, t, 0), a = !T(e) || e !== this._$AH && e !== P, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = V(this, r[n + o], t, o), s === L && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === R ? e = R : e !== R && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = R(this, r[n + o], t, o), s === P && (s = this._$AH[o]), a ||= !T(s) || s !== this._$AH[o], s === F ? e = F : e !== F && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === R ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === F ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, pe = class extends U {
+}, ge = class extends B {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === R ? void 0 : e;
+		this.element[this.name] = e === F ? void 0 : e;
 	}
-}, me = class extends U {
+}, _e = class extends B {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== R);
+		this.element.toggleAttribute(this.name, !!e && e !== F);
 	}
-}, he = class extends U {
+}, ve = class extends B {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = V(this, e, t, 0) ?? R) === L) return;
-		let n = this._$AH, r = e === R && n !== R || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== R && (n === R || r);
+		if ((e = R(this, e, t, 0) ?? F) === P) return;
+		let n = this._$AH, r = e === F && n !== F || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== F && (n === F || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, ge = class {
+}, ye = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		V(this, e);
+		R(this, e);
 	}
-}, _e = y.litHtmlPolyfillSupport;
-_e?.(B, H), (y.litHtmlVersions ??= []).push("3.3.3");
-var ve = (e, t, n) => {
+}, be = _.litHtmlPolyfillSupport;
+be?.(L, z), (_.litHtmlVersions ??= []).push("3.3.3");
+var xe = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new H(t.insertBefore(E(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new z(t.insertBefore(w(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, W = globalThis, G = class extends v {
+}, V = globalThis, H = class extends g {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var ve = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ve(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = xe(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,39 +502,39 @@ var ve = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return L;
+		return P;
 	}
 };
-G._$litElement$ = !0, G.finalized = !0, W.litElementHydrateSupport?.({ LitElement: G });
-var ye = W.litElementPolyfillSupport;
-ye?.({ LitElement: G }), (W.litElementVersions ??= []).push("4.2.2");
+H._$litElement$ = !0, H.finalized = !0, V.litElementHydrateSupport?.({ LitElement: H });
+var Se = V.litElementPolyfillSupport;
+Se?.({ LitElement: H }), (V.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var be = Object.freeze({ type: "ai_orchestrator/status" }), K = [
+var Ce = Object.freeze({ type: "ai_orchestrator/status" }), U = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], q = class extends Error {
+], W = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function J(e) {
+function G(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Y(e, t) {
+function K(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function xe(e) {
-	if (!J(e) || !Y(e, [
+function we(e) {
+	if (!G(e) || !K(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !J(e.features) || !Y(e.features, K)) throw new q();
+	]) || !G(e.features) || !K(e.features, U)) throw new W();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || K.some((e) => typeof t[e] != "boolean")) throw new q();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || U.some((e) => typeof t[e] != "boolean")) throw new W();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,30 +547,30 @@ function xe(e) {
 		}
 	};
 }
-async function Se(e) {
-	return xe(await e.callWS({ ...be }));
+async function Te(e) {
+	return we(await e.callWS({ ...Ce }));
 }
-function Ce(e) {
-	return J(e) && e.code === "unauthorized";
+function Ee(e) {
+	return G(e) && e.code === "unauthorized";
 }
 //#endregion
 //#region src/api/workflow-probe-client.ts
-var we = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Te = class extends Error {
+var De = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Oe = class extends Error {
 	constructor() {
 		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
 	}
 };
-function Ee(e) {
+function ke(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function De(e, t) {
+function Ae(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Oe(e) {
+function je(e) {
 	return typeof e == "number" && Number.isInteger(e) && e > 0;
 }
-function ke(e) {
-	if (!Ee(e) || !De(e, [
+function Me(e) {
+	if (!ke(e) || !Ae(e, [
 		"schema_version",
 		"workflow_id",
 		"trigger_type",
@@ -579,15 +579,15 @@ function ke(e) {
 		"registration_count",
 		"provider_contacted",
 		"home_assistant_action_called"
-	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Oe(e.execution_count) || e.executions_for_trigger !== 1 || !Oe(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Te();
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !je(e.execution_count) || e.executions_for_trigger !== 1 || !je(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Oe();
 	return e;
 }
-async function Ae(e) {
-	return ke(await e.callWS({ ...we }));
+async function Ne(e) {
+	return Me(await e.callWS({ ...De }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var je = o`
+var Pe = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1277,13 +1277,13 @@ var je = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Me = Object.freeze({ type: "ai_orchestrator/providers/list" }), Ne = [
+`, Fe = Object.freeze({ type: "ai_orchestrator/providers/list" }), Ie = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], Pe = [
+], Le = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1300,33 +1300,33 @@ var je = o`
 	"unsupported",
 	"unknown"
 ];
-function X(e) {
+function q(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Z(e, t) {
+function J(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function Q(e) {
+function Re(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
 }
-function Fe(e) {
-	return typeof e == "string" && Ne.includes(e);
+function ze(e) {
+	return typeof e == "string" && Ie.includes(e);
 }
-function Ie(e) {
-	return typeof e == "string" && Pe.includes(e);
+function Be(e) {
+	return typeof e == "string" && Le.includes(e);
 }
-function Le(e) {
-	if (!X(e) || !Z(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+function Ve(e) {
+	if (!q(e) || !J(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!X(n) || !Z(n, [
+		if (!q(n) || !J(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
 			"health"
-		]) || !Q(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !Fe(n.health)) throw Error("Invalid provider entry in list");
+		]) || !Re(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ze(n.health)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
@@ -1340,13 +1340,13 @@ function Le(e) {
 		providers: t
 	};
 }
-function Re(e, t) {
-	if (!X(e) || !Z(e, [
+function He(e, t) {
+	if (!q(e) || !J(e, [
 		"schema_version",
 		"connection_id",
 		"health",
 		"error_code"
-	]) || e.schema_version !== 1 || !Q(e.connection_id) || t !== void 0 && e.connection_id !== t || !Fe(e.health) || e.error_code !== null && !Ie(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null) throw Error("Invalid provider test response");
+	]) || e.schema_version !== 1 || !Re(e.connection_id) || t !== void 0 && e.connection_id !== t || !ze(e.health) || e.error_code !== null && !Be(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
@@ -1354,18 +1354,18 @@ function Re(e, t) {
 		error_code: e.error_code
 	};
 }
-async function ze(e) {
-	return Le(await e.callWS({ ...Me }));
+async function Ue(e) {
+	return Ve(await e.callWS({ ...Fe }));
 }
-async function Be(e, t) {
-	return Re(await e.callWS({
+async function We(e, t) {
+	return He(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var Ve = "/config/integrations/integration/ai_orchestrator", He = {
+var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1381,13 +1381,13 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, Ue = {
+}, Ke = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, We = class extends G {
+}, qe = class extends H {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1585,27 +1585,27 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 		this._scheduleLoad();
 	}
 	render() {
-		return this._viewState === "loading" ? I`<div role="status" aria-label="Loading providers" aria-busy="true">
+		return this._viewState === "loading" ? N`<div role="status" aria-label="Loading providers" aria-busy="true">
         Loading provider connections…
-      </div>` : this._viewState === "error" ? I`
+      </div>` : this._viewState === "error" ? N`
         <div class="error-state">
           <p>Could not load provider connections.</p>
           <button class="refresh-button" type="button" @click=${this._loadProviders}>
             Retry
           </button>
         </div>
-      ` : this._viewState === "empty" ? I`
+      ` : this._viewState === "empty" ? N`
         <div class="empty-state">
           <h3>No provider connections</h3>
           <p>
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${Ve}>Add provider connection</a>
+          <a class="primary-link" href=${Y}>Add provider connection</a>
         </div>
-      ` : I`
+      ` : N`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${Ve}>Manage provider connections</a>
+        <a class="primary-link" href=${Y}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1614,14 +1614,14 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 	}
 	_renderProviderCard(e) {
 		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n?.health ?? e.health;
-		return I`
+		return N`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
           <div>
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${Ue[r]}</span>
+          <span class="state-badge ${r}">${Ke[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
         <div class="provider-actions">
@@ -1639,28 +1639,28 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
     `;
 	}
 	_renderTestResult(e, t) {
-		if (e === "checking") return I`<span class="test-result checking" role="status" aria-live="polite">
+		if (e === "checking") return N`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
       </span>`;
-		if (t?.health === "healthy") return I`<span class="test-result healthy" role="status" aria-live="polite">
+		if (t?.health === "healthy") return N`<span class="test-result healthy" role="status" aria-live="polite">
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = He[t.error_code ?? "unknown"] ?? "Test failed";
-			return I`<span
+			let e = Ge[t.error_code ?? "unknown"] ?? "Test failed";
+			return N`<span
         class="test-result ${t.health}"
         role="status"
         aria-live="polite"
       >${e}</span>`;
 		}
-		return R;
+		return F;
 	}
 	_loadProviders = async () => {
 		let e = this.hass;
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await ze(e);
+				let t = await Ue(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1677,7 +1677,7 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 		if (t !== void 0) {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await Be(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
+				let n = await We(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
 				r.set(e, "idle"), i.set(e, n), this._testStates = r, this._testResults = i;
 			} catch {
 				this._testStates = new Map(this._testStates).set(e, "idle"), this._testResults = new Map(this._testResults).set(e, {
@@ -1689,7 +1689,150 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 			}
 		}
 	}
-}, Ge = "ai-orchestrator-panel", $ = [
+}, Je = Object.freeze({ type: "ai_orchestrator/catalog" });
+function X(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function Z(e, t) {
+	let n = Object.keys(e).sort(), r = [...t].sort();
+	return n.length === r.length && n.every((e, t) => e === r[t]);
+}
+function Q(e) {
+	return e === null || typeof e == "string" && e.length > 0;
+}
+function Ye(e) {
+	if (!X(e) || !Z(e, [
+		"schema_version",
+		"areas",
+		"devices",
+		"entities"
+	]) || e.schema_version !== 1 || !Array.isArray(e.areas) || !Array.isArray(e.devices) || !Array.isArray(e.entities)) throw Error("Invalid catalog response");
+	let t = [];
+	for (let n of e.areas) {
+		if (!X(n) || !Z(n, ["area_id", "name"]) || typeof n.area_id != "string" || n.area_id.length === 0 || typeof n.name != "string" || n.name.trim() === "") throw Error("Invalid area in catalog response");
+		t.push({
+			area_id: n.area_id,
+			name: n.name
+		});
+	}
+	let n = [];
+	for (let t of e.devices) {
+		if (!X(t) || !Z(t, [
+			"device_id",
+			"name",
+			"area_id"
+		]) || typeof t.device_id != "string" || t.device_id.length === 0 || typeof t.name != "string" || t.name.trim() === "" || !Q(t.area_id)) throw Error("Invalid device in catalog response");
+		n.push({
+			device_id: t.device_id,
+			name: t.name,
+			area_id: t.area_id
+		});
+	}
+	let r = [];
+	for (let t of e.entities) {
+		if (!X(t) || !Z(t, [
+			"entity_id",
+			"name",
+			"area_id",
+			"device_id",
+			"disabled"
+		]) || typeof t.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(t.entity_id) || typeof t.name != "string" || t.name.trim() === "" || !Q(t.area_id) || !Q(t.device_id) || typeof t.disabled != "boolean") throw Error("Invalid entity in catalog response");
+		r.push({
+			entity_id: t.entity_id,
+			name: t.name,
+			area_id: t.area_id,
+			device_id: t.device_id,
+			disabled: t.disabled
+		});
+	}
+	return {
+		schema_version: 1,
+		areas: t,
+		devices: n,
+		entities: r
+	};
+}
+async function Xe(e) {
+	return Ye(await e.callWS({ ...Je }));
+}
+//#endregion
+//#region src/panel/catalog-view.ts
+var Ze = class extends H {
+	static properties = {
+		hass: { attribute: !1 },
+		_viewState: { state: !0 },
+		_catalog: { state: !0 }
+	};
+	static styles = o`
+    :host { display: block; }
+    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+    .refresh { border: 1px solid var(--divider-color, #d7e0e0); border-radius: 6px; padding: 8px 14px; background: transparent; color: var(--primary-text-color, #172126); cursor: pointer; }
+    .summary { color: var(--secondary-text-color, #526168); margin: 0 0 16px; }
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .catalog-card { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #d7e0e0); border-radius: 8px; padding: 16px; }
+    .catalog-card h2 { margin: 0 0 12px; font-size: 1rem; }
+    .catalog-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .catalog-item { border-top: 1px solid var(--divider-color, #d7e0e0); padding-top: 8px; }
+    .catalog-item strong, .catalog-item span { display: block; overflow-wrap: anywhere; }
+    .catalog-item span { color: var(--secondary-text-color, #526168); font-size: .82rem; margin-top: 3px; }
+    .disabled { color: var(--error-color, #b42318); }
+    .empty, .error { padding: 28px; text-align: center; }
+    .error button { margin-top: 12px; }
+  `;
+	_hasLoaded = !1;
+	_loadScheduled = !1;
+	constructor() {
+		super(), this._viewState = "loading";
+	}
+	connectedCallback() {
+		super.connectedCallback(), this._scheduleLoad();
+	}
+	updated() {
+		this._scheduleLoad();
+	}
+	render() {
+		if (this._viewState === "loading") return N`<div role="status" aria-busy="true">Loading Home Assistant catalog…</div>`;
+		if (this._viewState === "error") return N`<div class="error"><p>Could not load the Home Assistant catalog.</p><button class="refresh" type="button" @click=${this._loadCatalog}>Retry</button></div>`;
+		let e = this._catalog;
+		return e === void 0 || e.areas.length === 0 && e.devices.length === 0 && e.entities.length === 0 ? N`<div class="empty"><h2>No registry entries</h2><p>Home Assistant returned no areas, devices, or entities.</p></div>` : N`
+      <div class="toolbar"><button class="refresh" type="button" @click=${this._loadCatalog}>Refresh catalog</button></div>
+      <p class="summary">Read-only registry catalog. Current state and actions are not included.</p>
+      <div class="catalog-grid">
+        ${this._renderList("Areas", e.areas.map((e) => ({
+			primary: e.name,
+			secondary: e.area_id
+		})))}
+        ${this._renderList("Devices", e.devices.map((e) => ({
+			primary: e.name,
+			secondary: e.area_id ?? "No area"
+		})))}
+        ${this._renderList("Entities", e.entities.map((e) => ({
+			primary: e.name,
+			secondary: `${e.entity_id}${e.disabled ? " · Disabled" : ""}`,
+			disabled: e.disabled
+		})))}
+      </div>
+    `;
+	}
+	_renderList(e, t) {
+		return N`<section class="catalog-card" aria-labelledby=${`${e.toLowerCase()}-heading`}><h2 id=${`${e.toLowerCase()}-heading`}>${e} (${t.length})</h2><ul class="catalog-list">${t.map((e) => N`<li class="catalog-item"><strong class=${e.disabled ? "disabled" : F}>${e.primary}</strong><span>${e.secondary}</span></li>`)}</ul></section>`;
+	}
+	_scheduleLoad() {
+		this.hass === void 0 || this._hasLoaded || this._loadScheduled || (this._loadScheduled = !0, queueMicrotask(() => {
+			this._loadScheduled = !1, this._loadCatalog();
+		}));
+	}
+	_loadCatalog = async () => {
+		if (this.hass !== void 0) {
+			this._hasLoaded = !0, this._viewState = "loading";
+			try {
+				this._catalog = await Xe(this.hass), this._viewState = "ready";
+			} catch {
+				this._catalog = void 0, this._viewState = "error";
+			}
+		}
+	};
+}, Qe = "ai-orchestrator-panel", $ = [
 	{
 		id: "home",
 		label: "Home"
@@ -1722,12 +1865,12 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 		id: "settings",
 		label: "Settings"
 	}
-], Ke = {
+], $e = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, qe = {
+}, et = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -1757,11 +1900,11 @@ var Ve = "/config/integrations/integration/ai_orchestrator", He = {
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function Je(e) {
+function tt(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
 	return $.find((e) => e.id === t)?.id;
 }
-var Ye = class extends G {
+var nt = class extends H {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -1773,7 +1916,7 @@ var Ye = class extends G {
 		_probeLoadState: { state: !0 },
 		_probeResult: { state: !0 }
 	};
-	static styles = je;
+	static styles = Pe;
 	_hasRequested = !1;
 	_requestSequence = 0;
 	constructor() {
@@ -1784,7 +1927,7 @@ var Ye = class extends G {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = Je(this.route);
+			let e = tt(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
@@ -1792,19 +1935,19 @@ var Ye = class extends G {
 		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus());
 	}
 	render() {
-		return I`
+		return N`
       <div class="app-frame ${this.narrow ? "narrow" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._activeSection === "providers" ? this._renderProviders() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
     `;
 	}
 	_renderSidebar() {
-		return I`
+		return N`
       <aside class="sidebar">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">AI</span>
@@ -1815,11 +1958,11 @@ var Ye = class extends G {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${$.map((e) => I`
+          ${$.map((e) => N`
               <button
                 class="nav-button"
                 type="button"
-                aria-current=${this._activeSection === e.id ? "page" : R}
+                aria-current=${this._activeSection === e.id ? "page" : F}
                 @click=${() => this._selectSection(e.id)}
               >
                 <span class="nav-marker" aria-hidden="true"></span>
@@ -1838,7 +1981,7 @@ var Ye = class extends G {
 	}
 	_renderHome() {
 		let e = this._statusHeading();
-		return I`
+		return N`
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
@@ -1861,7 +2004,7 @@ var Ye = class extends G {
           <h2 id="foundation-status">${e.title}</h2>
           <p class="hero-description">${e.detail}</p>
           ${this._renderStatusAction()}
-          ${this._loadState === "loading" ? I`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : R}
+          ${this._loadState === "loading" ? N`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : F}
         </div>
         <div class="connection-summary" aria-label="Connection summary">
           <p class="summary-label">Home Assistant</p>
@@ -1888,17 +2031,17 @@ var Ye = class extends G {
     `;
 	}
 	_renderFeatureCard() {
-		return I`
+		return N`
       <section class="card" aria-labelledby="feature-status-heading">
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${K.map((e) => {
+          ${U.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
-			return I`
+			return N`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${Ke[e]}</span>
+                  <span class="status-name">${$e[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -1912,7 +2055,7 @@ var Ye = class extends G {
     `;
 	}
 	_renderNextSteps() {
-		return I`
+		return N`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
         <p class="card-intro">Each capability opens only after its own verification gate.</p>
@@ -1935,8 +2078,8 @@ var Ye = class extends G {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = qe[e], n = $.find((t) => t.id === e)?.label ?? "Section";
-		return I`
+		let t = et[e], n = $.find((t) => t.id === e)?.label ?? "Section";
+		return N`
       <header class="page-header">
         <div>
           <p class="eyebrow">${n}</p>
@@ -1959,7 +2102,7 @@ var Ye = class extends G {
     `;
 	}
 	_renderWorkflowProbe() {
-		return I`
+		return N`
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>
@@ -2000,7 +2143,7 @@ var Ye = class extends G {
     `;
 	}
 	_renderProviders() {
-		return I`
+		return N`
       <header class="page-header">
         <div>
           <p class="eyebrow">Providers</p>
@@ -2016,21 +2159,34 @@ var Ye = class extends G {
       <ai-orchestrator-providers-view .hass=${this.hass}></ai-orchestrator-providers-view>
     `;
 	}
+	_renderCatalog() {
+		return N`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Entities & Permissions</p>
+          <h1>Home Assistant catalog</h1>
+          <p class="page-intro">Browse registry identity and relationships only. Current state and actions remain outside this read-only catalog.</p>
+        </div>
+        <span class="privacy-badge">Read-only registry data</span>
+      </header>
+      <ai-orchestrator-catalog-view .hass=${this.hass}></ai-orchestrator-catalog-view>
+    `;
+	}
 	_renderWorkflowProbeResult() {
-		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? I`
+		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? N`
         <strong>One trigger produced exactly one execution.</strong>
         <span>
           Runtime execution ${this._probeResult.execution_count}; listener registration
           ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
           called: no.
         </span>
-      ` : this._probeLoadState === "error" ? I`
+      ` : this._probeLoadState === "error" ? N`
         <strong>The lifecycle probe was not confirmed.</strong>
         <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
-      ` : this._probeLoadState === "loading" ? I`<span>Waiting for the bounded integration response.</span>` : I`<span>No lifecycle probe has run in this panel session.</span>`;
+      ` : this._probeLoadState === "loading" ? N`<span>Waiting for the bounded integration response.</span>` : N`<span>No lifecycle probe has run in this panel session.</span>`;
 	}
 	_renderStatusAction() {
-		return this._loadState === "loading" ? R : this._loadState === "ready" && this._status?.configured === !1 ? I`
+		return this._loadState === "loading" ? F : this._loadState === "ready" && this._status?.configured === !1 ? N`
         <div class="hero-actions">
           <button class="secondary-button" type="button" @click=${this._refreshStatus}>
             Check again
@@ -2040,11 +2196,11 @@ var Ye = class extends G {
 			"denied",
 			"incompatible",
 			"error"
-		].includes(this._loadState) ? I`
+		].includes(this._loadState) ? N`
         <div class="hero-actions">
           <button class="primary-button" type="button" @click=${this._refreshStatus}>Retry status check</button>
         </div>
-      ` : R;
+      ` : F;
 	}
 	_statusHeading() {
 		return this._loadState === "loading" ? {
@@ -2105,12 +2261,12 @@ var Ye = class extends G {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await Se(e);
+			let n = await Te(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof q ? "incompatible" : Ce(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof W ? "incompatible" : Ee(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -2121,12 +2277,12 @@ var Ye = class extends G {
 		}
 		this._probeLoadState = "loading", this._probeResult = void 0;
 		try {
-			this._probeResult = await Ae(e), this._probeLoadState = "ready";
+			this._probeResult = await Ne(e), this._probeLoadState = "ready";
 		} catch {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, Xe = "ai-orchestrator-providers-view";
-customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Ge, Ye), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Xe, We);
+}, rt = "ai-orchestrator-providers-view", it = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Qe, nt), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(rt, qe), customElements.get(it) === void 0 && customElements.define(it, Ze);
 //#endregion
-export { Ye as AiOrchestratorPanel, Ge as PANEL_TAG, Xe as PROVIDERS_VIEW_TAG, We as ProvidersView };
+export { nt as AiOrchestratorPanel, Ze as CatalogView, Qe as PANEL_TAG, rt as PROVIDERS_VIEW_TAG, qe as ProvidersView };
