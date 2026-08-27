@@ -56,7 +56,7 @@ Immutable implementation artifact `079d93f14fbbe9bd2da0658072d65a969f8b954d` was
 1. Install the accepted artifact bundle on the named Home Assistant Core `2026.8.3` target.
 2. Use the owner's existing backend config flow to add the LM Studio connection. Never copy the token or full private endpoint into evidence.
 3. Record desktop and Companion App Android screenshots for empty and configured provider states, with private identifiers redacted.
-3. Record redacted positive connection-test behavior, isolated invalid-credential behavior, duplicate-click behavior, reload/unload/restart behavior, Home/foundation health, mobile layout, and scoped logs.
+4. Record redacted positive connection-test behavior, isolated invalid-credential behavior, duplicate-click behavior, reload/unload/restart behavior, Home/foundation health, mobile layout, and scoped logs.
 
 ## Acceptance status
 

@@ -22,11 +22,11 @@ No task may move to `DONE` based only on an assertion.
 | Field | Current value |
 |---|---|
 | Last completed | LOC-001 provider-neutral config-entry lifecycle, independently accepted |
-| Active work | LOC-003 and LOC-004 exact artifacts in independent review queue |
+| Active work | LOC-003 and LOC-004 exact artifacts approved for synthetic quality; live acceptance pending |
 | Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
 | Next gate | Install the independently approved LOC-003/LOC-004 artifacts and complete redacted live acceptance on Core 2026.8.3 |
 | Production code | The foundation, action-free lifecycle probe, provider-neutral contract, provider config-entry lifecycle, authenticated LM Studio transport, and bounded provider list/test panel are implemented locally; LOC-003/LOC-004 remain unaccepted and product workflows remain absent |
-| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository. LOC-003 and LOC-004 review candidates are published on `origin/main` for handoff but remain unaccepted pending independent review and live acceptance. The unrelated untracked `AI Orchestrator.iml` file is excluded from all commits and artifacts. |
+| Repository | Local `main` tracks the public `ewaisg/HA-AI-Orchestrator` repository. LOC-003 and LOC-004 review candidates are published on `origin/main`; both have independent synthetic-quality approvals, but remain in review pending live acceptance. The unrelated untracked `AI Orchestrator.iml` file is excluded from all commits and artifacts. |
 
 ## Phase 0 — foundation and architecture validation
 
