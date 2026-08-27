@@ -29,7 +29,7 @@
       },
       "reauth_confirm": {
         "title": "Reauthenticate provider",
-        "description": "Enter replacement authentication details for {name}.",
+        "description": "Enter replacement authentication details.",
         "data": {
           "api_token": "LM Studio API token"
         },
@@ -39,7 +39,7 @@
       },
       "reconfigure": {
         "title": "Reconfigure provider",
-        "description": "Update and validate the connection settings for {name}.",
+        "description": "Update and validate the connection settings.",
         "data": {
           "base_url": "LM Studio API base URL",
           "api_token": "LM Studio API token",
