@@ -55,4 +55,4 @@ Independent workflow/safety review approved exact artifact `53fe6781930f9264daf9
 
 ## Acceptance status
 
-`REVIEW — LIVE ACCEPTANCE PENDING`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates and has both independent pre-live approvals recorded above. No live request from the implemented adapter is claimed. LOC-003 cannot be `DONE` until redacted live Home Assistant revalidation passes.
+`REVIEW — LIVE ACCEPTANCE PARTIAL`. Remediated artifact `53fe6781930f9264daf96ddd9f79f3aa7f691c33` passes its exact-source synthetic gates and has both independent pre-live approvals recorded above. On the owner's authenticated local Home Assistant page, the saved LM Studio connection remained healthy after browser reload and a second explicit connection test displayed `Connection test passed`. No token, full endpoint, or model identifier was recorded. Invalid-credential behavior, integration reload/unload/restart, and scoped-log evidence remain outstanding. LOC-003 cannot be `DONE` until the remaining redacted live checks pass.

@@ -137,7 +137,7 @@
   "unknowns": [
     {
       "id": "LIVE_ADAPTER_REVALIDATION",
-      "description": "The reviewed adapter has not yet made a redacted authenticated request from the named Home Assistant installation.",
+      "description": "Live positive setup and connection-test requests have passed on the named Home Assistant installation; invalid-credential behavior, integration reload/unload/restart, and scoped-log evidence remain unrecorded.",
       "blocks": ["LOC-003"]
     }
   ],

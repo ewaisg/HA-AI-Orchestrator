@@ -114,7 +114,7 @@
   "unknowns": [
     {
       "id": "LIVE_PROVIDER_UI_REVALIDATION",
-      "description": "The reviewed provider UI has not been installed or used for a redacted live connection test on the named Home Assistant installation.",
+      "description": "The reviewed provider UI is installed and positive connection testing has passed; invalid credentials, duplicate clicks, integration reload/unload/restart, Companion App Android, screenshots, and scoped-log evidence remain unrecorded.",
       "blocks": ["LOC-004"]
     }
   ],
