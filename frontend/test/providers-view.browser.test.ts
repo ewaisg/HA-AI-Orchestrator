@@ -144,4 +144,46 @@ describe("provider setup and connection-test view", () => {
     expect(shadowText(view)).toContain("Could not load provider connections");
     expect(shadowText(view)).not.toContain(marker);
   });
+
+  it("preserves evidenced provider health when the test transport fails", async () => {
+    const marker = "transport-secret-must-not-render";
+    const requests: Record<string, unknown>[] = [];
+    const evidencedProviderList = {
+      ...PROVIDER_LIST,
+      providers: [
+        {
+          ...PROVIDER_LIST.providers[0],
+          health: "healthy",
+          last_tested_at: "2026-08-28T18:00:00+00:00",
+        },
+      ],
+    };
+    const view = await mountView({
+      callWS: async <T>(message: Record<string, unknown>): Promise<T> => {
+        requests.push(message);
+        if (message.type === "ai_orchestrator/providers/list") {
+          return structuredClone(evidencedProviderList) as T;
+        }
+        return Promise.reject(new Error(marker));
+      },
+    });
+
+    expect(shadowText(view)).toContain("Healthy");
+    expect(shadowText(view)).toContain("Last tested");
+    view.shadowRoot?.querySelector<HTMLButtonElement>("button.test-button")?.click();
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await view.updateComplete;
+
+    expect(requests).toEqual([
+      { type: "ai_orchestrator/providers/list" },
+      { type: "ai_orchestrator/providers/test", connection_id: CONNECTION_ID },
+    ]);
+    expect(shadowText(view)).toContain("Healthy");
+    expect(shadowText(view)).toContain("Last tested");
+    expect(shadowText(view)).toContain(
+      "Home Assistant communication failed; provider health unchanged",
+    );
+    expect(shadowText(view)).not.toContain("Unavailable");
+    expect(shadowText(view)).not.toContain(marker);
+  });
 });

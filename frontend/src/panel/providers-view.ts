@@ -301,7 +301,7 @@ export class ProvidersView extends LitElement {
     const testResult = this._testResults.get(provider.connection_id);
     const health =
       testResult === "transport_failure"
-        ? "unavailable"
+        ? provider.health
         : (testResult?.health ?? provider.health);
     const lastTestedAt =
       testResult === "transport_failure"
@@ -348,8 +348,12 @@ export class ProvidersView extends LitElement {
       </span>`;
     }
     if (testResult === "transport_failure") {
-      return html`<span class="test-result unavailable" role="status" aria-live="polite">
-        Test failed
+      return html`<span
+        class="test-result transport-failure"
+        role="status"
+        aria-live="polite"
+      >
+        Home Assistant communication failed; provider health unchanged
       </span>`;
     }
     if (testResult?.health === "healthy") {

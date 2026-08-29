@@ -23,6 +23,7 @@ from .provider_entry import (
     LoadedProviderConnection,
 )
 from .providers.contract import (
+    ConnectionValidationResult,
     ProviderError,
     safe_provider_error_code,
 )
@@ -33,6 +34,7 @@ WORKFLOW_PROBE_INVARIANT_FAILED = "workflow_probe_invariant_failed"
 WORKFLOW_PROBE_NOT_LOADED = "workflow_probe_not_loaded"
 PROVIDER_NOT_FOUND = "provider_not_found"
 PROVIDER_TEST_IN_PROGRESS = "provider_test_in_progress"
+PROVIDER_TEST_FAILED = "provider_test_failed"
 PROVIDER_RESPONSE_SCHEMA_VERSION = 1
 
 PROVIDER_HEALTH_HEALTHY = "healthy"
@@ -214,7 +216,14 @@ async def websocket_provider_test(
     in_progress.add(connection_id)
     try:
         try:
-            await loaded.provider.validate_connection()
+            validation = await loaded.provider.validate_connection()
+            if not isinstance(validation, ConnectionValidationResult):
+                connection.send_error(
+                    msg["id"],
+                    PROVIDER_TEST_FAILED,
+                    "Provider connection test did not complete.",
+                )
+                return
             tested_at = datetime.now(UTC).isoformat()
             runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
                 health=PROVIDER_HEALTH_HEALTHY,
@@ -256,21 +265,10 @@ async def websocket_provider_test(
                 },
             )
         except Exception:  # noqa: BLE001 -- adapter details stay backend-only.
-            tested_at = datetime.now(UTC).isoformat()
-            runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
-                health=PROVIDER_HEALTH_UNAVAILABLE,
-                error_code="unknown",
-                tested_at=tested_at,
-            )
-            connection.send_result(
+            connection.send_error(
                 msg["id"],
-                {
-                    "schema_version": PROVIDER_RESPONSE_SCHEMA_VERSION,
-                    "connection_id": connection_id,
-                    "health": PROVIDER_HEALTH_UNAVAILABLE,
-                    "error_code": "unknown",
-                    "last_tested_at": tested_at,
-                },
+                PROVIDER_TEST_FAILED,
+                "Provider connection test did not complete.",
             )
     finally:
         in_progress.discard(connection_id)

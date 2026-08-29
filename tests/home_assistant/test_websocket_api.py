@@ -34,6 +34,7 @@ from custom_components.ai_orchestrator.providers.contract import (
 from custom_components.ai_orchestrator.runtime import async_get_runtime
 from custom_components.ai_orchestrator.websocket_api import (
     PROVIDER_NOT_FOUND,
+    PROVIDER_TEST_FAILED,
     PROVIDER_TEST_IN_PROGRESS,
     WORKFLOW_PROBE_INVARIANT_FAILED,
     WORKFLOW_PROBE_NOT_LOADED,
@@ -377,7 +378,6 @@ async def test_admin_provider_test_returns_bounded_success(
             "unavailable",
             "timeout",
         ),
-        (RuntimeError("raw-provider-canary-must-not-leak"), "unavailable", "unknown"),
     ],
 )
 async def test_admin_provider_test_normalizes_failures_without_exception_egress(
@@ -418,6 +418,69 @@ async def test_admin_provider_test_normalizes_failures_without_exception_egress(
     listed = list_response["result"]["providers"][0]
     assert listed["health"] == health
     assert listed["last_tested_at"] == tested_at
+
+
+@pytest.mark.parametrize(
+    ("invalid_outcome", "raises"),
+    [
+        (None, False),
+        (RuntimeError("raw-provider-canary-must-not-leak"), True),
+    ],
+)
+async def test_provider_test_rejects_unobserved_adapter_outcomes_without_health_change(
+    hass: HomeAssistant,
+    hass_ws_client: WebSocketGenerator,
+    invalid_outcome: object,
+    raises: bool,
+) -> None:
+    """Malformed or internal adapter outcomes cannot fabricate provider health."""
+    entry = await _setup_loaded_provider(hass)
+    runtime = async_get_runtime(hass)
+    async_register_websocket_commands(hass)
+    client = await hass_ws_client(hass)
+
+    await client.send_json_auto_id(
+        {
+            "type": PROVIDER_TEST_WEBSOCKET_TYPE,
+            CONF_CONNECTION_ID: PROVIDER_CONNECTION_ID,
+        }
+    )
+    first_response = await client.receive_json()
+    assert first_response["success"] is True
+    prior_status = runtime.provider_test_statuses[PROVIDER_CONNECTION_ID]
+
+    replacement = (
+        AsyncMock(side_effect=invalid_outcome)
+        if raises
+        else AsyncMock(return_value=invalid_outcome)
+    )
+    with patch.object(
+        type(entry.runtime_data.provider),
+        "validate_connection",
+        new=replacement,
+    ):
+        await client.send_json_auto_id(
+            {
+                "type": PROVIDER_TEST_WEBSOCKET_TYPE,
+                CONF_CONNECTION_ID: PROVIDER_CONNECTION_ID,
+            }
+        )
+        response = await client.receive_json()
+
+    assert response["success"] is False
+    assert response["error"] == {
+        "code": PROVIDER_TEST_FAILED,
+        "message": "Provider connection test did not complete.",
+    }
+    assert "raw-provider-canary-must-not-leak" not in json.dumps(response)
+    assert runtime.provider_test_statuses[PROVIDER_CONNECTION_ID] == prior_status
+    assert runtime.provider_test_in_progress_connection_ids == set()
+
+    await client.send_json_auto_id({"type": PROVIDER_LIST_WEBSOCKET_TYPE})
+    list_response = await client.receive_json()
+    listed = list_response["result"]["providers"][0]
+    assert listed["health"] == "healthy"
+    assert listed["last_tested_at"] == prior_status.tested_at
 
 
 async def test_provider_test_rejects_unknown_connection_and_extra_fields(

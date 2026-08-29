@@ -48,7 +48,10 @@ from custom_components.ai_orchestrator.providers.lm_studio import (
 from custom_components.ai_orchestrator.providers.lm_studio import (
     PROVIDER_TYPE as LM_STUDIO_PROVIDER_TYPE,
 )
-from custom_components.ai_orchestrator.runtime import async_get_runtime
+from custom_components.ai_orchestrator.runtime import (
+    ProviderTestStatus,
+    async_get_runtime,
+)
 from custom_components.ai_orchestrator.workflow_probe import async_run_workflow_probe
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
@@ -358,9 +361,26 @@ async def test_provider_entry_setup_and_unload_are_isolated_from_foundation(
     assert entry.runtime_data.provider_type == SYNTHETIC_PROVIDER_TYPE
     assert entry.runtime_data.validation.authenticated is True
 
+    runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
+        health="healthy",
+        error_code=None,
+        tested_at="2026-08-29T16:00:00+00:00",
+    )
+    runtime.provider_test_in_progress_connection_ids.add(connection_id)
+
     assert await async_unload_entry(hass, entry)
     assert runtime.loaded_provider_entry_ids == set()
+    assert connection_id not in runtime.provider_test_statuses
+    assert connection_id not in runtime.provider_test_in_progress_connection_ids
     assert getattr(entry, "runtime_data", None) is None
+
+    runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
+        health="unavailable",
+        error_code="timeout",
+        tested_at="2026-08-29T16:01:00+00:00",
+    )
+    assert await async_setup_entry(hass, entry)
+    assert connection_id not in runtime.provider_test_statuses
 
 
 async def test_lm_studio_unload_drops_provider_without_closing_shared_session(

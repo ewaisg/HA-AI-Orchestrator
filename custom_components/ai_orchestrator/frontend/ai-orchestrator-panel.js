@@ -1858,7 +1858,7 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
     `;
 	}
 	_renderProviderCard(e) {
-		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n === "transport_failure" ? "unavailable" : n?.health ?? e.health, i = n === "transport_failure" ? e.last_tested_at : n?.last_tested_at ?? e.last_tested_at;
+		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n === "transport_failure" ? e.health : n?.health ?? e.health, i = n === "transport_failure" ? e.last_tested_at : n?.last_tested_at ?? e.last_tested_at;
 		return M`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
@@ -1890,8 +1890,12 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 		if (e === "checking") return M`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
       </span>`;
-		if (t === "transport_failure") return M`<span class="test-result unavailable" role="status" aria-live="polite">
-        Test failed
+		if (t === "transport_failure") return M`<span
+        class="test-result transport-failure"
+        role="status"
+        aria-live="polite"
+      >
+        Home Assistant communication failed; provider health unchanged
       </span>`;
 		if (t?.health === "healthy") return M`<span class="test-result healthy" role="status" aria-live="polite">
         Connection test passed
