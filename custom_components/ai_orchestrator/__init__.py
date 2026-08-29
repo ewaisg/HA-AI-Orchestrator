@@ -172,6 +172,7 @@ async def _async_setup_provider_entry(
         provider=provider,
         validation=validation,
     )
+    runtime.provider_test_statuses.pop(parsed.connection_id, None)
     runtime.loaded_provider_entry_ids.add(entry.entry_id)
     return True
 

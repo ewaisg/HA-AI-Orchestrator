@@ -26,6 +26,7 @@ from custom_components.ai_orchestrator.providers.contract import (
     ProviderError,
     ProviderRequest,
     StructuredOutputDefinition,
+    ToolCall,
     ToolDefinition,
 )
 from custom_components.ai_orchestrator.providers.lm_studio import (
@@ -491,6 +492,48 @@ async def test_generate_rejects_noncanonical_outbound_json(
 
     with pytest.raises(ProviderError) as caught:
         await provider.generate(provider_request)
+
+    assert error_code(caught.value) is ErrorCode.UNSUPPORTED
+    assert session.requests == []
+
+
+async def test_nonfinite_historical_tool_arguments_stop_before_network() -> None:
+    """Historical continuation arguments receive canonical JSON validation."""
+    provider, session = provider_with()
+    tool = ToolDefinition(
+        name="use_number",
+        description="Accept a synthetic number.",
+        parameters={
+            "type": "object",
+            "properties": {"value": {"type": "number"}},
+            "required": ["value"],
+            "additionalProperties": False,
+        },
+    )
+    request = ProviderRequest(
+        messages=(
+            Message(
+                role=MessageRole.ASSISTANT,
+                content="",
+                tool_calls=(
+                    ToolCall(
+                        id="synthetic-call-nonfinite",
+                        name="use_number",
+                        arguments={"value": float("inf")},
+                    ),
+                ),
+            ),
+            Message(
+                role=MessageRole.TOOL,
+                content="Synthetic result",
+                tool_call_id="synthetic-call-nonfinite",
+            ),
+        ),
+        tools=(tool,),
+    )
+
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(request)
 
     assert error_code(caught.value) is ErrorCode.UNSUPPORTED
     assert session.requests == []

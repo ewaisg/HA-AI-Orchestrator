@@ -1,17 +1,15 @@
 """Authenticated WebSocket API for AI Orchestrator."""
 
+from datetime import UTC, datetime
 from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import area_registry as ar
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers import entity_registry as er
 
+from .catalog import build_catalog_snapshot
 from .const import (
-    CATALOG_SCHEMA_VERSION,
-    CATALOG_WEBSOCKET_TYPE,
+    CATALOG_LIST_WEBSOCKET_TYPE,
     DOMAIN,
     PROVIDER_LIST_WEBSOCKET_TYPE,
     PROVIDER_TEST_WEBSOCKET_TYPE,
@@ -28,7 +26,7 @@ from .providers.contract import (
     ProviderError,
     safe_provider_error_code,
 )
-from .runtime import async_get_runtime, is_foundation_loaded
+from .runtime import ProviderTestStatus, async_get_runtime, is_foundation_loaded
 from .workflow_probe import WorkflowProbeInvariantError, async_run_workflow_probe
 
 WORKFLOW_PROBE_INVARIANT_FAILED = "workflow_probe_invariant_failed"
@@ -38,54 +36,9 @@ PROVIDER_TEST_IN_PROGRESS = "provider_test_in_progress"
 PROVIDER_RESPONSE_SCHEMA_VERSION = 1
 
 PROVIDER_HEALTH_HEALTHY = "healthy"
+PROVIDER_HEALTH_NOT_TESTED = "not_tested"
 PROVIDER_HEALTH_UNAVAILABLE = "unavailable"
 PROVIDER_HEALTH_AUTHENTICATION_REQUIRED = "authentication_required"
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command(
-    vol.All(vol.Schema({vol.Required("type"): CATALOG_WEBSOCKET_TYPE}))
-)
-@callback
-def websocket_catalog(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Return read-only registry identity metadata for the administrator panel."""
-    areas = ar.async_get(hass)
-    devices = dr.async_get(hass)
-    entities = er.async_get(hass)
-    connection.send_result(
-        msg["id"],
-        {
-            "schema_version": CATALOG_SCHEMA_VERSION,
-            "areas": [
-                {"area_id": area.id, "name": area.name}
-                for area in sorted(areas.async_entries(), key=lambda item: item.id)
-            ],
-            "devices": [
-                {
-                    "device_id": device.id,
-                    "name": device.name_by_user or device.name or device.id,
-                    "area_id": device.area_id,
-                }
-                for device in sorted(devices.devices.values(), key=lambda item: item.id)
-            ],
-            "entities": [
-                {
-                    "entity_id": entity.entity_id,
-                    "name": entity.name or entity.original_name or entity.entity_id,
-                    "area_id": entity.area_id,
-                    "device_id": entity.device_id,
-                    "disabled": entity.disabled_by is not None,
-                }
-                for entity in sorted(
-                    entities.entities.values(), key=lambda item: item.entity_id
-                )
-            ],
-        },
-    )
 
 
 @websocket_api.require_admin
@@ -169,6 +122,7 @@ def websocket_provider_list(
         if not isinstance(loaded, LoadedProviderConnection):
             continue
         adapter = runtime.provider_entry_adapters.get(loaded.provider_type)
+        test_status = runtime.provider_test_statuses.get(loaded.connection_id)
         providers.append(
             {
                 "connection_id": loaded.connection_id,
@@ -177,7 +131,14 @@ def websocket_provider_list(
                     adapter.display_name if adapter else loaded.provider_type
                 ),
                 "title": entry.title,
-                "health": PROVIDER_HEALTH_HEALTHY,
+                "health": (
+                    test_status.health
+                    if test_status is not None
+                    else PROVIDER_HEALTH_NOT_TESTED
+                ),
+                "last_tested_at": (
+                    test_status.tested_at if test_status is not None else None
+                ),
             }
         )
     connection.send_result(
@@ -187,6 +148,20 @@ def websocket_provider_list(
             "providers": providers,
         },
     )
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    vol.All(vol.Schema({vol.Required("type"): CATALOG_LIST_WEBSOCKET_TYPE}))
+)
+@callback
+def websocket_catalog_list(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return current bounded registry metadata to an administrator."""
+    connection.send_result(msg["id"], build_catalog_snapshot(hass))
 
 
 @websocket_api.require_admin
@@ -240,6 +215,12 @@ async def websocket_provider_test(
     try:
         try:
             await loaded.provider.validate_connection()
+            tested_at = datetime.now(UTC).isoformat()
+            runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
+                health=PROVIDER_HEALTH_HEALTHY,
+                error_code=None,
+                tested_at=tested_at,
+            )
             connection.send_result(
                 msg["id"],
                 {
@@ -247,24 +228,40 @@ async def websocket_provider_test(
                     "connection_id": connection_id,
                     "health": PROVIDER_HEALTH_HEALTHY,
                     "error_code": None,
+                    "last_tested_at": tested_at,
                 },
             )
         except ProviderError as err:
+            tested_at = datetime.now(UTC).isoformat()
             code = safe_provider_error_code(err)
+            health = (
+                PROVIDER_HEALTH_AUTHENTICATION_REQUIRED
+                if code is not None and code.value == "authentication"
+                else PROVIDER_HEALTH_UNAVAILABLE
+            )
+            error_code = code.value if code else "unknown"
+            runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
+                health=health,
+                error_code=error_code,
+                tested_at=tested_at,
+            )
             connection.send_result(
                 msg["id"],
                 {
                     "schema_version": PROVIDER_RESPONSE_SCHEMA_VERSION,
                     "connection_id": connection_id,
-                    "health": (
-                        PROVIDER_HEALTH_AUTHENTICATION_REQUIRED
-                        if code is not None and code.value == "authentication"
-                        else PROVIDER_HEALTH_UNAVAILABLE
-                    ),
-                    "error_code": code.value if code else "unknown",
+                    "health": health,
+                    "error_code": error_code,
+                    "last_tested_at": tested_at,
                 },
             )
         except Exception:  # noqa: BLE001 -- adapter details stay backend-only.
+            tested_at = datetime.now(UTC).isoformat()
+            runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
+                health=PROVIDER_HEALTH_UNAVAILABLE,
+                error_code="unknown",
+                tested_at=tested_at,
+            )
             connection.send_result(
                 msg["id"],
                 {
@@ -272,6 +269,7 @@ async def websocket_provider_test(
                     "connection_id": connection_id,
                     "health": PROVIDER_HEALTH_UNAVAILABLE,
                     "error_code": "unknown",
+                    "last_tested_at": tested_at,
                 },
             )
     finally:
@@ -283,6 +281,6 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     """Register integration-wide WebSocket commands once during setup."""
     websocket_api.async_register_command(hass, websocket_status)
     websocket_api.async_register_command(hass, websocket_run_workflow_probe)
-    websocket_api.async_register_command(hass, websocket_catalog)
     websocket_api.async_register_command(hass, websocket_provider_list)
     websocket_api.async_register_command(hass, websocket_provider_test)
+    websocket_api.async_register_command(hass, websocket_catalog_list)

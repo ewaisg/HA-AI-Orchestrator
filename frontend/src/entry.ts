@@ -15,4 +15,11 @@ if (customElements.get(CATALOG_VIEW_TAG) === undefined) {
   customElements.define(CATALOG_VIEW_TAG, CatalogView);
 }
 
-export { AiOrchestratorPanel, CatalogView, PANEL_TAG, ProvidersView, PROVIDERS_VIEW_TAG };
+export {
+  AiOrchestratorPanel,
+  CATALOG_VIEW_TAG,
+  CatalogView,
+  PANEL_TAG,
+  ProvidersView,
+  PROVIDERS_VIEW_TAG,
+};

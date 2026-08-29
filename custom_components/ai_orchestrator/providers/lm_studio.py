@@ -379,35 +379,35 @@ def _raise_provider_error(code: ErrorCode) -> NoReturn:
 
 
 def _build_chat_request(model_id: str, request: ProviderRequest) -> dict[str, object]:
-    body: dict[str, object] = {
-        "model": model_id,
-        "messages": [_message_to_openai(message) for message in request.messages],
-        "stream": False,
-    }
-    if request.tools:
-        body["tools"] = [
-            {
-                "type": "function",
-                "function": {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "parameters": _to_json_value(tool.parameters),
+    try:
+        body: dict[str, object] = {
+            "model": model_id,
+            "messages": [_message_to_openai(message) for message in request.messages],
+            "stream": False,
+        }
+        if request.tools:
+            body["tools"] = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": tool.name,
+                        "description": tool.description,
+                        "parameters": _to_json_value(tool.parameters),
+                    },
+                }
+                for tool in request.tools
+            ]
+        if request.output_schema is not None:
+            body["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": request.output_schema.name,
+                    "strict": True,
+                    "schema": _to_json_value(request.output_schema.schema),
                 },
             }
-            for tool in request.tools
-        ]
-    if request.output_schema is not None:
-        body["response_format"] = {
-            "type": "json_schema",
-            "json_schema": {
-                "name": request.output_schema.name,
-                "strict": True,
-                "schema": _to_json_value(request.output_schema.schema),
-            },
-        }
-    try:
         _validate_json_value(body)
-    except ValueError:
+    except TypeError, ValueError:
         _raise_provider_error(ErrorCode.UNSUPPORTED)
     return body
 
@@ -418,19 +418,23 @@ def _message_to_openai(message: Message) -> dict[str, object]:
         "content": message.content,
     }
     if message.role is MessageRole.ASSISTANT and message.tool_calls:
-        result["tool_calls"] = [
-            {
-                "id": call.id,
-                "type": "function",
-                "function": {
-                    "name": call.name,
-                    "arguments": json.dumps(
-                        _to_json_value(call.arguments), separators=(",", ":")
-                    ),
-                },
-            }
-            for call in message.tool_calls
-        ]
+        tool_calls: list[dict[str, object]] = []
+        for call in message.tool_calls:
+            arguments = _to_json_value(call.arguments)
+            _validate_json_value(arguments)
+            tool_calls.append(
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {
+                        "name": call.name,
+                        "arguments": json.dumps(
+                            arguments, separators=(",", ":"), allow_nan=False
+                        ),
+                    },
+                }
+            )
+        result["tool_calls"] = tool_calls
     elif message.role is MessageRole.TOOL:
         result["tool_call_id"] = message.tool_call_id
     return result

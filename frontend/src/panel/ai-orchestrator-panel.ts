@@ -18,8 +18,8 @@ import type {
   HomeAssistantRoute,
 } from "../ha/hass-contract";
 import { panelStyles } from "../styles/panel-styles";
-import "./providers-view";
 import "./catalog-view";
+import "./providers-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -156,8 +156,8 @@ export class AiOrchestratorPanel extends LitElement {
                 ? this._renderWorkflowProbe()
                 : this._activeSection === "providers"
                   ? this._renderProviders()
-                    : this._activeSection === "permissions"
-                      ? this._renderCatalog()
+                  : this._activeSection === "permissions"
+                    ? this._renderCatalog()
                   : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
@@ -397,10 +397,13 @@ export class AiOrchestratorPanel extends LitElement {
       <header class="page-header">
         <div>
           <p class="eyebrow">Entities & Permissions</p>
-          <h1>Home Assistant catalog</h1>
-          <p class="page-intro">Browse registry identity and relationships only. Current state and actions remain outside this read-only catalog.</p>
+          <h1>Home Assistant registry catalogue</h1>
+          <p class="page-intro">
+            Browse current entity, device, and area metadata from Home Assistant. No state values
+            or attributes are included, and every entity begins with no AI access.
+          </p>
         </div>
-        <span class="privacy-badge">Read-only registry data</span>
+        <span class="privacy-badge">Read-only · AI access none</span>
       </header>
       <ai-orchestrator-catalog-view .hass=${this.hass}></ai-orchestrator-catalog-view>
     `;

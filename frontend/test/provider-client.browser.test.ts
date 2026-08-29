@@ -13,7 +13,8 @@ const VALID_PROVIDER = Object.freeze({
   provider_type: "lm_studio",
   display_name: "LM Studio",
   title: "LM Studio 12345678",
-  health: "healthy",
+  health: "not_tested",
+  last_tested_at: null,
 });
 
 const VALID_LIST_RESPONSE = Object.freeze({
@@ -26,6 +27,7 @@ const VALID_TEST_SUCCESS = Object.freeze({
   connection_id: "12345678-1234-4234-9234-123456789abc",
   health: "healthy",
   error_code: null,
+  last_tested_at: "2026-08-28T18:00:00+00:00",
 });
 
 const VALID_TEST_FAILURE = Object.freeze({
@@ -33,6 +35,7 @@ const VALID_TEST_FAILURE = Object.freeze({
   connection_id: "12345678-1234-4234-9234-123456789abc",
   health: "authentication_required",
   error_code: "authentication",
+  last_tested_at: "2026-08-28T18:01:00+00:00",
 });
 
 describe("provider list client", () => {
@@ -66,6 +69,8 @@ describe("provider list client", () => {
     { schema_version: 1, providers: [{ connection_id: 123 }] },
     { schema_version: 1, providers: [{ ...VALID_PROVIDER, connection_id: undefined }] },
     { schema_version: 1, providers: [{ ...VALID_PROVIDER, health: "loaded" }] },
+    { schema_version: 1, providers: [{ ...VALID_PROVIDER, health: "healthy" }] },
+    { schema_version: 1, providers: [{ ...VALID_PROVIDER, last_tested_at: "yesterday" }] },
     { schema_version: 1, providers: [{ ...VALID_PROVIDER, credential: "must-reject" }] },
     { schema_version: 1, providers: [], unexpected: true },
   ])("rejects invalid list response", (response) => {
@@ -110,6 +115,7 @@ describe("provider test client", () => {
     { ...VALID_TEST_SUCCESS, connection_id: "x" },
     { ...VALID_TEST_SUCCESS, health: "loaded" },
     { ...VALID_TEST_SUCCESS, error_code: "authentication" },
+    { ...VALID_TEST_SUCCESS, last_tested_at: null },
     { ...VALID_TEST_FAILURE, error_code: null },
     { ...VALID_TEST_FAILURE, error_code: "raw-provider-secret" },
     { ...VALID_TEST_SUCCESS, unexpected: true },

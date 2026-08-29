@@ -42,6 +42,7 @@ export interface ProviderConnection {
   display_name: string;
   title: string;
   health: ProviderHealth;
+  last_tested_at: string | null;
 }
 
 export interface ProviderListResponse {
@@ -54,6 +55,7 @@ export interface ProviderTestResult {
   connection_id: string;
   health: ProviderHealth;
   error_code: ProviderErrorCode | null;
+  last_tested_at: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -89,6 +91,14 @@ function isProviderErrorCode(value: unknown): value is ProviderErrorCode {
   );
 }
 
+function isTimestamp(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(value) &&
+    !Number.isNaN(Date.parse(value))
+  );
+}
+
 export function parseProviderList(value: unknown): ProviderListResponse {
   if (
     !isRecord(value) ||
@@ -108,6 +118,7 @@ export function parseProviderList(value: unknown): ProviderListResponse {
         "display_name",
         "title",
         "health",
+        "last_tested_at",
       ]) ||
       !isCanonicalConnectionId(item.connection_id) ||
       typeof item.provider_type !== "string" ||
@@ -116,7 +127,9 @@ export function parseProviderList(value: unknown): ProviderListResponse {
       item.display_name.trim() === "" ||
       typeof item.title !== "string" ||
       item.title.trim() === "" ||
-      !isProviderHealth(item.health)
+      !isProviderHealth(item.health) ||
+      (item.last_tested_at !== null && !isTimestamp(item.last_tested_at)) ||
+      (item.health === "not_tested") !== (item.last_tested_at === null)
     ) {
       throw new Error("Invalid provider entry in list");
     }
@@ -126,6 +139,7 @@ export function parseProviderList(value: unknown): ProviderListResponse {
       display_name: item.display_name,
       title: item.title,
       health: item.health,
+      last_tested_at: item.last_tested_at,
     });
   }
   return { schema_version: PROVIDER_RESPONSE_SCHEMA_VERSION, providers };
@@ -137,14 +151,22 @@ export function parseProviderTestResult(
 ): ProviderTestResult {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ["schema_version", "connection_id", "health", "error_code"]) ||
+    !hasExactKeys(value, [
+      "schema_version",
+      "connection_id",
+      "health",
+      "error_code",
+      "last_tested_at",
+    ]) ||
     value.schema_version !== PROVIDER_RESPONSE_SCHEMA_VERSION ||
     !isCanonicalConnectionId(value.connection_id) ||
     (expectedConnectionId !== undefined && value.connection_id !== expectedConnectionId) ||
     !isProviderHealth(value.health) ||
     (value.error_code !== null && !isProviderErrorCode(value.error_code)) ||
     (value.health === "healthy" && value.error_code !== null) ||
-    (value.health !== "healthy" && value.error_code === null)
+    (value.health !== "healthy" && value.error_code === null) ||
+    value.health === "not_tested" ||
+    !isTimestamp(value.last_tested_at)
   ) {
     throw new Error("Invalid provider test response");
   }
@@ -153,6 +175,7 @@ export function parseProviderTestResult(
     connection_id: value.connection_id,
     health: value.health,
     error_code: value.error_code,
+    last_tested_at: value.last_tested_at,
   };
 }
 

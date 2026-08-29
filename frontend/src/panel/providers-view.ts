@@ -11,6 +11,7 @@ import type { HomeAssistantLike } from "../ha/hass-contract";
 
 type ViewState = "loading" | "ready" | "empty" | "error";
 type TestState = "idle" | "checking";
+type TestResult = ProviderTestResult | "transport_failure";
 
 export const PROVIDER_MANAGEMENT_PATH = "/config/integrations/integration/ai_orchestrator";
 
@@ -233,7 +234,7 @@ export class ProvidersView extends LitElement {
   private declare _viewState: ViewState;
   private declare _providers: ProviderConnection[];
   private declare _testStates: Map<string, TestState>;
-  private declare _testResults: Map<string, ProviderTestResult>;
+  private declare _testResults: Map<string, TestResult>;
   private _hasLoaded = false;
   private _loadScheduled = false;
 
@@ -298,7 +299,14 @@ export class ProvidersView extends LitElement {
   private _renderProviderCard(provider: ProviderConnection): TemplateResult {
     const testState = this._testStates.get(provider.connection_id) ?? "idle";
     const testResult = this._testResults.get(provider.connection_id);
-    const health = testResult?.health ?? provider.health;
+    const health =
+      testResult === "transport_failure"
+        ? "unavailable"
+        : (testResult?.health ?? provider.health);
+    const lastTestedAt =
+      testResult === "transport_failure"
+        ? provider.last_tested_at
+        : (testResult?.last_tested_at ?? provider.last_tested_at);
 
     return html`
       <article class="provider-card" role="listitem">
@@ -310,6 +318,11 @@ export class ProvidersView extends LitElement {
           <span class="state-badge ${health}">${HEALTH_LABELS[health]}</span>
         </div>
         <p class="provider-meta">Local provider · ${provider.provider_type}</p>
+        <p class="provider-meta">
+          ${lastTestedAt
+            ? `Last tested ${new Date(lastTestedAt).toLocaleString()}`
+            : "Not tested in this Home Assistant runtime"}
+        </p>
         <div class="provider-actions">
           <button
             class="test-button"
@@ -327,11 +340,16 @@ export class ProvidersView extends LitElement {
 
   private _renderTestResult(
     testState: TestState,
-    testResult: ProviderTestResult | undefined,
+    testResult: TestResult | undefined,
   ): TemplateResult | typeof nothing {
     if (testState === "checking") {
       return html`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
+      </span>`;
+    }
+    if (testResult === "transport_failure") {
+      return html`<span class="test-result unavailable" role="status" aria-live="polite">
+        Test failed
       </span>`;
     }
     if (testResult?.health === "healthy") {
@@ -399,12 +417,10 @@ export class ProvidersView extends LitElement {
       this._testResults = newResults;
     } catch {
       this._testStates = new Map(this._testStates).set(connectionId, "idle");
-      this._testResults = new Map(this._testResults).set(connectionId, {
-        schema_version: 1,
-        connection_id: connectionId,
-        health: "unavailable",
-        error_code: "unknown",
-      });
+      this._testResults = new Map(this._testResults).set(
+        connectionId,
+        "transport_failure",
+      );
     }
   }
 }

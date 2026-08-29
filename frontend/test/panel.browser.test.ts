@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { AiOrchestratorPanel, PANEL_TAG } from "../src/entry";
+import { AiOrchestratorPanel, type CatalogView, PANEL_TAG } from "../src/entry";
 import {
   createFailingHass,
   createFakeHass,
@@ -77,6 +77,35 @@ describe("AI Orchestrator panel shell", () => {
     expect(shadowText(panel)).toContain("Provider connections");
     expect(shadowText(panel)).toContain("Test connection");
     expect(shadowText(panel)).toContain("no stored secret");
+  });
+
+  it("opens the read-only registry catalogue with no AI permission", async () => {
+    const panel = await mountPanel(
+      createRoutedFakeHass({
+        "ai_orchestrator/status": FOUNDATION_STATUS,
+        "ai_orchestrator/catalog/list": {
+          schema_version: 1,
+          areas: [],
+          devices: [],
+          entities: [],
+        },
+      }),
+    );
+    const permissionsButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Entities & Permissions"));
+
+    permissionsButton?.click();
+    await panel.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    const catalog = panel.shadowRoot?.querySelector<CatalogView>(
+      "ai-orchestrator-catalog-view",
+    );
+    await catalog?.updateComplete;
+
+    expect(shadowText(panel)).toContain("Home Assistant registry catalogue");
+    expect(shadowText(panel)).toContain("AI access none");
+    expect(catalog?.shadowRoot?.textContent).toContain("No registered entities are available");
   });
 
   it("does not write panel state to browser storage", async () => {

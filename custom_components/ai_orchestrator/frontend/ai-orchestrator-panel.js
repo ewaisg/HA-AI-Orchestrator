@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, h = (e, t) => !l(e, t), oe = {
+}, oe = (e, t) => !l(e, t), se = {
 	attribute: !0,
 	type: String,
 	converter: m,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: h
+	hasChanged: oe
 };
 Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var g = class extends HTMLElement {
+var h = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = oe) {
+	static createProperty(e, t = se) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,7 +100,7 @@ var g = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? oe;
+		return this.elementProperties.get(e) ?? se;
 	}
 	static _$Ei() {
 		if (this.hasOwnProperty(p("elementProperties"))) return;
@@ -187,7 +187,7 @@ var g = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? h)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? oe)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,89 +251,89 @@ var g = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[p("elementProperties")] = /* @__PURE__ */ new Map(), g[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: g }), (f.reactiveElementVersions ??= []).push("2.1.2");
+h.elementStyles = [], h.shadowRootOptions = { mode: "open" }, h[p("elementProperties")] = /* @__PURE__ */ new Map(), h[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: h }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var _ = globalThis, v = (e) => e, y = _.trustedTypes, b = y ? y.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, x = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, se = "?" + S, ce = `<${se}>`, C = document, w = () => C.createComment(""), T = (e) => e === null || typeof e != "object" && typeof e != "function", E = Array.isArray, le = (e) => E(e) || typeof e?.[Symbol.iterator] == "function", D = "[ 	\n\f\r]", O = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ue = /-->/g, de = />/g, k = RegExp(`>|${D}(?:([^\\s"'>=/]+)(${D}*=${D}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), A = /'/g, j = /"/g, M = /^(?:script|style|textarea|title)$/i, N = ((e) => (t, ...n) => ({
+var g = globalThis, _ = (e) => e, v = g.trustedTypes, y = v ? v.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, b = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, ce = "?" + x, le = `<${ce}>`, S = document, C = () => S.createComment(""), w = (e) => e === null || typeof e != "object" && typeof e != "function", T = Array.isArray, ue = (e) => T(e) || typeof e?.[Symbol.iterator] == "function", E = "[ 	\n\f\r]", D = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, de = /-->/g, fe = />/g, O = RegExp(`>|${E}(?:([^\\s"'>=/]+)(${E}*=${E}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), k = /'/g, A = /"/g, j = /^(?:script|style|textarea|title)$/i, M = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), P = Symbol.for("lit-noChange"), F = Symbol.for("lit-nothing"), fe = /* @__PURE__ */ new WeakMap(), I = C.createTreeWalker(C, 129);
-function pe(e, t) {
-	if (!E(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return b === void 0 ? t : b.createHTML(t);
+}))(1), N = Symbol.for("lit-noChange"), P = Symbol.for("lit-nothing"), pe = /* @__PURE__ */ new WeakMap(), F = S.createTreeWalker(S, 129);
+function me(e, t) {
+	if (!T(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return y === void 0 ? t : y.createHTML(t);
 }
-var me = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = O;
+var he = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = D;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === O ? c[1] === "!--" ? o = ue : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = k) : (M.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = k) : o = de : o === k ? c[0] === ">" ? (o = i ?? O, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? k : c[3] === "\"" ? j : A) : o === j || o === A ? o = k : o === ue || o === de ? o = O : (o = k, i = void 0);
-		let d = o === k && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === O ? n + ce : l >= 0 ? (r.push(s), n.slice(0, l) + x + n.slice(l) + S + d) : n + S + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === D ? c[1] === "!--" ? o = de : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = O) : (j.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = O) : o = fe : o === O ? c[0] === ">" ? (o = i ?? D, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? O : c[3] === "\"" ? A : k) : o === A || o === k ? o = O : o === de || o === fe ? o = D : (o = O, i = void 0);
+		let d = o === O && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === D ? n + le : l >= 0 ? (r.push(s), n.slice(0, l) + b + n.slice(l) + x + d) : n + x + (l === -2 ? t : d);
 	}
-	return [pe(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, L = class e {
+	return [me(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, I = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = me(t, n);
-		if (this.el = e.createElement(l, r), I.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = he(t, n);
+		if (this.el = e.createElement(l, r), F.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = I.nextNode()) !== null && c.length < s;) {
+		for (; (i = F.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(x)) {
-					let t = u[o++], n = i.getAttribute(e).split(S), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(b)) {
+					let t = u[o++], n = i.getAttribute(e).split(x), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ge : r[1] === "?" ? _e : r[1] === "@" ? ve : B
+						ctor: r[1] === "." ? _e : r[1] === "?" ? ve : r[1] === "@" ? ye : z
 					}), i.removeAttribute(e);
-				} else e.startsWith(S) && (c.push({
+				} else e.startsWith(x) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (M.test(i.tagName)) {
-					let e = i.textContent.split(S), t = e.length - 1;
+				if (j.test(i.tagName)) {
+					let e = i.textContent.split(x), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = y ? y.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], w()), I.nextNode(), c.push({
+						i.textContent = v ? v.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], C()), F.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], w());
+						i.append(e[t], C());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === se) c.push({
+				if (i.data === ce) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(S, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(x, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += S.length - 1;
+					}), e += x.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = C.createElement("template");
+		let n = S.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function R(e, t, n = e, r) {
-	if (t === P) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = T(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = R(e, i._$AS(e, t.values), i, r)), t;
+function L(e, t, n = e, r) {
+	if (t === N) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = w(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = L(e, i._$AS(e, t.values), i, r)), t;
 }
-var he = class {
+var ge = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var he = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? C).importNode(t, !0);
-		I.currentNode = r;
-		let i = I.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? S).importNode(t, !0);
+		F.currentNode = r;
+		let i = F.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new z(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ye(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new R(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new be(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = I.nextNode(), a++);
+			a !== s?.index && (i = F.nextNode(), a++);
 		}
-		return I.currentNode = C, r;
+		return F.currentNode = S, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, z = class e {
+}, R = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = F, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = P, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var he = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = R(this, e, t), T(e) ? e === F || e == null || e === "" ? (this._$AH !== F && this._$AR(), this._$AH = F) : e !== this._$AH && e !== P && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? le(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = L(this, e, t), w(e) ? e === P || e == null || e === "" ? (this._$AH !== P && this._$AR(), this._$AH = P) : e !== this._$AH && e !== N && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ue(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var he = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== F && T(this._$AH) ? this._$AA.nextSibling.data = e : this.T(C.createTextNode(e)), this._$AH = e;
+		this._$AH !== P && w(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = L.createElement(pe(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = I.createElement(me(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new he(r, this), n = e.u(this.options);
+			let e = new ge(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = fe.get(e.strings);
-		return t === void 0 && fe.set(e.strings, t = new L(e)), t;
+		let t = pe.get(e.strings);
+		return t === void 0 && pe.set(e.strings, t = new I(e)), t;
 	}
 	k(t) {
-		E(this._$AH) || (this._$AH = [], this._$AR());
+		T(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(w()), this.O(w()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(C()), this.O(C()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = v(e).nextSibling;
-			v(e).remove(), e = t;
+			let t = _(e).nextSibling;
+			_(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, B = class {
+}, z = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var he = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = F, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = F;
+		this.type = 1, this._$AH = P, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = P;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = R(this, e, t, 0), a = !T(e) || e !== this._$AH && e !== P, a && (this._$AH = e);
+		if (i === void 0) e = L(this, e, t, 0), a = !w(e) || e !== this._$AH && e !== N, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = R(this, r[n + o], t, o), s === P && (s = this._$AH[o]), a ||= !T(s) || s !== this._$AH[o], s === F ? e = F : e !== F && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = L(this, r[n + o], t, o), s === N && (s = this._$AH[o]), a ||= !w(s) || s !== this._$AH[o], s === P ? e = P : e !== P && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === F ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === P ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ge = class extends B {
+}, _e = class extends z {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === F ? void 0 : e;
+		this.element[this.name] = e === P ? void 0 : e;
 	}
-}, _e = class extends B {
+}, ve = class extends z {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== F);
+		this.element.toggleAttribute(this.name, !!e && e !== P);
 	}
-}, ve = class extends B {
+}, ye = class extends z {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = R(this, e, t, 0) ?? F) === P) return;
-		let n = this._$AH, r = e === F && n !== F || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== F && (n === F || r);
+		if ((e = L(this, e, t, 0) ?? P) === N) return;
+		let n = this._$AH, r = e === P && n !== P || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== P && (n === P || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, ye = class {
+}, be = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var he = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		R(this, e);
+		L(this, e);
 	}
-}, be = _.litHtmlPolyfillSupport;
-be?.(L, z), (_.litHtmlVersions ??= []).push("3.3.3");
-var xe = (e, t, n) => {
+}, xe = g.litHtmlPolyfillSupport;
+xe?.(I, R), (g.litHtmlVersions ??= []).push("3.3.3");
+var Se = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new z(t.insertBefore(w(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new R(t.insertBefore(C(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, V = globalThis, H = class extends g {
+}, B = globalThis, V = class extends h {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var xe = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = xe(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Se(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,39 +502,39 @@ var xe = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return P;
+		return N;
 	}
 };
-H._$litElement$ = !0, H.finalized = !0, V.litElementHydrateSupport?.({ LitElement: H });
-var Se = V.litElementPolyfillSupport;
-Se?.({ LitElement: H }), (V.litElementVersions ??= []).push("4.2.2");
+V._$litElement$ = !0, V.finalized = !0, B.litElementHydrateSupport?.({ LitElement: V });
+var Ce = B.litElementPolyfillSupport;
+Ce?.({ LitElement: V }), (B.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var Ce = Object.freeze({ type: "ai_orchestrator/status" }), U = [
+var we = Object.freeze({ type: "ai_orchestrator/status" }), H = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], W = class extends Error {
+], U = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function G(e) {
+function W(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function K(e, t) {
+function Te(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function we(e) {
-	if (!G(e) || !K(e, [
+function Ee(e) {
+	if (!W(e) || !Te(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !G(e.features) || !K(e.features, U)) throw new W();
+	]) || !W(e.features) || !Te(e.features, H)) throw new U();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || U.some((e) => typeof t[e] != "boolean")) throw new W();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || H.some((e) => typeof t[e] != "boolean")) throw new U();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,30 +547,30 @@ function we(e) {
 		}
 	};
 }
-async function Te(e) {
-	return we(await e.callWS({ ...Ce }));
+async function De(e) {
+	return Ee(await e.callWS({ ...we }));
 }
-function Ee(e) {
-	return G(e) && e.code === "unauthorized";
+function Oe(e) {
+	return W(e) && e.code === "unauthorized";
 }
 //#endregion
 //#region src/api/workflow-probe-client.ts
-var De = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Oe = class extends Error {
+var ke = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Ae = class extends Error {
 	constructor() {
 		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
 	}
 };
-function ke(e) {
+function je(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Ae(e, t) {
+function Me(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function je(e) {
+function Ne(e) {
 	return typeof e == "number" && Number.isInteger(e) && e > 0;
 }
-function Me(e) {
-	if (!ke(e) || !Ae(e, [
+function Pe(e) {
+	if (!je(e) || !Me(e, [
 		"schema_version",
 		"workflow_id",
 		"trigger_type",
@@ -579,15 +579,15 @@ function Me(e) {
 		"registration_count",
 		"provider_contacted",
 		"home_assistant_action_called"
-	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !je(e.execution_count) || e.executions_for_trigger !== 1 || !je(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Oe();
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ne(e.execution_count) || e.executions_for_trigger !== 1 || !Ne(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Ae();
 	return e;
 }
-async function Ne(e) {
-	return Me(await e.callWS({ ...De }));
+async function Fe(e) {
+	return Pe(await e.callWS({ ...ke }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var Pe = o`
+var Ie = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1277,13 +1277,251 @@ var Pe = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Fe = Object.freeze({ type: "ai_orchestrator/providers/list" }), Ie = [
+`, Le = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Re = [
+	"available",
+	"unavailable",
+	"not_loaded"
+], ze = ["entity", "device"], G = 1e4;
+function K(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function q(e, t) {
+	let n = Object.keys(e).sort(), r = [...t].sort();
+	return n.length === r.length && n.every((e, t) => e === r[t]);
+}
+function J(e) {
+	return e === null || typeof e == "string";
+}
+function Y(e) {
+	return typeof e == "string" && e.length > 0 && e.length <= 255;
+}
+function Be(e) {
+	if (!Array.isArray(e) || e.length > G) throw Error("Invalid area catalogue");
+	return e.map((e) => {
+		if (!K(e) || !q(e, ["area_id", "name"]) || !Y(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
+		return {
+			area_id: e.area_id,
+			name: e.name
+		};
+	});
+}
+function Ve(e) {
+	if (!Array.isArray(e) || e.length > G) throw Error("Invalid device catalogue");
+	return e.map((e) => {
+		if (!K(e) || !q(e, [
+			"device_id",
+			"name",
+			"area_id",
+			"manufacturer",
+			"model",
+			"disabled"
+		]) || !Y(e.device_id) || !J(e.name) || e.area_id !== null && !Y(e.area_id) || !J(e.manufacturer) || !J(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
+		return {
+			device_id: e.device_id,
+			name: e.name,
+			area_id: e.area_id,
+			manufacturer: e.manufacturer,
+			model: e.model,
+			disabled: e.disabled
+		};
+	});
+}
+function He(e) {
+	if (!Array.isArray(e) || e.length > G) throw Error("Invalid entity catalogue");
+	return e.map((e) => {
+		if (!K(e) || !q(e, [
+			"registry_id",
+			"entity_id",
+			"domain",
+			"platform",
+			"name",
+			"device_id",
+			"area_id",
+			"area_source",
+			"disabled",
+			"availability"
+		]) || !Y(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !Y(e.platform) || !J(e.name) || e.device_id !== null && !Y(e.device_id) || e.area_id !== null && !Y(e.area_id) || e.area_source !== null && !ze.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Re.includes(e.availability)) throw Error("Invalid entity entry");
+		return {
+			registry_id: e.registry_id,
+			entity_id: e.entity_id,
+			domain: e.domain,
+			platform: e.platform,
+			name: e.name,
+			device_id: e.device_id,
+			area_id: e.area_id,
+			area_source: e.area_source,
+			disabled: e.disabled,
+			availability: e.availability
+		};
+	});
+}
+function Ue(e) {
+	if (!K(e) || !q(e, [
+		"schema_version",
+		"areas",
+		"devices",
+		"entities"
+	]) || e.schema_version !== 1) throw Error("Invalid catalogue response");
+	return {
+		schema_version: 1,
+		areas: Be(e.areas),
+		devices: Ve(e.devices),
+		entities: He(e.entities)
+	};
+}
+async function We(e) {
+	return Ue(await e.callWS({ ...Le }));
+}
+//#endregion
+//#region src/panel/catalog-view.ts
+var Ge = class extends V {
+	static properties = {
+		hass: { attribute: !1 },
+		_state: { state: !0 },
+		_catalog: { state: !0 },
+		_query: { state: !0 }
+	};
+	static styles = o`
+    :host { display: block; }
+    .summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .summary span, .permission {
+      padding: 6px 10px; border: 1px solid var(--divider-color, #d7e0e0);
+      border-radius: 999px; background: var(--card-background-color, #fff);
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .permission { color: var(--secondary-text-color, #526168); }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 16px; }
+    input {
+      min-width: 0; flex: 1; min-height: 44px; padding: 9px 12px;
+      border: 1px solid var(--divider-color, #d7e0e0); border-radius: 10px;
+      background: var(--card-background-color, #fff); color: var(--primary-text-color, #172126);
+      font: inherit;
+    }
+    button {
+      min-height: 44px; padding: 9px 15px; border: 1px solid var(--divider-color, #d7e0e0);
+      border-radius: 10px; background: var(--card-background-color, #fff);
+      color: var(--primary-text-color, #172126); cursor: pointer; font: inherit; font-weight: 700;
+    }
+    input:focus-visible, button:focus-visible { outline: 3px solid var(--primary-color, #0c6b66); outline-offset: 2px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--divider-color, #d7e0e0); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; background: var(--card-background-color, #fff); }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--divider-color, #d7e0e0); text-align: left; vertical-align: top; }
+    th { font-size: 0.76rem; color: var(--secondary-text-color, #526168); text-transform: uppercase; letter-spacing: 0.05em; }
+    tr:last-child td { border-bottom: 0; }
+    .name { font-weight: 750; }
+    code, .detail { display: block; margin-top: 3px; color: var(--secondary-text-color, #526168); font-size: 0.8rem; }
+    .state { font-weight: 700; font-size: 0.8rem; }
+    .state.available { color: #0e6040; }
+    .state.unavailable { color: var(--error-color, #b42318); }
+    .state.not_loaded { color: #7a4a00; }
+    .message { padding: 36px 20px; border: 1px solid var(--divider-color, #d7e0e0); border-radius: 14px; text-align: center; background: var(--card-background-color, #fff); }
+    @media (max-width: 680px) {
+      .toolbar { display: grid; }
+      thead { display: none; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      tr { padding: 12px 14px; border-bottom: 1px solid var(--divider-color, #d7e0e0); }
+      tr:last-child { border-bottom: 0; }
+      td { padding: 5px 0; border: 0; }
+      td::before { content: attr(data-label); display: block; color: var(--secondary-text-color, #526168); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+    }
+  `;
+	_hasLoaded = !1;
+	_loadScheduled = !1;
+	constructor() {
+		super(), this._state = "loading", this._query = "";
+	}
+	connectedCallback() {
+		super.connectedCallback(), this._scheduleLoad();
+	}
+	updated() {
+		this._scheduleLoad();
+	}
+	render() {
+		if (this._state === "loading") return M`<div class="message" role="status" aria-busy="true">Reading Home Assistant registries…</div>`;
+		if (this._state === "error") return M`<div class="message"><p>The registry catalogue could not be loaded.</p><button type="button" @click=${this._load}>Retry</button></div>`;
+		let e = this._catalog;
+		if (e === void 0 || this._state === "empty") return M`<div class="message"><p>No registered entities are available.</p><button type="button" @click=${this._load}>Refresh</button></div>`;
+		let t = this._filteredEntities(e);
+		return M`
+      <div class="summary" aria-label="Registry totals">
+        <span>${e.entities.length} entities</span>
+        <span>${e.devices.length} devices</span>
+        <span>${e.areas.length} areas</span>
+        <span>AI access: none</span>
+      </div>
+      <div class="toolbar">
+        <input
+          type="search"
+          aria-label="Search entities"
+          placeholder="Search name, entity ID, area, device, or integration"
+          .value=${this._query}
+          @input=${this._onSearch}
+        />
+        <button type="button" @click=${this._load}>Refresh registries</button>
+      </div>
+      ${t.length === 0 ? M`<div class="message" role="status">No entities match this search.</div>` : this._renderTable(e, t)}
+    `;
+	}
+	_renderTable(e, t) {
+		let n = new Map(e.areas.map((e) => [e.area_id, e.name])), r = new Map(e.devices.map((e) => [e.device_id, e]));
+		return M`
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Entity</th><th>Area / device</th><th>Status</th><th>AI permission</th></tr></thead>
+          <tbody>${t.map((e) => this._renderEntity(e, n, r))}</tbody>
+        </table>
+      </div>
+    `;
+	}
+	_renderEntity(e, t, n) {
+		let r = e.area_id === null ? "No area" : t.get(e.area_id) ?? "Unresolved area", i = e.device_id === null ? void 0 : n.get(e.device_id), a = e.disabled ? "Disabled" : e.availability.replace("_", " ");
+		return M`
+      <tr>
+        <td data-label="Entity"><span class="name">${e.name ?? e.entity_id}</span><code>${e.entity_id}</code><span class="detail">${e.platform}</span></td>
+        <td data-label="Area / device"><span>${r}</span><span class="detail">${i?.name ?? (e.device_id === null ? "No device" : "Unresolved device")}</span></td>
+        <td data-label="Status"><span class="state ${e.disabled ? "not_loaded" : e.availability}">${a}</span></td>
+        <td data-label="AI permission"><span class="permission">None</span></td>
+      </tr>
+    `;
+	}
+	_filteredEntities(e) {
+		let t = this._query.trim().toLocaleLowerCase();
+		if (t === "") return e.entities;
+		let n = new Map(e.areas.map((e) => [e.area_id, e.name])), r = new Map(e.devices.map((e) => [e.device_id, e.name]));
+		return e.entities.filter((e) => [
+			e.entity_id,
+			e.name,
+			e.domain,
+			e.platform,
+			e.area_id === null ? null : n.get(e.area_id),
+			e.device_id === null ? null : r.get(e.device_id)
+		].some((e) => e?.toLocaleLowerCase().includes(t) === !0));
+	}
+	_onSearch = (e) => {
+		this._query = e.currentTarget.value;
+	};
+	_load = async () => {
+		if (this.hass !== void 0) {
+			this._hasLoaded = !0, this._state = "loading";
+			try {
+				this._catalog = await We(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
+			} catch {
+				this._catalog = void 0, this._state = "error";
+			}
+		}
+	};
+	_scheduleLoad() {
+		this.hass === void 0 || this._hasLoaded || this._loadScheduled || (this._loadScheduled = !0, queueMicrotask(() => {
+			this._loadScheduled = !1, this._load();
+		}));
+	}
+}, Ke = Object.freeze({ type: "ai_orchestrator/providers/list" }), qe = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], Le = [
+], Je = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1300,39 +1538,44 @@ var Pe = o`
 	"unsupported",
 	"unknown"
 ];
-function q(e) {
+function X(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function J(e, t) {
+function Z(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function Re(e) {
+function Ye(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
 }
-function ze(e) {
-	return typeof e == "string" && Ie.includes(e);
+function Xe(e) {
+	return typeof e == "string" && qe.includes(e);
 }
-function Be(e) {
-	return typeof e == "string" && Le.includes(e);
+function Ze(e) {
+	return typeof e == "string" && Je.includes(e);
 }
-function Ve(e) {
-	if (!q(e) || !J(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+function Qe(e) {
+	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
+}
+function $e(e) {
+	if (!X(e) || !Z(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!q(n) || !J(n, [
+		if (!X(n) || !Z(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
-			"health"
-		]) || !Re(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ze(n.health)) throw Error("Invalid provider entry in list");
+			"health",
+			"last_tested_at"
+		]) || !Ye(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !Xe(n.health) || n.last_tested_at !== null && !Qe(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
 			display_name: n.display_name,
 			title: n.title,
-			health: n.health
+			health: n.health,
+			last_tested_at: n.last_tested_at
 		});
 	}
 	return {
@@ -1340,32 +1583,34 @@ function Ve(e) {
 		providers: t
 	};
 }
-function He(e, t) {
-	if (!q(e) || !J(e, [
+function et(e, t) {
+	if (!X(e) || !Z(e, [
 		"schema_version",
 		"connection_id",
 		"health",
-		"error_code"
-	]) || e.schema_version !== 1 || !Re(e.connection_id) || t !== void 0 && e.connection_id !== t || !ze(e.health) || e.error_code !== null && !Be(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null) throw Error("Invalid provider test response");
+		"error_code",
+		"last_tested_at"
+	]) || e.schema_version !== 1 || !Ye(e.connection_id) || t !== void 0 && e.connection_id !== t || !Xe(e.health) || e.error_code !== null && !Ze(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !Qe(e.last_tested_at)) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
 		health: e.health,
-		error_code: e.error_code
+		error_code: e.error_code,
+		last_tested_at: e.last_tested_at
 	};
 }
-async function Ue(e) {
-	return Ve(await e.callWS({ ...Fe }));
+async function tt(e) {
+	return $e(await e.callWS({ ...Ke }));
 }
-async function We(e, t) {
-	return He(await e.callWS({
+async function nt(e, t) {
+	return et(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
+var rt = "/config/integrations/integration/ai_orchestrator", it = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1381,13 +1626,13 @@ var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, Ke = {
+}, at = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, qe = class extends H {
+}, Q = class extends V {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1585,27 +1830,27 @@ var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
 		this._scheduleLoad();
 	}
 	render() {
-		return this._viewState === "loading" ? N`<div role="status" aria-label="Loading providers" aria-busy="true">
+		return this._viewState === "loading" ? M`<div role="status" aria-label="Loading providers" aria-busy="true">
         Loading provider connections…
-      </div>` : this._viewState === "error" ? N`
+      </div>` : this._viewState === "error" ? M`
         <div class="error-state">
           <p>Could not load provider connections.</p>
           <button class="refresh-button" type="button" @click=${this._loadProviders}>
             Retry
           </button>
         </div>
-      ` : this._viewState === "empty" ? N`
+      ` : this._viewState === "empty" ? M`
         <div class="empty-state">
           <h3>No provider connections</h3>
           <p>
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${Y}>Add provider connection</a>
+          <a class="primary-link" href=${rt}>Add provider connection</a>
         </div>
-      ` : N`
+      ` : M`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${Y}>Manage provider connections</a>
+        <a class="primary-link" href=${rt}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1613,17 +1858,20 @@ var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
     `;
 	}
 	_renderProviderCard(e) {
-		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n?.health ?? e.health;
-		return N`
+		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n === "transport_failure" ? "unavailable" : n?.health ?? e.health, i = n === "transport_failure" ? e.last_tested_at : n?.last_tested_at ?? e.last_tested_at;
+		return M`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
           <div>
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${Ke[r]}</span>
+          <span class="state-badge ${r}">${at[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
+        <p class="provider-meta">
+          ${i ? `Last tested ${new Date(i).toLocaleString()}` : "Not tested in this Home Assistant runtime"}
+        </p>
         <div class="provider-actions">
           <button
             class="test-button"
@@ -1639,28 +1887,31 @@ var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
     `;
 	}
 	_renderTestResult(e, t) {
-		if (e === "checking") return N`<span class="test-result checking" role="status" aria-live="polite">
+		if (e === "checking") return M`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
       </span>`;
-		if (t?.health === "healthy") return N`<span class="test-result healthy" role="status" aria-live="polite">
+		if (t === "transport_failure") return M`<span class="test-result unavailable" role="status" aria-live="polite">
+        Test failed
+      </span>`;
+		if (t?.health === "healthy") return M`<span class="test-result healthy" role="status" aria-live="polite">
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = Ge[t.error_code ?? "unknown"] ?? "Test failed";
-			return N`<span
+			let e = it[t.error_code ?? "unknown"] ?? "Test failed";
+			return M`<span
         class="test-result ${t.health}"
         role="status"
         aria-live="polite"
       >${e}</span>`;
 		}
-		return F;
+		return P;
 	}
 	_loadProviders = async () => {
 		let e = this.hass;
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await Ue(e);
+				let t = await tt(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1677,162 +1928,14 @@ var Y = "/config/integrations/integration/ai_orchestrator", Ge = {
 		if (t !== void 0) {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await We(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
+				let n = await nt(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
 				r.set(e, "idle"), i.set(e, n), this._testStates = r, this._testResults = i;
 			} catch {
-				this._testStates = new Map(this._testStates).set(e, "idle"), this._testResults = new Map(this._testResults).set(e, {
-					schema_version: 1,
-					connection_id: e,
-					health: "unavailable",
-					error_code: "unknown"
-				});
+				this._testStates = new Map(this._testStates).set(e, "idle"), this._testResults = new Map(this._testResults).set(e, "transport_failure");
 			}
 		}
 	}
-}, Je = Object.freeze({ type: "ai_orchestrator/catalog" });
-function X(e) {
-	return typeof e == "object" && !!e && !Array.isArray(e);
-}
-function Z(e, t) {
-	let n = Object.keys(e).sort(), r = [...t].sort();
-	return n.length === r.length && n.every((e, t) => e === r[t]);
-}
-function Q(e) {
-	return e === null || typeof e == "string" && e.length > 0;
-}
-function Ye(e) {
-	if (!X(e) || !Z(e, [
-		"schema_version",
-		"areas",
-		"devices",
-		"entities"
-	]) || e.schema_version !== 1 || !Array.isArray(e.areas) || !Array.isArray(e.devices) || !Array.isArray(e.entities)) throw Error("Invalid catalog response");
-	let t = [];
-	for (let n of e.areas) {
-		if (!X(n) || !Z(n, ["area_id", "name"]) || typeof n.area_id != "string" || n.area_id.length === 0 || typeof n.name != "string" || n.name.trim() === "") throw Error("Invalid area in catalog response");
-		t.push({
-			area_id: n.area_id,
-			name: n.name
-		});
-	}
-	let n = [];
-	for (let t of e.devices) {
-		if (!X(t) || !Z(t, [
-			"device_id",
-			"name",
-			"area_id"
-		]) || typeof t.device_id != "string" || t.device_id.length === 0 || typeof t.name != "string" || t.name.trim() === "" || !Q(t.area_id)) throw Error("Invalid device in catalog response");
-		n.push({
-			device_id: t.device_id,
-			name: t.name,
-			area_id: t.area_id
-		});
-	}
-	let r = [];
-	for (let t of e.entities) {
-		if (!X(t) || !Z(t, [
-			"entity_id",
-			"name",
-			"area_id",
-			"device_id",
-			"disabled"
-		]) || typeof t.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(t.entity_id) || typeof t.name != "string" || t.name.trim() === "" || !Q(t.area_id) || !Q(t.device_id) || typeof t.disabled != "boolean") throw Error("Invalid entity in catalog response");
-		r.push({
-			entity_id: t.entity_id,
-			name: t.name,
-			area_id: t.area_id,
-			device_id: t.device_id,
-			disabled: t.disabled
-		});
-	}
-	return {
-		schema_version: 1,
-		areas: t,
-		devices: n,
-		entities: r
-	};
-}
-async function Xe(e) {
-	return Ye(await e.callWS({ ...Je }));
-}
-//#endregion
-//#region src/panel/catalog-view.ts
-var Ze = class extends H {
-	static properties = {
-		hass: { attribute: !1 },
-		_viewState: { state: !0 },
-		_catalog: { state: !0 }
-	};
-	static styles = o`
-    :host { display: block; }
-    .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-    .refresh { border: 1px solid var(--divider-color, #d7e0e0); border-radius: 6px; padding: 8px 14px; background: transparent; color: var(--primary-text-color, #172126); cursor: pointer; }
-    .summary { color: var(--secondary-text-color, #526168); margin: 0 0 16px; }
-    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-    .catalog-card { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #d7e0e0); border-radius: 8px; padding: 16px; }
-    .catalog-card h2 { margin: 0 0 12px; font-size: 1rem; }
-    .catalog-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-    .catalog-item { border-top: 1px solid var(--divider-color, #d7e0e0); padding-top: 8px; }
-    .catalog-item strong, .catalog-item span { display: block; overflow-wrap: anywhere; }
-    .catalog-item span { color: var(--secondary-text-color, #526168); font-size: .82rem; margin-top: 3px; }
-    .disabled { color: var(--error-color, #b42318); }
-    .empty, .error { padding: 28px; text-align: center; }
-    .error button { margin-top: 12px; }
-  `;
-	_hasLoaded = !1;
-	_loadScheduled = !1;
-	constructor() {
-		super(), this._viewState = "loading";
-	}
-	connectedCallback() {
-		super.connectedCallback(), this._scheduleLoad();
-	}
-	updated() {
-		this._scheduleLoad();
-	}
-	render() {
-		if (this._viewState === "loading") return N`<div role="status" aria-busy="true">Loading Home Assistant catalog…</div>`;
-		if (this._viewState === "error") return N`<div class="error"><p>Could not load the Home Assistant catalog.</p><button class="refresh" type="button" @click=${this._loadCatalog}>Retry</button></div>`;
-		let e = this._catalog;
-		return e === void 0 || e.areas.length === 0 && e.devices.length === 0 && e.entities.length === 0 ? N`<div class="empty"><h2>No registry entries</h2><p>Home Assistant returned no areas, devices, or entities.</p></div>` : N`
-      <div class="toolbar"><button class="refresh" type="button" @click=${this._loadCatalog}>Refresh catalog</button></div>
-      <p class="summary">Read-only registry catalog. Current state and actions are not included.</p>
-      <div class="catalog-grid">
-        ${this._renderList("Areas", e.areas.map((e) => ({
-			primary: e.name,
-			secondary: e.area_id
-		})))}
-        ${this._renderList("Devices", e.devices.map((e) => ({
-			primary: e.name,
-			secondary: e.area_id ?? "No area"
-		})))}
-        ${this._renderList("Entities", e.entities.map((e) => ({
-			primary: e.name,
-			secondary: `${e.entity_id}${e.disabled ? " · Disabled" : ""}`,
-			disabled: e.disabled
-		})))}
-      </div>
-    `;
-	}
-	_renderList(e, t) {
-		return N`<section class="catalog-card" aria-labelledby=${`${e.toLowerCase()}-heading`}><h2 id=${`${e.toLowerCase()}-heading`}>${e} (${t.length})</h2><ul class="catalog-list">${t.map((e) => N`<li class="catalog-item"><strong class=${e.disabled ? "disabled" : F}>${e.primary}</strong><span>${e.secondary}</span></li>`)}</ul></section>`;
-	}
-	_scheduleLoad() {
-		this.hass === void 0 || this._hasLoaded || this._loadScheduled || (this._loadScheduled = !0, queueMicrotask(() => {
-			this._loadScheduled = !1, this._loadCatalog();
-		}));
-	}
-	_loadCatalog = async () => {
-		if (this.hass !== void 0) {
-			this._hasLoaded = !0, this._viewState = "loading";
-			try {
-				this._catalog = await Xe(this.hass), this._viewState = "ready";
-			} catch {
-				this._catalog = void 0, this._viewState = "error";
-			}
-		}
-	};
-}, Qe = "ai-orchestrator-panel", $ = [
+}, ot = "ai-orchestrator-panel", $ = [
 	{
 		id: "home",
 		label: "Home"
@@ -1865,12 +1968,12 @@ var Ze = class extends H {
 		id: "settings",
 		label: "Settings"
 	}
-], $e = {
+], st = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, et = {
+}, ct = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -1900,11 +2003,11 @@ var Ze = class extends H {
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function tt(e) {
+function lt(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
 	return $.find((e) => e.id === t)?.id;
 }
-var nt = class extends H {
+var ut = class extends V {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -1916,7 +2019,7 @@ var nt = class extends H {
 		_probeLoadState: { state: !0 },
 		_probeResult: { state: !0 }
 	};
-	static styles = Pe;
+	static styles = Ie;
 	_hasRequested = !1;
 	_requestSequence = 0;
 	constructor() {
@@ -1927,7 +2030,7 @@ var nt = class extends H {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = tt(this.route);
+			let e = lt(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
@@ -1935,7 +2038,7 @@ var nt = class extends H {
 		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus());
 	}
 	render() {
-		return N`
+		return M`
       <div class="app-frame ${this.narrow ? "narrow" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
@@ -1947,7 +2050,7 @@ var nt = class extends H {
     `;
 	}
 	_renderSidebar() {
-		return N`
+		return M`
       <aside class="sidebar">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">AI</span>
@@ -1958,11 +2061,11 @@ var nt = class extends H {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${$.map((e) => N`
+          ${$.map((e) => M`
               <button
                 class="nav-button"
                 type="button"
-                aria-current=${this._activeSection === e.id ? "page" : F}
+                aria-current=${this._activeSection === e.id ? "page" : P}
                 @click=${() => this._selectSection(e.id)}
               >
                 <span class="nav-marker" aria-hidden="true"></span>
@@ -1981,7 +2084,7 @@ var nt = class extends H {
 	}
 	_renderHome() {
 		let e = this._statusHeading();
-		return N`
+		return M`
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
@@ -2004,7 +2107,7 @@ var nt = class extends H {
           <h2 id="foundation-status">${e.title}</h2>
           <p class="hero-description">${e.detail}</p>
           ${this._renderStatusAction()}
-          ${this._loadState === "loading" ? N`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : F}
+          ${this._loadState === "loading" ? M`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : P}
         </div>
         <div class="connection-summary" aria-label="Connection summary">
           <p class="summary-label">Home Assistant</p>
@@ -2031,17 +2134,17 @@ var nt = class extends H {
     `;
 	}
 	_renderFeatureCard() {
-		return N`
+		return M`
       <section class="card" aria-labelledby="feature-status-heading">
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${U.map((e) => {
+          ${H.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
-			return N`
+			return M`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${$e[e]}</span>
+                  <span class="status-name">${st[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -2055,7 +2158,7 @@ var nt = class extends H {
     `;
 	}
 	_renderNextSteps() {
-		return N`
+		return M`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
         <p class="card-intro">Each capability opens only after its own verification gate.</p>
@@ -2078,8 +2181,8 @@ var nt = class extends H {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = et[e], n = $.find((t) => t.id === e)?.label ?? "Section";
-		return N`
+		let t = ct[e], n = $.find((t) => t.id === e)?.label ?? "Section";
+		return M`
       <header class="page-header">
         <div>
           <p class="eyebrow">${n}</p>
@@ -2102,7 +2205,7 @@ var nt = class extends H {
     `;
 	}
 	_renderWorkflowProbe() {
-		return N`
+		return M`
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>
@@ -2143,7 +2246,7 @@ var nt = class extends H {
     `;
 	}
 	_renderProviders() {
-		return N`
+		return M`
       <header class="page-header">
         <div>
           <p class="eyebrow">Providers</p>
@@ -2160,33 +2263,36 @@ var nt = class extends H {
     `;
 	}
 	_renderCatalog() {
-		return N`
+		return M`
       <header class="page-header">
         <div>
           <p class="eyebrow">Entities & Permissions</p>
-          <h1>Home Assistant catalog</h1>
-          <p class="page-intro">Browse registry identity and relationships only. Current state and actions remain outside this read-only catalog.</p>
+          <h1>Home Assistant registry catalogue</h1>
+          <p class="page-intro">
+            Browse current entity, device, and area metadata from Home Assistant. No state values
+            or attributes are included, and every entity begins with no AI access.
+          </p>
         </div>
-        <span class="privacy-badge">Read-only registry data</span>
+        <span class="privacy-badge">Read-only · AI access none</span>
       </header>
       <ai-orchestrator-catalog-view .hass=${this.hass}></ai-orchestrator-catalog-view>
     `;
 	}
 	_renderWorkflowProbeResult() {
-		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? N`
+		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? M`
         <strong>One trigger produced exactly one execution.</strong>
         <span>
           Runtime execution ${this._probeResult.execution_count}; listener registration
           ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
           called: no.
         </span>
-      ` : this._probeLoadState === "error" ? N`
+      ` : this._probeLoadState === "error" ? M`
         <strong>The lifecycle probe was not confirmed.</strong>
         <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
-      ` : this._probeLoadState === "loading" ? N`<span>Waiting for the bounded integration response.</span>` : N`<span>No lifecycle probe has run in this panel session.</span>`;
+      ` : this._probeLoadState === "loading" ? M`<span>Waiting for the bounded integration response.</span>` : M`<span>No lifecycle probe has run in this panel session.</span>`;
 	}
 	_renderStatusAction() {
-		return this._loadState === "loading" ? F : this._loadState === "ready" && this._status?.configured === !1 ? N`
+		return this._loadState === "loading" ? P : this._loadState === "ready" && this._status?.configured === !1 ? M`
         <div class="hero-actions">
           <button class="secondary-button" type="button" @click=${this._refreshStatus}>
             Check again
@@ -2196,11 +2302,11 @@ var nt = class extends H {
 			"denied",
 			"incompatible",
 			"error"
-		].includes(this._loadState) ? N`
+		].includes(this._loadState) ? M`
         <div class="hero-actions">
           <button class="primary-button" type="button" @click=${this._refreshStatus}>Retry status check</button>
         </div>
-      ` : F;
+      ` : P;
 	}
 	_statusHeading() {
 		return this._loadState === "loading" ? {
@@ -2261,12 +2367,12 @@ var nt = class extends H {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await Te(e);
+			let n = await De(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof W ? "incompatible" : Ee(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof U ? "incompatible" : Oe(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -2277,12 +2383,12 @@ var nt = class extends H {
 		}
 		this._probeLoadState = "loading", this._probeResult = void 0;
 		try {
-			this._probeResult = await Ne(e), this._probeLoadState = "ready";
+			this._probeResult = await Fe(e), this._probeLoadState = "ready";
 		} catch {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, rt = "ai-orchestrator-providers-view", it = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Qe, nt), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(rt, qe), customElements.get(it) === void 0 && customElements.define(it, Ze);
+}, dt = "ai-orchestrator-providers-view", ft = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(ot, ut), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(dt, Q), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(ft, Ge);
 //#endregion
-export { nt as AiOrchestratorPanel, Ze as CatalogView, Qe as PANEL_TAG, rt as PROVIDERS_VIEW_TAG, qe as ProvidersView };
+export { ut as AiOrchestratorPanel, ft as CATALOG_VIEW_TAG, Ge as CatalogView, ot as PANEL_TAG, dt as PROVIDERS_VIEW_TAG, Q as ProvidersView };

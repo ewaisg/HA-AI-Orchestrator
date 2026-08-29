@@ -1,28 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { type CatalogView } from "../src/entry";
-import { createRoutedFakeHass } from "./fixtures/fake-hass";
-
-const CATALOG = {
-  schema_version: 1,
-  areas: [{ area_id: "area-a", name: "Kitchen" }],
-  devices: [{ device_id: "device-a", name: "Kitchen device", area_id: "area-a" }],
-  entities: [
-    {
-      entity_id: "sensor.temperature",
-      name: "Temperature",
-      area_id: "area-a",
-      device_id: "device-a",
-      disabled: false,
-    },
-  ],
-};
+import { CATALOG_VIEW_TAG, type CatalogView } from "../src/entry";
+import { createFailingHass, createRoutedFakeHass } from "./fixtures/fake-hass";
+import { VALID_CATALOG } from "./catalog-client.browser.test";
 
 const mounted: CatalogView[] = [];
 
-async function mountView(response: unknown): Promise<CatalogView> {
-  const view = document.createElement("ai-orchestrator-catalog-view") as CatalogView;
-  view.hass = createRoutedFakeHass({ "ai_orchestrator/catalog": response });
+async function mountView(hass: CatalogView["hass"]): Promise<CatalogView> {
+  const view = document.createElement(CATALOG_VIEW_TAG) as CatalogView;
+  view.hass = hass;
   document.body.append(view);
   mounted.push(view);
   await view.updateComplete;
@@ -39,27 +25,58 @@ afterEach(() => {
   for (const view of mounted.splice(0)) view.remove();
 });
 
-describe("catalog view", () => {
-  it("renders registry identity and read-only boundaries", async () => {
-    const view = await mountView(CATALOG);
+describe("read-only registry catalogue view", () => {
+  it("renders live metadata with explicit zero AI access", async () => {
+    const requests: Record<string, unknown>[] = [];
+    const view = await mountView(
+      createRoutedFakeHass(
+        { "ai_orchestrator/catalog/list": VALID_CATALOG },
+        (message) => requests.push(message),
+      ),
+    );
 
-    expect(shadowText(view)).toContain("Areas (1)");
-    expect(shadowText(view)).toContain("Kitchen");
-    expect(shadowText(view)).toContain("Devices (1)");
-    expect(shadowText(view)).toContain("Entities (1)");
-    expect(shadowText(view)).toContain("Current state and actions are not included");
+    expect(requests).toEqual([{ type: "ai_orchestrator/catalog/list" }]);
+    expect(shadowText(view)).toContain("Kitchen Window");
+    expect(shadowText(view)).toContain("binary_sensor.kitchen_window");
+    expect(shadowText(view)).toContain("AI access: none");
+    expect(shadowText(view)).toContain("None");
   });
 
-  it("renders the empty registry state", async () => {
-    const view = await mountView({ schema_version: 1, areas: [], devices: [], entities: [] });
+  it("filters by live area and device metadata", async () => {
+    const view = await mountView(
+      createRoutedFakeHass({ "ai_orchestrator/catalog/list": VALID_CATALOG }),
+    );
+    const input = view.shadowRoot?.querySelector<HTMLInputElement>('input[type="search"]');
+    expect(input).not.toBeNull();
+    if (input === null || input === undefined) throw new Error("Search input missing");
 
-    expect(shadowText(view)).toContain("No registry entries");
+    input.value = "Kitchen window device";
+    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    await view.updateComplete;
+    expect(shadowText(view)).toContain("Kitchen Window");
+
+    input.value = "No match marker";
+    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+    await view.updateComplete;
+    expect(shadowText(view)).toContain("No entities match this search");
   });
 
   it("fails closed without rendering malformed response content", async () => {
-    const view = await mountView({ schema_version: 1, areas: [], devices: [], entities: [], marker: "secret" });
+    const marker = "private-state-must-not-render";
+    const view = await mountView(
+      createRoutedFakeHass({
+        "ai_orchestrator/catalog/list": { ...VALID_CATALOG, raw_state: marker },
+      }),
+    );
+    expect(shadowText(view)).toContain("catalogue could not be loaded");
+    expect(shadowText(view)).not.toContain(marker);
+  });
 
-    expect(shadowText(view)).toContain("Could not load the Home Assistant catalog");
-    expect(shadowText(view)).not.toContain("secret");
+  it("offers a bounded retry after transport failure", async () => {
+    const marker = "transport-secret-must-not-render";
+    const view = await mountView(createFailingHass(new Error(marker)));
+    expect(shadowText(view)).toContain("catalogue could not be loaded");
+    expect(shadowText(view)).not.toContain(marker);
+    expect(view.shadowRoot?.querySelector("button")?.textContent).toContain("Retry");
   });
 });

@@ -18,7 +18,8 @@ const PROVIDER_LIST = Object.freeze({
       provider_type: "lm_studio",
       display_name: "LM Studio",
       title: "Local LM Studio",
-      health: "healthy",
+      health: "not_tested",
+      last_tested_at: null,
     },
   ],
 });
@@ -60,13 +61,14 @@ describe("provider setup and connection-test view", () => {
     expect(link?.textContent).toContain("Add provider connection");
   });
 
-  it("renders only bounded provider metadata and an explicit health label", async () => {
+  it("renders an untested provider without claiming healthy", async () => {
     const view = await mountView(
       createRoutedFakeHass({ "ai_orchestrator/providers/list": PROVIDER_LIST }),
     );
 
     expect(shadowText(view)).toContain("Local LM Studio");
-    expect(shadowText(view)).toContain("Healthy");
+    expect(shadowText(view)).toContain("Not tested");
+    expect(shadowText(view)).not.toContain("Healthy");
     expect(shadowText(view)).toContain("Test connection");
     expect(shadowText(view)).not.toContain(CONNECTION_ID);
   });
@@ -82,6 +84,7 @@ describe("provider setup and connection-test view", () => {
             connection_id: CONNECTION_ID,
             health: "healthy",
             error_code: null,
+            last_tested_at: "2026-08-28T18:00:00+00:00",
           },
         },
         (message) => requests.push(message),
@@ -109,6 +112,7 @@ describe("provider setup and connection-test view", () => {
           connection_id: CONNECTION_ID,
           health: "authentication_required",
           error_code: "authentication",
+          last_tested_at: "2026-08-28T18:01:00+00:00",
         },
       }),
     );

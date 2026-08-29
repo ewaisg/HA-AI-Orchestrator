@@ -12,6 +12,15 @@ if TYPE_CHECKING:
     from .provider_entry import ProviderEntryAdapter
 
 
+@dataclass(frozen=True, slots=True)
+class ProviderTestStatus:
+    """Last explicit provider test completed in this runtime."""
+
+    health: str
+    error_code: str | None
+    tested_at: str
+
+
 @dataclass(slots=True)
 class AIOrchestratorRuntime:
     """Track resources shared by every loaded foundation entry."""
@@ -22,6 +31,7 @@ class AIOrchestratorRuntime:
         default_factory=dict
     )
     provider_test_in_progress_connection_ids: set[str] = field(default_factory=set)
+    provider_test_statuses: dict[str, ProviderTestStatus] = field(default_factory=dict)
     owns_panel: bool = False
     workflow_probe_unsubscribe: Callable[[], None] | None = None
     workflow_probe_execution_count: int = 0
