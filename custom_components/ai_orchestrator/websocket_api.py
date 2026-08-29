@@ -187,6 +187,7 @@ async def websocket_provider_test(
     runtime = async_get_runtime(hass)
     connection_id = msg[CONF_CONNECTION_ID]
     loaded: LoadedProviderConnection | None = None
+    loaded_entry = None
     for entry in hass.config_entries.async_entries(DOMAIN):
         if entry.entry_id not in runtime.loaded_provider_entry_ids:
             continue
@@ -198,8 +199,9 @@ async def websocket_provider_test(
             and candidate.connection_id == connection_id
         ):
             loaded = candidate
+            loaded_entry = entry
             break
-    if loaded is None:
+    if loaded is None or loaded_entry is None:
         connection.send_error(
             msg["id"], PROVIDER_NOT_FOUND, "Provider connection not found."
         )
@@ -217,7 +219,13 @@ async def websocket_provider_test(
     try:
         try:
             validation = await loaded.provider.validate_connection()
-            if not isinstance(validation, ConnectionValidationResult):
+            if (
+                loaded_entry.entry_id not in runtime.loaded_provider_entry_ids
+                or getattr(loaded_entry, "runtime_data", None) is not loaded
+                or type(validation) is not ConnectionValidationResult
+                or validation.reachable is not True
+                or validation.authenticated is not True
+            ):
                 connection.send_error(
                     msg["id"],
                     PROVIDER_TEST_FAILED,
@@ -241,14 +249,31 @@ async def websocket_provider_test(
                 },
             )
         except ProviderError as err:
+            if (
+                loaded_entry.entry_id not in runtime.loaded_provider_entry_ids
+                or getattr(loaded_entry, "runtime_data", None) is not loaded
+            ):
+                connection.send_error(
+                    msg["id"],
+                    PROVIDER_TEST_FAILED,
+                    "Provider connection test did not complete.",
+                )
+                return
             tested_at = datetime.now(UTC).isoformat()
             code = safe_provider_error_code(err)
+            if code is None:
+                connection.send_error(
+                    msg["id"],
+                    PROVIDER_TEST_FAILED,
+                    "Provider connection test did not complete.",
+                )
+                return
             health = (
                 PROVIDER_HEALTH_AUTHENTICATION_REQUIRED
-                if code is not None and code.value == "authentication"
+                if code.value == "authentication"
                 else PROVIDER_HEALTH_UNAVAILABLE
             )
-            error_code = code.value if code else "unknown"
+            error_code = code.value
             runtime.provider_test_statuses[connection_id] = ProviderTestStatus(
                 health=health,
                 error_code=error_code,

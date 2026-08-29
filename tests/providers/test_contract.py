@@ -272,6 +272,21 @@ def test_connection_failure_must_use_normalized_error_channel() -> None:
         ConnectionValidationResult(reachable=True, authenticated=False)
 
 
+@pytest.mark.parametrize(
+    ("reachable", "authenticated"),
+    [(1, True), (True, "yes")],
+)
+def test_connection_validation_requires_exact_booleans(
+    reachable: object,
+    authenticated: object,
+) -> None:
+    with pytest.raises(TypeError, match="must use bool"):
+        ConnectionValidationResult(
+            reachable=reachable,  # type: ignore[arg-type]
+            authenticated=authenticated,  # type: ignore[arg-type]
+        )
+
+
 def test_contract_rejects_adapter_specific_string_enums() -> None:
     with pytest.raises(TypeError, match="must use ErrorCode"):
         NormalizedError(

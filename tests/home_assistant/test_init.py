@@ -366,12 +366,10 @@ async def test_provider_entry_setup_and_unload_are_isolated_from_foundation(
         error_code=None,
         tested_at="2026-08-29T16:00:00+00:00",
     )
-    runtime.provider_test_in_progress_connection_ids.add(connection_id)
 
     assert await async_unload_entry(hass, entry)
     assert runtime.loaded_provider_entry_ids == set()
     assert connection_id not in runtime.provider_test_statuses
-    assert connection_id not in runtime.provider_test_in_progress_connection_ids
     assert getattr(entry, "runtime_data", None) is None
 
     runtime.provider_test_statuses[connection_id] = ProviderTestStatus(

@@ -103,9 +103,6 @@ async def async_unload_entry(
         loaded = getattr(entry, "runtime_data", None)
         if isinstance(loaded, LoadedProviderConnection):
             runtime.provider_test_statuses.pop(loaded.connection_id, None)
-            runtime.provider_test_in_progress_connection_ids.discard(
-                loaded.connection_id
-            )
         runtime.loaded_provider_entry_ids.discard(entry.entry_id)
         entry.runtime_data = None
         return True

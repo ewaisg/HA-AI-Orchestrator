@@ -1,5 +1,6 @@
 """Tests for the bounded AI Orchestrator WebSocket API."""
 
+import asyncio
 import json
 from datetime import datetime
 from unittest.mock import AsyncMock, patch
@@ -10,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.typing import WebSocketGenerator
 
-from custom_components.ai_orchestrator import async_setup_entry
+from custom_components.ai_orchestrator import async_setup_entry, async_unload_entry
 from custom_components.ai_orchestrator.const import (
     DOMAIN,
     FOUNDATION_ENTRY_UNIQUE_ID,
@@ -27,6 +28,7 @@ from custom_components.ai_orchestrator.provider_entry import (
 )
 from custom_components.ai_orchestrator.providers.contract import (
     SAFE_ERROR_MESSAGES,
+    ConnectionValidationResult,
     ErrorCode,
     NormalizedError,
     ProviderError,
@@ -48,6 +50,7 @@ from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
     SYNTHETIC_PROVIDER_TYPE,
     SyntheticProviderEntryAdapter,
+    forged_provider_error,
 )
 
 PROVIDER_CONNECTION_ID = "00000000-0000-4000-8000-000000000030"
@@ -425,6 +428,13 @@ async def test_admin_provider_test_normalizes_failures_without_exception_egress(
     [
         (None, False),
         (RuntimeError("raw-provider-canary-must-not-leak"), True),
+        (
+            forged_provider_error(
+                ErrorCode.TIMEOUT,
+                "raw-provider-canary-must-not-leak",
+            ),
+            True,
+        ),
     ],
 )
 async def test_provider_test_rejects_unobserved_adapter_outcomes_without_health_change(
@@ -481,6 +491,70 @@ async def test_provider_test_rejects_unobserved_adapter_outcomes_without_health_
     listed = list_response["result"]["providers"][0]
     assert listed["health"] == "healthy"
     assert listed["last_tested_at"] == prior_status.tested_at
+
+
+async def test_provider_test_cannot_complete_or_lose_ownership_across_reload(
+    hass: HomeAssistant,
+    hass_ws_client: WebSocketGenerator,
+) -> None:
+    """A late old test cannot write status or release a newer request marker."""
+    entry = await _setup_loaded_provider(hass)
+    runtime = async_get_runtime(hass)
+    async_register_websocket_commands(hass)
+    old_client = await hass_ws_client(hass)
+    new_client = await hass_ws_client(hass)
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    async def blocked_validation(*_args: object, **_kwargs: object) -> object:
+        started.set()
+        await release.wait()
+        return ConnectionValidationResult(reachable=True, authenticated=True)
+
+    with patch.object(
+        type(entry.runtime_data.provider),
+        "validate_connection",
+        new=blocked_validation,
+    ):
+        await old_client.send_json_auto_id(
+            {
+                "type": PROVIDER_TEST_WEBSOCKET_TYPE,
+                CONF_CONNECTION_ID: PROVIDER_CONNECTION_ID,
+            }
+        )
+        await asyncio.wait_for(started.wait(), timeout=1)
+
+    assert PROVIDER_CONNECTION_ID in runtime.provider_test_in_progress_connection_ids
+    assert await async_unload_entry(hass, entry)
+    assert await async_setup_entry(hass, entry)
+    assert PROVIDER_CONNECTION_ID in runtime.provider_test_in_progress_connection_ids
+
+    await new_client.send_json_auto_id(
+        {
+            "type": PROVIDER_TEST_WEBSOCKET_TYPE,
+            CONF_CONNECTION_ID: PROVIDER_CONNECTION_ID,
+        }
+    )
+    duplicate_response = await new_client.receive_json()
+    assert duplicate_response["success"] is False
+    assert duplicate_response["error"]["code"] == PROVIDER_TEST_IN_PROGRESS
+
+    release.set()
+    old_response = await old_client.receive_json()
+    assert old_response["success"] is False
+    assert old_response["error"]["code"] == PROVIDER_TEST_FAILED
+    assert PROVIDER_CONNECTION_ID not in runtime.provider_test_statuses
+    assert runtime.provider_test_in_progress_connection_ids == set()
+
+    await new_client.send_json_auto_id(
+        {
+            "type": PROVIDER_TEST_WEBSOCKET_TYPE,
+            CONF_CONNECTION_ID: PROVIDER_CONNECTION_ID,
+        }
+    )
+    current_response = await new_client.receive_json()
+    assert current_response["success"] is True
+    assert current_response["result"]["health"] == "healthy"
 
 
 async def test_provider_test_rejects_unknown_connection_and_extra_fields(

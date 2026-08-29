@@ -248,6 +248,8 @@ class ConnectionValidationResult:
 
     def __post_init__(self) -> None:
         """Require failures to use the normalized error channel."""
+        _require_instance(self.reachable, bool, "connection reachability")
+        _require_instance(self.authenticated, bool, "connection authentication")
         if not self.reachable or not self.authenticated:
             raise ValueError(
                 "Connection validation failures must use a normalized provider error"
