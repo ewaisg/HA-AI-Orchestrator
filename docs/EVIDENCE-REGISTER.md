@@ -16,6 +16,7 @@ This register prevents environment details from being guessed or silently copied
 | PRJ-008 | The project owner manually installed the Phase 0 bundle and reported the sidebar panel, default Home section, and placeholder sections visible | `docs/evidence/2026-08-23-fnd-015-live-install.md` | 2026-08-23 |
 | PRJ-009 | On the named Core 2026.8.3 target, the current AI Orchestrator integration management route is `/config/integrations/integration/ai_orchestrator`; the read-only live UI inspection showed the existing entry and an `Add hub` control | `docs/evidence/2026-08-25-loc-004-provider-ui.md`; live authenticated DOM inspection with no form submission | 2026-08-25 |
 | PRJ-010 | Docker Desktop 4.75.0 could not start its Linux engine for the 2026-08-28 working-tree gate because its optional inference manager failed while removing the `dockerInference` listener socket; no Docker reset or settings mutation was authorized or performed | Bounded Docker startup attempts and local Docker backend log; `docs/evidence/2026-08-28-loc-005-read-only-catalog.md` | 2026-08-28 |
+| PRJ-011 | The Docker Linux engine responded again without a project-side settings mutation, allowing exact Git-archive candidate `989917fd4229f528c142a9ecebeeea3934c394da` to complete its clean Linux gate | `docker version` output and exact Git-archive test command; LOC-003/LOC-004/LOC-005 `-002` manifests | 2026-08-29 |
 
 ## Live Home Assistant verification
 

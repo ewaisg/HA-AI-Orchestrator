@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-005-REGISTRY-CATALOG-002",
+  "task_id": "LOC-005",
+  "kind": "automated_test",
+  "captured_at": "2026-08-29T16:38:05Z",
+  "source_revision": {"state": "committed", "git_commit": "989917fd4229f528c142a9ecebeeea3934c394da", "dirty": false},
+  "traceability": {
+    "requirements": ["LOC-005", "REQ-CAP-001"],
+    "decisions": ["DEC-003", "DEC-005", "DEC-010", "DEC-023"],
+    "controls": ["CTRL-AUTH-001", "CTRL-TOOL-001"],
+    "tests": ["TEST-AUTHORIZATION-MATRIX", "TEST-NO-HOME-ASSISTANT-ACTION", "TEST-REGISTRY-CATALOG-CONTRACT", "TEST-REGISTRY-CATALOG-UI", "LINUX_FULL_SUITE", "FOCUSED_CANDIDATE", "SECURITY_TRACEABILITY", "PURE_SUITE", "FRONTEND_CHECK", "RUFF_FORMAT", "RUFF_LINT", "CANARY_SCAN", "GIT_DIFF_CHECK"]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {"name": "python", "status": "verified", "version": "3.14.5"},
+      {"name": "home_assistant", "status": "verified", "version": "2026.8.3"},
+      {"name": "pytest_homeassistant_custom_component", "status": "verified", "version": "0.13.357"},
+      {"name": "node", "status": "verified", "version": "24.16.0"},
+      {"name": "npm", "status": "verified", "version": "12.0.2"}
+    ]
+  },
+  "checks": [
+    {"id": "LINUX_FULL_SUITE", "command_argv": ["git", "archive", "989917fd4229f528c142a9ecebeeea3934c394da", "pipe", "docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider"], "exit_code": 0, "result": "passed"},
+    {"id": "FOCUSED_CANDIDATE", "command_argv": ["docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider tests/home_assistant/test_websocket_api.py tests/home_assistant/test_init.py tests/home_assistant/test_catalog.py tests/providers/test_contract.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "SECURITY_TRACEABILITY", "command_argv": ["docker", "python:3.14-slim", "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "PURE_SUITE", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/run_pure_tests.py"], "exit_code": 0, "result": "passed"},
+    {"id": "FRONTEND_CHECK", "command_argv": ["npm", "run", "check"], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_FORMAT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff format --check ."], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_LINT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff check ."], "exit_code": 0, "result": "passed"},
+    {"id": "CANARY_SCAN", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/canary_scan.py"], "exit_code": 0, "result": "passed"},
+    {"id": "GIT_DIFF_CHECK", "command_argv": ["git", "diff-tree", "--check", "989917fd4229f528c142a9ecebeeea3934c394da^", "989917fd4229f528c142a9ecebeeea3934c394da"], "exit_code": 0, "result": "passed"}
+  ],
+  "artifacts": [
+    {"name": "catalog-builder", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/catalog.py", "sha256": "b89edce56f5f780719a904fa2bcea71dbb8a5a611c9023b0b9e67a63faf5e860", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-websocket-api", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/websocket_api.py", "sha256": "8c3a10dc670113c2616b3ae7b6436ff37cd050844265c670988fa9cfb2daf269", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-bundle", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js", "sha256": "18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-frontend-client", "location_type": "repository", "repository_path": "frontend/src/api/catalog-client.ts", "sha256": "8695d5d3fe971c0291a316fef38f522085f192307ff5449965963fb497987533", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-frontend-view", "location_type": "repository", "repository_path": "frontend/src/panel/catalog-view.ts", "sha256": "139acde0e968f02efd07ebf6cf57458a6d4c7a42a6e9369f329e800d5859e35e", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-backend-tests", "location_type": "repository", "repository_path": "tests/home_assistant/test_catalog.py", "sha256": "6142914ecafad5b5f6cd14fe0e6aa4837cdf9590e3f54918054ebb5b1e1773d0", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-client-tests", "location_type": "repository", "repository_path": "frontend/test/catalog-client.browser.test.ts", "sha256": "387c91b77c2830ae291b8c76ca95b24eb03ca37db04c196f7ac399aa9ac7b227", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "catalog-view-tests", "location_type": "repository", "repository_path": "frontend/test/catalog-view.browser.test.ts", "sha256": "4e4597abfdfe9df4420b6fe157e3652d33e2f6070b45e748d38d672d6448b276", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"}
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {"id": "LIVE_REGISTRY_CATALOG", "description": "No redacted live inventory, desktop/Android rendering, rename/removal/disable/unavailable, area/device relationship change, refresh/reload, or scoped-log result has been recorded for the changed candidate.", "blocks": ["LOC-005"]}
+  ],
+  "residuals": [
+    {"id": "CATALOG_READ_ONLY", "description": "The catalog exposes bounded registry identity and relationships only; current state values, attributes, Home Assistant actions, and AI access are intentionally absent.", "blocks": []}
+  ],
+  "reviews": [
+    {"role": "workflow_safety", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"},
+    {"role": "test_release", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"}
+  ]
+}

@@ -27,12 +27,12 @@ LOC-005 replaces the empty **Entities & Permissions** tab with an administrator-
 | Canary scan | Passed with no findings |
 | Working-tree diff check | Passed; line-ending notices only |
 
-## Incomplete evidence and next gate
+## Exact candidate verification and next gate
 
-The Home Assistant component tests were authored against the exact pinned Core registry APIs, but they have not yet completed in clean Linux for this working tree. Windows cannot collect the Home Assistant plugin because `homeassistant.runner` imports `fcntl`. Bounded Docker Desktop 4.75.0 startup attempts failed before the Linux engine started: the backend log reports that the optional inference manager could not remove its `dockerInference` listener socket. No Docker settings change, reset, or file removal was authorized or performed. This is recorded as an incomplete test, not a pass.
+The Docker Linux engine later responded without a project-side settings mutation. Exact Git-archive candidate `989917fd4229f528c142a9ecebeeea3934c394da` passed 340 full tests, 98 focused Home Assistant/provider-contract/catalog tests, 30 security/evidence/traceability tests, 231 pure tests, Ruff format/lint, and canary. The frontend passed 95 browser tests plus lint, typecheck, build, sync, and byte identity. Independent workflow/safety and test/release reviewers approved the exact candidate for synthetic/pre-live acceptance and found no catalog action, state-value, provider-secret, or authorization regression.
 
-After clean-Linux verification and a committed candidate, independent workflow/safety and test/release reviews are required. Live acceptance must then record a redacted inventory sample on Core `2026.8.3`, desktop and Companion App Android rendering, a real entity rename or approved reversible equivalent, removal/missing behavior, refresh, reload, and scoped logs. No household entity or device names belong in committed evidence.
+Live acceptance must record a redacted inventory sample on Core `2026.8.3`, desktop and Companion App Android rendering, a real entity rename or approved reversible equivalent, removal/missing, disabled/unavailable, area/device relationship changes, refresh, reload, and scoped logs. No household entity or device names belong in committed evidence.
 
 ## Acceptance status
 
-`IN PROGRESS`. The feature is implemented in the working tree and its Windows-safe gates pass. It is not accepted, published, installed, or live-verified.
+`REVIEW — LIVE ACCEPTANCE REQUIRED`. The exact code candidate has both independent synthetic/pre-live approvals. It is not `DONE`, installed, or live-verified. Manifest: `docs/evidence/manifests/LOC-005/LOC-005-REGISTRY-CATALOG-002.json`.

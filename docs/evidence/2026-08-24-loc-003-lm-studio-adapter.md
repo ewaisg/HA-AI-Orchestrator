@@ -61,4 +61,10 @@ Independent workflow/safety review approved exact artifact `53fe6781930f9264daf9
 
 A later workflow/safety re-review rejected the published artifact despite its earlier approvals. It proved that a schema-valid historical tool call containing a nonfinite Python float was serialized with the JSON encoder's permissive default before the complete body validator ran. The resulting argument string contained noncanonical `Infinity`; the body validator saw only a string and did not reject it.
 
-The rebased candidate validates converted historical arguments before serialization, serializes with `allow_nan=False`, and maps validation or serialization failure to the bounded `unsupported` error before any session request. A regression constructs that exact continuation and asserts zero captured requests. The focused adapter suite passes 61 tests; the combined Windows-safe pure suite passes 229 tests. The earlier live results remain valid evidence for the earlier installed artifact, but they do not approve the changed candidate. Clean-Linux verification and independent re-review remain required.
+The rebased candidate validates converted historical arguments before serialization, serializes with `allow_nan=False`, and maps validation or serialization failure to the bounded `unsupported` error before any session request. A regression constructs that exact continuation and asserts zero captured requests. The earlier live results remain valid evidence for the earlier installed artifact, but they do not approve changed code.
+
+## 2026-08-29 accepted pre-live candidate
+
+Exact code candidate `989917fd4229f528c142a9ecebeeea3934c394da` passed the shared clean Git-archive Linux gate: 340 full tests, 98 focused Home Assistant/provider-contract/catalog tests, 30 security/evidence/traceability tests, 231 pure tests, Ruff format/lint, and canary. The frontend gate passed 95 browser tests and byte identity. Independent workflow/safety and test/release reviewers approved the exact candidate for synthetic/pre-live acceptance and found no LOC-003 regression.
+
+Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL`. Updated-candidate live provider/authentication validation, reload/unload/restart, safe timeout/cancellation where reproducible, foundation health, and scoped logs remain. Manifest: `docs/evidence/manifests/LOC-003/LOC-003-LM-STUDIO-ADAPTER-002.json`.

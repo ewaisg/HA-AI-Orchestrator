@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-004-PROVIDER-UI-002",
+  "task_id": "LOC-004",
+  "kind": "automated_test",
+  "captured_at": "2026-08-29T16:38:05Z",
+  "source_revision": {"state": "committed", "git_commit": "989917fd4229f528c142a9ecebeeea3934c394da", "dirty": false},
+  "traceability": {
+    "requirements": ["LOC-004", "REQ-CAP-001", "REQ-CON-003"],
+    "decisions": ["DEC-001", "DEC-005", "DEC-010", "DEC-020", "DEC-023"],
+    "controls": ["CTRL-AUTH-001", "CTRL-SECRET-001", "CTRL-PROVIDER-001", "CTRL-RATE-001"],
+    "tests": ["TEST-AUTHORIZATION-MATRIX", "TEST-NO-BROWSER-PROVIDER", "TEST-SECRET-EGRESS", "TEST-STORM-CONCURRENCY", "LINUX_FULL_SUITE", "FOCUSED_CANDIDATE", "SECURITY_TRACEABILITY", "PURE_SUITE", "FRONTEND_CHECK", "RUFF_FORMAT", "RUFF_LINT", "CANARY_SCAN", "GIT_DIFF_CHECK"]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {"name": "python", "status": "verified", "version": "3.14.5"},
+      {"name": "home_assistant", "status": "verified", "version": "2026.8.3"},
+      {"name": "pytest_homeassistant_custom_component", "status": "verified", "version": "0.13.357"},
+      {"name": "node", "status": "verified", "version": "24.16.0"},
+      {"name": "npm", "status": "verified", "version": "12.0.2"}
+    ]
+  },
+  "checks": [
+    {"id": "LINUX_FULL_SUITE", "command_argv": ["git", "archive", "989917fd4229f528c142a9ecebeeea3934c394da", "pipe", "docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider"], "exit_code": 0, "result": "passed"},
+    {"id": "FOCUSED_CANDIDATE", "command_argv": ["docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider tests/home_assistant/test_websocket_api.py tests/home_assistant/test_init.py tests/home_assistant/test_catalog.py tests/providers/test_contract.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "SECURITY_TRACEABILITY", "command_argv": ["docker", "python:3.14-slim", "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "PURE_SUITE", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/run_pure_tests.py"], "exit_code": 0, "result": "passed"},
+    {"id": "FRONTEND_CHECK", "command_argv": ["npm", "run", "check"], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_FORMAT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff format --check ."], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_LINT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff check ."], "exit_code": 0, "result": "passed"},
+    {"id": "CANARY_SCAN", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/canary_scan.py"], "exit_code": 0, "result": "passed"},
+    {"id": "GIT_DIFF_CHECK", "command_argv": ["git", "diff-tree", "--check", "989917fd4229f528c142a9ecebeeea3934c394da^", "989917fd4229f528c142a9ecebeeea3934c394da"], "exit_code": 0, "result": "passed"}
+  ],
+  "artifacts": [
+    {"name": "integration-lifecycle", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/__init__.py", "sha256": "b64361458ad8241e96b70a11037c400c839decf8b814d32a8792c3b062ed83fe", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-test-runtime", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/runtime.py", "sha256": "5aef416e617775b568e432ca8e29607b07dd342b788b576216de93d6150ed59f", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-websocket-api", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/websocket_api.py", "sha256": "8c3a10dc670113c2616b3ae7b6436ff37cd050844265c670988fa9cfb2daf269", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "bundled-provider-panel", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js", "sha256": "18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-frontend-client", "location_type": "repository", "repository_path": "frontend/src/api/provider-client.ts", "sha256": "7dfc853945457754a5a77cc8e0ce070bd7b1b7ce2ee11090b45b79c123d4f962", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-frontend-view", "location_type": "repository", "repository_path": "frontend/src/panel/providers-view.ts", "sha256": "7ce115568785ec045f05723f38a42919ca14208cd0c4c188a23bfa971e139458", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-websocket-tests", "location_type": "repository", "repository_path": "tests/home_assistant/test_websocket_api.py", "sha256": "64a8a2c7293428c33c44eb20067b06c0b96baa7caa73e47c4cc07d3e41dbf441", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-lifecycle-tests", "location_type": "repository", "repository_path": "tests/home_assistant/test_init.py", "sha256": "4b577242e2eadb72ab720047dcb9fe78a14deb0c1fc1f82aedd18ce25129b8aa", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-view-tests", "location_type": "repository", "repository_path": "frontend/test/providers-view.browser.test.ts", "sha256": "1ea07ba48df9b9a0b28f52b44858cfbd7708af4c3cb164ed2c9b8456e0ff9ea1", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"}
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {"id": "LIVE_UPDATED_PROVIDER_UI_ACCEPTANCE", "description": "The changed candidate still requires redacted live runtime-reset and timestamp semantics, duplicate-click and transport behavior, desktop and Companion App Android rendering, reload/restart, and scoped-log evidence on Core 2026.8.3.", "blocks": ["LOC-004"]}
+  ],
+  "residuals": [
+    {"id": "NO_BROWSER_PROVIDER_TRANSPORT", "description": "The browser requests only authenticated Home Assistant commands; provider transport and credentials remain backend-only.", "blocks": []}
+  ],
+  "reviews": [
+    {"role": "workflow_safety", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"},
+    {"role": "test_release", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"}
+  ]
+}

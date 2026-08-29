@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "evidence_id": "LOC-003-LM-STUDIO-ADAPTER-002",
+  "task_id": "LOC-003",
+  "kind": "automated_test",
+  "captured_at": "2026-08-29T16:38:05Z",
+  "source_revision": {
+    "state": "committed",
+    "git_commit": "989917fd4229f528c142a9ecebeeea3934c394da",
+    "dirty": false
+  },
+  "traceability": {
+    "requirements": ["LOC-003", "REQ-CAP-001", "REQ-CON-003"],
+    "decisions": ["DEC-003", "DEC-005", "DEC-010", "DEC-020", "DEC-023"],
+    "controls": ["CTRL-SECRET-001", "CTRL-ENDPOINT-001", "CTRL-PROVIDER-001", "CTRL-TOOL-001"],
+    "tests": ["TEST-PROVIDER-CONTRACT", "TEST-SECRET-EGRESS", "TEST-ENDPOINT-SSRF", "TEST-NO-HOME-ASSISTANT-ACTION", "LINUX_FULL_SUITE", "FOCUSED_CANDIDATE", "SECURITY_TRACEABILITY", "PURE_SUITE", "RUFF_FORMAT", "RUFF_LINT", "CANARY_SCAN", "FRONTEND_CHECK", "GIT_DIFF_CHECK"]
+  },
+  "environment": {
+    "data_mode": "synthetic",
+    "components": [
+      {"name": "python", "status": "verified", "version": "3.14.5"},
+      {"name": "home_assistant", "status": "verified", "version": "2026.8.3"},
+      {"name": "pytest_homeassistant_custom_component", "status": "verified", "version": "0.13.357"},
+      {"name": "node", "status": "verified", "version": "24.16.0"},
+      {"name": "npm", "status": "verified", "version": "12.0.2"}
+    ]
+  },
+  "checks": [
+    {"id": "LINUX_FULL_SUITE", "command_argv": ["git", "archive", "989917fd4229f528c142a9ecebeeea3934c394da", "pipe", "docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider"], "exit_code": 0, "result": "passed"},
+    {"id": "FOCUSED_CANDIDATE", "command_argv": ["docker", "python:3.14-slim", "uv run pytest -p no:cacheprovider tests/home_assistant/test_websocket_api.py tests/home_assistant/test_init.py tests/home_assistant/test_catalog.py tests/providers/test_contract.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "SECURITY_TRACEABILITY", "command_argv": ["docker", "python:3.14-slim", "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run pytest -p pytest_asyncio.plugin tests/security tests/quality/test_evidence_schema.py tests/quality/test_traceability.py -q"], "exit_code": 0, "result": "passed"},
+    {"id": "PURE_SUITE", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/run_pure_tests.py"], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_FORMAT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff format --check ."], "exit_code": 0, "result": "passed"},
+    {"id": "RUFF_LINT", "command_argv": ["docker", "python:3.14-slim", "uv run ruff check ."], "exit_code": 0, "result": "passed"},
+    {"id": "CANARY_SCAN", "command_argv": ["docker", "python:3.14-slim", "uv run python scripts/canary_scan.py"], "exit_code": 0, "result": "passed"},
+    {"id": "FRONTEND_CHECK", "command_argv": ["npm", "run", "check"], "exit_code": 0, "result": "passed"},
+    {"id": "GIT_DIFF_CHECK", "command_argv": ["git", "diff-tree", "--check", "989917fd4229f528c142a9ecebeeea3934c394da^", "989917fd4229f528c142a9ecebeeea3934c394da"], "exit_code": 0, "result": "passed"}
+  ],
+  "artifacts": [
+    {"name": "provider-contract", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/providers/contract.py", "sha256": "9ccd284cd186ccd3a3920847f053e15675b796d9902294944bbbed348acfbeef", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "lm-studio-adapter", "location_type": "repository", "repository_path": "custom_components/ai_orchestrator/providers/lm_studio.py", "sha256": "99e2b822d344849d956b7cc0d5b960717f3b5bf4d4bfe900f984f96b930f98f8", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "lm-studio-tests", "location_type": "repository", "repository_path": "tests/providers/test_lm_studio.py", "sha256": "ab8f8ec348e71ea19702b372c0b2ddaa57ddc75f44f9499b9fe632dafa4dbdd2", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"},
+    {"name": "provider-contract-tests", "location_type": "repository", "repository_path": "tests/providers/test_contract.py", "sha256": "e383fff57471fd82c4d018665485537c2df6ea2815ee20b6147dceddf4d0679c", "classification": "synthetic", "contains_live_data": false, "redaction_status": "reviewed"}
+  ],
+  "result": "incomplete",
+  "unknowns": [
+    {"id": "LIVE_UPDATED_PROVIDER_ACCEPTANCE", "description": "The changed candidate still requires redacted live provider/authentication, reload/unload/restart, bounded timeout or cancellation where reproducible, foundation health, and scoped-log evidence on Core 2026.8.3.", "blocks": ["LOC-003"]}
+  ],
+  "residuals": [
+    {"id": "NO_TOOL_EXECUTION", "description": "Provider tool calls remain normalized data only; this artifact contains no Home Assistant action executor.", "blocks": []}
+  ],
+  "reviews": [
+    {"role": "workflow_safety", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"},
+    {"role": "test_release", "status": "approved", "reviewed_at": "2026-08-29T16:41:58Z"}
+  ]
+}
