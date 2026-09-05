@@ -362,6 +362,43 @@ async def test_generate_normalizes_text_and_usage() -> None:
     assert cast_json(sent["json"])["stream"] is False
 
 
+@pytest.mark.parametrize("role", [MessageRole.USER, MessageRole.ASSISTANT])
+async def test_generate_never_sends_configured_token_in_message_content(role) -> None:
+    provider, session = provider_with()
+    request = ProviderRequest(
+        messages=(Message(role=role, content=f"Echo {API_TOKEN}"),)
+    )
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(request)
+    assert error_code(caught.value) is ErrorCode.UNSUPPORTED
+    assert session.requests == []
+    assert API_TOKEN not in str(caught.value)
+
+
+async def test_generate_never_returns_configured_token_in_text() -> None:
+    provider, _session = provider_with(
+        json_response(
+            {
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {
+                            "role": "assistant",
+                            "content": f"Echo {API_TOKEN}",
+                        },
+                    }
+                ],
+            }
+        )
+    )
+    with pytest.raises(ProviderError) as caught:
+        await provider.generate(
+            ProviderRequest(messages=(Message(role=MessageRole.USER, content="Hello"),))
+        )
+    assert error_code(caught.value) is ErrorCode.INVALID_RESPONSE
+    assert API_TOKEN not in str(caught.value)
+
+
 async def test_generate_returns_tool_request_without_executing_it() -> None:
     provider, session = provider_with(
         json_response(

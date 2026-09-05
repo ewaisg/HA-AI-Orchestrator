@@ -12,6 +12,7 @@ from homeassistant.exceptions import (
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 
+from .chat import async_cancel_provider_chats
 from .const import FOUNDATION_ENTRY_UNIQUE_ID
 from .panel import (
     async_register_panel,
@@ -105,6 +106,7 @@ async def async_unload_entry(
             runtime.provider_test_statuses.pop(loaded.connection_id, None)
         runtime.loaded_provider_entry_ids.discard(entry.entry_id)
         entry.runtime_data = None
+        async_cancel_provider_chats(hass, entry.entry_id)
         return True
 
     runtime.loaded_foundation_entry_ids.discard(entry.entry_id)

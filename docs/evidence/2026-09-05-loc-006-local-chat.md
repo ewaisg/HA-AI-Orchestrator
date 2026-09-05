@@ -1,0 +1,106 @@
+# LOC-006: local chat test candidate
+
+Date: 2026-09-05. Status: **REVIEW — implementation and independent pre-live
+review complete; live generation acceptance pending.**
+
+## Delivered behavior
+
+Administrators can open Chat, select a saved local provider, send a message,
+continue with bounded conversation context, and start a new chat. Only the
+typed conversation and a fixed system instruction reach the provider. No Home
+Assistant registry/state context, tools, device actions, cloud route, streaming,
+or persistent transcript is enabled. Unknown generation capability is visibly
+disclosed as an explicit trial, under ADR-0003's September 5 clarification.
+
+The backend allows one pending generation per user and four globally, times out
+after 60 seconds, rejects duplicate request IDs, caps replay metadata at 256
+records for 120 seconds, and rejects late output from replaced/unloaded providers.
+Each request is capped at 21 messages, 4,000 UTF-16 units per message/response and
+16,000 per request. The frontend trims whole old pairs and reports omissions.
+Leaving the view, account/provider changes, missing HA context and disconnects
+clear the transcript. New chat discards any late reply; an already dispatched
+provider request can finish. Provider-side logging is outside this retention rule.
+
+## Exact candidate
+
+- Canonical source fingerprint:
+  `2dad75b07572b63adf5bd47fc2d1510c4b29993efc0dbd7e2860f46c23488dfd`.
+- Algorithm: SHA-256 of sorted UTF-8 `path<TAB>SHA256(canonical file)<LF>`
+  records for all source files under `custom_components/ai_orchestrator` and
+  `frontend/src`; canonical files normalize CRLF to LF, exclude generated caches.
+- Bundled JavaScript: **91,291 bytes**, SHA-256
+  `7b034887f4187293469e1262a5369e15bb668df941cc6d931e2be87c4609ea83`.
+- Local deliverables: `outputs/loc-006/ai-orchestrator-local-chat.zip`,
+  `candidate-identity.json`, and `candidate.tar`. The ZIP contains only the
+  integration directory with canonical LF content. These generated artifacts
+  are ignored by Git; the source fingerprint identifies the reviewed content.
+
+## Verification actually run
+
+An isolated canonical source snapshot was extracted in persistent WSL Ubuntu
+storage, outside the mounted Windows checkout and dependency directories.
+
+| Check | Observed result |
+|---|---|
+| Full backend, Python 3.14.5 / Core 2026.8.3 / test helper 0.13.357 | 378 passed, 3.89 s |
+| Full backend, Python 3.14.5 / Core 2026.9.0 / test helper 0.13.363 | 378 passed, 4.12 s |
+| Independent chat + LM Studio backend tests, current Core | 99 passed |
+| Full frontend `npm --prefix frontend run check` | lint, typecheck, script syntax, 112 browser tests, build, sync and byte identity passed |
+| Independent chat browser subset | 17 passed |
+| Pure tests, current-Core environment | 234 passed; five upstream deprecation warnings |
+| Canonical Linux Ruff formatting | 36 files already formatted |
+| Checkout Ruff lint | All checks passed |
+| Canonical snapshot canary scan | Exit 0, no findings |
+
+Counts overlap; they are not summed as unique tests. Browser tests include
+keyboard and narrow-screen accessibility checks, plain-text rendering, follow-up
+history, duplicate clicks, stale replies, account/disconnect cleanup, backend
+failures, and strict protocol validation. Synthetic tests do not prove actual
+LM Studio model behavior or Companion App operation.
+
+The independent workflow/safety reviewer approved the source fingerprint above
+and exact bundle after reviewing context-loss cleanup, keyboard submission
+guards, and configured-token preflight/reflection protection. No scoped blocker
+remains. Protection concerns the configured provider token; it does not claim
+to detect every secret a user might manually type. This is pre-live approval,
+not completion of LOC-007 or the compatibility matrix.
+
+## Current environment and remaining acceptance
+
+The authenticated HA About page reported Core **2026.9.0**, Frontend
+**20260826.4**, Supervisor **2026.08.0**, OS **18.2**, and HA OS installation.
+COMP-001 reopens the upgrade gate required by DEC-023. The existing installed
+panel returned admin status; explicit provider Test connection passed; catalogue
+refresh showed 2,193 entities, 173 devices and 19 areas with AI access none.
+These observations precede chat installation and do not establish candidate
+identity. Household IDs, endpoint, credentials, names and model IDs are withheld.
+
+Remaining: install the exact reviewed integration with a rollback copy, restart
+Core to load Python changes, then test a harmless prompt, follow-up, new-chat
+reset, provider health, registry refresh and scoped logs. Record actual results
+before marking LOC-006 done. Android, registry-mutation/lifecycle acceptance
+for LOC-003 through LOC-005 and broader release gates remain open.
+
+## Live installation observed
+
+The File editor add-on exposes the configuration volume at `/homeassistant`
+(its `/config` path is absent); its command interpreter reported Python 3.14.5
+with optimization disabled. The previous installed frontend hash matched the
+historical accepted 75,409-byte bundle. No provider credential/config file was
+changed for this update.
+
+The browser file chooser rejected file selection, so the existing File editor
+command console transferred the archive as base64 data with exclusive file
+creation and exact SHA-256 validation. Archive SHA-256:
+`bfb663d25e0d496f3758d920301a4bae189973b99e0e931ff1612689c057b608`.
+The independently reviewed installer (SHA-256
+`8304a9098316a6d5dc5e1763d19dc9799596da3c4e4a6adca928e3e35350d0b5`)
+validated paths, rejected symlinks, compiled Python, made and byte-verified a
+scoped backup, atomically replaced each member, and verified all 17 installed
+files against the package. Visible output reported `INSTALLED: 17 reviewed
+files, all bytes verified; restart required` and the exact new bundle hash above.
+
+Rollback directory in the File editor mount:
+`/homeassistant/.ai-orchestrator-backups/before-loc006-3pcm8d5v/ai_orchestrator`.
+Restore that directory as the integration and restart Core if needed. No storage
+migration is included. Core restart and live generation are the next checks.

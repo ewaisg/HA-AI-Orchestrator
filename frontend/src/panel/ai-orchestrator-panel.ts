@@ -20,6 +20,7 @@ import type {
 import { panelStyles } from "../styles/panel-styles";
 import "./catalog-view";
 import "./providers-view";
+import "./chat-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -154,6 +155,8 @@ export class AiOrchestratorPanel extends LitElement {
               ? this._renderHome()
               : this._activeSection === "automations"
                 ? this._renderWorkflowProbe()
+                : this._activeSection === "chat"
+                  ? html`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>`
                 : this._activeSection === "providers"
                   ? this._renderProviders()
                   : this._activeSection === "permissions"
@@ -193,9 +196,9 @@ export class AiOrchestratorPanel extends LitElement {
         </nav>
 
         <div class="sidebar-note">
-          <strong>Explicit provider tests only</strong>
-          Status and provider lists stay inside Home Assistant. A provider is contacted only after
-          an administrator selects Test connection; no entity state or prompt is sent.
+          <strong>Local AI, explicit requests</strong>
+          Chat sends only your conversation to the selected local provider. Browsing the entity
+          catalogue sends no household context to AI. Device actions remain unavailable.
         </div>
       </aside>
     `;
@@ -209,9 +212,8 @@ export class AiOrchestratorPanel extends LitElement {
           <p class="eyebrow">Private Home Assistant AI</p>
           <h1>Build from a verified foundation</h1>
           <p class="page-intro">
-            This shell reports only what the installed integration confirms. Provider setup,
-            entity access, workflows, chat, and actions stay unavailable until their evidence and
-            safety gates pass.
+            Set up a local provider, browse your entity catalogue, and try a read-only chat.
+            Workflow execution, device permissions, and Assist remain in development.
           </p>
         </div>
         <span class="privacy-badge">Local status check only</span>

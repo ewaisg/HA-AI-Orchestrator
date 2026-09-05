@@ -20,7 +20,7 @@ from homeassistant.helpers.selector import (
 )
 from yarl import URL
 
-from ..provider_entry import ProviderConfigMode
+from ..provider_entry import ChatDestination, ProviderConfigMode
 from .contract import (
     EMPTY_REQUEST,
     SAFE_ERROR_MESSAGES,
@@ -81,6 +81,7 @@ class LMStudioProviderEntryAdapter:
     session: aiohttp.ClientSession = field(repr=False)
     provider_type: str = PROVIDER_TYPE
     display_name: str = DISPLAY_NAME
+    chat_destination: ChatDestination = ChatDestination.LOCAL
 
     def config_schema(self, mode: ProviderConfigMode) -> vol.Schema:
         """Return fields without receiving or exposing stored values."""
@@ -194,11 +195,17 @@ class LMStudioProvider:
 
     async def generate(self, request: ProviderRequest) -> TextGenerationResult:
         """Generate one bounded response without executing requested tools."""
+        if any(
+            self.config.api_token in message.content for message in request.messages
+        ):
+            _raise_provider_error(ErrorCode.UNSUPPORTED)
         body = _build_chat_request(self.config.model_id, request)
         payload = await self._async_request_json(
             "POST", "/chat/completions", json_body=body
         )
         result = _parse_chat_response(payload, request)
+        if self.config.api_token in result.text:
+            _raise_provider_error(ErrorCode.INVALID_RESPONSE)
         try:
             validate_generation_result(request, result)
         except TypeError, ValueError:

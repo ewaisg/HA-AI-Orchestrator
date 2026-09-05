@@ -20,6 +20,29 @@ This register prevents environment details from being guessed or silently copied
 
 ## Live Home Assistant verification
 
+### 2026-09-05 repository review
+
+- Live About-page inspection during the owner's continuation now confirms
+  Home Assistant OS, Core 2026.9.0, Supervisor 2026.08.0, OS 18.2, and Frontend
+  20260826.4. The historical Core 2026.8.3 scope does not approve this version;
+  COMP-001 reopens the compatibility gate for LOC-003 through LOC-007.
+- WSL Ubuntu successfully installed the frozen Core 2026.8.3 test environment
+  using uv 0.12.1; Docker is no longer the only Linux runner. Full test results
+  are recorded separately after execution.
+
+- REV-001 verified that application/test/build source on local `main` at
+  `0596de456e8bd6e4e8663cc27f769d99b491ac96` matches accepted candidate
+  `989917fd4229f528c142a9ecebeeea3934c394da`. Current source checks and historical
+  test gates are distinguished in
+  [`the review`](evidence/2026-09-05-repository-review.md).
+- The committed frontend bundle matches its acceptance hash; Windows checkout
+  CRLF conversion changes its physical bytes. Prepare the exact installation
+  artifact from the accepted Git archive (LOC-003/LOC-004/LOC-005).
+- The current workstation lacks installed project test dependencies and its
+  Docker Linux engine failed to start. Earlier PRJ-011 remains historical
+  evidence; it does not establish a working Linux runner today. Restore the
+  pinned development environment before LOC-006 implementation verification.
+
 The redacted read-only inspections are recorded in [`docs/evidence/2026-08-22-home-assistant-environment.md`](evidence/2026-08-22-home-assistant-environment.md) and [`docs/evidence/2026-08-23-home-assistant-backup.md`](evidence/2026-08-23-home-assistant-backup.md). The source UI remains authoritative; the snapshots must be revalidated where a fact can drift.
 
 | ID | Resolution | Evidence | Remaining unknown |
@@ -55,7 +78,24 @@ The redacted read-only inspections are recorded in [`docs/evidence/2026-08-22-ho
 | ENV-009 | Sensitive-data, cloud-disclosure, and retention defaults | These are user policy decisions, not technical defaults | Written choices after reviewing the UI/security plans | FND-010, CLD-003 |
 | ENV-010 | Backup encryption and network protections | Determines credible credential and LAN-provider operating guidance | Redacted backup/network settings; never keys or recovery material | FND-010, LOC-007 |
 | ENV-011 | Repository hosting, owner/organization metadata, and desired distribution visibility | Required before HACS validation or update claims | Hosting choice and non-secret repository metadata | HACS distribution; does not block manual Phase 0 builds |
+| ENV-012 | PARTIAL: owner URL supplied; Chrome has an existing authenticated Home Assistant session; AI Orchestrator's admin-only status succeeds and reports provider connections available. Current Core version, installed candidate, provider health, and catalogue behavior remain unverified | Previous live evidence does not approve today's environment or the changed candidate | `docs/evidence/2026-09-05-repository-review.md`, browser handoff and visible panel status; no credentials or private URL committed | LOC-003, LOC-004, LOC-005 live acceptance |
 
 ## Rule for resolving an unknown
 
 Record the source, date, and scope of the evidence. If a value can drift, add a revalidation step to the consuming task. Never place a secret, access token, full diagnostic archive, or unredacted credential screen in this repository.
+
+## September 5 LOC-006 and compatibility revalidation
+
+- ENV-012 is now partially resolved by direct current-version inspection:
+  Core 2026.9.0, Frontend 20260826.4, Supervisor 2026.08.0, OS 18.2, HA OS.
+  Explicit provider test passed and read-only catalogue refreshed successfully.
+  These observations predate the chat update and do not prove its live behavior.
+- Development-runner absence above is superseded: persistent WSL Ubuntu test
+  environments on Python 3.14.5 passed 378 full tests on each named Core
+  2026.8.3 and 2026.9.0. Frontend gate passed 112 browser tests and bundle identity.
+- LOC-006's exact source and package have independent pre-live safety approval.
+  Remaining unknowns are actual live generation and changed-candidate lifecycle,
+  Android, registry-mutation and scoped-log results. Track under LOC-006,
+  COMP-001 and LOC-003 through LOC-005; do not infer a completed Phase 1 release.
+- Evidence and the live resume procedure:
+  [LOC-006 local chat](evidence/2026-09-05-loc-006-local-chat.md).

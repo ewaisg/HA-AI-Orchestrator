@@ -1,8 +1,10 @@
 # Project tracker
 
-Last updated: 2026-08-29
+Last updated: 2026-09-05
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **Exact code candidate `989917fd4229f528c142a9ecebeeea3934c394da` closes the later LOC-003 canonical-JSON defect, the LOC-004 unqualified-health and transport semantics defects, malformed-result handling, and the unload/reload in-flight test race; it also contains the expanded LOC-005 stable read-only registry catalogue. A clean Git-archive Linux gate passed 340 full, 98 focused Home Assistant/provider-contract/catalog, 30 security/evidence/traceability, and 231 pure tests plus Ruff and canary. The frontend gate passed 95 browser tests plus lint, typecheck, build, sync, and byte identity (75,409 bytes; SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`). Independent workflow/safety and test/release reviewers approved the exact candidate for synthetic/pre-live acceptance, and evidence commit `dc71eca6d5e8124c2d2101064d44e3269a5f9190` is published. LOC-003 through LOC-005 are in `REVIEW`, not `DONE`: next install the accepted bundle and record the named redacted live Core 2026.8.3 provider, lifecycle, desktop/Android, registry-change, and scoped-log checks.**
+Current resume point: **LOC-006 local text chat is implemented, tested on Core 2026.8.3 and 2026.9.0, independently approved for live acceptance, and packaged. Continue the scoped live installation/test procedure in `docs/evidence/2026-09-05-loc-006-local-chat.md`; verify an actual reply, follow-up and New chat, then hand the Chat view to the owner. LOC-003 through LOC-005 and COMP-001 retain their remaining live acceptance gates. Complete LOC-007 before WFL-001 workflow schema.**
+
+Accepted candidate evidence: the August 29 clean Git-archive Linux gate recorded 340 full, 98 focused, 30 security/evidence/traceability, and 231 pure tests plus Ruff/canary. The frontend recorded 95 browser tests plus lint, typecheck, build, sync, and byte identity (75,409 bytes; SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`). Both independent pre-live reviewers approved the candidate; evidence commit is `dc71eca6d5e8124c2d2101064d44e3269a5f9190`. These are historical gates, not September 5 test reruns. The Windows checkout's CRLF bundle differs physically; use the canonical Git archive for exact-artifact installation.
 
 ## Status rules
 
@@ -21,12 +23,20 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | LOC-001 provider-neutral config-entry lifecycle, independently accepted |
-| Active work | LOC-003/LOC-004/LOC-005 live acceptance for exact pre-live-approved code candidate `989917fd4229f528c142a9ecebeeea3934c394da`; prior live evidence is preserved but does not approve changed code |
-| Evidence/input needed | Future cross-Core evidence only when the owner chooses to evaluate an upgrade; first isolated restore artifact by 2027-02-23 or earlier after a major backup/migration change |
-| Next gate | Install the accepted bundle, then record redacted live Core 2026.8.3 provider, lifecycle, desktop/Android, registry-change, and scoped-log evidence |
-| Production code | The foundation, action-free lifecycle probe, provider-neutral lifecycle/contract, authenticated LM Studio transport, provider list/test panel, and read-only registry catalogue are implemented; product workflows remain absent |
-| Repository | The published `main` chain contains pre-live-approved code candidate `989917fd4229f528c142a9ecebeeea3934c394da` and evidence commit `dc71eca6d5e8124c2d2101064d44e3269a5f9190`; remote live records are preserved. The unrelated untracked `AI Orchestrator.iml` file is excluded from all commits and artifacts. |
+| Last completed | LOC-006 implementation and independent pre-live approval; DOC-001 documentation reconciliation. Evidence: `docs/evidence/2026-09-05-loc-006-local-chat.md`. |
+| Active work | LOC-006 live installation and chat acceptance on the owner's Core 2026.9.0; LOC-003/004/005 and COMP-001 remaining live gates. |
+| Evidence/input needed | Current version is verified; exact installed chat identity, actual local-model reply and live lifecycle/mobile acceptance remain. Both isolated Linux environments now work. First isolated backup restore artifact remains due by 2027-02-23 or earlier after a major change. |
+| Next gate | Verified candidate installation with rollback, Core restart, harmless live chat/follow-up/reset, provider/catalogue health and scoped logs; then owner acceptance. |
+| Production code | Foundation, provider lifecycle/contract, authenticated LM Studio, provider setup/test UI, read-only catalogue, and bounded admin local text chat are implemented. Workflow execution, device actions, Assist, cloud providers and chat persistence remain planned. |
+| Repository | Local `main` base remains `0596de456e8bd6e4e8663cc27f769d99b491ac96`; uncommitted LOC-006 source/tests/bundle and review/documentation changes are present. Reviewed canonical source fingerprint is `2dad75b07572b63adf5bd47fc2d1510c4b29993efc0dbd7e2860f46c23488dfd`. No remote publish performed. |
+
+## Repository review and session handoff
+
+| ID | Task | Owner/role | Status | Acceptance evidence / next action |
+|---|---|---|---|---|
+| REV-001 | Review repository purpose, implementation, remaining scope, and live acceptance resume point; open the browser for owner sign-in | Primary / tracker steward | `DONE` | Review and integrity results: `docs/evidence/2026-09-05-repository-review.md`. Owner supplied the URL; after Edge became unavailable, the selected Chrome browser opened an existing authenticated Home Assistant session. AI Orchestrator displayed successful authenticated status and provider connections available. Tab retained for the user; no credential entry or live configuration/action change. Next: LOC-003/004/005 environment revalidation and live acceptance. |
+| DOC-001 | Reconcile README, installation guidance, product/architecture snapshots, and outdated panel copy with current accepted decisions and implemented behavior | Tracker steward + UI | `DONE` | README, installation, requirements, architecture and UI product plan reconciled; planned features separated from current preview. All 22 local Markdown links resolve; diff check passed. Panel copy is included in the 112-browser-test frontend gate. |
+| COMP-001 | Validate the owner's now-installed Core 2026.9.0 and Frontend 20260826.4 | Primary / HA + test | `REVIEW` | About-page versions verified. Isolated full backend suite passes 378 tests on each Core 2026.8.3 and 2026.9.0; current helper 0.13.363. Exact updated-candidate live restart/panel/lifecycle/Android acceptance remains; no broad compatibility range claimed. See LOC-006 September 5 evidence. |
 
 ## Phase 0 — foundation and architecture validation
 
@@ -57,8 +67,8 @@ No task may move to `DONE` based only on an assertion.
 | LOC-003 | Add authenticated LM Studio/OpenAI-compatible adapter | `REVIEW` | LOC-001, LOC-002, ENV-003 | Exact candidate `989917fd4229f528c142a9ecebeeea3934c394da` validates historical tool arguments before serialization, rejects noncanonical JSON with zero network requests, and has both independent pre-live approvals. Shared exact-source gates: 340 full, 98 focused, 30 security/evidence/traceability, 231 pure, Ruff/canary. Updated-candidate live provider/auth, reload/unload/restart, bounded timeout/cancellation where reproducible, foundation health, and scoped logs remain. Evidence: `docs/evidence/2026-08-24-loc-003-lm-studio-adapter.md`; manifest `LOC-003-LM-STUDIO-ADAPTER-002.json`. |
 | LOC-004 | Add provider setup/test UI | `REVIEW` | LOC-001, LOC-002 | Exact candidate `989917fd4229f528c142a9ecebeeea3934c394da` reports `not_tested` until an explicit timestamped observation, preserves evidenced health on Home Assistant transport failure, fails closed on malformed adapter outcomes, and prevents late in-flight tests from crossing unload/reload ownership. Both independent pre-live reviewers approved it. Frontend passes 95 tests and byte identity. Updated live runtime-reset/timestamp, duplicate-click/transport, desktop/Android, reload/restart, and scoped-log checks remain. Evidence: `docs/evidence/2026-08-25-loc-004-provider-ui.md`; manifest `LOC-004-PROVIDER-UI-002.json`. |
 | LOC-005 | Add read-only entity/area/device catalog | `REVIEW` | LOC-001 | Exact candidate `989917fd4229f528c142a9ecebeeea3934c394da` provides stable registry identity, effective area/device relationships, availability, integration/domain metadata, search, responsive layout, explicit `AI access: none`, and strict privacy omissions. Both independent pre-live reviewers found no action, state-value, secret, or authorization regression. Redacted live inventory, desktop/Android, rename/removal/disable/unavailable, area/device change, refresh/reload, and scoped logs remain. Evidence: `docs/evidence/2026-08-27-loc-005-registry-catalog.md`, `docs/evidence/2026-08-28-loc-005-read-only-catalog.md`; manifest `LOC-005-REGISTRY-CATALOG-002.json`. |
-| LOC-006 | Add read-only panel chat | `TODO` | LOC-003, LOC-005 | Streaming/non-streaming tests and tool access proven absent |
-| LOC-007 | Phase 1 release gate | `TODO` | LOC-003 through LOC-006 | Quality gate, redaction check, Home Assistant Green smoke test |
+| LOC-006 | Add read-only panel chat | `REVIEW` | LOC-003, LOC-005 | Implemented local-only admin text chat, bounded session history, static failures, concurrency/replay guards and no HA context/tools/actions/cloud. 378 backend tests pass on each named Core; 112 frontend tests plus build/sync/identity; independent review approved exact source fingerprint and 91,291-byte bundle. Live install/generation acceptance remains. Evidence: `docs/evidence/2026-09-05-loc-006-local-chat.md`. |
+| LOC-007 | Phase 1 release gate | `TODO` | LOC-003 through LOC-006, DOC-001 | Quality gate, redaction check, Home Assistant Green smoke test |
 
 ## Phase 2 — AI notification workflows
 

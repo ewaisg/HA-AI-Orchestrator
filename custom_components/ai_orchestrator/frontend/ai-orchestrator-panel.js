@@ -254,86 +254,86 @@ var h = class extends HTMLElement {
 h.elementStyles = [], h.shadowRootOptions = { mode: "open" }, h[p("elementProperties")] = /* @__PURE__ */ new Map(), h[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: h }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var g = globalThis, _ = (e) => e, v = g.trustedTypes, y = v ? v.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, b = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, ce = "?" + x, le = `<${ce}>`, S = document, C = () => S.createComment(""), w = (e) => e === null || typeof e != "object" && typeof e != "function", T = Array.isArray, ue = (e) => T(e) || typeof e?.[Symbol.iterator] == "function", E = "[ 	\n\f\r]", D = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, de = /-->/g, fe = />/g, O = RegExp(`>|${E}(?:([^\\s"'>=/]+)(${E}*=${E}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), k = /'/g, A = /"/g, j = /^(?:script|style|textarea|title)$/i, M = ((e) => (t, ...n) => ({
+var g = globalThis, ce = (e) => e, _ = g.trustedTypes, le = _ ? _.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ue = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, de = "?" + v, fe = `<${de}>`, y = document, b = () => y.createComment(""), x = (e) => e === null || typeof e != "object" && typeof e != "function", S = Array.isArray, pe = (e) => S(e) || typeof e?.[Symbol.iterator] == "function", C = "[ 	\n\f\r]", w = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, me = /-->/g, he = />/g, T = RegExp(`>|${C}(?:([^\\s"'>=/]+)(${C}*=${C}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ge = /'/g, _e = /"/g, ve = /^(?:script|style|textarea|title)$/i, E = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), N = Symbol.for("lit-noChange"), P = Symbol.for("lit-nothing"), pe = /* @__PURE__ */ new WeakMap(), F = S.createTreeWalker(S, 129);
-function me(e, t) {
-	if (!T(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return y === void 0 ? t : y.createHTML(t);
+}))(1), D = Symbol.for("lit-noChange"), O = Symbol.for("lit-nothing"), ye = /* @__PURE__ */ new WeakMap(), k = y.createTreeWalker(y, 129);
+function be(e, t) {
+	if (!S(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return le === void 0 ? t : le.createHTML(t);
 }
-var he = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = D;
+var xe = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = w;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === D ? c[1] === "!--" ? o = de : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = O) : (j.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = O) : o = fe : o === O ? c[0] === ">" ? (o = i ?? D, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? O : c[3] === "\"" ? A : k) : o === A || o === k ? o = O : o === de || o === fe ? o = D : (o = O, i = void 0);
-		let d = o === O && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === D ? n + le : l >= 0 ? (r.push(s), n.slice(0, l) + b + n.slice(l) + x + d) : n + x + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === w ? c[1] === "!--" ? o = me : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = T) : (ve.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = T) : o = he : o === T ? c[0] === ">" ? (o = i ?? w, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? T : c[3] === "\"" ? _e : ge) : o === _e || o === ge ? o = T : o === me || o === he ? o = w : (o = T, i = void 0);
+		let d = o === T && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === w ? n + fe : l >= 0 ? (r.push(s), n.slice(0, l) + ue + n.slice(l) + v + d) : n + v + (l === -2 ? t : d);
 	}
-	return [me(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, I = class e {
+	return [be(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, A = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = he(t, n);
-		if (this.el = e.createElement(l, r), F.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = xe(t, n);
+		if (this.el = e.createElement(l, r), k.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = F.nextNode()) !== null && c.length < s;) {
+		for (; (i = k.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(b)) {
-					let t = u[o++], n = i.getAttribute(e).split(x), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(ue)) {
+					let t = u[o++], n = i.getAttribute(e).split(v), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? _e : r[1] === "?" ? ve : r[1] === "@" ? ye : z
+						ctor: r[1] === "." ? Ce : r[1] === "?" ? we : r[1] === "@" ? Te : N
 					}), i.removeAttribute(e);
-				} else e.startsWith(x) && (c.push({
+				} else e.startsWith(v) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (j.test(i.tagName)) {
-					let e = i.textContent.split(x), t = e.length - 1;
+				if (ve.test(i.tagName)) {
+					let e = i.textContent.split(v), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = v ? v.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], C()), F.nextNode(), c.push({
+						i.textContent = _ ? _.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], b()), k.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], C());
+						i.append(e[t], b());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === ce) c.push({
+				if (i.data === de) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(x, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(v, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += x.length - 1;
+					}), e += v.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = S.createElement("template");
+		let n = y.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function L(e, t, n = e, r) {
-	if (t === N) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = w(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = L(e, i._$AS(e, t.values), i, r)), t;
+function j(e, t, n = e, r) {
+	if (t === D) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = x(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = j(e, i._$AS(e, t.values), i, r)), t;
 }
-var ge = class {
+var Se = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var ge = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? S).importNode(t, !0);
-		F.currentNode = r;
-		let i = F.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? y).importNode(t, !0);
+		k.currentNode = r;
+		let i = k.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new R(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new be(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new M(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ee(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = F.nextNode(), a++);
+			a !== s?.index && (i = k.nextNode(), a++);
 		}
-		return F.currentNode = S, r;
+		return k.currentNode = y, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, R = class e {
+}, M = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = P, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = O, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var ge = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = L(this, e, t), w(e) ? e === P || e == null || e === "" ? (this._$AH !== P && this._$AR(), this._$AH = P) : e !== this._$AH && e !== N && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ue(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = j(this, e, t), x(e) ? e === O || e == null || e === "" ? (this._$AH !== O && this._$AR(), this._$AH = O) : e !== this._$AH && e !== D && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? pe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var ge = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== P && w(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
+		this._$AH !== O && x(this._$AH) ? this._$AA.nextSibling.data = e : this.T(y.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = I.createElement(me(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = A.createElement(be(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new ge(r, this), n = e.u(this.options);
+			let e = new Se(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = pe.get(e.strings);
-		return t === void 0 && pe.set(e.strings, t = new I(e)), t;
+		let t = ye.get(e.strings);
+		return t === void 0 && ye.set(e.strings, t = new A(e)), t;
 	}
 	k(t) {
-		T(this._$AH) || (this._$AH = [], this._$AR());
+		S(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(C()), this.O(C()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(b()), this.O(b()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = _(e).nextSibling;
-			_(e).remove(), e = t;
+			let t = ce(e).nextSibling;
+			ce(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, z = class {
+}, N = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var ge = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = P, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = P;
+		this.type = 1, this._$AH = O, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = O;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = L(this, e, t, 0), a = !w(e) || e !== this._$AH && e !== N, a && (this._$AH = e);
+		if (i === void 0) e = j(this, e, t, 0), a = !x(e) || e !== this._$AH && e !== D, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = L(this, r[n + o], t, o), s === N && (s = this._$AH[o]), a ||= !w(s) || s !== this._$AH[o], s === P ? e = P : e !== P && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = j(this, r[n + o], t, o), s === D && (s = this._$AH[o]), a ||= !x(s) || s !== this._$AH[o], s === O ? e = O : e !== O && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === P ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === O ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, _e = class extends z {
+}, Ce = class extends N {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === P ? void 0 : e;
+		this.element[this.name] = e === O ? void 0 : e;
 	}
-}, ve = class extends z {
+}, we = class extends N {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== P);
+		this.element.toggleAttribute(this.name, !!e && e !== O);
 	}
-}, ye = class extends z {
+}, Te = class extends N {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = L(this, e, t, 0) ?? P) === N) return;
-		let n = this._$AH, r = e === P && n !== P || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== P && (n === P || r);
+		if ((e = j(this, e, t, 0) ?? O) === D) return;
+		let n = this._$AH, r = e === O && n !== O || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== O && (n === O || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, be = class {
+}, Ee = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var ge = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		L(this, e);
+		j(this, e);
 	}
-}, xe = g.litHtmlPolyfillSupport;
-xe?.(I, R), (g.litHtmlVersions ??= []).push("3.3.3");
-var Se = (e, t, n) => {
+}, De = g.litHtmlPolyfillSupport;
+De?.(A, M), (g.litHtmlVersions ??= []).push("3.3.3");
+var Oe = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new R(t.insertBefore(C(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new M(t.insertBefore(b(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, B = globalThis, V = class extends h {
+}, P = globalThis, F = class extends h {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var Se = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Se(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Oe(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,39 +502,39 @@ var Se = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return N;
+		return D;
 	}
 };
-V._$litElement$ = !0, V.finalized = !0, B.litElementHydrateSupport?.({ LitElement: V });
-var Ce = B.litElementPolyfillSupport;
-Ce?.({ LitElement: V }), (B.litElementVersions ??= []).push("4.2.2");
+F._$litElement$ = !0, F.finalized = !0, P.litElementHydrateSupport?.({ LitElement: F });
+var ke = P.litElementPolyfillSupport;
+ke?.({ LitElement: F }), (P.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var we = Object.freeze({ type: "ai_orchestrator/status" }), H = [
+var Ae = Object.freeze({ type: "ai_orchestrator/status" }), I = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], U = class extends Error {
+], L = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function W(e) {
+function R(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Te(e, t) {
+function je(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Ee(e) {
-	if (!W(e) || !Te(e, [
+function Me(e) {
+	if (!R(e) || !je(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !W(e.features) || !Te(e.features, H)) throw new U();
+	]) || !R(e.features) || !je(e.features, I)) throw new L();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || H.some((e) => typeof t[e] != "boolean")) throw new U();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || I.some((e) => typeof t[e] != "boolean")) throw new L();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,30 +547,30 @@ function Ee(e) {
 		}
 	};
 }
-async function De(e) {
-	return Ee(await e.callWS({ ...we }));
+async function Ne(e) {
+	return Me(await e.callWS({ ...Ae }));
 }
-function Oe(e) {
-	return W(e) && e.code === "unauthorized";
+function Pe(e) {
+	return R(e) && e.code === "unauthorized";
 }
 //#endregion
 //#region src/api/workflow-probe-client.ts
-var ke = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Ae = class extends Error {
+var Fe = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Ie = class extends Error {
 	constructor() {
 		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
 	}
 };
-function je(e) {
+function Le(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Me(e, t) {
+function Re(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Ne(e) {
+function ze(e) {
 	return typeof e == "number" && Number.isInteger(e) && e > 0;
 }
-function Pe(e) {
-	if (!je(e) || !Me(e, [
+function Be(e) {
+	if (!Le(e) || !Re(e, [
 		"schema_version",
 		"workflow_id",
 		"trigger_type",
@@ -579,15 +579,15 @@ function Pe(e) {
 		"registration_count",
 		"provider_contacted",
 		"home_assistant_action_called"
-	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ne(e.execution_count) || e.executions_for_trigger !== 1 || !Ne(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Ae();
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !ze(e.execution_count) || e.executions_for_trigger !== 1 || !ze(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Ie();
 	return e;
 }
-async function Fe(e) {
-	return Pe(await e.callWS({ ...ke }));
+async function Ve(e) {
+	return Be(await e.callWS({ ...Fe }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var Ie = o`
+var He = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1277,45 +1277,45 @@ var Ie = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Le = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Re = [
+`, Ue = Object.freeze({ type: "ai_orchestrator/catalog/list" }), We = [
 	"available",
 	"unavailable",
 	"not_loaded"
-], ze = ["entity", "device"], G = 1e4;
-function K(e) {
+], Ge = ["entity", "device"], z = 1e4;
+function B(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function q(e, t) {
+function V(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function J(e) {
+function H(e) {
 	return e === null || typeof e == "string";
 }
-function Y(e) {
+function U(e) {
 	return typeof e == "string" && e.length > 0 && e.length <= 255;
 }
-function Be(e) {
-	if (!Array.isArray(e) || e.length > G) throw Error("Invalid area catalogue");
+function Ke(e) {
+	if (!Array.isArray(e) || e.length > z) throw Error("Invalid area catalogue");
 	return e.map((e) => {
-		if (!K(e) || !q(e, ["area_id", "name"]) || !Y(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
+		if (!B(e) || !V(e, ["area_id", "name"]) || !U(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
 		return {
 			area_id: e.area_id,
 			name: e.name
 		};
 	});
 }
-function Ve(e) {
-	if (!Array.isArray(e) || e.length > G) throw Error("Invalid device catalogue");
+function qe(e) {
+	if (!Array.isArray(e) || e.length > z) throw Error("Invalid device catalogue");
 	return e.map((e) => {
-		if (!K(e) || !q(e, [
+		if (!B(e) || !V(e, [
 			"device_id",
 			"name",
 			"area_id",
 			"manufacturer",
 			"model",
 			"disabled"
-		]) || !Y(e.device_id) || !J(e.name) || e.area_id !== null && !Y(e.area_id) || !J(e.manufacturer) || !J(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
+		]) || !U(e.device_id) || !H(e.name) || e.area_id !== null && !U(e.area_id) || !H(e.manufacturer) || !H(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
 		return {
 			device_id: e.device_id,
 			name: e.name,
@@ -1326,10 +1326,10 @@ function Ve(e) {
 		};
 	});
 }
-function He(e) {
-	if (!Array.isArray(e) || e.length > G) throw Error("Invalid entity catalogue");
+function Je(e) {
+	if (!Array.isArray(e) || e.length > z) throw Error("Invalid entity catalogue");
 	return e.map((e) => {
-		if (!K(e) || !q(e, [
+		if (!B(e) || !V(e, [
 			"registry_id",
 			"entity_id",
 			"domain",
@@ -1340,7 +1340,7 @@ function He(e) {
 			"area_source",
 			"disabled",
 			"availability"
-		]) || !Y(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !Y(e.platform) || !J(e.name) || e.device_id !== null && !Y(e.device_id) || e.area_id !== null && !Y(e.area_id) || e.area_source !== null && !ze.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Re.includes(e.availability)) throw Error("Invalid entity entry");
+		]) || !U(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !U(e.platform) || !H(e.name) || e.device_id !== null && !U(e.device_id) || e.area_id !== null && !U(e.area_id) || e.area_source !== null && !Ge.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !We.includes(e.availability)) throw Error("Invalid entity entry");
 		return {
 			registry_id: e.registry_id,
 			entity_id: e.entity_id,
@@ -1355,8 +1355,8 @@ function He(e) {
 		};
 	});
 }
-function Ue(e) {
-	if (!K(e) || !q(e, [
+function Ye(e) {
+	if (!B(e) || !V(e, [
 		"schema_version",
 		"areas",
 		"devices",
@@ -1364,17 +1364,17 @@ function Ue(e) {
 	]) || e.schema_version !== 1) throw Error("Invalid catalogue response");
 	return {
 		schema_version: 1,
-		areas: Be(e.areas),
-		devices: Ve(e.devices),
-		entities: He(e.entities)
+		areas: Ke(e.areas),
+		devices: qe(e.devices),
+		entities: Je(e.entities)
 	};
 }
-async function We(e) {
-	return Ue(await e.callWS({ ...Le }));
+async function Xe(e) {
+	return Ye(await e.callWS({ ...Ue }));
 }
 //#endregion
 //#region src/panel/catalog-view.ts
-var Ge = class extends V {
+var Ze = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		_state: { state: !0 },
@@ -1437,12 +1437,12 @@ var Ge = class extends V {
 		this._scheduleLoad();
 	}
 	render() {
-		if (this._state === "loading") return M`<div class="message" role="status" aria-busy="true">Reading Home Assistant registries…</div>`;
-		if (this._state === "error") return M`<div class="message"><p>The registry catalogue could not be loaded.</p><button type="button" @click=${this._load}>Retry</button></div>`;
+		if (this._state === "loading") return E`<div class="message" role="status" aria-busy="true">Reading Home Assistant registries…</div>`;
+		if (this._state === "error") return E`<div class="message"><p>The registry catalogue could not be loaded.</p><button type="button" @click=${this._load}>Retry</button></div>`;
 		let e = this._catalog;
-		if (e === void 0 || this._state === "empty") return M`<div class="message"><p>No registered entities are available.</p><button type="button" @click=${this._load}>Refresh</button></div>`;
+		if (e === void 0 || this._state === "empty") return E`<div class="message"><p>No registered entities are available.</p><button type="button" @click=${this._load}>Refresh</button></div>`;
 		let t = this._filteredEntities(e);
-		return M`
+		return E`
       <div class="summary" aria-label="Registry totals">
         <span>${e.entities.length} entities</span>
         <span>${e.devices.length} devices</span>
@@ -1459,12 +1459,12 @@ var Ge = class extends V {
         />
         <button type="button" @click=${this._load}>Refresh registries</button>
       </div>
-      ${t.length === 0 ? M`<div class="message" role="status">No entities match this search.</div>` : this._renderTable(e, t)}
+      ${t.length === 0 ? E`<div class="message" role="status">No entities match this search.</div>` : this._renderTable(e, t)}
     `;
 	}
 	_renderTable(e, t) {
 		let n = new Map(e.areas.map((e) => [e.area_id, e.name])), r = new Map(e.devices.map((e) => [e.device_id, e]));
-		return M`
+		return E`
       <div class="table-wrap">
         <table>
           <thead><tr><th>Entity</th><th>Area / device</th><th>Status</th><th>AI permission</th></tr></thead>
@@ -1475,7 +1475,7 @@ var Ge = class extends V {
 	}
 	_renderEntity(e, t, n) {
 		let r = e.area_id === null ? "No area" : t.get(e.area_id) ?? "Unresolved area", i = e.device_id === null ? void 0 : n.get(e.device_id), a = e.disabled ? "Disabled" : e.availability.replace("_", " ");
-		return M`
+		return E`
       <tr>
         <td data-label="Entity"><span class="name">${e.name ?? e.entity_id}</span><code>${e.entity_id}</code><span class="detail">${e.platform}</span></td>
         <td data-label="Area / device"><span>${r}</span><span class="detail">${i?.name ?? (e.device_id === null ? "No device" : "Unresolved device")}</span></td>
@@ -1504,7 +1504,7 @@ var Ge = class extends V {
 		if (this.hass !== void 0) {
 			this._hasLoaded = !0, this._state = "loading";
 			try {
-				this._catalog = await We(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
+				this._catalog = await Xe(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
 			} catch {
 				this._catalog = void 0, this._state = "error";
 			}
@@ -1515,13 +1515,13 @@ var Ge = class extends V {
 			this._loadScheduled = !1, this._load();
 		}));
 	}
-}, Ke = Object.freeze({ type: "ai_orchestrator/providers/list" }), qe = [
+}, Qe = Object.freeze({ type: "ai_orchestrator/providers/list" }), $e = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], Je = [
+], et = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1538,37 +1538,37 @@ var Ge = class extends V {
 	"unsupported",
 	"unknown"
 ];
-function X(e) {
+function W(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Z(e, t) {
+function G(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function Ye(e) {
+function tt(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
 }
-function Xe(e) {
-	return typeof e == "string" && qe.includes(e);
+function nt(e) {
+	return typeof e == "string" && $e.includes(e);
 }
-function Ze(e) {
-	return typeof e == "string" && Je.includes(e);
+function rt(e) {
+	return typeof e == "string" && et.includes(e);
 }
-function Qe(e) {
+function it(e) {
 	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
 }
-function $e(e) {
-	if (!X(e) || !Z(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+function at(e) {
+	if (!W(e) || !G(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!X(n) || !Z(n, [
+		if (!W(n) || !G(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
 			"health",
 			"last_tested_at"
-		]) || !Ye(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !Xe(n.health) || n.last_tested_at !== null && !Qe(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
+		]) || !tt(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !nt(n.health) || n.last_tested_at !== null && !it(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
@@ -1583,14 +1583,14 @@ function $e(e) {
 		providers: t
 	};
 }
-function et(e, t) {
-	if (!X(e) || !Z(e, [
+function ot(e, t) {
+	if (!W(e) || !G(e, [
 		"schema_version",
 		"connection_id",
 		"health",
 		"error_code",
 		"last_tested_at"
-	]) || e.schema_version !== 1 || !Ye(e.connection_id) || t !== void 0 && e.connection_id !== t || !Xe(e.health) || e.error_code !== null && !Ze(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !Qe(e.last_tested_at)) throw Error("Invalid provider test response");
+	]) || e.schema_version !== 1 || !tt(e.connection_id) || t !== void 0 && e.connection_id !== t || !nt(e.health) || e.error_code !== null && !rt(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !it(e.last_tested_at)) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
@@ -1599,18 +1599,18 @@ function et(e, t) {
 		last_tested_at: e.last_tested_at
 	};
 }
-async function tt(e) {
-	return $e(await e.callWS({ ...Ke }));
+async function st(e) {
+	return at(await e.callWS({ ...Qe }));
 }
-async function nt(e, t) {
-	return et(await e.callWS({
+async function ct(e, t) {
+	return ot(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var rt = "/config/integrations/integration/ai_orchestrator", it = {
+var lt = "/config/integrations/integration/ai_orchestrator", ut = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1626,13 +1626,13 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, at = {
+}, dt = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, Q = class extends V {
+}, K = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1830,27 +1830,27 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 		this._scheduleLoad();
 	}
 	render() {
-		return this._viewState === "loading" ? M`<div role="status" aria-label="Loading providers" aria-busy="true">
+		return this._viewState === "loading" ? E`<div role="status" aria-label="Loading providers" aria-busy="true">
         Loading provider connections…
-      </div>` : this._viewState === "error" ? M`
+      </div>` : this._viewState === "error" ? E`
         <div class="error-state">
           <p>Could not load provider connections.</p>
           <button class="refresh-button" type="button" @click=${this._loadProviders}>
             Retry
           </button>
         </div>
-      ` : this._viewState === "empty" ? M`
+      ` : this._viewState === "empty" ? E`
         <div class="empty-state">
           <h3>No provider connections</h3>
           <p>
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${rt}>Add provider connection</a>
+          <a class="primary-link" href=${lt}>Add provider connection</a>
         </div>
-      ` : M`
+      ` : E`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${rt}>Manage provider connections</a>
+        <a class="primary-link" href=${lt}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1859,14 +1859,14 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 	}
 	_renderProviderCard(e) {
 		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n === "transport_failure" ? e.health : n?.health ?? e.health, i = n === "transport_failure" ? e.last_tested_at : n?.last_tested_at ?? e.last_tested_at;
-		return M`
+		return E`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
           <div>
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${at[r]}</span>
+          <span class="state-badge ${r}">${dt[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
         <p class="provider-meta">
@@ -1887,35 +1887,35 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
     `;
 	}
 	_renderTestResult(e, t) {
-		if (e === "checking") return M`<span class="test-result checking" role="status" aria-live="polite">
+		if (e === "checking") return E`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
       </span>`;
-		if (t === "transport_failure") return M`<span
+		if (t === "transport_failure") return E`<span
         class="test-result transport-failure"
         role="status"
         aria-live="polite"
       >
         Home Assistant communication failed; provider health unchanged
       </span>`;
-		if (t?.health === "healthy") return M`<span class="test-result healthy" role="status" aria-live="polite">
+		if (t?.health === "healthy") return E`<span class="test-result healthy" role="status" aria-live="polite">
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = it[t.error_code ?? "unknown"] ?? "Test failed";
-			return M`<span
+			let e = ut[t.error_code ?? "unknown"] ?? "Test failed";
+			return E`<span
         class="test-result ${t.health}"
         role="status"
         aria-live="polite"
       >${e}</span>`;
 		}
-		return P;
+		return O;
 	}
 	_loadProviders = async () => {
 		let e = this.hass;
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await tt(e);
+				let t = await st(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1932,14 +1932,296 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 		if (t !== void 0) {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await nt(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
+				let n = await ct(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
 				r.set(e, "idle"), i.set(e, n), this._testStates = r, this._testResults = i;
 			} catch {
 				this._testStates = new Map(this._testStates).set(e, "idle"), this._testResults = new Map(this._testResults).set(e, "transport_failure");
 			}
 		}
 	}
-}, ot = "ai-orchestrator-panel", $ = [
+}, q = Object.freeze({
+	max_messages: 21,
+	max_message_chars: 4e3,
+	max_total_chars: 16e3,
+	max_response_chars: 4e3,
+	timeout_seconds: 60
+}), J = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function Y(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function X(e, t) {
+	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
+}
+function Z(e, t) {
+	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
+}
+function ft(e) {
+	if (!Y(e) || !X(e, [
+		"schema_version",
+		"providers",
+		"limits",
+		"streaming",
+		"household_context",
+		"actions",
+		"history_persisted"
+	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !Y(e.limits) || !X(e.limits, Object.keys(q))) throw Error("Unsupported chat options");
+	let t = e.limits;
+	if (Object.entries(q).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
+	let n = /* @__PURE__ */ new Set();
+	return {
+		schema_version: 1,
+		providers: e.providers.map((e) => {
+			if (!Y(e) || !X(e, [
+				"connection_id",
+				"title",
+				"display_name",
+				"destination",
+				"capability_verified"
+			]) || typeof e.connection_id != "string" || !J.test(e.connection_id) || !Z(e.title, 1e3) || !Z(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
+			return n.add(e.connection_id), {
+				connection_id: e.connection_id,
+				title: e.title,
+				display_name: e.display_name,
+				destination: "local",
+				capability_verified: !1
+			};
+		}),
+		limits: q,
+		streaming: !1,
+		household_context: !1,
+		actions: !1,
+		history_persisted: !1
+	};
+}
+function pt(e, t, n) {
+	if (!Y(e) || !X(e, [
+		"schema_version",
+		"connection_id",
+		"request_id",
+		"text",
+		"destination",
+		"streaming"
+	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !Z(e.text, q.max_response_chars)) throw Error("Unsupported chat response");
+	return {
+		schema_version: 1,
+		connection_id: t,
+		request_id: n,
+		text: e.text,
+		destination: "local",
+		streaming: !1
+	};
+}
+async function mt(e) {
+	return ft(await e.callWS({ type: "ai_orchestrator/chat/options" }));
+}
+async function ht(e, t, n, r) {
+	if (!J.test(t) || !J.test(n) || r.length === 0 || r.length > q.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !Z(e.content, q.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > q.max_total_chars) throw Error("Invalid chat request");
+	return pt(await e.callWS({
+		type: "ai_orchestrator/chat/send",
+		connection_id: t,
+		request_id: n,
+		messages: r.map(({ role: e, content: t }) => ({
+			role: e,
+			content: t
+		}))
+	}), t, n);
+}
+function gt(e, t) {
+	let n = [...e.map((e) => ({ ...e })), {
+		role: "user",
+		content: t
+	}], r = !1;
+	for (; n.length > 1 && (n.length > q.max_messages || n.reduce((e, t) => e + t.content.length, 0) > q.max_total_chars);) n.splice(0, 2), r = !0;
+	return {
+		messages: n,
+		omitted: r
+	};
+}
+//#endregion
+//#region src/panel/chat-view.ts
+var _t = "ai-orchestrator-chat-view", vt = {
+	unauthorized: "Administrator access is required for chat.",
+	chat_busy: "A request is still running. Wait a moment, then send again.",
+	chat_duplicate_request: "This request was already submitted. Start a new request to retry.",
+	chat_provider_unavailable: "This local provider is no longer available. Refresh providers and select a connection.",
+	chat_authentication: "Provider authentication failed. Update its credentials in Home Assistant.",
+	chat_timeout: "The provider took too long to reply. Your message is ready to try again.",
+	chat_invalid_response: "The provider did not return a valid text-only reply. Try a shorter request.",
+	chat_connection: "Home Assistant could not reach the local provider.",
+	chat_not_found: "The configured model is not available. Check provider settings.",
+	chat_unsupported: "This provider does not support the requested text generation."
+}, yt = class extends F {
+	static properties = {
+		hass: { attribute: !1 },
+		_options: { state: !0 },
+		_connectionId: { state: !0 },
+		_draft: { state: !0 },
+		_history: { state: !0 },
+		_busy: { state: !0 },
+		_loading: { state: !0 },
+		_error: { state: !0 },
+		_notice: { state: !0 },
+		_pendingPrompt: { state: !0 }
+	};
+	static styles = o`
+    :host { display:block; color:var(--primary-text-color,#233642); font:inherit; }
+    * { box-sizing:border-box; }
+    .chat { max-width:900px; margin:auto; }
+    header { margin-bottom:24px; }
+    .eyebrow { color:var(--secondary-text-color,#4b626d); text-transform:uppercase; font-size:12px; letter-spacing:.14em; font-weight:700; }
+    h1 { font-size:clamp(28px,4vw,40px); letter-spacing:-.035em; margin:8px 0; }
+    h2 { font-size:20px; }
+    p { line-height:1.6; }
+    .intro { margin:0; color:var(--secondary-text-color,#4b626d); }
+    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
+    .provider { flex:1; min-width:0; }
+    label { display:block; font-weight:600; margin-bottom:8px; font-size:14px; }
+    select,textarea { width:100%; max-width:100%; min-width:0; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:9px; font:inherit; padding:12px; }
+    select { text-overflow:ellipsis; }
+    textarea { resize:vertical; min-height:110px; line-height:1.5; }
+    button,a { font:inherit; }
+    button { cursor:pointer; min-height:44px; border-radius:9px; padding:10px 16px; border:1px solid #7d969c; color:inherit; background:var(--card-background-color,#fff); font-weight:600; }
+    button.primary { background:#175e56; color:#fff; border-color:#175e56; }
+    button:disabled { opacity:.55; cursor:default; }
+    button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
+    a { color:#175e56; }
+    .privacy { padding:12px 2px; color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.6; }
+    .privacy strong { color:var(--primary-text-color,#233642); }
+    .transcript { min-height:220px; max-height:60vh; overflow:auto; padding:12px 4px; overscroll-behavior:contain; }
+    .empty { text-align:center; padding:32px 18px; color:var(--secondary-text-color,#4b626d); }
+    .message { border-radius:14px; padding:16px 18px; margin:0 0 16px; border:1px solid var(--divider-color,#ccd9da); background:var(--card-background-color,#fff); overflow-wrap:anywhere; }
+    .message.user { margin-left:32px; border-left:3px solid #207e73; }
+    .message.assistant { margin-right:32px; }
+    .message strong { font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+    .message p { white-space:pre-wrap; margin:8px 0 0; }
+    .pending { color:var(--secondary-text-color,#4b626d); }
+    .error { background:#fff2ee; color:#852e23; border:1px solid #d7a79d; border-radius:10px; padding:12px 16px; margin:12px 0; line-height:1.5; }
+    .notice { color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.5; }
+    .compose { padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
+    .compose-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
+    .hint { font-size:12px; color:var(--secondary-text-color,#4b626d); }
+    @media(max-width:480px) { .controls,.compose { padding:12px; } .provider { flex-basis:100%; } .message.user { margin-left:12px; } .message.assistant { margin-right:12px; } .transcript { min-height:150px; } }
+  `;
+	_sequence = 0;
+	_loadSequence = 0;
+	_boundConnection;
+	_userId;
+	_hasLoaded = !1;
+	constructor() {
+		super(), this._connectionId = "", this._draft = "", this._history = [], this._busy = !1, this._loading = !1, this._error = "", this._notice = "", this._pendingPrompt = "";
+	}
+	_onDisconnected = () => {
+		this._reset(), this._options = void 0, this._hasLoaded = !1, this._error = "Home Assistant disconnected. Chat history was cleared. Reconnect and refresh providers.";
+	};
+	_onReady = () => {
+		this._hasLoaded = !0, this._load();
+	};
+	disconnectedCallback() {
+		this._unbind(), this._reset(), this._hasLoaded = !1, super.disconnectedCallback();
+	}
+	willUpdate(e) {
+		if (e.has("hass")) {
+			if (this.hass === void 0) {
+				this._unbind(), this._reset(), this._options = void 0, this._connectionId = "", this._hasLoaded = !1, this._userId = void 0;
+				return;
+			}
+			(this._userId !== this.hass.user?.id || this._boundConnection !== this.hass.connection) && (this._unbind(), this._reset(), this._options = void 0, this._connectionId = "", this._hasLoaded = !1, this._userId = this.hass.user?.id, this._boundConnection = this.hass.connection, this._boundConnection?.addEventListener("disconnected", this._onDisconnected), this._boundConnection?.addEventListener("ready", this._onReady)), !this._hasLoaded && this.hass.connection?.connected !== !1 && (this._hasLoaded = !0, queueMicrotask(() => void this._load()));
+		}
+	}
+	_unbind() {
+		this._boundConnection?.removeEventListener("disconnected", this._onDisconnected), this._boundConnection?.removeEventListener("ready", this._onReady), this._boundConnection = void 0;
+	}
+	_reset() {
+		this._sequence += 1, this._loadSequence += 1, this._history = [], this._draft = "", this._pendingPrompt = "", this._busy = !1, this._loading = !1, this._error = "", this._notice = "";
+	}
+	async _load() {
+		let e = this.hass;
+		if (e === void 0 || this._loading || !this.isConnected) return;
+		let t = ++this._loadSequence;
+		this._loading = !0, this._error = "";
+		try {
+			let n = await mt(e);
+			if (t !== this._loadSequence || !this.isConnected) return;
+			this._options = n, n.providers.some((e) => e.connection_id === this._connectionId) || (this._sequence += 1, this._history = [], this._draft = "", this._notice = "", this._connectionId = n.providers[0]?.connection_id ?? "");
+		} catch {
+			if (t !== this._loadSequence || !this.isConnected) return;
+			this._options = void 0, this._error = "Chat is unavailable. Check administrator access and install matching backend and panel files, then refresh providers.";
+		} finally {
+			t === this._loadSequence && (this._loading = !1);
+		}
+	}
+	async _send(e) {
+		e?.preventDefault();
+		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
+		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > q.max_message_chars || this.hass?.connection?.connected === !1) return;
+		let i = gt(this._history, n), a = ++this._sequence, o = this._connectionId;
+		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
+		try {
+			let e = await ht(t, o, crypto.randomUUID(), i.messages);
+			if (a !== this._sequence || !this.isConnected) return;
+			this._history = [...i.messages, {
+				role: "assistant",
+				content: e.text
+			}], this._draft = "", await this.updateComplete;
+			let n = this.renderRoot.querySelector(".transcript");
+			n?.scrollTo({ top: n.scrollHeight });
+		} catch (e) {
+			if (a !== this._sequence || !this.isConnected) return;
+			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
+			this._error = vt[t] ?? "The reply could not be completed. Your message is ready to try again.";
+		} finally {
+			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
+		}
+	}
+	render() {
+		let e = this._options?.providers.find((e) => e.connection_id === this._connectionId);
+		return E`<div class="chat">
+      <header><p class="eyebrow">Local AI · Read-only chat</p><h1>Talk to your local AI</h1>
+        <p class="intro">Try a question, draft an announcement, or explore an idea.</p></header>
+      <section class="controls" aria-label="Chat provider">
+        <div class="provider"><label for="provider">Local provider</label>
+          <select id="provider" .value=${this._connectionId} ?disabled=${this._busy || this._loading || !this._options?.providers.length}
+            @change=${(e) => {
+			this._reset(), this._connectionId = e.target.value;
+		}}>
+            ${this._options?.providers.length ? O : E`<option value="">${this._loading ? "Loading providers…" : "No local provider available"}</option>`}
+            ${this._options?.providers.map((e) => E`<option value=${e.connection_id}>${e.title}</option>`)}
+          </select></div>
+        <button type="button" ?disabled=${this._busy || this._loading} @click=${() => void this._load()}>Refresh providers</button>
+        <button type="button" @click=${() => {
+			let e = this._busy;
+			this._reset(), e && (this._notice = "Conversation cleared. The pending provider request may still finish; its reply will be discarded.");
+		}}>New chat</button>
+      </section>
+      <div class="privacy"><strong>Destination: ${e ? `${e.title} · Local` : "Choose a local provider"}</strong><br>
+        Only messages in this conversation are sent when you press Send. No household context or device actions.
+        History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
+        ${e ? E`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : O}
+      </div>
+      ${!this._loading && this._options?.providers.length === 0 ? E`<p>Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : O}
+      <div class="transcript" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
+        ${this._history.length === 0 && !this._busy ? E`<div class="empty"><h2>A fresh conversation</h2><p>For example: “Draft a friendly reminder to close a window.”<br>This chat can write the words; it cannot check or control devices.</p></div>` : O}
+        ${this._history.map((e) => E`<article class="message ${e.role}"><strong>${e.role === "user" ? "You" : "AI reply"}</strong><p>${e.content}</p></article>`)}
+        ${this._busy ? E`<article class="message user"><strong>You</strong><p>${this._pendingPrompt}</p></article><p class="pending" role="status">Waiting for your local provider…</p>` : O}
+      </div>
+      ${this._error ? E`<div class="error" role="alert">${this._error}</div>` : O}
+      ${this._notice ? E`<p class="notice" role="status">${this._notice}</p>` : O}
+      <form class="compose" @submit=${(e) => void this._send(e)}>
+        <label for="message">Your message</label>
+        <textarea id="message" maxlength=${q.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+          placeholder="Ask your local AI…" aria-describedby="compose-hint"
+          @input=${(e) => {
+			this._draft = e.target.value;
+		}}
+          @keydown=${(e) => {
+			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
+		}}></textarea>
+        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${q.max_message_chars} · Ctrl/⌘ + Enter to send</span>
+          <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !e || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>
+      </form>
+    </div>`;
+	}
+}, bt = "ai-orchestrator-panel", Q = [
 	{
 		id: "home",
 		label: "Home"
@@ -1972,12 +2254,12 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 		id: "settings",
 		label: "Settings"
 	}
-], st = {
+], xt = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, ct = {
+}, St = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -2007,11 +2289,11 @@ var rt = "/config/integrations/integration/ai_orchestrator", it = {
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function lt(e) {
+function Ct(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
-	return $.find((e) => e.id === t)?.id;
+	return Q.find((e) => e.id === t)?.id;
 }
-var ut = class extends V {
+var wt = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -2023,7 +2305,7 @@ var ut = class extends V {
 		_probeLoadState: { state: !0 },
 		_probeResult: { state: !0 }
 	};
-	static styles = Ie;
+	static styles = He;
 	_hasRequested = !1;
 	_requestSequence = 0;
 	constructor() {
@@ -2034,7 +2316,7 @@ var ut = class extends V {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = lt(this.route);
+			let e = Ct(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
@@ -2042,19 +2324,19 @@ var ut = class extends V {
 		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus());
 	}
 	render() {
-		return M`
+		return E`
       <div class="app-frame ${this.narrow ? "narrow" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._activeSection === "chat" ? E`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
     `;
 	}
 	_renderSidebar() {
-		return M`
+		return E`
       <aside class="sidebar">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">AI</span>
@@ -2065,11 +2347,11 @@ var ut = class extends V {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${$.map((e) => M`
+          ${Q.map((e) => E`
               <button
                 class="nav-button"
                 type="button"
-                aria-current=${this._activeSection === e.id ? "page" : P}
+                aria-current=${this._activeSection === e.id ? "page" : O}
                 @click=${() => this._selectSection(e.id)}
               >
                 <span class="nav-marker" aria-hidden="true"></span>
@@ -2079,24 +2361,23 @@ var ut = class extends V {
         </nav>
 
         <div class="sidebar-note">
-          <strong>Explicit provider tests only</strong>
-          Status and provider lists stay inside Home Assistant. A provider is contacted only after
-          an administrator selects Test connection; no entity state or prompt is sent.
+          <strong>Local AI, explicit requests</strong>
+          Chat sends only your conversation to the selected local provider. Browsing the entity
+          catalogue sends no household context to AI. Device actions remain unavailable.
         </div>
       </aside>
     `;
 	}
 	_renderHome() {
 		let e = this._statusHeading();
-		return M`
+		return E`
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
           <h1>Build from a verified foundation</h1>
           <p class="page-intro">
-            This shell reports only what the installed integration confirms. Provider setup,
-            entity access, workflows, chat, and actions stay unavailable until their evidence and
-            safety gates pass.
+            Set up a local provider, browse your entity catalogue, and try a read-only chat.
+            Workflow execution, device permissions, and Assist remain in development.
           </p>
         </div>
         <span class="privacy-badge">Local status check only</span>
@@ -2111,7 +2392,7 @@ var ut = class extends V {
           <h2 id="foundation-status">${e.title}</h2>
           <p class="hero-description">${e.detail}</p>
           ${this._renderStatusAction()}
-          ${this._loadState === "loading" ? M`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : P}
+          ${this._loadState === "loading" ? E`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : O}
         </div>
         <div class="connection-summary" aria-label="Connection summary">
           <p class="summary-label">Home Assistant</p>
@@ -2138,17 +2419,17 @@ var ut = class extends V {
     `;
 	}
 	_renderFeatureCard() {
-		return M`
+		return E`
       <section class="card" aria-labelledby="feature-status-heading">
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${H.map((e) => {
+          ${I.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
-			return M`
+			return E`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${st[e]}</span>
+                  <span class="status-name">${xt[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -2162,7 +2443,7 @@ var ut = class extends V {
     `;
 	}
 	_renderNextSteps() {
-		return M`
+		return E`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
         <p class="card-intro">Each capability opens only after its own verification gate.</p>
@@ -2185,8 +2466,8 @@ var ut = class extends V {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = ct[e], n = $.find((t) => t.id === e)?.label ?? "Section";
-		return M`
+		let t = St[e], n = Q.find((t) => t.id === e)?.label ?? "Section";
+		return E`
       <header class="page-header">
         <div>
           <p class="eyebrow">${n}</p>
@@ -2209,7 +2490,7 @@ var ut = class extends V {
     `;
 	}
 	_renderWorkflowProbe() {
-		return M`
+		return E`
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>
@@ -2250,7 +2531,7 @@ var ut = class extends V {
     `;
 	}
 	_renderProviders() {
-		return M`
+		return E`
       <header class="page-header">
         <div>
           <p class="eyebrow">Providers</p>
@@ -2267,7 +2548,7 @@ var ut = class extends V {
     `;
 	}
 	_renderCatalog() {
-		return M`
+		return E`
       <header class="page-header">
         <div>
           <p class="eyebrow">Entities & Permissions</p>
@@ -2283,20 +2564,20 @@ var ut = class extends V {
     `;
 	}
 	_renderWorkflowProbeResult() {
-		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? M`
+		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? E`
         <strong>One trigger produced exactly one execution.</strong>
         <span>
           Runtime execution ${this._probeResult.execution_count}; listener registration
           ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
           called: no.
         </span>
-      ` : this._probeLoadState === "error" ? M`
+      ` : this._probeLoadState === "error" ? E`
         <strong>The lifecycle probe was not confirmed.</strong>
         <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
-      ` : this._probeLoadState === "loading" ? M`<span>Waiting for the bounded integration response.</span>` : M`<span>No lifecycle probe has run in this panel session.</span>`;
+      ` : this._probeLoadState === "loading" ? E`<span>Waiting for the bounded integration response.</span>` : E`<span>No lifecycle probe has run in this panel session.</span>`;
 	}
 	_renderStatusAction() {
-		return this._loadState === "loading" ? P : this._loadState === "ready" && this._status?.configured === !1 ? M`
+		return this._loadState === "loading" ? O : this._loadState === "ready" && this._status?.configured === !1 ? E`
         <div class="hero-actions">
           <button class="secondary-button" type="button" @click=${this._refreshStatus}>
             Check again
@@ -2306,11 +2587,11 @@ var ut = class extends V {
 			"denied",
 			"incompatible",
 			"error"
-		].includes(this._loadState) ? M`
+		].includes(this._loadState) ? E`
         <div class="hero-actions">
           <button class="primary-button" type="button" @click=${this._refreshStatus}>Retry status check</button>
         </div>
-      ` : P;
+      ` : O;
 	}
 	_statusHeading() {
 		return this._loadState === "loading" ? {
@@ -2371,12 +2652,12 @@ var ut = class extends V {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await De(e);
+			let n = await Ne(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof U ? "incompatible" : Oe(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof L ? "incompatible" : Pe(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -2387,12 +2668,12 @@ var ut = class extends V {
 		}
 		this._probeLoadState = "loading", this._probeResult = void 0;
 		try {
-			this._probeResult = await Fe(e), this._probeLoadState = "ready";
+			this._probeResult = await Ve(e), this._probeLoadState = "ready";
 		} catch {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, dt = "ai-orchestrator-providers-view", ft = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(ot, ut), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(dt, Q), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(ft, Ge);
+}, Tt = "ai-orchestrator-providers-view", $ = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(_t, yt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(bt, wt), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Tt, K), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define($, Ze);
 //#endregion
-export { ut as AiOrchestratorPanel, ft as CATALOG_VIEW_TAG, Ge as CatalogView, ot as PANEL_TAG, dt as PROVIDERS_VIEW_TAG, Q as ProvidersView };
+export { wt as AiOrchestratorPanel, $ as CATALOG_VIEW_TAG, _t as CHAT_VIEW_TAG, Ze as CatalogView, yt as ChatView, bt as PANEL_TAG, Tt as PROVIDERS_VIEW_TAG, K as ProvidersView };

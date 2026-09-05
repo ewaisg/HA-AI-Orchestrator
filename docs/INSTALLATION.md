@@ -1,14 +1,23 @@
 # Manual installation and current usage
 
-Status: Phase 0 foundation preview
+Status: Phase 1 local-provider preview; LOC-006 chat is test-ready and awaiting live acceptance.
 
 The current repository supports a manual-copy Home Assistant installation.
 HACS installation and updating are not yet validated or claimed.
 
+Use the exact candidate and artifact identified in the [tracker](PROJECT-TRACKER.md)
+and [LOC-006 evidence](evidence/2026-09-05-loc-006-local-chat.md). An arbitrary
+checkout is not evidence of a tested installation. Historical live acceptance
+targets Core 2026.8.3; the owner's current Core 2026.9.0/Frontend 20260826.4
+environment is undergoing `COMP-001` validation. No broader compatibility
+range is claimed.
+
 ## Install
 
-1. Download or clone `https://github.com/ewaisg/HA-AI-Orchestrator`.
-2. Copy the complete repository folder
+1. Obtain the reviewed manual-copy artifact for the named candidate from
+   `https://github.com/ewaisg/HA-AI-Orchestrator` or the linked candidate evidence.
+   Keep an existing backup and the previous integration artifact for rollback.
+2. Copy the complete artifact folder
    `custom_components/ai_orchestrator` into the Home Assistant configuration
    directory as `/config/custom_components/ai_orchestrator`.
 3. Confirm that the final manifest path is exactly
@@ -25,18 +34,74 @@ access method such as Samba Share or Studio Code Server. Provider credentials,
 Home Assistant secrets, and household data do not belong in the repository or
 the integration directory.
 
-## Expected behavior
+## Provider setup and testing
 
-The Home page reports the authenticated foundation status. The expected feature
-states are all unavailable:
+After creating the foundation entry, add **AI Orchestrator** again from
+Home Assistant's integration setup to create a provider connection. Select
+**LM Studio** and enter the actual server base URL, API token, and configured
+model identifier. The adapter requires a private LAN IP address; public
+addresses, hostnames, credentials in URLs, and custom URL paths are rejected.
+Use the token value without a `Bearer` prefix. Setup validates authentication
+and the configured model against the server's model list.
 
-- Provider connections
-- Workflow runtime
-- Conversation agent
-- AI Task entity
+The **Providers** panel lists loaded connections. **Test connection** checks
+reachability, authentication, and the configured model without sending a prompt
+or household context. It does not prove text-generation, streaming, tool, or
+structured-output capabilities. A connection shows **Not tested** until an
+explicit test completes in the current runtime; reload/restart resets that
+observation. Stored credentials are handled through Home Assistant's backend
+config/re-auth/reconfigure flows and are not returned to this panel.
 
-The remaining navigation sections are intentional placeholders. The foundation
-does not contact an AI destination or execute a Home Assistant action.
+## Read-only chat candidate
+
+After installing matching LOC-006 backend and panel files:
+
+1. Open **Chat**, select a loaded local provider, and read its destination and
+   access disclosure. The model's generation capability is explicitly unverified.
+2. Enter a harmless text request, such as drafting a reminder, and press **Send**
+   or **Ctrl/Command + Enter**. The backend contacts that local provider only.
+3. Continue with a follow-up message or select **New chat** to clear the view.
+
+Chat sends a fixed assistant instruction and the conversation supplied in the
+view. It reads no household state, attaches no catalogue data, exposes no tools,
+and executes no device action. It does not use cloud failover or automatic
+retries. A complete reply appears after generation; streaming is unavailable.
+
+Requests contain at most 21 messages, 4,000 characters per message, and 16,000
+conversation characters. Replies are limited to 4,000 characters and provider
+work has a 60-second deadline. Counts use browser text units, so some emoji
+count as two. Earlier complete turns are omitted when needed
+to stay within the conversation limit, with a notice in the view. One request
+per administrator and four requests across the integration may run at once.
+
+History stays in the open chat view and is cleared by **New chat**, a provider
+change, leaving the view, or losing/changing the Home Assistant user/connection
+context. No transcript is saved to browser storage or integration storage.
+The future persistent-history defaults in DEC-018 are not implemented here.
+This does not establish the LM Studio server's own logging or retention policy.
+
+Clearing while waiting discards the eventual reply; the provider request may
+continue until completion or its deadline. Wait before sending again if the
+backend reports that the previous request is still running. A failed generation
+keeps the draft for an explicit retry. Unloading its provider cancels the
+integration's owned generation task.
+
+These instructions describe the implemented candidate. Its live chat acceptance
+is recorded separately in the linked LOC-006 evidence; implementation and
+automated checks alone do not establish a successful live model reply.
+
+## Catalogue and foundation status
+
+**Entities & Permissions** is currently a read-only registry catalogue: entity,
+device, and area metadata, relationships, availability, and search. It omits
+state values and attributes. Every entity displays **AI access: none**; this
+screen cannot grant access or run actions.
+
+The Home page reports authenticated foundation status. **Provider connections**
+is available only when a provider entry is loaded. **Workflow runtime**,
+**Conversation agent**, and **AI Task entity** remain unavailable. The
+Conversation agent flag refers to the future native Assist integration, not
+the LOC-006 panel chat.
 
 The Automations section may expose the Phase 0 **lifecycle probe**. That bounded
 test fires one integration-owned internal event and increments an in-memory
@@ -44,19 +109,26 @@ counter. A valid result reports exactly one execution for the trigger, no
 provider contact, and no Home Assistant action call. It is not a published
 automation or the product workflow runtime.
 
+Voice/notification configuration, activity/security, and full settings remain
+planned. No panel feature currently executes a device action.
+
 ## Troubleshooting
 
 - If Home Assistant cannot find the integration, verify the exact manifest path
   and restart Home Assistant again.
-- Only one foundation config entry is permitted. Until a real provider adapter
-  is installed by a later phase, a second setup attempt reports that no
-  provider adapters are available; it does not create placeholder provider
-  data.
-- The panel and status command require an administrator.
+- Only one foundation config entry is permitted. Later setup attempts create
+  provider entries; do not remove the foundation merely to add a provider.
+- The panel, provider/catalogue commands, and chat require an administrator.
+- If no provider appears, check that its config entry loaded successfully,
+  correct its connection/model/authentication issue, and refresh providers.
+- If chat reports a timeout or invalid response, shorten the request and retry
+  explicitly. A configured token in message content or reflected in the reply
+  is rejected; do not paste credentials into chat.
 - If the panel reports an unsupported status response, replace the whole
   `ai_orchestrator` directory from one repository revision; do not mix backend
   and frontend files from different revisions.
 - Check **Settings -> System -> Logs** for `ai_orchestrator` setup errors.
+  Keep tokens, private endpoints, and household text out of shared evidence.
 - If the lifecycle probe does not report exactly one execution for its trigger,
   treat the result as a failed compatibility check and do not infer that
   workflows are available.
@@ -69,8 +141,17 @@ if automatic registration fails; this evidence does not claim another version.
 
 ## Update and removal boundary
 
-Config-entry removal/reinstallation, reload, restart recovery, cache-bypassing
-refresh, YAML fallback, and restoration of automatic registration are validated
-on the named FND-011 target in
-`docs/evidence/2026-08-23-fnd-011-panel-lifecycle.md`. Android Companion App
-rendering is also confirmed. Core-upgrade evidence remains open.
+For an update, preserve the previous artifact, replace the complete integration
+directory from one reviewed candidate, restart Home Assistant, and refresh the
+panel so backend and frontend match. Follow the candidate's installation and
+verification record rather than mixing individual files. To roll back the code,
+restore the previous complete artifact and restart; any future storage migration
+needs its own documented downgrade/restore procedure.
+
+Historical config-entry removal/reinstallation, reload, restart recovery,
+cache-bypassing refresh, YAML fallback, restoration of automatic registration,
+and Android Companion rendering are recorded for the named FND-011 target in
+[the lifecycle evidence](evidence/2026-08-23-fnd-011-panel-lifecycle.md).
+They do not approve the changed chat candidate or Core 2026.9.0.
+Updated lifecycle, desktop/mobile, provider, chat, and scoped-log acceptance
+remain governed by the tracker and candidate evidence.

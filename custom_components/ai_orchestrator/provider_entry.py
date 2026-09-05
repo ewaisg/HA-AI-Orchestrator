@@ -37,11 +37,18 @@ class ProviderConfigMode(StrEnum):
     RECONFIGURE = "reconfigure"
 
 
+class ChatDestination(StrEnum):
+    """Destinations eligible for an explicit administrator read-only chat trial."""
+
+    LOCAL = "local"
+
+
 class ProviderEntryAdapter(Protocol):
     """Provider-specific configuration behind the shared entry lifecycle."""
 
     provider_type: str
     display_name: str
+    chat_destination: ChatDestination | None
 
     def config_schema(
         self,

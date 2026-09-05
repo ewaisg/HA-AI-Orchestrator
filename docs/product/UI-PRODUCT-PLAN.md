@@ -1,15 +1,38 @@
 # HA AI Orchestrator — UI and Product Plan
 
-Status: Draft for product review
+Status: Product design baseline; Phase 1 implementation and acceptance are active
 Audience: Product, frontend, Home Assistant integration, provider/API, security, and QA contributors
 Scope: Private, single-household Home Assistant AI orchestration product
-Implementation status: Not started
+Implementation status: Provider setup/testing and read-only catalogue implemented; LOC-006 administrator chat is test-ready and awaiting live acceptance
 
 ## 1. Purpose
 
 HA AI Orchestrator should let a Home Assistant user configure AI providers and build safe, useful AI-enhanced automations without routinely editing YAML. It should feel native to Home Assistant while making provider routing, data exposure, permissions, model decisions, and executed actions understandable.
 
-This document defines the product experience and frontend architecture for review. It does not authorize implementation or settle the explicitly listed unknowns.
+This document defines the complete product experience and frontend architecture.
+The implementation snapshot below describes current code; the remaining
+experience, screen, and acceptance specifications are planned targets unless
+explicitly identified as implemented. The [tracker](../PROJECT-TRACKER.md)
+records authoritative task status, and [decisions](../DECISIONS.md) override
+historical open questions here. This plan does not independently authorize
+cloud account access or device actions.
+
+### 1.1 Current implementation snapshot
+
+| Surface | Implemented scope | Remaining boundary |
+|---|---|---|
+| Home | Administrator status and loaded-provider availability | Operational workflow/activity overview is planned |
+| Providers | Home Assistant backend setup/re-auth/reconfigure for authenticated local LM Studio; list and explicit timestamped connection test | Capability wizards, cloud providers, route editor, and dependency management are planned |
+| Entities & Permissions | Searchable read-only entity/device/area registry metadata and availability; `AI access: none` everywhere | No state values, attributes, context selection, or permission grants |
+| Chat | LOC-006 administrator local text trial with provider selector, complete replies, safe errors, keyboard submit, and bounded session-only history | No household context, tools/actions, streaming, profiles, Assist, or persistent history; live candidate acceptance pending |
+| Automations | Action-free internal lifecycle probe with an in-memory execution count | Product workflow schema, runtime, and visual studio are planned |
+| Other sections | Navigation and scope placeholders | Voice/notifications, activity/security, and full settings are planned |
+
+The panel uses TypeScript/Lit and one bundled module. Historical live acceptance
+names Core 2026.8.3 and Frontend 20260729.7; the owner's now-installed Core
+2026.9.0 and Frontend 20260826.4 are under `COMP-001` validation. Neither that
+discovery nor historical mobile evidence approves the changed chat candidate.
+See [LOC-006 candidate evidence](../evidence/2026-09-05-loc-006-local-chat.md).
 
 ## 2. Product principles
 
@@ -26,7 +49,7 @@ This document defines the product experience and frontend architecture for revie
 
 Primary user: the Home Assistant administrator who owns and operates the private installation.
 
-Secondary user: a household member permitted to use selected chat or voice profiles but not to administer providers, workflows, credentials, or security policy.
+Planned secondary user: a household member permitted to use selected chat or voice profiles but not to administer providers, workflows, credentials, or security policy. The current panel and LOC-006 chat are administrator-only.
 
 Confirmed product assumptions from the approved architecture:
 
@@ -108,7 +131,13 @@ The user may exit after any stage. Home should display `Continue setup` until mi
 
 ### 5.2 Minimum readiness
 
-The product is ready for read-only chat when:
+For the implemented LOC-006 trial, a loaded local provider is selected directly.
+The view discloses that generation capability is unverified and only sends text
+after an explicit administrator submission. No profile, context permission
+editor, or routing policy editor is required for this restricted trial.
+Its live readiness still depends on the candidate's acceptance evidence.
+
+The planned profile-based chat experience is ready when:
 
 - At least one provider connection passes its connection test.
 - At least one usable model is selected and its required capability is verified or explicitly marked as a user override.
@@ -159,7 +188,15 @@ Provider-specific fields appear only when relevant.
 
 ### 6.3 OpenAI-compatible / LM Studio
 
-UI fields:
+The implemented adapter accepts a private LAN IP base URL, required API token,
+and explicit model identifier through Home Assistant's backend form. It uses
+the selected model already served by LM Studio. It has no arbitrary custom
+headers, public/hostname endpoints, model load/unload management, adjustable
+timeout, or TLS-verification override. Connection testing proves only the
+connection/authentication/configured-model lookup; generation is an explicit
+LOC-006 trial and other capabilities remain unverified.
+
+Planned field categories, subject to later adapter and security review:
 
 - Display name.
 - Base URL.
@@ -415,9 +452,35 @@ Conflicts resolve to the more restrictive rule. The UI must show the rule respon
 
 ### 8.4 Sensitive data
 
-The frontend must provide sensitivity controls for entity values and attributes. Default sensitivity rules are an unresolved product decision and must be validated against the user's system before shipping. Until then, the safe default is no cloud exposure unless explicitly granted.
+The planned frontend must provide sensitivity controls for entity values and
+attributes. DEC-017 establishes local-only workflow defaults, and DEC-019
+excludes credentials, cameras, precise location, person/presence data,
+calendars, locks, alarms, and garage/security state from cloud routes by default.
+Credentials remain prohibited from provider payload content. Actual context
+selectors and exception enforcement still require implementation and live
+validation. The current catalogue grants no AI access and LOC-006 attaches no
+household data.
 
 ## 9. Chat experience
+
+The current LOC-006 candidate provides a local connection selector, destination
+and no-context/action disclosure, plain-text complete replies, a draft preserved
+on generation failure, keyboard submission, and **New chat**. Requests allow
+at most 21 messages, 4,000 characters per message, and 16,000 conversation
+characters; replies are bounded to 4,000 characters with a 60-second backend
+deadline. Backend and frontend count UTF-16 units consistently. Older complete
+turns are omitted with a notice when necessary.
+Duplicate submissions are blocked, with one in-flight request per administrator
+and four across the integration.
+
+History is in-memory only and clears on leaving the view, provider changes,
+**New chat**, and Home Assistant context loss/change. Clearing a pending reply
+discards it from the view but is not a stop-generation request; provider work
+may finish before the backend deadline. Provider unload cancels owned work.
+No persistent transcript, tool cards, entity citations, action confirmation,
+streaming, or native ConversationEntity/Assist surface is implemented here.
+
+Sections 9.1 through 9.3 specify the planned profile/action-capable experience.
 
 ### 9.1 Chat profile
 
@@ -541,7 +604,11 @@ Repair items link directly to the relevant screen and preserve unsaved work wher
 
 Settings include retention periods for chat, execution traces, and payload details. The UI explains what is retained in Home Assistant and what may be retained by external providers. Deletion scope and recoverability must be stated before confirmation.
 
-Unknown: storage limits and default retention periods require backend performance testing and user approval.
+DEC-018 accepts 30-day chat content and 90-day execution metadata defaults for
+the future persistent storage implementation. Capacity, deletion, recovery,
+write-frequency, and provider-side retention behavior still require evidence.
+LOC-006 uses session-only history and does not implement those persistence
+defaults or retention settings.
 
 ## 12. Responsive behavior
 
@@ -736,6 +803,11 @@ The following are release-level criteria unless assigned to a later phase.
 
 ## 17. Phase-aligned UI deliverables
 
+This roadmap is a product target, not a completion checklist. The tracker
+defines each phase's current acceptance scope. In particular, the current
+Phase 1 catalogue does not grant entity read access, and the chat candidate
+has no household context or persistent diagnostics/history UI.
+
 | Phase | UI deliverables |
 |---|---|
 | 0 — Architecture spike | Panel shell, navigation prototype, typed WebSocket proof, object schemas, target-resolution proof, accessibility baseline |
@@ -749,29 +821,33 @@ Each phase requires design review, implementation acceptance criteria, and test 
 
 ## 18. Open product and technical decisions
 
-These items must remain tracked as unknown until answered with user input, live system discovery, implementation evidence, or current authoritative documentation.
+The table preserves original decision IDs and records subsequent resolutions.
+Unresolved portions remain tracked until answered with user input, live system
+discovery, implementation evidence, or current authoritative documentation.
 
 | ID | Decision/unknown | Needed evidence or owner |
 |---|---|---|
 | UI-001 | Final product name and sidebar label | User decision |
-| UI-002 | Target Home Assistant version and frontend compatibility range | Live installation/version plus HA documentation |
+| UI-002 | Target Home Assistant version and frontend compatibility range | Historical target Core 2026.8.3/Frontend 20260729.7; Core 2026.9.0/Frontend 20260826.4 now observed, with COMP-001 acceptance open; no broader range claimed |
 | UI-003 | Exact entities, devices, areas, actions, notification targets, and Assist pipelines available | Live Home Assistant discovery; do not assume |
 | UI-004 | First-release Azure account/resource type, endpoint, models, and authentication | User account details plus live Microsoft documentation/test |
 | UI-005 | First-release AWS account, region, model access, and IAM/authentication method | User account details plus live AWS documentation/test |
 | UI-006 | LM Studio model lifecycle scope (consume only versus manage load/unload) | User preference plus supported API validation |
-| UI-007 | Default sensitive entity/attribute policy | Security review and user approval |
+| UI-007 | Default sensitive entity/attribute policy | Defaults accepted in DEC-017/DEC-019; selectors, enforcement, and any exceptions require implementation evidence |
 | UI-008 | High-risk and critical action classification details | Security review against discovered HA action catalog |
 | UI-009 | Confirmation delivery beyond the panel | HA/Companion App capability proof and user preference |
-| UI-010 | Execution/chat retention defaults and storage limits | Backend performance test and user approval |
-| UI-011 | Whether workflow templates can create native HA automation artifacts or remain internal only | Architecture/product decision |
+| UI-010 | Execution/chat retention defaults and storage limits | Defaults accepted in DEC-018: chat 30 days, execution metadata 90 days; persistence/storage limits remain unimplemented; LOC-006 is session-only |
+| UI-011 | Whether workflow templates can create native HA automation artifacts or remain internal only | DEC-009 selects the integration-owned deterministic v1 runtime; workflow implementation starts in Phase 2 |
 | UI-012 | Required localization languages | User decision |
 | UI-013 | Browser/device accessibility test matrix | User environment and QA decision |
 | UI-014 | Whether a free-form flow canvas is needed after the structured builder | Usage evidence after MVP |
-| UI-015 | Whether per-user chat history and voice authorization are feasible | HA user-context/Assist integration proof |
+| UI-015 | Whether per-user chat history and voice authorization are feasible | LOC-006 isolates an administrator's in-memory view and pending requests; persistent/non-admin history and Assist authorization remain planned |
 
-## 19. Review gate before implementation
+## 19. Design review for remaining implementation
 
-Implementation should begin only after the following are reviewed together:
+For remaining profile, workflow, permission, cloud, and voice surfaces, review
+the following against the implemented boundary and accepted decisions before
+expanding capabilities:
 
 - Information architecture and first-run flow.
 - Structured Automation Studio direction.

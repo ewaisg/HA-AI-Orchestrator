@@ -20,6 +20,8 @@ WORKFLOW_PROBE_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflow/probe/run"
 PROVIDER_LIST_WEBSOCKET_TYPE: Final = f"{DOMAIN}/providers/list"
 PROVIDER_TEST_WEBSOCKET_TYPE: Final = f"{DOMAIN}/providers/test"
 CATALOG_LIST_WEBSOCKET_TYPE: Final = f"{DOMAIN}/catalog/list"
+CHAT_OPTIONS_WEBSOCKET_TYPE: Final = f"{DOMAIN}/chat/options"
+CHAT_SEND_WEBSOCKET_TYPE: Final = f"{DOMAIN}/chat/send"
 
 PANEL_ELEMENT_NAME: Final = "ai-orchestrator-panel"
 PANEL_FILENAME: Final = "ai-orchestrator-panel.js"

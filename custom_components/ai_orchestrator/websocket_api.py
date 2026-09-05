@@ -8,6 +8,7 @@ from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 
 from .catalog import build_catalog_snapshot
+from .chat import websocket_chat_options, websocket_chat_send
 from .const import (
     CATALOG_LIST_WEBSOCKET_TYPE,
     DOMAIN,
@@ -307,3 +308,5 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_provider_list)
     websocket_api.async_register_command(hass, websocket_provider_test)
     websocket_api.async_register_command(hass, websocket_catalog_list)
+    websocket_api.async_register_command(hass, websocket_chat_options)
+    websocket_api.async_register_command(hass, websocket_chat_send)
