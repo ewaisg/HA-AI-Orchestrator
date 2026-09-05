@@ -1,7 +1,7 @@
 # LOC-006: local chat test candidate
 
-Date: 2026-09-05. Status: **REVIEW — implementation and independent pre-live
-review complete; live generation acceptance pending.**
+Date: 2026-09-05. Status: **DONE — implementation, independent pre-live review,
+and live generation acceptance complete.**
 
 ## Delivered behavior
 
@@ -103,4 +103,27 @@ files, all bytes verified; restart required` and the exact new bundle hash above
 Rollback directory in the File editor mount:
 `/homeassistant/.ai-orchestrator-backups/before-loc006-3pcm8d5v/ai_orchestrator`.
 Restore that directory as the integration and restart Core if needed. No storage
-migration is included. Core restart and live generation are the next checks.
+migration is included.
+
+## Live generation acceptance observed
+
+Performed against the owner's authenticated Home Assistant instance (Core
+2026.9.0) through the browser session the owner supplied. No credential,
+household identifier, or endpoint was recorded here.
+
+| Check | Observed result |
+|---|---|
+| Panel loads and provider list resolves | Chat view opened with no console error scoped to `ai_orchestrator`; provider dropdown resolved from "Loading providers…" to a single configured local provider automatically |
+| First harmless prompt | Sent "Say hello in one short sentence."; an actual generated reply "Hello!" was rendered under "AI reply" after a brief wait state |
+| Follow-up with bounded context | Sent "What did I just ask you to say?" in the same session; the reply was "I was asked to say \"hello\" in one short sentence.", proving prior-turn context reached the provider correctly and only through the conversation, not device state |
+| New chat reset | Pressing "New chat" cleared both prior turns and restored the "A fresh conversation" empty state |
+| Provider health / manual test | Providers view showed the configured local provider status "Healthy" with a prior timestamp; pressing "Test connection" produced a fresh "Connection test passed" status and an updated timestamp |
+| Catalogue health (unrelated regression check) | Entities & Permissions view reported 2,193 entities, 173 devices, 19 areas, "AI access: none", matching the previously recorded read-only inventory with no state values exposed |
+| Scoped logs | No JavaScript console error attributable to the `ai-orchestrator-panel` bundle or `ai_orchestrator` WebSocket commands was observed during panel load, chat send/receive, provider test, or catalogue navigation; unrelated dashboard resource warnings predate panel navigation and are outside this integration's scope |
+
+Only the typed conversation reached the provider; no entity state, device
+action, or household registry data was included in either chat request. This
+satisfies the LOC-006 outstanding live acceptance gate recorded above. LOC-006
+is now `DONE`. LOC-007 (Phase 1 release gate) may proceed; LOC-003 through
+LOC-005 and COMP-001 retain their own separately tracked live acceptance items
+recorded elsewhere in this evidence trail and the tracker.
