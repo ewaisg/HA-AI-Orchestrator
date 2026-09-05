@@ -36,3 +36,18 @@ Live acceptance must record a redacted inventory sample on Core `2026.8.3`, desk
 ## Acceptance status
 
 `REVIEW — LIVE ACCEPTANCE REQUIRED`. The exact code candidate has both independent synthetic/pre-live approvals. It is not `DONE`, installed, or live-verified. Manifest: `docs/evidence/manifests/LOC-005/LOC-005-REGISTRY-CATALOG-002.json`.
+
+## 2026-09-05 live inventory, search, refresh, and rendering acceptance
+
+Performed through the browser session on the owner's authenticated Home Assistant instance (Core 2026.9.0). No household entity name, device name, or area name was recorded; only bounded counts and structural behavior are reported.
+
+| Check | Observed result |
+|---|---|
+| Redacted live inventory | The catalogue reported **2,193 entities, 173 devices, 19 areas**, `AI access: none`, consistent across two independent visits in this session |
+| Search by domain prefix | Filtering to `sensor.` narrowed the rendered row count; filtering to a nonexistent term (`ai_orchestrator`, which is not an entity ID prefix on this instance) correctly produced "No entities match this search." with zero rows, proving search is live-filtered rather than a static placeholder |
+| Refresh | Clearing the search and pressing "Refresh" issued a new registry read; post-refresh counts were unchanged at 2,193/173/19, showing stability across a real re-read |
+| Desktop rendering | At 1400×900, the table rendered up to hundreds of matched rows without layout defect |
+| Narrow/mobile-width rendering | At 390×844, `scrollWidth` equaled `clientWidth` (no horizontal overflow) while the catalogue view was active |
+| Scoped logs | No JavaScript console error was observed during search, refresh, or viewport resize |
+
+Rename, removal, disabled/unavailable-state, and area/device relationship-change checks require mutating a real registry entry and were not performed in this session to avoid an unreviewed household change. Companion App Android (native shell) rendering remains unobserved. Status remains `REVIEW — LIVE ACCEPTANCE REQUIRED` pending those items.

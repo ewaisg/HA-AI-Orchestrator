@@ -75,3 +75,17 @@ Exact code candidate `989917fd4229f528c142a9ecebeeea3934c394da` additionally rej
 The shared clean Git-archive Linux gate passed 340 full, 98 focused, 30 security/evidence/traceability, and 231 pure tests plus Ruff and canary. The frontend passed 95 browser tests plus lint, typecheck, build, sync, and byte identity; the bundle is 75,409 bytes with SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`. Independent workflow/safety and test/release reviewers approved the exact candidate for synthetic/pre-live acceptance.
 
 Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL`. Updated live runtime-reset/timestamp semantics, duplicate-click and transport behavior, desktop and Companion App Android rendering, reload/restart, and scoped logs remain. Manifest: `docs/evidence/manifests/LOC-004/LOC-004-PROVIDER-UI-002.json`.
+
+## 2026-09-05 runtime-reset and desktop/mobile rendering acceptance
+
+Performed through the browser session on the owner's authenticated Home Assistant instance (Core 2026.9.0). No credential, token, endpoint, or household identifier was recorded.
+
+| Check | Observed result |
+|---|---|
+| Runtime-reset semantics after config-entry reload | The Providers view reported "Not tested in this Home Assistant runtime" for the LM Studio connection immediately after a native config-entry Reload, proving the reviewed fix (no stale `healthy` label survives a runtime reset) holds against the live entry, not only synthetic fixtures |
+| Explicit test after reset | Pressing "Test connection" produced "Connection test passed" and a fresh `Last tested` timestamp, restoring "Healthy" |
+| Desktop rendering | At a 1400×900 viewport, the Providers view rendered the connection card, health badge, and timestamp with no layout defect |
+| Narrow/mobile-width rendering | At a 390×844 viewport (representative of a phone-sized Companion App layout), `document.documentElement.scrollWidth` equaled `clientWidth` (no horizontal overflow), and the same provider name, "Healthy" status, and timestamp text rendered correctly |
+| Scoped logs | No JavaScript console error was observed during reload, provider view navigation, viewport resize, or connection testing |
+
+Companion App Android rendering itself (the actual mobile app shell, not a resized desktop browser) remains unobserved and is not claimed here. Duplicate-click protection and a full Home Assistant Core restart (as opposed to config-entry reload) remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those items.

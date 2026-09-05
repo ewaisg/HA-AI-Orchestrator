@@ -68,3 +68,16 @@ The rebased candidate validates converted historical arguments before serializat
 Exact code candidate `989917fd4229f528c142a9ecebeeea3934c394da` passed the shared clean Git-archive Linux gate: 340 full tests, 98 focused Home Assistant/provider-contract/catalog tests, 30 security/evidence/traceability tests, 231 pure tests, Ruff format/lint, and canary. The frontend gate passed 95 browser tests and byte identity. Independent workflow/safety and test/release reviewers approved the exact candidate for synthetic/pre-live acceptance and found no LOC-003 regression.
 
 Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL`. Updated-candidate live provider/authentication validation, reload/unload/restart, safe timeout/cancellation where reproducible, foundation health, and scoped logs remain. Manifest: `docs/evidence/manifests/LOC-003/LOC-003-LM-STUDIO-ADAPTER-002.json`.
+
+## 2026-09-05 reload lifecycle acceptance
+
+Performed through the browser session on the owner's authenticated Home Assistant instance (Core 2026.9.0). No credential, token, endpoint, or household identifier was recorded.
+
+| Check | Observed result |
+|---|---|
+| Config-entry Reload action | Selecting Reload on the `LM Studio 594e2b2e` hub from `/config/integrations/integration/ai_orchestrator` produced the native confirmation "The integration was reloaded" with no error |
+| Post-reload runtime state | Immediately after reload, the Providers view correctly reported "Not tested in this Home Assistant runtime" rather than a stale "Healthy" status, confirming the reviewed runtime-reset behavior holds against the live config entry |
+| Post-reload connection test | Pressing "Test connection" produced "Connection test passed" and the status returned to "Healthy" with a fresh timestamp |
+| Scoped logs | No JavaScript console error was observed across the reload, panel reload, and test-connection sequence |
+
+This is config-entry **reload**, not a full Home Assistant Core process restart; the Core-restart check remains outstanding for LOC-003, along with cancellation/timeout reproduction and Companion App Android rendering. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those items.
