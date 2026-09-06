@@ -235,3 +235,52 @@ describe("read-only chat interaction",()=>{
     expect(results.violations.filter(v=>v.impact==="serious"||v.impact==="critical")).toEqual([]);
   });
 });
+
+describe("chat app-shell layout",()=>{
+  it("scrolls only the transcript, keeping controls and composer fixed",async()=>{
+    const view=await mount(fixture([]));
+    // Approximates a common phone viewport minus the Home Assistant toolbar.
+    view.style.height="640px"; view.style.width="360px";
+    const shell=view.shadowRoot?.querySelector<HTMLElement>(".chat");
+    const transcript=view.shadowRoot?.querySelector<HTMLElement>(".transcript");
+    if (!shell || !transcript) throw new Error("Missing chat shell");
+    // Fill the transcript so it must scroll.
+    for (let index=0; index<12; index+=1) {
+      await compose(view,`Message ${index}`);
+      await submit(view);
+    }
+    const shellStyle=getComputedStyle(shell);
+    const transcriptStyle=getComputedStyle(transcript);
+    expect(shellStyle.display).toBe("flex");
+    expect(shellStyle.flexDirection).toBe("column");
+    // The transcript owns the overflow; the shell itself must not scroll.
+    expect(transcriptStyle.overflowY).toBe("auto");
+    expect(transcript.scrollHeight).toBeGreaterThan(transcript.clientHeight);
+    expect(shell.scrollHeight).toBeLessThanOrEqual(shell.clientHeight+1);
+  });
+
+  it("keeps the newest turn visible after a reply arrives",async()=>{
+    const view=await mount(fixture([]));
+    view.style.height="320px";
+    for (let index=0; index<10; index+=1) {
+      await compose(view,`Turn ${index}`);
+      await submit(view);
+    }
+    const transcript=view.shadowRoot?.querySelector<HTMLElement>(".transcript");
+    if (!transcript) throw new Error("Missing transcript");
+    // Auto-scroll pins the view to the bottom so the latest reply is on screen.
+    expect(transcript.scrollTop+transcript.clientHeight).toBeGreaterThanOrEqual(transcript.scrollHeight-2);
+  });
+
+  it("grows the composer with content and resets it after sending",async()=>{
+    const view=await mount(fixture([]));
+    const field=view.shadowRoot?.querySelector<HTMLTextAreaElement>("textarea");
+    if (!field) throw new Error("Missing composer");
+    const initial=field.getBoundingClientRect().height;
+    await compose(view,Array.from({length:12},(_v,i)=>`line ${i}`).join("\n"));
+    expect(field.getBoundingClientRect().height).toBeGreaterThan(initial);
+    await submit(view);
+    expect(field.value).toBe("");
+    expect(field.style.height).toBe("");
+  });
+});

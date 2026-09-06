@@ -30,43 +30,74 @@ export class ChatView extends LitElement {
   };
 
   public static override styles = css`
-    :host { display:block; color:var(--primary-text-color,#233642); font:inherit; }
+    :host { display:block; color:var(--primary-text-color,#233642); font:inherit; block-size:100%; min-block-size:0; }
     * { box-sizing:border-box; }
-    .chat { max-width:900px; margin:auto; }
-    header { margin-bottom:24px; }
-    .eyebrow { color:var(--secondary-text-color,#4b626d); text-transform:uppercase; font-size:12px; letter-spacing:.14em; font-weight:700; }
-    h1 { font-size:clamp(28px,4vw,40px); letter-spacing:-.035em; margin:8px 0; }
-    h2 { font-size:20px; }
+
+    /* App-shell layout: only .transcript scrolls; header/controls/compose stay fixed. */
+    .chat {
+      display:flex; flex-direction:column; min-height:0;
+      height:var(--ai-chat-height,100%);
+      width:100%; max-width:var(--ai-chat-max-width,860px); margin-inline:auto;
+    }
+    .chat > .transcript { flex:1 1 auto; min-height:0; }
+    .chat > header, .chat > .controls, .chat > .privacy,
+    .chat > .error, .chat > .notice, .chat > .compose, .chat > .setup-hint { flex:0 0 auto; }
+
+    header { margin:0 0 12px; }
+    .eyebrow { margin:0; color:var(--secondary-text-color,#4b626d); text-transform:uppercase; font-size:11px; letter-spacing:.14em; font-weight:700; }
+    h1 { font-size:clamp(20px,2.4vw,26px); letter-spacing:-.02em; margin:4px 0 0; }
+    h2 { font-size:18px; margin:0 0 6px; }
     p { line-height:1.6; }
-    .intro { margin:0; color:var(--secondary-text-color,#4b626d); }
-    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
+    .intro { display:none; }
+
+    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:10px; padding:10px 12px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:12px; }
     .provider { flex:1; min-width:0; }
-    label { display:block; font-weight:600; margin-bottom:8px; font-size:14px; }
-    select,textarea { width:100%; max-width:100%; min-width:0; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:9px; font:inherit; padding:12px; }
+    label { display:block; font-weight:600; margin-bottom:5px; font-size:12px; color:var(--secondary-text-color,#4b626d); }
+    select,textarea { width:100%; max-width:100%; min-width:0; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:9px; font:inherit; padding:9px 10px; }
     select { text-overflow:ellipsis; }
-    textarea { resize:vertical; min-height:110px; line-height:1.5; }
+    textarea { resize:none; min-height:52px; max-height:34vh; line-height:1.5; overflow:auto; }
     button,a { font:inherit; }
-    button { cursor:pointer; min-height:44px; border-radius:9px; padding:10px 16px; border:1px solid #7d969c; color:inherit; background:var(--card-background-color,#fff); font-weight:600; }
+    button { cursor:pointer; min-height:40px; border-radius:9px; padding:8px 14px; border:1px solid #7d969c; color:inherit; background:var(--card-background-color,#fff); font-weight:600; }
     button.primary { background:#175e56; color:#fff; border-color:#175e56; }
     button:disabled { opacity:.55; cursor:default; }
     button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
     a { color:#175e56; }
-    .privacy { padding:12px 2px; color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.6; }
-    .privacy strong { color:var(--primary-text-color,#233642); }
-    .transcript { min-height:220px; max-height:60vh; overflow:auto; padding:12px 4px; overscroll-behavior:contain; }
-    .empty { text-align:center; padding:32px 18px; color:var(--secondary-text-color,#4b626d); }
-    .message { border-radius:14px; padding:16px 18px; margin:0 0 16px; border:1px solid var(--divider-color,#ccd9da); background:var(--card-background-color,#fff); overflow-wrap:anywhere; }
-    .message.user { margin-left:32px; border-left:3px solid #207e73; }
-    .message.assistant { margin-right:32px; }
-    .message strong { font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
-    .message p { white-space:pre-wrap; margin:8px 0 0; }
-    .pending { color:var(--secondary-text-color,#4b626d); }
-    .error { background:#fff2ee; color:#852e23; border:1px solid #d7a79d; border-radius:10px; padding:12px 16px; margin:12px 0; line-height:1.5; }
-    .notice { color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.5; }
-    .compose { padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
-    .compose-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
-    .hint { font-size:12px; color:var(--secondary-text-color,#4b626d); }
-    @media(max-width:480px) { .controls,.compose { padding:12px; } .provider { flex-basis:100%; } .message.user { margin-left:12px; } .message.assistant { margin-right:12px; } .transcript { min-height:150px; } }
+
+    .privacy { padding:6px 2px; color:var(--secondary-text-color,#4b626d); font-size:12px; line-height:1.55; }
+    .privacy strong { color:var(--primary-text-color,#233642); font-weight:600; }
+    .privacy > summary { cursor:pointer; list-style:revert; padding:2px 0; }
+    .privacy > summary:focus-visible { outline:3px solid #207e73; outline-offset:3px; border-radius:6px; }
+    .privacy-detail { padding:6px 0 2px 2px; }
+    .setup-hint { margin:0 0 8px; }
+
+    .transcript { overflow-y:auto; overflow-x:hidden; padding:8px 2px; overscroll-behavior:contain; scrollbar-width:thin; }
+    .empty { text-align:center; padding:28px 18px; color:var(--secondary-text-color,#4b626d); }
+
+    .message { border-radius:14px; padding:12px 14px; margin:0 0 10px; border:1px solid var(--divider-color,#ccd9da); background:var(--card-background-color,#fff); overflow-wrap:anywhere; max-width:88%; }
+    .message.user { margin-left:auto; border-left:3px solid #207e73; }
+    .message.assistant { margin-right:auto; }
+    .message strong { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--secondary-text-color,#4b626d); }
+    .message p { white-space:pre-wrap; margin:6px 0 0; }
+    .pending { color:var(--secondary-text-color,#4b626d); margin:0 0 10px; font-size:13px; }
+    .error { background:#fff2ee; color:#852e23; border:1px solid #d7a79d; border-radius:10px; padding:10px 14px; margin:8px 0; line-height:1.5; }
+    .notice { color:var(--secondary-text-color,#4b626d); font-size:12px; line-height:1.5; margin:6px 0; }
+
+    .compose { padding:10px 12px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:12px; }
+    .compose label { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0; }
+    .compose-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; }
+    .hint { font-size:11px; color:var(--secondary-text-color,#4b626d); }
+
+    @media(max-width:900px) {
+      .chat { height:var(--ai-chat-height,100%); }
+      h1 { font-size:20px; }
+    }
+    @media(max-width:480px) {
+      .controls,.compose { padding:9px 10px; }
+      .provider { flex-basis:100%; }
+      .message { max-width:94%; }
+      .privacy { font-size:11px; padding:6px 2px; }
+      textarea { max-height:26vh; }
+    }
   `;
 
   public declare hass?: HomeAssistantLike;
@@ -221,6 +252,23 @@ export class ChatView extends LitElement {
     }
   }
 
+  /** Size the compose box to its content, bounded by the CSS max-height. */
+  private _autoGrow(field: HTMLTextAreaElement): void {
+    field.style.height = "auto";
+    field.style.height = `${field.scrollHeight}px`;
+  }
+
+  /** Keep the newest turn visible, like a normal chat client. */
+  protected override updated(changed: PropertyValues): void {
+    if (changed.has("_draft") && this._draft === "") {
+      const field = this.shadowRoot?.querySelector<HTMLTextAreaElement>("textarea");
+      if (field) field.style.height = "";
+    }
+    if (!changed.has("_history") && !changed.has("_busy")) return;
+    const transcript = this.shadowRoot?.querySelector<HTMLElement>(".transcript");
+    if (transcript) transcript.scrollTop = transcript.scrollHeight;
+  }
+
   protected override render(): TemplateResult {
     const provider = this._options?.providers.find((p) => p.connection_id === this._connectionId);
     return html`<div class="chat">
@@ -236,12 +284,15 @@ export class ChatView extends LitElement {
         <button type="button" ?disabled=${this._busy || this._loading} @click=${() => void this._load()}>Refresh providers</button>
         <button type="button" @click=${() => {const wasBusy = this._busy; this._reset(); if (wasBusy) this._notice = "Conversation cleared. The pending provider request may still finish; its reply will be discarded.";}}>New chat</button>
       </section>
-      <div class="privacy"><strong>Destination: ${provider ? `${provider.title} · Local` : "Choose a local provider"}</strong><br>
-        Only messages in this conversation are sent when you press Send. No household context or device actions.
-        History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
-        ${provider ? html`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : nothing}
-      </div>
-      ${!this._loading && this._options?.providers.length === 0 ? html`<p>Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : nothing}
+      <details class="privacy">
+        <summary><strong>Destination: ${provider ? `${provider.title} · Local` : "Choose a local provider"}</strong></summary>
+        <div class="privacy-detail">
+          Only messages in this conversation are sent when you press Send. No household context or device actions.
+          History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
+          ${provider ? html`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : nothing}
+        </div>
+      </details>
+      ${!this._loading && this._options?.providers.length === 0 ? html`<p class="setup-hint">Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : nothing}
       <div class="transcript" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
         ${this._history.length === 0 && !this._busy ? html`<div class="empty"><h2>A fresh conversation</h2><p>For example: “Draft a friendly reminder to close a window.”<br>This chat can write the words; it cannot check or control devices.</p></div>` : nothing}
         ${this._history.map((m) => html`<article class="message ${m.role}"><strong>${m.role === "user" ? "You" : "AI reply"}</strong><p>${m.content}</p></article>`)}
@@ -251,9 +302,9 @@ export class ChatView extends LitElement {
       ${this._notice ? html`<p class="notice" role="status">${this._notice}</p>` : nothing}
       <form class="compose" @submit=${(event:Event) => void this._send(event)}>
         <label for="message">Your message</label>
-        <textarea id="message" maxlength=${CHAT_LIMITS.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${CHAT_LIMITS.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
-          @input=${(event:Event) => {this._draft = (event.target as HTMLTextAreaElement).value;}}
+          @input=${(event:Event) => {const field = event.target as HTMLTextAreaElement; this._draft = field.value; this._autoGrow(field);}}
           @keydown=${(event:KeyboardEvent) => {if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) void this._send(event);}}></textarea>
         <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${CHAT_LIMITS.max_message_chars} · Ctrl/⌘ + Enter to send</span>
           <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !provider || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>

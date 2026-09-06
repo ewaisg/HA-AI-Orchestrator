@@ -79,6 +79,37 @@ describe("AI Orchestrator panel shell", () => {
     expect(shadowText(panel)).toContain("no stored secret");
   });
 
+  it("constrains only the chat section to the available panel height", async () => {
+    const panel = await mountPanel();
+    const navButton = (label: string): HTMLButtonElement | undefined =>
+      [...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? [])].find((button) =>
+        button.textContent?.includes(label),
+      );
+
+    // Non-chat sections must scroll normally and stay unconstrained.
+    expect(panel.classList.contains("chat-host")).toBe(false);
+    expect(panel.style.getPropertyValue("--orchestrator-shell-height")).toBe("");
+
+    navButton("Chat")?.click();
+    await panel.updateComplete;
+
+    // Chat becomes an app shell sized to the space Home Assistant actually gave
+    // the panel, so the composer cannot be pushed below the viewport.
+    expect(panel.classList.contains("chat-host")).toBe(true);
+    const height = panel.style.getPropertyValue("--orchestrator-shell-height");
+    expect(height).toMatch(/^\d+px$/u);
+    const available = window.innerHeight - panel.getBoundingClientRect().top;
+    expect(Number.parseInt(height, 10)).toBeLessThanOrEqual(Math.max(320, Math.ceil(available)) + 1);
+    expect(panel.shadowRoot?.querySelector(".app-frame")?.classList.contains("chat-mode")).toBe(true);
+
+    // Leaving chat releases the constraint again.
+    navButton("Home")?.click();
+    await panel.updateComplete;
+    expect(panel.classList.contains("chat-host")).toBe(false);
+    expect(panel.style.getPropertyValue("--orchestrator-shell-height")).toBe("");
+    expect(panel.shadowRoot?.querySelector(".app-frame")?.classList.contains("chat-mode")).toBe(false);
+  });
+
   it("opens the read-only registry catalogue with no AI permission", async () => {
     const panel = await mountPanel(
       createRoutedFakeHass({

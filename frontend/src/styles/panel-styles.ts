@@ -162,6 +162,47 @@ export const panelStyles = css`
     margin: 0 auto;
   }
 
+  /*
+   * Chat uses an app-shell layout: the frame fills the height Home Assistant
+   * gives the panel and only the transcript inside the chat view scrolls, so
+   * the compose box and controls stay fixed like a normal chat app.
+   *
+   * Home Assistant renders this panel below its own toolbar, so the panel host
+   * is not the full viewport. Prefer the host's own height and fall back to a
+   * dynamic-viewport height only when the host is not itself constrained.
+   */
+  :host(.chat-host) {
+    height: var(--orchestrator-shell-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-frame.chat-mode {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-frame.chat-mode .workspace {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    padding: clamp(14px, 2vw, 24px) clamp(14px, 3vw, 32px);
+  }
+
+  .app-frame.chat-mode .workspace-inner {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: min(980px, 100%);
+  }
+
+  .app-frame.chat-mode ai-orchestrator-chat-view {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
   .page-header {
     display: flex;
     align-items: flex-start;
@@ -589,6 +630,22 @@ export const panelStyles = css`
     .app-frame,
     .app-frame.narrow {
       display: block;
+    }
+
+    /* Mobile chat: header/nav stay put, only the transcript scrolls. */
+    .app-frame.chat-mode,
+    .app-frame.chat-mode.narrow {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-frame.chat-mode .sidebar {
+      flex: 0 0 auto;
+    }
+
+    .app-frame.chat-mode .workspace {
+      flex: 1 1 auto;
+      padding: 12px 12px 14px;
     }
 
     .sidebar {

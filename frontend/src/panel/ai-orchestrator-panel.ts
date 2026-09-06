@@ -127,6 +127,8 @@ export class AiOrchestratorPanel extends LitElement {
 
   public override disconnectedCallback(): void {
     this._requestSequence += 1;
+    window.removeEventListener("resize", this._onViewportChange);
+    window.visualViewport?.removeEventListener("resize", this._onViewportChange);
     super.disconnectedCallback();
   }
 
@@ -139,15 +141,45 @@ export class AiOrchestratorPanel extends LitElement {
     }
   }
 
+  /**
+   * Chat is an app-shell view: only its transcript scrolls. Home Assistant
+   * renders this panel below its own toolbar and does not guarantee a
+   * height-constrained parent, so `height: 100%` alone can collapse or
+   * overflow. Measure the host's offset from the viewport top instead, which
+   * adapts to any toolbar height without hard-coding one.
+   */
+  private _syncChatHeight(): void {
+    if (this._activeSection !== "chat") {
+      this.style.removeProperty("--orchestrator-shell-height");
+      return;
+    }
+    const top = this.getBoundingClientRect().top;
+    const available = Math.max(320, Math.round(window.innerHeight - top));
+    this.style.setProperty("--orchestrator-shell-height", `${available}px`);
+  }
+
+  private readonly _onViewportChange = (): void => { this._syncChatHeight(); };
+
+  public override connectedCallback(): void {
+    super.connectedCallback();
+    window.addEventListener("resize", this._onViewportChange, { passive: true });
+    window.visualViewport?.addEventListener("resize", this._onViewportChange, { passive: true });
+  }
+
   protected override updated(changed: PropertyValues<this>): void {
     if (changed.has("hass") && this.hass !== undefined && !this._hasRequested) {
       queueMicrotask(() => void this._refreshStatus());
     }
+    // Chat is the only section that owns the panel height; every other section
+    // scrolls normally, so the host constraint is applied only while in chat.
+    this.classList.toggle("chat-host", this._activeSection === "chat");
+    this._syncChatHeight();
   }
 
   protected override render(): TemplateResult {
+    const isChat = this._activeSection === "chat";
     return html`
-      <div class="app-frame ${this.narrow ? "narrow" : ""}">
+      <div class="app-frame ${this.narrow ? "narrow" : ""} ${isChat ? "chat-mode" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
@@ -155,7 +187,7 @@ export class AiOrchestratorPanel extends LitElement {
               ? this._renderHome()
               : this._activeSection === "automations"
                 ? this._renderWorkflowProbe()
-                : this._activeSection === "chat"
+                : isChat
                   ? html`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>`
                 : this._activeSection === "providers"
                   ? this._renderProviders()

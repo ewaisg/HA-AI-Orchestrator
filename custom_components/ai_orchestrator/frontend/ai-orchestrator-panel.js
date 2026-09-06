@@ -749,6 +749,47 @@ var He = o`
     margin: 0 auto;
   }
 
+  /*
+   * Chat uses an app-shell layout: the frame fills the height Home Assistant
+   * gives the panel and only the transcript inside the chat view scrolls, so
+   * the compose box and controls stay fixed like a normal chat app.
+   *
+   * Home Assistant renders this panel below its own toolbar, so the panel host
+   * is not the full viewport. Prefer the host's own height and fall back to a
+   * dynamic-viewport height only when the host is not itself constrained.
+   */
+  :host(.chat-host) {
+    height: var(--orchestrator-shell-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-frame.chat-mode {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-frame.chat-mode .workspace {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    padding: clamp(14px, 2vw, 24px) clamp(14px, 3vw, 32px);
+  }
+
+  .app-frame.chat-mode .workspace-inner {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: min(980px, 100%);
+  }
+
+  .app-frame.chat-mode ai-orchestrator-chat-view {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
   .page-header {
     display: flex;
     align-items: flex-start;
@@ -1176,6 +1217,22 @@ var He = o`
     .app-frame,
     .app-frame.narrow {
       display: block;
+    }
+
+    /* Mobile chat: header/nav stay put, only the transcript scrolls. */
+    .app-frame.chat-mode,
+    .app-frame.chat-mode.narrow {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-frame.chat-mode .sidebar {
+      flex: 0 0 auto;
+    }
+
+    .app-frame.chat-mode .workspace {
+      flex: 1 1 auto;
+      padding: 12px 12px 14px;
     }
 
     .sidebar {
@@ -2064,43 +2121,74 @@ var _t = "ai-orchestrator-chat-view", vt = {
 		_pendingPrompt: { state: !0 }
 	};
 	static styles = o`
-    :host { display:block; color:var(--primary-text-color,#233642); font:inherit; }
+    :host { display:block; color:var(--primary-text-color,#233642); font:inherit; block-size:100%; min-block-size:0; }
     * { box-sizing:border-box; }
-    .chat { max-width:900px; margin:auto; }
-    header { margin-bottom:24px; }
-    .eyebrow { color:var(--secondary-text-color,#4b626d); text-transform:uppercase; font-size:12px; letter-spacing:.14em; font-weight:700; }
-    h1 { font-size:clamp(28px,4vw,40px); letter-spacing:-.035em; margin:8px 0; }
-    h2 { font-size:20px; }
+
+    /* App-shell layout: only .transcript scrolls; header/controls/compose stay fixed. */
+    .chat {
+      display:flex; flex-direction:column; min-height:0;
+      height:var(--ai-chat-height,100%);
+      width:100%; max-width:var(--ai-chat-max-width,860px); margin-inline:auto;
+    }
+    .chat > .transcript { flex:1 1 auto; min-height:0; }
+    .chat > header, .chat > .controls, .chat > .privacy,
+    .chat > .error, .chat > .notice, .chat > .compose, .chat > .setup-hint { flex:0 0 auto; }
+
+    header { margin:0 0 12px; }
+    .eyebrow { margin:0; color:var(--secondary-text-color,#4b626d); text-transform:uppercase; font-size:11px; letter-spacing:.14em; font-weight:700; }
+    h1 { font-size:clamp(20px,2.4vw,26px); letter-spacing:-.02em; margin:4px 0 0; }
+    h2 { font-size:18px; margin:0 0 6px; }
     p { line-height:1.6; }
-    .intro { margin:0; color:var(--secondary-text-color,#4b626d); }
-    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
+    .intro { display:none; }
+
+    .controls { display:flex; flex-wrap:wrap; align-items:end; gap:10px; padding:10px 12px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:12px; }
     .provider { flex:1; min-width:0; }
-    label { display:block; font-weight:600; margin-bottom:8px; font-size:14px; }
-    select,textarea { width:100%; max-width:100%; min-width:0; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:9px; font:inherit; padding:12px; }
+    label { display:block; font-weight:600; margin-bottom:5px; font-size:12px; color:var(--secondary-text-color,#4b626d); }
+    select,textarea { width:100%; max-width:100%; min-width:0; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:9px; font:inherit; padding:9px 10px; }
     select { text-overflow:ellipsis; }
-    textarea { resize:vertical; min-height:110px; line-height:1.5; }
+    textarea { resize:none; min-height:52px; max-height:34vh; line-height:1.5; overflow:auto; }
     button,a { font:inherit; }
-    button { cursor:pointer; min-height:44px; border-radius:9px; padding:10px 16px; border:1px solid #7d969c; color:inherit; background:var(--card-background-color,#fff); font-weight:600; }
+    button { cursor:pointer; min-height:40px; border-radius:9px; padding:8px 14px; border:1px solid #7d969c; color:inherit; background:var(--card-background-color,#fff); font-weight:600; }
     button.primary { background:#175e56; color:#fff; border-color:#175e56; }
     button:disabled { opacity:.55; cursor:default; }
     button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
     a { color:#175e56; }
-    .privacy { padding:12px 2px; color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.6; }
-    .privacy strong { color:var(--primary-text-color,#233642); }
-    .transcript { min-height:220px; max-height:60vh; overflow:auto; padding:12px 4px; overscroll-behavior:contain; }
-    .empty { text-align:center; padding:32px 18px; color:var(--secondary-text-color,#4b626d); }
-    .message { border-radius:14px; padding:16px 18px; margin:0 0 16px; border:1px solid var(--divider-color,#ccd9da); background:var(--card-background-color,#fff); overflow-wrap:anywhere; }
-    .message.user { margin-left:32px; border-left:3px solid #207e73; }
-    .message.assistant { margin-right:32px; }
-    .message strong { font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
-    .message p { white-space:pre-wrap; margin:8px 0 0; }
-    .pending { color:var(--secondary-text-color,#4b626d); }
-    .error { background:#fff2ee; color:#852e23; border:1px solid #d7a79d; border-radius:10px; padding:12px 16px; margin:12px 0; line-height:1.5; }
-    .notice { color:var(--secondary-text-color,#4b626d); font-size:13px; line-height:1.5; }
-    .compose { padding:18px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:16px; }
-    .compose-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
-    .hint { font-size:12px; color:var(--secondary-text-color,#4b626d); }
-    @media(max-width:480px) { .controls,.compose { padding:12px; } .provider { flex-basis:100%; } .message.user { margin-left:12px; } .message.assistant { margin-right:12px; } .transcript { min-height:150px; } }
+
+    .privacy { padding:6px 2px; color:var(--secondary-text-color,#4b626d); font-size:12px; line-height:1.55; }
+    .privacy strong { color:var(--primary-text-color,#233642); font-weight:600; }
+    .privacy > summary { cursor:pointer; list-style:revert; padding:2px 0; }
+    .privacy > summary:focus-visible { outline:3px solid #207e73; outline-offset:3px; border-radius:6px; }
+    .privacy-detail { padding:6px 0 2px 2px; }
+    .setup-hint { margin:0 0 8px; }
+
+    .transcript { overflow-y:auto; overflow-x:hidden; padding:8px 2px; overscroll-behavior:contain; scrollbar-width:thin; }
+    .empty { text-align:center; padding:28px 18px; color:var(--secondary-text-color,#4b626d); }
+
+    .message { border-radius:14px; padding:12px 14px; margin:0 0 10px; border:1px solid var(--divider-color,#ccd9da); background:var(--card-background-color,#fff); overflow-wrap:anywhere; max-width:88%; }
+    .message.user { margin-left:auto; border-left:3px solid #207e73; }
+    .message.assistant { margin-right:auto; }
+    .message strong { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--secondary-text-color,#4b626d); }
+    .message p { white-space:pre-wrap; margin:6px 0 0; }
+    .pending { color:var(--secondary-text-color,#4b626d); margin:0 0 10px; font-size:13px; }
+    .error { background:#fff2ee; color:#852e23; border:1px solid #d7a79d; border-radius:10px; padding:10px 14px; margin:8px 0; line-height:1.5; }
+    .notice { color:var(--secondary-text-color,#4b626d); font-size:12px; line-height:1.5; margin:6px 0; }
+
+    .compose { padding:10px 12px; background:var(--card-background-color,#fff); border:1px solid var(--divider-color,#ccd9da); border-radius:12px; }
+    .compose label { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0; }
+    .compose-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; }
+    .hint { font-size:11px; color:var(--secondary-text-color,#4b626d); }
+
+    @media(max-width:900px) {
+      .chat { height:var(--ai-chat-height,100%); }
+      h1 { font-size:20px; }
+    }
+    @media(max-width:480px) {
+      .controls,.compose { padding:9px 10px; }
+      .provider { flex-basis:100%; }
+      .message { max-width:94%; }
+      .privacy { font-size:11px; padding:6px 2px; }
+      textarea { max-height:26vh; }
+    }
   `;
 	_sequence = 0;
 	_loadSequence = 0;
@@ -2173,6 +2261,18 @@ var _t = "ai-orchestrator-chat-view", vt = {
 			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
 		}
 	}
+	_autoGrow(e) {
+		e.style.height = "auto", e.style.height = `${e.scrollHeight}px`;
+	}
+	updated(e) {
+		if (e.has("_draft") && this._draft === "") {
+			let e = this.shadowRoot?.querySelector("textarea");
+			e && (e.style.height = "");
+		}
+		if (!e.has("_history") && !e.has("_busy")) return;
+		let t = this.shadowRoot?.querySelector(".transcript");
+		t && (t.scrollTop = t.scrollHeight);
+	}
 	render() {
 		let e = this._options?.providers.find((e) => e.connection_id === this._connectionId);
 		return E`<div class="chat">
@@ -2193,12 +2293,15 @@ var _t = "ai-orchestrator-chat-view", vt = {
 			this._reset(), e && (this._notice = "Conversation cleared. The pending provider request may still finish; its reply will be discarded.");
 		}}>New chat</button>
       </section>
-      <div class="privacy"><strong>Destination: ${e ? `${e.title} · Local` : "Choose a local provider"}</strong><br>
-        Only messages in this conversation are sent when you press Send. No household context or device actions.
-        History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
-        ${e ? E`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : O}
-      </div>
-      ${!this._loading && this._options?.providers.length === 0 ? E`<p>Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : O}
+      <details class="privacy">
+        <summary><strong>Destination: ${e ? `${e.title} · Local` : "Choose a local provider"}</strong></summary>
+        <div class="privacy-detail">
+          Only messages in this conversation are sent when you press Send. No household context or device actions.
+          History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
+          ${e ? E`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : O}
+        </div>
+      </details>
+      ${!this._loading && this._options?.providers.length === 0 ? E`<p class="setup-hint">Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : O}
       <div class="transcript" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
         ${this._history.length === 0 && !this._busy ? E`<div class="empty"><h2>A fresh conversation</h2><p>For example: “Draft a friendly reminder to close a window.”<br>This chat can write the words; it cannot check or control devices.</p></div>` : O}
         ${this._history.map((e) => E`<article class="message ${e.role}"><strong>${e.role === "user" ? "You" : "AI reply"}</strong><p>${e.content}</p></article>`)}
@@ -2208,10 +2311,11 @@ var _t = "ai-orchestrator-chat-view", vt = {
       ${this._notice ? E`<p class="notice" role="status">${this._notice}</p>` : O}
       <form class="compose" @submit=${(e) => void this._send(e)}>
         <label for="message">Your message</label>
-        <textarea id="message" maxlength=${q.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${q.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
           @input=${(e) => {
-			this._draft = e.target.value;
+			let t = e.target;
+			this._draft = t.value, this._autoGrow(t);
 		}}
           @keydown=${(e) => {
 			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
@@ -2312,7 +2416,7 @@ var wt = class extends F {
 		super(), this.narrow = !1, this._activeSection = "home", this._loadState = "waiting", this._probeLoadState = "idle";
 	}
 	disconnectedCallback() {
-		this._requestSequence += 1, super.disconnectedCallback();
+		this._requestSequence += 1, window.removeEventListener("resize", this._onViewportChange), window.visualViewport?.removeEventListener("resize", this._onViewportChange), super.disconnectedCallback();
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
@@ -2320,16 +2424,31 @@ var wt = class extends F {
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
+	_syncChatHeight() {
+		if (this._activeSection !== "chat") {
+			this.style.removeProperty("--orchestrator-shell-height");
+			return;
+		}
+		let e = this.getBoundingClientRect().top, t = Math.max(320, Math.round(window.innerHeight - e));
+		this.style.setProperty("--orchestrator-shell-height", `${t}px`);
+	}
+	_onViewportChange = () => {
+		this._syncChatHeight();
+	};
+	connectedCallback() {
+		super.connectedCallback(), window.addEventListener("resize", this._onViewportChange, { passive: !0 }), window.visualViewport?.addEventListener("resize", this._onViewportChange, { passive: !0 });
+	}
 	updated(e) {
-		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus());
+		e.has("hass") && this.hass !== void 0 && !this._hasRequested && queueMicrotask(() => void this._refreshStatus()), this.classList.toggle("chat-host", this._activeSection === "chat"), this._syncChatHeight();
 	}
 	render() {
+		let e = this._activeSection === "chat";
 		return E`
-      <div class="app-frame ${this.narrow ? "narrow" : ""}">
+      <div class="app-frame ${this.narrow ? "narrow" : ""} ${e ? "chat-mode" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : this._activeSection === "chat" ? E`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : e ? E`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
