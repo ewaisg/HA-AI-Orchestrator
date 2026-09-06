@@ -88,4 +88,8 @@ Performed through the browser session on the owner's authenticated Home Assistan
 | Narrow/mobile-width rendering | At a 390×844 viewport (representative of a phone-sized Companion App layout), `document.documentElement.scrollWidth` equaled `clientWidth` (no horizontal overflow), and the same provider name, "Healthy" status, and timestamp text rendered correctly |
 | Scoped logs | No JavaScript console error was observed during reload, provider view navigation, viewport resize, or connection testing |
 
-Companion App Android rendering itself (the actual mobile app shell, not a resized desktop browser) remains unobserved and is not claimed here. Duplicate-click protection and a full Home Assistant Core restart (as opposed to config-entry reload) remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those items.
+Companion App Android rendering itself (the actual mobile app shell, not a resized desktop browser) remains unobserved and is not claimed here. Duplicate-click protection remains outstanding.
+
+## 2026-09-05 full Core restart acceptance
+
+With the owner's explicit approval, a full Home Assistant Core restart was performed (not just a config-entry reload). See the matching LOC-003 evidence entry for the restart procedure. The Providers view correctly reported "Not tested in this Home Assistant runtime" immediately after Core came back online, then "Healthy" with a fresh timestamp after an explicit "Test connection". This closes the full Core-restart gate for LOC-004. Duplicate-click protection and Companion App Android (native shell) rendering remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those two items.

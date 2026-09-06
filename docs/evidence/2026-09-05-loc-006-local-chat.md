@@ -127,3 +127,19 @@ satisfies the LOC-006 outstanding live acceptance gate recorded above. LOC-006
 is now `DONE`. LOC-007 (Phase 1 release gate) may proceed; LOC-003 through
 LOC-005 and COMP-001 retain their own separately tracked live acceptance items
 recorded elsewhere in this evidence trail and the tracker.
+
+## 2026-09-05 later session: full Core restart survives chat generation
+
+With the owner's explicit approval, a full Home Assistant Core restart was
+performed later the same day (see the matching LOC-003 evidence entry for the
+exact restart procedure: Developer Tools → YAML → Check configuration →
+Restart → "Restart Home Assistant", confirmed at the "All integrations will be
+reloaded" prompt). Home Assistant's own "Home Assistant has started!" banner
+confirmed a genuine process restart, not a page reload.
+
+After restart, the Chat view reopened with a fresh conversation and the
+provider auto-selected. A prompt asking the model to confirm it was working
+after the restart returned an actual reply: "I am ready and functioning
+normally after restart." This proves LOC-006 chat generation survives a full
+Core restart, not only a browser reload, closing that additional gap for the
+Phase 1 release gate.

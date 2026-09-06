@@ -51,3 +51,25 @@ Performed through the browser session on the owner's authenticated Home Assistan
 | Scoped logs | No JavaScript console error was observed during search, refresh, or viewport resize |
 
 Rename, removal, disabled/unavailable-state, and area/device relationship-change checks require mutating a real registry entry and were not performed in this session to avoid an unreviewed household change. Companion App Android (native shell) rendering remains unobserved. Status remains `REVIEW — LIVE ACCEPTANCE REQUIRED` pending those items.
+
+## 2026-09-05 live rename round-trip acceptance
+
+With the owner's explicit approval, one reversible entity rename was performed
+and then undone, using the owner-selected low-risk entity
+`camera.diveway_looking_sw_fluent` (existing default friendly name "Fluent",
+area "Outdoor", device "Driveway Looking SW", integration Reolink). No other
+household data was recorded.
+
+| Step | Observed result |
+|---|---|
+| Rename via Home Assistant's native entity settings dialog | Set friendly name to "Fluent (LOC-005 test rename)" and pressed Update; Home Assistant's own entities list immediately reflected the new name |
+| Catalogue reflects the rename | Searching the AI Orchestrator catalogue for `diveway_looking_sw_fluent` showed the entity as **"Fluent (LOC-005 test rename)"**, `available`, area "Outdoor", device "Driveway Looking SW", integration `reolink`, `None` AI permission — an exact match to the live registry state, proving the catalogue reads current registry data rather than a cache |
+| Revert via the same dialog | Cleared the custom name field and pressed Update; Home Assistant's entities list returned to the default name "Fluent" |
+| Catalogue reflects the revert | Re-searching the same term in the AI Orchestrator catalogue showed the entity restored to **"Fluent"**, with the same area/device/integration/permission fields unchanged |
+
+This closes the live rename/registry-relationship-change gate for LOC-005. No
+entity was renamed, disabled, or removed permanently; the household entity is
+back in its original state. Removal, disabled/unavailable-state, and
+area/device reassignment checks remain unperformed, and Companion App Android
+(native shell) rendering remains unobserved. Status remains
+`REVIEW — LIVE ACCEPTANCE REQUIRED` pending those items.

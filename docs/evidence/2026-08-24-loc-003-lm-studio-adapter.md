@@ -81,3 +81,17 @@ Performed through the browser session on the owner's authenticated Home Assistan
 | Scoped logs | No JavaScript console error was observed across the reload, panel reload, and test-connection sequence |
 
 This is config-entry **reload**, not a full Home Assistant Core process restart; the Core-restart check remains outstanding for LOC-003, along with cancellation/timeout reproduction and Companion App Android rendering. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those items.
+
+## 2026-09-05 full Core restart acceptance
+
+With the owner's explicit approval, a full Home Assistant Core restart was performed (Developer Tools → YAML → Check configuration, then Restart → "Restart Home Assistant", confirmed at the "All integrations will be reloaded" prompt). This reloads the entire Core process, not just the `ai_orchestrator` config entry.
+
+| Check | Observed result |
+|---|---|
+| Pre-restart configuration check | "Configuration will not prevent Home Assistant from starting!" |
+| Restart behavior | Browser observed "Connection lost. Reconnecting…", then Home Assistant's own "Home Assistant has started!" banner after normal integration startup (including third-party integrations restarting, e.g. an observed "Starting Apple TV…" message unrelated to this project) |
+| Post-restart provider state | The LM Studio connection correctly reported "Not tested in this Home Assistant runtime", proving no stale health value survives a real Core process restart |
+| Post-restart connection test | "Test connection" produced "Connection test passed" and a fresh timestamp |
+| Post-restart chat generation | A prompt asking the model to confirm it was working after restart returned an actual reply: "I am ready and functioning normally after restart." |
+
+This satisfies the outstanding full Core-restart gate for LOC-003. Bounded timeout/cancellation reproduction and Companion App Android (native shell) rendering remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those two items.
