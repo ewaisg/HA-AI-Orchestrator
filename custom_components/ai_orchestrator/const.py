@@ -29,3 +29,9 @@ PANEL_URL_PATH: Final = "ai-orchestrator"
 PANEL_STATIC_URL: Final = f"/api/{DOMAIN}/static"
 PANEL_MODULE_URL: Final = f"{PANEL_STATIC_URL}/{PANEL_FILENAME}"
 PANEL_SIDEBAR_ICON: Final = "mdi:robot-outline"
+
+# Home Assistant's frontend service worker caches the panel module response.
+# `cache_headers=False` does not defeat it, so the module URL must change when
+# the bundle changes. See LOC-009 and the 2026-09-05 LOC-008 evidence.
+PANEL_CACHE_BUST_QUERY: Final = "hash"
+PANEL_CACHE_BUST_LENGTH: Final = 16

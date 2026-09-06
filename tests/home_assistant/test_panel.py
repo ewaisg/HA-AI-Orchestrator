@@ -21,6 +21,8 @@ from custom_components.ai_orchestrator.panel import (
     async_register_panel,
     async_register_static_assets,
     async_unregister_panel,
+    panel_bundle_fingerprint,
+    panel_module_url,
 )
 
 
@@ -61,7 +63,7 @@ async def test_register_panel_is_admin_only(hass: HomeAssistant) -> None:
             "embed_iframe": False,
             "trust_external": False,
             "handle_safe_area": False,
-            "module_url": PANEL_MODULE_URL,
+            "module_url": panel_module_url(),
         }
     }
 
@@ -127,3 +129,61 @@ async def test_unregister_panel(hass: HomeAssistant) -> None:
         PANEL_URL_PATH,
         warn_if_unknown=False,
     )
+
+
+def test_module_url_is_content_addressed() -> None:
+    """The served module URL carries the exact bundle fingerprint.
+
+    Home Assistant's frontend service worker caches the panel module response,
+    so an unchanged URL keeps serving a stale bundle after an update.
+    """
+    fingerprint = panel_bundle_fingerprint()
+
+    assert fingerprint is not None
+    assert fingerprint.isalnum()
+    assert panel_module_url() == f"{PANEL_MODULE_URL}?hash={fingerprint}"
+    assert panel_module_url().startswith(f"{PANEL_MODULE_URL}?")
+
+
+def test_module_url_changes_when_bundle_bytes_change() -> None:
+    """A different bundle must produce a different module URL."""
+    original = panel_module_url()
+
+    with patch(
+        "custom_components.ai_orchestrator.panel.panel_bundle_fingerprint",
+        return_value="0123456789abcdef",
+    ):
+        changed = panel_module_url()
+
+    assert changed != original
+    assert changed == f"{PANEL_MODULE_URL}?hash=0123456789abcdef"
+
+
+def test_module_url_falls_back_when_bundle_is_unreadable() -> None:
+    """An unreadable bundle degrades to the plain URL instead of failing setup."""
+    with patch(
+        "custom_components.ai_orchestrator.panel.panel_bundle_fingerprint",
+        return_value=None,
+    ):
+        assert panel_module_url() == PANEL_MODULE_URL
+
+
+async def test_unversioned_yaml_fallback_remains_accepted(
+    hass: HomeAssistant,
+) -> None:
+    """The documented YAML fallback cannot know the hash and stays supported."""
+    await panel_custom.async_register_panel(
+        hass,
+        frontend_url_path=PANEL_URL_PATH,
+        webcomponent_name=PANEL_ELEMENT_NAME,
+        sidebar_title=NAME,
+        sidebar_icon=PANEL_SIDEBAR_ICON,
+        module_url=PANEL_MODULE_URL,
+        require_admin=True,
+    )
+    existing = hass.data[frontend.DATA_PANELS][PANEL_URL_PATH]
+
+    owns_panel = await async_register_panel(hass)
+
+    assert owns_panel is False
+    assert hass.data[frontend.DATA_PANELS][PANEL_URL_PATH] is existing

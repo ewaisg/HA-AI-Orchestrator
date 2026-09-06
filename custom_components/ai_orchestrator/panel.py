@@ -22,6 +22,7 @@ panel and leaves it user-owned. A foreign or incompatible panel at the same URL
 path fails setup instead of being overwritten or silently accepted.
 """
 
+import hashlib
 from pathlib import Path
 
 from homeassistant.components import frontend, panel_custom
@@ -31,7 +32,10 @@ from homeassistant.exceptions import ConfigEntryError
 
 from .const import (
     NAME,
+    PANEL_CACHE_BUST_LENGTH,
+    PANEL_CACHE_BUST_QUERY,
     PANEL_ELEMENT_NAME,
+    PANEL_FILENAME,
     PANEL_MODULE_URL,
     PANEL_SIDEBAR_ICON,
     PANEL_STATIC_URL,
@@ -39,21 +43,54 @@ from .const import (
 )
 
 _PANEL_DIRECTORY = Path(__file__).parent / "frontend"
-_EXPECTED_CUSTOM_PANEL_CONFIG = {
-    "name": PANEL_ELEMENT_NAME,
-    "embed_iframe": False,
-    "trust_external": False,
-    "handle_safe_area": False,
-    "module_url": PANEL_MODULE_URL,
-}
+_PANEL_BUNDLE = _PANEL_DIRECTORY / PANEL_FILENAME
+
+
+def panel_bundle_fingerprint() -> str | None:
+    """Return a short content hash of the bundled panel, or None if unreadable.
+
+    The frontend service worker caches the panel module response, so a changed
+    bundle must be requested at a different URL. Content addressing makes the
+    URL change exactly when the bytes change.
+    """
+    try:
+        data = _PANEL_BUNDLE.read_bytes()
+    except OSError:
+        return None
+    return hashlib.sha256(data).hexdigest()[:PANEL_CACHE_BUST_LENGTH]
+
+
+def panel_module_url() -> str:
+    """Return the versioned module URL used to register and validate the panel."""
+    fingerprint = panel_bundle_fingerprint()
+    if fingerprint is None:
+        return PANEL_MODULE_URL
+    return f"{PANEL_MODULE_URL}?{PANEL_CACHE_BUST_QUERY}={fingerprint}"
+
+
+def _expected_custom_panel_config(module_url: str) -> dict[str, object]:
+    """Return the exact panel_custom config this integration accepts."""
+    return {
+        "name": PANEL_ELEMENT_NAME,
+        "embed_iframe": False,
+        "trust_external": False,
+        "handle_safe_area": False,
+        "module_url": module_url,
+    }
 
 
 def _is_compatible_panel(panel: frontend.Panel) -> bool:
-    """Return whether an existing panel is the exact supported YAML fallback."""
-    return (
-        panel.component_name == "custom"
-        and panel.require_admin is True
-        and panel.config == {"_panel_custom": _EXPECTED_CUSTOM_PANEL_CONFIG}
+    """Return whether an existing panel is the exact supported YAML fallback.
+
+    Both the unversioned URL (a hand-written YAML fallback) and the versioned
+    URL this integration registers are accepted, because the YAML fallback
+    documented in this module's docstring cannot know the content hash.
+    """
+    if panel.component_name != "custom" or panel.require_admin is not True:
+        return False
+    return any(
+        panel.config == {"_panel_custom": _expected_custom_panel_config(url)}
+        for url in (panel_module_url(), PANEL_MODULE_URL)
     )
 
 
@@ -89,7 +126,7 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         webcomponent_name=PANEL_ELEMENT_NAME,
         sidebar_title=NAME,
         sidebar_icon=PANEL_SIDEBAR_ICON,
-        module_url=PANEL_MODULE_URL,
+        module_url=panel_module_url(),
         require_admin=True,
     )
     return True
