@@ -92,4 +92,17 @@ Companion App Android rendering itself (the actual mobile app shell, not a resiz
 
 ## 2026-09-05 full Core restart acceptance
 
-With the owner's explicit approval, a full Home Assistant Core restart was performed (not just a config-entry reload). See the matching LOC-003 evidence entry for the restart procedure. The Providers view correctly reported "Not tested in this Home Assistant runtime" immediately after Core came back online, then "Healthy" with a fresh timestamp after an explicit "Test connection". This closes the full Core-restart gate for LOC-004. Duplicate-click protection and Companion App Android (native shell) rendering remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those two items.
+With the owner's explicit approval, a full Home Assistant Core restart was performed (not just a config-entry reload). See the matching LOC-003 evidence entry for the restart procedure. The Providers view correctly reported "Not tested in this Home Assistant runtime" immediately after Core came back online, then "Healthy" with a fresh timestamp after an explicit "Test connection". This closes the full Core-restart gate for LOC-004.
+
+## 2026-09-05 owner-reported Companion App Android rendering
+
+The owner tested the panel in the Companion App on Android and reported that it
+"looks fine" and "renders without issue", with one exception scoped to the chat
+view only (whole-page scrolling instead of transcript-only scrolling), which is
+tracked separately as LOC-008. No provider-view rendering defect was reported.
+
+This is an owner observation reported in conversation, not a screenshot or an
+instrumented measurement, and it is recorded as such. It covers the Providers
+view rendering for LOC-004. Duplicate-click protection and transport-failure
+reproduction remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE
+PARTIAL` pending those items.

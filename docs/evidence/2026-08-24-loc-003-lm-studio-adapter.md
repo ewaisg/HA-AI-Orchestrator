@@ -94,4 +94,15 @@ With the owner's explicit approval, a full Home Assistant Core restart was perfo
 | Post-restart connection test | "Test connection" produced "Connection test passed" and a fresh timestamp |
 | Post-restart chat generation | A prompt asking the model to confirm it was working after restart returned an actual reply: "I am ready and functioning normally after restart." |
 
-This satisfies the outstanding full Core-restart gate for LOC-003. Bounded timeout/cancellation reproduction and Companion App Android (native shell) rendering remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE PARTIAL` pending those two items.
+This satisfies the outstanding full Core-restart gate for LOC-003.
+
+## 2026-09-05 owner-reported Companion App Android rendering
+
+The owner tested the panel in the Companion App on Android and reported that it
+"looks fine" and "renders without issue", with one exception scoped to the chat
+view layout only, tracked separately as LOC-008. This is an owner observation
+reported in conversation, not a screenshot or an instrumented measurement, and
+it is recorded as such.
+
+Bounded timeout/cancellation reproduction remains outstanding. Status remains
+`REVIEW — LIVE ACCEPTANCE PARTIAL` pending that item.

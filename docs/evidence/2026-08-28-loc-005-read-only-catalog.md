@@ -69,7 +69,16 @@ household data was recorded.
 
 This closes the live rename/registry-relationship-change gate for LOC-005. No
 entity was renamed, disabled, or removed permanently; the household entity is
-back in its original state. Removal, disabled/unavailable-state, and
-area/device reassignment checks remain unperformed, and Companion App Android
-(native shell) rendering remains unobserved. Status remains
-`REVIEW — LIVE ACCEPTANCE REQUIRED` pending those items.
+back in its original state.
+
+## 2026-09-05 owner-reported Companion App Android rendering
+
+The owner tested the panel in the Companion App on Android and reported that it
+"looks fine" and "renders without issue", with one exception scoped to the chat
+view only, tracked separately as LOC-008. No catalogue rendering defect was
+reported. This is an owner observation reported in conversation, not a
+screenshot or an instrumented measurement, and it is recorded as such.
+
+Removal, disabled/unavailable-state, and area/device reassignment checks remain
+unperformed. Status remains `REVIEW — LIVE ACCEPTANCE REQUIRED` pending those
+items.
