@@ -138,3 +138,79 @@ A convenient verification command in the File editor shell console is
 `sha256sum /homeassistant/custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js`.
 Line endings matter: the canonical artifact uses LF, and the Windows checkout
 may present CRLF, so copy from a Git archive or verify the hash after copying.
+
+## Installed, and the service-worker caching trap
+
+The owner copied the file successfully. The installed file was verified on the
+configuration volume as **95,427** bytes, SHA-256
+`d24d6b50aa09cf805822f7ec06af94bfdd84813c153e700d328003701677dce2`, single
+inode, single filesystem, with no stale duplicate anywhere under
+`/homeassistant` other than the intentional LOC-006 rollback copy.
+
+The owner then reported that the **Chat and Providers sections had disappeared**.
+Investigation showed they had not: the sidebar still listed every section and
+the backend was healthy. The panel was simply running old code.
+
+**Root cause: the Home Assistant frontend service worker.** Home Assistant
+registers a Workbox service worker (`/sw-modern.js`, scope `/`) with a
+`workbox-runtime` cache. That cache held the previous
+`/api/ai_orchestrator/static/ai-orchestrator-panel.js` response and kept serving
+the 91,291-byte LOC-006 bundle to the page.
+
+This is worth recording because several normally reliable steps did **not** fix
+it, and each produced a misleading signal:
+
+| Attempt | Result |
+|---|---|
+| `fetch(..., { cache: 'no-store' })` from the page | Still returned the old 91,291-byte body |
+| Config-entry reload of the hub entry | API reported `{"require_restart": false}`; served bytes unchanged |
+| Full Home Assistant Core restart | Core reported "Home Assistant has started!"; served bytes still unchanged |
+| Replacing the file through a fresh inode | New inode and mtime on disk; served `Last-Modified` did not move at all |
+| `Network.clearBrowserCache` via CDP | No effect; the service worker sits in front of the HTTP cache |
+| `curl` from outside the browser | **Correctly returned 95,427 bytes** with the new `Last-Modified` |
+
+The `curl` result is what isolated the fault to the browser rather than the
+server or the integration: the identical URL returned the new artifact to a
+client with no service worker, while the authenticated page kept receiving the
+old one. A frozen `Last-Modified` value that did not change even after the file
+was rewritten through a new inode was the decisive clue that the response was
+not coming from the filesystem.
+
+**Fix.** Delete the cached entry from the Workbox runtime cache, then reload:
+
+```js
+const c = await caches.open('workbox-runtime-' + location.origin + '/');
+for (const req of await c.keys()) {
+  if (/ai-orchestrator-panel\.js/.test(req.url)) await c.delete(req, { ignoreSearch: true });
+}
+```
+
+Equivalent manual routes are a browser hard reload that bypasses the service
+worker, clearing site data for the Home Assistant origin, or on the Companion
+App clearing the app's cache.
+
+**Consequence for this project.** The claim in the section above that
+"`cache_headers=False` means a hard refresh is sufficient" is **wrong for the
+first load after a bundle change**, because the service worker caches the
+response independently of the integration's own cache headers. Any future
+frontend-only update must include a service-worker cache-clear step, and the
+`LOC-007` release gate should state it in user-facing install instructions.
+A durable code-side improvement would be to add a content hash or version query
+string to `PANEL_MODULE_URL` so each build requests a distinct URL; that is not
+implemented yet and should be tracked before wider distribution.
+
+## Live verification after the cache clear
+
+| Check | Observed result |
+|---|---|
+| Served bundle | 95,427 bytes and the new `chat-host` marker present |
+| Sections restored | Home, Automations, Chat, Providers, Entities & Permissions, Voice & Notifications, Activity & Security, Settings all listed |
+| Chat shell active | Panel host carried `chat-host`, `--orchestrator-shell-height` resolved to `973px`, and the frame carried `chat-mode` |
+| Transcript-only scrolling | Transcript `overflow-y: auto`; `document.documentElement` did **not** scroll |
+| Privacy disclosure | Rendered as a `details` element with the destination line visible as its summary |
+| Provider | `LM Studio 594e2b2e` auto-selected |
+| Generation | Prompt "Reply with one short sentence confirming the new layout is live." returned the actual reply "New layout is live." |
+
+Desktop behavior is therefore confirmed live. Owner confirmation of the
+on-screen-keyboard behavior and the spacing judgement on the Companion App for
+Android is still outstanding, so LOC-008 remains `REVIEW`.
