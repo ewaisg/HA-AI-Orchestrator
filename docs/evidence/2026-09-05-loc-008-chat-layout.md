@@ -98,3 +98,43 @@ Only the bundled panel JavaScript changed, and the panel is served with
 `cache_headers=False`, so a hard refresh is expected to be sufficient; a Core
 restart is not required for a frontend-only update. LOC-008 cannot be `DONE`
 until the owner confirms the four items above.
+
+## Deployment attempt and blocker
+
+The updated bundle was **not** installed in this session. The installed file
+remains the LOC-006 bundle, verified in place as SHA-256
+`7b034887f4187293469e1262a5369e15bb668df941cc6d931e2be87c4609ea83`.
+
+Two transfer paths were attempted through the File editor add-on and neither
+completed:
+
+1. **Chunked base64 through the "Execute shell command" console.** The console
+   runs single commands through BusyBox without shell operators (`;`, `>`), so
+   redirection is unavailable. Appending through `python3 -c` worked for a short
+   probe (exit 0), but the full payload is 127,236 base64 characters across 43
+   chunks, and the automation harness cannot read the local chunk file into the
+   browser context to drive that loop.
+2. **The File editor `#uploadfile` input.** The file was attached
+   programmatically, but a subsequent `find /homeassistant -maxdepth 2 -name
+   ai-orchestrator-panel.js` returned exit 0 with no match, so the upload did
+   not land in the configuration volume.
+
+No partial or corrupted file was left behind: the staging path
+`/homeassistant/.ai-orch-stage.b64` was removed and its absence confirmed with
+`ls` returning "No such file or directory". The integration directory was not
+modified, so no rollback is required and the running panel is unchanged.
+
+**Recommended install path.** Because only one file changed, the owner can copy
+`custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js` from this
+repository over the installed file at
+`/homeassistant/custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js`
+using Samba, SSH, or the File editor's own upload from the browser, then hard
+refresh. Before accepting, confirm the installed file reports:
+
+- size **95,427** bytes
+- SHA-256 **`d24d6b50aa09cf805822f7ec06af94bfdd84813c153e700d328003701677dce2`**
+
+A convenient verification command in the File editor shell console is
+`sha256sum /homeassistant/custom_components/ai_orchestrator/frontend/ai-orchestrator-panel.js`.
+Line endings matter: the canonical artifact uses LF, and the Windows checkout
+may present CRLF, so copy from a Git archive or verify the hash after copying.
