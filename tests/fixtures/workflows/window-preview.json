@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "workflow_id": "12345678-1234-4123-8123-123456789abc",
+  "name": "Synthetic evening window preview",
+  "enabled": false,
+  "triggers": [
+    {"kind": "state", "entity_ids": ["binary_sensor.synthetic_window"], "to_state": "on"}
+  ],
+  "conditions": [
+    {"kind": "time_window", "after_time": "18:00", "before_time": "06:00"},
+    {"kind": "state", "entity_id": "binary_sensor.synthetic_window", "state": "on"}
+  ],
+  "steps": [
+    {"step_id": "compose", "kind": "ai_compose", "prompt": "Write a short window reminder."},
+    {"step_id": "notify", "kind": "notify", "notify_service": "notify.synthetic"}
+  ]
+}

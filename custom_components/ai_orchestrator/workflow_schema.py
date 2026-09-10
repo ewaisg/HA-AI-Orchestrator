@@ -151,9 +151,9 @@ class WorkflowStep:
 class Workflow:
     """One complete versioned workflow document.
 
-    A workflow is disabled when created. Enabling is an explicit administrator
-    action so that a newly imported or migrated document cannot begin running
-    on its own.
+    Missing enabled state defaults to disabled. Parsing preserves an explicit
+    enabled state for storage round trips; future import and activation handlers
+    must separately enforce administrator approval. Parsing never starts a run.
     """
 
     workflow_id: str
@@ -192,11 +192,8 @@ def _reject_unknown_keys(
     data: dict[str, Any], allowed: frozenset[str], field_name: str
 ) -> None:
     """Fail closed on any key outside the closed schema."""
-    unknown = sorted(set(data) - allowed)
-    if unknown:
-        raise WorkflowValidationError(
-            f"{field_name} has unsupported field(s): {', '.join(unknown)}"
-        )
+    if set(data) - allowed:
+        raise WorkflowValidationError(f"{field_name} has unsupported fields")
 
 
 def _require_bounded_str(
@@ -229,7 +226,7 @@ def _require_entity_id(value: Any, field_name: str) -> str:
     that is temporarily unavailable.
     """
     entity_id = _require_bounded_str(value, field_name, max_chars=255)
-    if not _ENTITY_ID_PATTERN.match(entity_id):
+    if not _ENTITY_ID_PATTERN.fullmatch(entity_id):
         raise WorkflowValidationError(f"{field_name} is not a valid entity ID")
     return entity_id
 
@@ -240,7 +237,12 @@ def _require_time_of_day(value: Any, field_name: str) -> str:
     if len(text) != 5 or text[2] != ":":
         raise WorkflowValidationError(f"{field_name} must use HH:MM")
     hours, minutes = text[:2], text[3:]
-    if not (hours.isdigit() and minutes.isdigit()):
+    if not (
+        hours.isascii()
+        and minutes.isascii()
+        and hours.isdecimal()
+        and minutes.isdecimal()
+    ):
         raise WorkflowValidationError(f"{field_name} must use HH:MM")
     if not (0 <= int(hours) <= 23 and 0 <= int(minutes) <= 59):
         raise WorkflowValidationError(f"{field_name} is not a valid time of day")
@@ -251,7 +253,10 @@ def _require_finite_number(value: Any, field_name: str) -> float:
     """Return a finite number, rejecting booleans, NaN, and infinities."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise WorkflowValidationError(f"{field_name} must be a number")
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError:
+        raise WorkflowValidationError(f"{field_name} must be a finite number") from None
     if number != number or number in (float("inf"), float("-inf")):
         raise WorkflowValidationError(f"{field_name} must be a finite number")
     return number
@@ -340,6 +345,13 @@ def parse_condition(raw: Any) -> WorkflowCondition:
     except ValueError:
         raise WorkflowValidationError("condition.kind is not supported") from None
 
+    allowed = {
+        ConditionKind.STATE: frozenset({"kind", "entity_id", "state"}),
+        ConditionKind.NUMERIC_STATE: frozenset({"kind", "entity_id", "above", "below"}),
+        ConditionKind.TIME_WINDOW: frozenset({"kind", "after_time", "before_time"}),
+    }
+    _reject_unknown_keys(data, allowed[kind], "condition")
+
     if kind is ConditionKind.STATE:
         return WorkflowCondition(
             kind=kind,
@@ -389,12 +401,19 @@ def parse_step(raw: Any) -> WorkflowStep:
     data = _require_mapping(raw, "step")
     _reject_unknown_keys(data, _STEP_KEYS, "step")
     step_id = _require_bounded_str(data.get("step_id"), "step.step_id", max_chars=64)
-    if not _STEP_ID_PATTERN.match(step_id):
+    if not _STEP_ID_PATTERN.fullmatch(step_id):
         raise WorkflowValidationError("step.step_id must be a lowercase identifier")
     try:
         kind = StepKind(data.get("kind"))
     except ValueError:
         raise WorkflowValidationError("step.kind is not supported") from None
+
+    allowed = {
+        StepKind.AI_COMPOSE: frozenset({"step_id", "kind", "prompt"}),
+        StepKind.AI_CLASSIFY: frozenset({"step_id", "kind", "prompt", "categories"}),
+        StepKind.NOTIFY: frozenset({"step_id", "kind", "notify_service"}),
+    }
+    _reject_unknown_keys(data, allowed[kind], "step")
 
     if kind is StepKind.AI_COMPOSE:
         if "categories" in data:
@@ -435,9 +454,9 @@ def parse_step(raw: Any) -> WorkflowStep:
     service = _require_bounded_str(
         data.get("notify_service"), "step.notify_service", max_chars=255
     )
-    if not _ENTITY_ID_PATTERN.match(service):
+    if not _ENTITY_ID_PATTERN.fullmatch(service) or not service.startswith("notify."):
         raise WorkflowValidationError(
-            "step.notify_service must be a domain.service reference"
+            "step.notify_service must be a notify service reference"
         )
     return WorkflowStep(step_id=step_id, kind=kind, notify_service=service)
 
@@ -453,7 +472,7 @@ def parse_workflow(raw: Any) -> Workflow:
     _reject_unknown_keys(data, _WORKFLOW_KEYS, "workflow")
 
     version = data.get("schema_version")
-    if version != WORKFLOW_SCHEMA_VERSION:
+    if type(version) is not int or version != WORKFLOW_SCHEMA_VERSION:
         raise WorkflowValidationError(
             f"workflow.schema_version must be {WORKFLOW_SCHEMA_VERSION}"
         )
@@ -461,7 +480,7 @@ def parse_workflow(raw: Any) -> Workflow:
     workflow_id = _require_bounded_str(
         data.get("workflow_id"), "workflow.workflow_id", max_chars=36
     )
-    if not _WORKFLOW_ID_PATTERN.match(workflow_id):
+    if not _WORKFLOW_ID_PATTERN.fullmatch(workflow_id):
         raise WorkflowValidationError("workflow.workflow_id must be a UUID4")
 
     name = _require_bounded_str(
@@ -529,9 +548,9 @@ def migrate_workflow(raw: Any) -> dict[str, Any]:
     """
     data = _require_mapping(raw, "workflow")
     version = data.get("schema_version")
-    if version == WORKFLOW_SCHEMA_VERSION:
+    if type(version) is int and version == WORKFLOW_SCHEMA_VERSION:
         return parse_workflow(data).as_dict()
-    if isinstance(version, int) and version > WORKFLOW_SCHEMA_VERSION:
+    if type(version) is int and version > WORKFLOW_SCHEMA_VERSION:
         raise WorkflowValidationError(
             "workflow was written by a newer version and cannot be downgraded"
         )

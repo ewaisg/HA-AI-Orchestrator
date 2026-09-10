@@ -299,14 +299,8 @@ export class ProvidersView extends LitElement {
   private _renderProviderCard(provider: ProviderConnection): TemplateResult {
     const testState = this._testStates.get(provider.connection_id) ?? "idle";
     const testResult = this._testResults.get(provider.connection_id);
-    const health =
-      testResult === "transport_failure"
-        ? provider.health
-        : (testResult?.health ?? provider.health);
-    const lastTestedAt =
-      testResult === "transport_failure"
-        ? provider.last_tested_at
-        : (testResult?.last_tested_at ?? provider.last_tested_at);
+    const health = provider.health;
+    const lastTestedAt = provider.last_tested_at;
 
     return html`
       <article class="provider-card" role="listitem">
@@ -404,7 +398,7 @@ export class ProvidersView extends LitElement {
 
   private async _testConnection(connectionId: string): Promise<void> {
     const hass = this.hass;
-    if (hass === undefined) {
+    if (hass === undefined || this._testStates.get(connectionId) === "checking") {
       return;
     }
 
@@ -413,6 +407,12 @@ export class ProvidersView extends LitElement {
 
     try {
       const result = await testProviderConnection(hass, connectionId);
+      // Keep confirmed health separate from the latest request's transport status.
+      this._providers = this._providers.map((provider) =>
+        provider.connection_id === connectionId
+          ? { ...provider, health: result.health, last_tested_at: result.last_tested_at }
+          : provider,
+      );
       const newStates = new Map(this._testStates);
       const newResults = new Map(this._testResults);
       newStates.set(connectionId, "idle");

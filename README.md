@@ -9,13 +9,14 @@ implements Home Assistant config-entry lifecycle, authenticated LM Studio
 connections, provider setup and connection testing, a read-only entity/device/area
 catalogue, and a bundled TypeScript/Lit panel.
 
-`LOC-006` adds a test-ready administrator chat: select a local provider, send
+`LOC-006` provides an administrator chat: select a local provider, send
 text, and continue a bounded conversation in the open view. It sends no automatic
 household context and exposes no tools or device actions. Replies arrive when
 complete; history is not persisted. Generation is an explicit trial, not a claim
 that the selected model's capabilities have been verified.
 
-The chat candidate has not yet completed live installation and acceptance.
+Local chat has recorded live acceptance, and the owner confirmed the cache-safe
+update loaded panel/chat without manually clearing caches.
 Historical live evidence targets Core **2026.8.3**; the owner's now-installed
 Core **2026.9.0** is undergoing compatibility validation in `COMP-001`.
 Provider/catalogue live acceptance and the Phase 1 release gate remain open.
@@ -28,6 +29,7 @@ planned. The next product phase is the visual announcement workflow, after
 Phase 1 acceptance.
 
 - [Manual installation and current usage](docs/INSTALLATION.md)
+- [Run an offline workflow preview](docs/OFFLINE-WORKFLOW-PREVIEW.md)
 
 - [Project tracker](docs/PROJECT-TRACKER.md)
 - [Product requirements](docs/PRODUCT-REQUIREMENTS.md)

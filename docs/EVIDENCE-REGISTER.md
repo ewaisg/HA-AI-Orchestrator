@@ -99,3 +99,19 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   COMP-001 and LOC-003 through LOC-005; do not infer a completed Phase 1 release.
 - Evidence and the live resume procedure:
   [LOC-006 local chat](evidence/2026-09-05-loc-006-local-chat.md).
+
+## September 9 repository resume
+
+- Superseding the older LOC-006 unknown above: September 5 evidence records an
+  actual local reply, follow-up context and New chat reset on Core 2026.9.0.
+- ENV-013: LOC-009's committed content-hash code required executor offloading
+  and a real byte-change regression. Live installation of the repaired candidate
+  and an update observed without manual cache clearing remain unverified.
+  Consuming tasks: LOC-009 and LOC-007. Do not infer live success from local tests.
+- LOC-008 Android keyboard/transcript/spacing acceptance remains unconfirmed for
+  this layout candidate. Consuming tasks: LOC-008, COMP-001 and LOC-007.
+
+- ENV-013 resolved for LOC-009 behavioral acceptance: owner explicitly confirmed
+  updated panel/chat worked without clearing caches after the candidate handoff.
+  See the owner acceptance addendum in `evidence/2026-09-09-loc-009-resume.md`.
+  No live URL trace, Android confirmation or unrelated acceptance is inferred.

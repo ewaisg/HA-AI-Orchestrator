@@ -79,7 +79,7 @@ def _expected_custom_panel_config(module_url: str) -> dict[str, object]:
     }
 
 
-def _is_compatible_panel(panel: frontend.Panel) -> bool:
+def _is_compatible_panel(panel: frontend.Panel, module_url: str) -> bool:
     """Return whether an existing panel is the exact supported YAML fallback.
 
     Both the unversioned URL (a hand-written YAML fallback) and the versioned
@@ -90,7 +90,7 @@ def _is_compatible_panel(panel: frontend.Panel) -> bool:
         return False
     return any(
         panel.config == {"_panel_custom": _expected_custom_panel_config(url)}
-        for url in (panel_module_url(), PANEL_MODULE_URL)
+        for url in (module_url, PANEL_MODULE_URL)
     )
 
 
@@ -109,10 +109,11 @@ async def async_register_static_assets(hass: HomeAssistant) -> None:
 
 async def async_register_panel(hass: HomeAssistant) -> bool:
     """Register the admin-only panel and report whether this integration owns it."""
+    module_url = await hass.async_add_executor_job(panel_module_url)
     existing = hass.data.get(frontend.DATA_PANELS, {}).get(PANEL_URL_PATH)
     if existing is not None:
         if not isinstance(existing, frontend.Panel) or not _is_compatible_panel(
-            existing
+            existing, module_url
         ):
             raise ConfigEntryError(
                 "AI Orchestrator panel path is already registered by an "
@@ -126,7 +127,7 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
         webcomponent_name=PANEL_ELEMENT_NAME,
         sidebar_title=NAME,
         sidebar_icon=PANEL_SIDEBAR_ICON,
-        module_url=panel_module_url(),
+        module_url=module_url,
         require_admin=True,
     )
     return True

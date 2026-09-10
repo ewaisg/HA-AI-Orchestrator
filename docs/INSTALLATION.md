@@ -1,6 +1,6 @@
 # Manual installation and current usage
 
-Status: Phase 1 local-provider preview; LOC-006 chat is test-ready and awaiting live acceptance.
+Status: Phase 1 local-provider preview; LOC-006 chat has recorded live acceptance. The Phase 1 release gate remains open.
 
 The current repository supports a manual-copy Home Assistant installation.
 HACS installation and updating are not yet validated or claimed.
@@ -143,7 +143,19 @@ if automatic registration fails; this evidence does not claim another version.
 
 For an update, preserve the previous artifact, replace the complete integration
 directory from one reviewed candidate, restart Home Assistant, and refresh the
-panel so backend and frontend match. Follow the candidate's installation and
+panel so backend and frontend match. Automatic panel registration now appends a
+content hash to the module URL so changed bundle bytes request a distinct cached
+resource. Reload the browser page after restarting Core; an already loaded
+JavaScript module cannot be replaced in place. Live verification of an update
+without manual cache clearing remains tracked under LOC-009.
+
+The manual YAML fallback uses a fixed URL and does not automatically receive
+this hash. If that fallback, or an older installation, shows stale sections,
+clear the Home Assistant site cache in the browser or reset the Companion App
+frontend cache, then reopen the panel. This may require signing in again; do not
+remove the integration or its provider entries to clear frontend caching.
+
+Follow the candidate's installation and
 verification record rather than mixing individual files. To roll back the code,
 restore the previous complete artifact and restart; any future storage migration
 needs its own documented downgrade/restore procedure.

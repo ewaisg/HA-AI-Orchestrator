@@ -1,5 +1,7 @@
 """Tests for the isolated Home Assistant panel compatibility boundary."""
 
+import hashlib
+import threading
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -11,6 +13,7 @@ from homeassistant.exceptions import ConfigEntryError
 
 from custom_components.ai_orchestrator.const import (
     NAME,
+    PANEL_CACHE_BUST_LENGTH,
     PANEL_ELEMENT_NAME,
     PANEL_MODULE_URL,
     PANEL_SIDEBAR_ICON,
@@ -51,6 +54,7 @@ async def test_register_static_assets(hass: HomeAssistant) -> None:
 
 async def test_register_panel_is_admin_only(hass: HomeAssistant) -> None:
     """The compatibility adapter registers one admin-only custom panel."""
+    expected_module_url = await hass.async_add_executor_job(panel_module_url)
     owns_panel = await async_register_panel(hass)
 
     assert owns_panel is True
@@ -63,7 +67,7 @@ async def test_register_panel_is_admin_only(hass: HomeAssistant) -> None:
             "embed_iframe": False,
             "trust_external": False,
             "handle_safe_area": False,
-            "module_url": panel_module_url(),
+            "module_url": expected_module_url,
         }
     }
 
@@ -145,27 +149,52 @@ def test_module_url_is_content_addressed() -> None:
     assert panel_module_url().startswith(f"{PANEL_MODULE_URL}?")
 
 
-def test_module_url_changes_when_bundle_bytes_change() -> None:
+def test_module_url_changes_when_bundle_bytes_change(tmp_path: Path) -> None:
     """A different bundle must produce a different module URL."""
-    original = panel_module_url()
-
-    with patch(
-        "custom_components.ai_orchestrator.panel.panel_bundle_fingerprint",
-        return_value="0123456789abcdef",
-    ):
+    bundle = tmp_path / "panel.js"
+    bundle.write_bytes(b"original bundle")
+    with patch("custom_components.ai_orchestrator.panel._PANEL_BUNDLE", bundle):
+        original = panel_module_url()
+        assert panel_module_url() == original
+        bundle.write_bytes(b"changed bundle")
         changed = panel_module_url()
 
     assert changed != original
-    assert changed == f"{PANEL_MODULE_URL}?hash=0123456789abcdef"
+    fingerprint = hashlib.sha256(b"changed bundle").hexdigest()[
+        :PANEL_CACHE_BUST_LENGTH
+    ]
+    assert changed == f"{PANEL_MODULE_URL}?hash={fingerprint}"
 
 
-def test_module_url_falls_back_when_bundle_is_unreadable() -> None:
+def test_module_url_falls_back_when_bundle_is_unreadable(tmp_path: Path) -> None:
     """An unreadable bundle degrades to the plain URL instead of failing setup."""
     with patch(
-        "custom_components.ai_orchestrator.panel.panel_bundle_fingerprint",
-        return_value=None,
+        "custom_components.ai_orchestrator.panel._PANEL_BUNDLE",
+        tmp_path / "missing.js",
     ):
+        assert panel_bundle_fingerprint() is None
         assert panel_module_url() == PANEL_MODULE_URL
+
+
+async def test_registration_reads_bundle_once_in_executor(hass: HomeAssistant) -> None:
+    """Registration and compatibility validation hash off the event-loop thread."""
+    event_loop_thread = threading.get_ident()
+    read_threads: list[int] = []
+
+    def read_bundle() -> bytes:
+        read_threads.append(threading.get_ident())
+        return b"executor bundle"
+
+    bundle = Mock(spec=Path)
+    bundle.read_bytes.side_effect = read_bundle
+    with patch("custom_components.ai_orchestrator.panel._PANEL_BUNDLE", bundle):
+        assert await async_register_panel(hass) is True
+        assert bundle.read_bytes.call_count == 1
+        assert await async_register_panel(hass) is False
+        assert bundle.read_bytes.call_count == 2
+
+    assert len(read_threads) == 2
+    assert all(thread != event_loop_thread for thread in read_threads)
 
 
 async def test_unversioned_yaml_fallback_remains_accepted(

@@ -1,0 +1,5 @@
+{
+  "states": {"binary_sensor.synthetic_window": "on"},
+  "time": "20:00",
+  "event": {"kind": "state", "entity_id": "binary_sensor.synthetic_window", "from_state": "off", "to_state": "on"}
+}
