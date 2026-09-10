@@ -2,7 +2,24 @@
 
 WFL-002A adds a local command for evaluating a workflow against a supplied
 snapshot. It does not need Home Assistant or a provider connection. This command
-is not yet available in the panel and does not publish or activate workflows.
+also has an administrator panel editor under **Automations** in the WFL-002C
+candidate. Neither entry point publishes or activates workflows.
+
+## Use the panel
+
+After installing the complete WFL-002C candidate, open **Automations**. The
+**Workflow preview** editor accepts workflow JSON and a supplied snapshot. Load
+an explicitly labeled synthetic example, select **Preview**, and inspect the
+trigger/condition outcomes and planned step kinds. The daytime example should
+fail its evening condition. The existing lifecycle probe remains below the editor.
+
+This is an offline draft editor, not a visual workflow builder. It reads no live
+household state and sends no data to an AI provider. JSON drafts stay in the open
+view; reset or session loss clears them. Editing a draft invalidates its result.
+Each panel JSON input is limited to 131,072 characters. An installation with an
+older backend cannot serve this preview; replace backend and bundle together.
+
+## Use the command
 
 From the repository root, run the included synthetic window example:
 

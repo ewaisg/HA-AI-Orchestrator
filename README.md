@@ -29,7 +29,7 @@ planned. The next product phase is the visual announcement workflow, after
 Phase 1 acceptance.
 
 - [Manual installation and current usage](docs/INSTALLATION.md)
-- [Run an offline workflow preview](docs/OFFLINE-WORKFLOW-PREVIEW.md)
+- [Preview a workflow in Automations or by command](docs/OFFLINE-WORKFLOW-PREVIEW.md)
 
 - [Project tracker](docs/PROJECT-TRACKER.md)
 - [Product requirements](docs/PRODUCT-REQUIREMENTS.md)

@@ -3,7 +3,7 @@
 Status: Product design baseline; Phase 1 implementation and acceptance are active
 Audience: Product, frontend, Home Assistant integration, provider/API, security, and QA contributors
 Scope: Private, single-household Home Assistant AI orchestration product
-Implementation status: Provider setup/testing and read-only catalogue implemented; LOC-006 administrator chat is test-ready and awaiting live acceptance
+Implementation status: Provider setup/testing and read-only catalogue implemented; LOC-006 administrator chat has live acceptance; WFL-002C adds an offline draft preview editor
 
 ## 1. Purpose
 
@@ -24,8 +24,8 @@ cloud account access or device actions.
 | Home | Administrator status and loaded-provider availability | Operational workflow/activity overview is planned |
 | Providers | Home Assistant backend setup/re-auth/reconfigure for authenticated local LM Studio; list and explicit timestamped connection test | Capability wizards, cloud providers, route editor, and dependency management are planned |
 | Entities & Permissions | Searchable read-only entity/device/area registry metadata and availability; `AI access: none` everywhere | No state values, attributes, context selection, or permission grants |
-| Chat | LOC-006 administrator local text trial with provider selector, complete replies, safe errors, keyboard submit, and bounded session-only history | No household context, tools/actions, streaming, profiles, Assist, or persistent history; live candidate acceptance pending |
-| Automations | Action-free internal lifecycle probe with an in-memory execution count | Product workflow schema, runtime, and visual studio are planned |
+| Chat | LOC-006 administrator local text trial with provider selector, complete replies, safe errors, keyboard submit, and bounded session-only history | No household context, tools/actions, streaming, profiles, Assist, or persistent history; current acceptance is tracked separately |
+| Automations | WFL-002C offline JSON draft/snapshot preview with explicit synthetic examples, static condition results, and no execution; existing lifecycle probe remains available | Visual studio, persistent activation, AI steps and notification execution remain planned. The WFL-002B listener harness is isolated from startup. |
 | Other sections | Navigation and scope placeholders | Voice/notifications, activity/security, and full settings are planned |
 
 The panel uses TypeScript/Lit and one bundled module. Historical live acceptance

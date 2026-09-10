@@ -29,6 +29,7 @@ from .providers.contract import (
     safe_provider_error_code,
 )
 from .runtime import ProviderTestStatus, async_get_runtime, is_foundation_loaded
+from .workflow_preview_api import websocket_workflow_preview
 from .workflow_probe import WorkflowProbeInvariantError, async_run_workflow_probe
 
 WORKFLOW_PROBE_INVARIANT_FAILED = "workflow_probe_invariant_failed"
@@ -310,3 +311,4 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_catalog_list)
     websocket_api.async_register_command(hass, websocket_chat_options)
     websocket_api.async_register_command(hass, websocket_chat_send)
+    websocket_api.async_register_command(hass, websocket_workflow_preview)

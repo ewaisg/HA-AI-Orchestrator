@@ -1689,7 +1689,7 @@ var lt = "/config/integrations/integration/ai_orchestrator", ut = {
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, K = class extends F {
+}, ft = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1915,7 +1915,7 @@ var lt = "/config/integrations/integration/ai_orchestrator", ut = {
     `;
 	}
 	_renderProviderCard(e) {
-		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = n === "transport_failure" ? e.health : n?.health ?? e.health, i = n === "transport_failure" ? e.last_tested_at : n?.last_tested_at ?? e.last_tested_at;
+		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = e.health, i = e.last_tested_at;
 		return E`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
@@ -1986,34 +1986,40 @@ var lt = "/config/integrations/integration/ai_orchestrator", ut = {
 	}
 	async _testConnection(e) {
 		let t = this.hass;
-		if (t !== void 0) {
+		if (t !== void 0 && this._testStates.get(e) !== "checking") {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await ct(t, e), r = new Map(this._testStates), i = new Map(this._testResults);
+				let n = await ct(t, e);
+				this._providers = this._providers.map((t) => t.connection_id === e ? {
+					...t,
+					health: n.health,
+					last_tested_at: n.last_tested_at
+				} : t);
+				let r = new Map(this._testStates), i = new Map(this._testResults);
 				r.set(e, "idle"), i.set(e, n), this._testStates = r, this._testResults = i;
 			} catch {
 				this._testStates = new Map(this._testStates).set(e, "idle"), this._testResults = new Map(this._testResults).set(e, "transport_failure");
 			}
 		}
 	}
-}, q = Object.freeze({
+}, K = Object.freeze({
 	max_messages: 21,
 	max_message_chars: 4e3,
 	max_total_chars: 16e3,
 	max_response_chars: 4e3,
 	timeout_seconds: 60
-}), J = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-function Y(e) {
+}), q = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function J(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function X(e, t) {
+function Y(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Z(e, t) {
+function X(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function ft(e) {
-	if (!Y(e) || !X(e, [
+function pt(e) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"providers",
 		"limits",
@@ -2021,20 +2027,20 @@ function ft(e) {
 		"household_context",
 		"actions",
 		"history_persisted"
-	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !Y(e.limits) || !X(e.limits, Object.keys(q))) throw Error("Unsupported chat options");
+	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !J(e.limits) || !Y(e.limits, Object.keys(K))) throw Error("Unsupported chat options");
 	let t = e.limits;
-	if (Object.entries(q).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
+	if (Object.entries(K).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
 	let n = /* @__PURE__ */ new Set();
 	return {
 		schema_version: 1,
 		providers: e.providers.map((e) => {
-			if (!Y(e) || !X(e, [
+			if (!J(e) || !Y(e, [
 				"connection_id",
 				"title",
 				"display_name",
 				"destination",
 				"capability_verified"
-			]) || typeof e.connection_id != "string" || !J.test(e.connection_id) || !Z(e.title, 1e3) || !Z(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
+			]) || typeof e.connection_id != "string" || !q.test(e.connection_id) || !X(e.title, 1e3) || !X(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
 			return n.add(e.connection_id), {
 				connection_id: e.connection_id,
 				title: e.title,
@@ -2043,22 +2049,22 @@ function ft(e) {
 				capability_verified: !1
 			};
 		}),
-		limits: q,
+		limits: K,
 		streaming: !1,
 		household_context: !1,
 		actions: !1,
 		history_persisted: !1
 	};
 }
-function pt(e, t, n) {
-	if (!Y(e) || !X(e, [
+function mt(e, t, n) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"connection_id",
 		"request_id",
 		"text",
 		"destination",
 		"streaming"
-	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !Z(e.text, q.max_response_chars)) throw Error("Unsupported chat response");
+	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !X(e.text, K.max_response_chars)) throw Error("Unsupported chat response");
 	return {
 		schema_version: 1,
 		connection_id: t,
@@ -2068,12 +2074,12 @@ function pt(e, t, n) {
 		streaming: !1
 	};
 }
-async function mt(e) {
-	return ft(await e.callWS({ type: "ai_orchestrator/chat/options" }));
+async function ht(e) {
+	return pt(await e.callWS({ type: "ai_orchestrator/chat/options" }));
 }
-async function ht(e, t, n, r) {
-	if (!J.test(t) || !J.test(n) || r.length === 0 || r.length > q.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !Z(e.content, q.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > q.max_total_chars) throw Error("Invalid chat request");
-	return pt(await e.callWS({
+async function gt(e, t, n, r) {
+	if (!q.test(t) || !q.test(n) || r.length === 0 || r.length > K.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !X(e.content, K.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > K.max_total_chars) throw Error("Invalid chat request");
+	return mt(await e.callWS({
 		type: "ai_orchestrator/chat/send",
 		connection_id: t,
 		request_id: n,
@@ -2083,12 +2089,12 @@ async function ht(e, t, n, r) {
 		}))
 	}), t, n);
 }
-function gt(e, t) {
+function _t(e, t) {
 	let n = [...e.map((e) => ({ ...e })), {
 		role: "user",
 		content: t
 	}], r = !1;
-	for (; n.length > 1 && (n.length > q.max_messages || n.reduce((e, t) => e + t.content.length, 0) > q.max_total_chars);) n.splice(0, 2), r = !0;
+	for (; n.length > 1 && (n.length > K.max_messages || n.reduce((e, t) => e + t.content.length, 0) > K.max_total_chars);) n.splice(0, 2), r = !0;
 	return {
 		messages: n,
 		omitted: r
@@ -2096,7 +2102,7 @@ function gt(e, t) {
 }
 //#endregion
 //#region src/panel/chat-view.ts
-var _t = "ai-orchestrator-chat-view", vt = {
+var vt = "ai-orchestrator-chat-view", yt = {
 	unauthorized: "Administrator access is required for chat.",
 	chat_busy: "A request is still running. Wait a moment, then send again.",
 	chat_duplicate_request: "This request was already submitted. Start a new request to retry.",
@@ -2107,7 +2113,7 @@ var _t = "ai-orchestrator-chat-view", vt = {
 	chat_connection: "Home Assistant could not reach the local provider.",
 	chat_not_found: "The configured model is not available. Check provider settings.",
 	chat_unsupported: "This provider does not support the requested text generation."
-}, yt = class extends F {
+}, bt = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		_options: { state: !0 },
@@ -2228,7 +2234,7 @@ var _t = "ai-orchestrator-chat-view", vt = {
 		let t = ++this._loadSequence;
 		this._loading = !0, this._error = "";
 		try {
-			let n = await mt(e);
+			let n = await ht(e);
 			if (t !== this._loadSequence || !this.isConnected) return;
 			this._options = n, n.providers.some((e) => e.connection_id === this._connectionId) || (this._sequence += 1, this._history = [], this._draft = "", this._notice = "", this._connectionId = n.providers[0]?.connection_id ?? "");
 		} catch {
@@ -2241,11 +2247,11 @@ var _t = "ai-orchestrator-chat-view", vt = {
 	async _send(e) {
 		e?.preventDefault();
 		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
-		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > q.max_message_chars || this.hass?.connection?.connected === !1) return;
-		let i = gt(this._history, n), a = ++this._sequence, o = this._connectionId;
+		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > K.max_message_chars || this.hass?.connection?.connected === !1) return;
+		let i = _t(this._history, n), a = ++this._sequence, o = this._connectionId;
 		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
 		try {
-			let e = await ht(t, o, crypto.randomUUID(), i.messages);
+			let e = await gt(t, o, crypto.randomUUID(), i.messages);
 			if (a !== this._sequence || !this.isConnected) return;
 			this._history = [...i.messages, {
 				role: "assistant",
@@ -2256,7 +2262,7 @@ var _t = "ai-orchestrator-chat-view", vt = {
 		} catch (e) {
 			if (a !== this._sequence || !this.isConnected) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = vt[t] ?? "The reply could not be completed. Your message is ready to try again.";
+			this._error = yt[t] ?? "The reply could not be completed. Your message is ready to try again.";
 		} finally {
 			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
 		}
@@ -2311,7 +2317,7 @@ var _t = "ai-orchestrator-chat-view", vt = {
       ${this._notice ? E`<p class="notice" role="status">${this._notice}</p>` : O}
       <form class="compose" @submit=${(e) => void this._send(e)}>
         <label for="message">Your message</label>
-        <textarea id="message" rows="1" maxlength=${q.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${K.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
           @input=${(e) => {
 			let t = e.target;
@@ -2320,12 +2326,218 @@ var _t = "ai-orchestrator-chat-view", vt = {
           @keydown=${(e) => {
 			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
 		}}></textarea>
-        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${q.max_message_chars} · Ctrl/⌘ + Enter to send</span>
+        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${K.max_message_chars} · Ctrl/⌘ + Enter to send</span>
           <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !e || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>
       </form>
     </div>`;
 	}
-}, bt = "ai-orchestrator-panel", Q = [
+}, xt = 131072, St = {
+	matched: "Matched",
+	event_kind_mismatch: "Event type did not match",
+	state_unchanged: "State did not change",
+	entity_not_selected: "Entity was not selected",
+	target_state_mismatch: "Target state did not match",
+	time_mismatch: "Time did not match",
+	outside_time_window: "Outside the time window",
+	state_unavailable: "State unavailable",
+	state_mismatch: "State did not match",
+	state_not_numeric: "State is not numeric",
+	outside_numeric_bounds: "Outside numeric bounds"
+}, Ct = class extends Error {
+	constructor() {
+		super("Workflow preview response is unsupported.");
+	}
+};
+function Z(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function Q(e, t) {
+	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
+}
+function wt(e, t, n) {
+	return Array.isArray(e) && e.length <= t && e.every((e, t) => Z(e) && Q(e, [
+		"index",
+		"passed",
+		"reason"
+	]) && e.index === t && typeof e.passed == "boolean" && typeof e.reason == "string" && n.includes(e.reason) && e.passed === (e.reason === "matched"));
+}
+function Tt(e) {
+	if (!Z(e) || !Q(e, [
+		"schema_version",
+		"mode",
+		"enabled",
+		"triggered",
+		"conditions_passed",
+		"eligible",
+		"trigger_results",
+		"condition_results",
+		"planned_steps",
+		"provider_calls",
+		"actions_executed"
+	]) || e.schema_version !== 1 || e.mode !== "offline" || typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !wt(e.trigger_results, 10, [
+		"matched",
+		"event_kind_mismatch",
+		"state_unchanged",
+		"entity_not_selected",
+		"target_state_mismatch",
+		"time_mismatch"
+	]) || !wt(e.condition_results, 20, [
+		"matched",
+		"outside_time_window",
+		"state_unavailable",
+		"state_mismatch",
+		"state_not_numeric",
+		"outside_numeric_bounds"
+	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Z(e) && Q(e, ["index", "kind"]) && e.index === t && [
+		"ai_compose",
+		"ai_classify",
+		"notify"
+	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new Ct();
+	return e;
+}
+async function Et(e, t, n) {
+	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new Ct();
+	return Tt(await e.callWS({
+		type: "ai_orchestrator/workflow/preview",
+		workflow_json: t,
+		snapshot_json: n
+	}));
+}
+//#endregion
+//#region src/panel/workflow-preview-view.ts
+var Dt = "ai-orchestrator-workflow-preview", Ot = {
+	schema_version: 1,
+	workflow_id: "12345678-1234-4123-8123-123456789abc",
+	name: "Synthetic evening window preview",
+	enabled: !1,
+	triggers: [{
+		kind: "state",
+		entity_ids: ["binary_sensor.synthetic_window"],
+		to_state: "on"
+	}],
+	conditions: [{
+		kind: "time_window",
+		after_time: "18:00",
+		before_time: "06:00"
+	}, {
+		kind: "state",
+		entity_id: "binary_sensor.synthetic_window",
+		state: "on"
+	}],
+	steps: [{
+		step_id: "compose",
+		kind: "ai_compose",
+		prompt: "Write a short window reminder."
+	}, {
+		step_id: "notify",
+		kind: "notify",
+		notify_service: "notify.synthetic"
+	}]
+}, kt = {
+	ai_compose: "Compose text",
+	ai_classify: "Classify text",
+	notify: "Notification"
+}, At = class extends F {
+	static properties = {
+		hass: { attribute: !1 },
+		_workflow: { state: !0 },
+		_snapshot: { state: !0 },
+		_busy: { state: !0 },
+		_error: { state: !0 },
+		_result: { state: !0 }
+	};
+	static styles = o`
+    :host { display:block; min-width:0; color:var(--primary-text-color,#233642); margin-bottom:32px; }
+    * { box-sizing:border-box; } h1 { font-size:26px; margin:0 0 10px; } h2 { font-size:20px; }
+    p { line-height:1.6; } .editors { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:16px; }
+    label { display:block; font-weight:600; margin-bottom:6px; } textarea { width:100%; min-width:0; height:300px; resize:vertical; padding:12px; font:13px/1.5 monospace; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:8px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; } button { cursor:pointer; min-height:44px; padding:10px 14px; font:inherit; border:1px solid #7d969c; border-radius:8px; background:var(--card-background-color,#fff); color:inherit; }
+    .primary { background:#175e56; color:#fff; } button:disabled { opacity:.55; cursor:default; }
+    button:focus-visible,textarea:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
+    .result { border:1px solid var(--divider-color,#ccd9da); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
+    .error { color:var(--error-color,#852e23); } li { margin:8px 0; } @media(max-width:700px) { .editors { grid-template-columns:minmax(0,1fr); } textarea { height:220px; } }
+  `;
+	_sequence = 0;
+	_connection;
+	_userId;
+	_callWS;
+	constructor() {
+		super(), this._workflow = "", this._snapshot = "", this._busy = !1, this._error = "";
+	}
+	_reset = () => {
+		this._invalidate(), this._workflow = "", this._snapshot = "";
+	};
+	_invalidate() {
+		this._sequence++, this._busy = !1, this._error = "", this._result = void 0;
+	}
+	_unbind() {
+		this._connection?.removeEventListener("disconnected", this._reset);
+	}
+	connectedCallback() {
+		super.connectedCallback(), this._connection?.addEventListener("disconnected", this._reset);
+	}
+	disconnectedCallback() {
+		this._unbind(), this._reset(), super.disconnectedCallback();
+	}
+	willUpdate(e) {
+		e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset));
+	}
+	_example(e) {
+		this._invalidate(), this._workflow = JSON.stringify(Ot, null, 2), this._snapshot = JSON.stringify({
+			states: { "binary_sensor.synthetic_window": "on" },
+			time: e ? "12:00" : "20:00",
+			event: {
+				kind: "state",
+				entity_id: "binary_sensor.synthetic_window",
+				from_state: "off",
+				to_state: "on"
+			}
+		}, null, 2);
+	}
+	_edit(e, t) {
+		this._invalidate();
+		let n = e.target.value;
+		t ? this._workflow = n : this._snapshot = n;
+	}
+	_preview = async () => {
+		let e = this.hass;
+		if (this._busy || !e || e.connection?.connected === !1 || !this._workflow.trim() || !this._snapshot.trim()) return;
+		this._invalidate(), this._busy = !0;
+		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
+		try {
+			let t = await Et(e, this._workflow, this._snapshot);
+			n() && (this._result = t);
+		} catch {
+			n() && (this._error = "Preview could not be completed. Check both JSON documents, administrator access, and the installed integration version.");
+		} finally {
+			n() && (this._busy = !1);
+		}
+	};
+	render() {
+		return E`<section aria-labelledby="preview-title">
+      <h1 id="preview-title">Workflow preview</h1>
+      <p>Experimental offline JSON editor. Test a draft against a supplied snapshot. Nothing is saved or activated; no live home state is read, no provider is contacted, and no action executes.</p>
+      <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
+      <div class="actions"><button type="button" @click=${() => this._example(!1)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(!0)}>Load synthetic daytime example</button></div>
+      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${xt} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
+      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${xt} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
+      <div class="actions"><button class="primary" type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim() || !this._snapshot.trim()} @click=${this._preview}>${this._busy ? "Previewing…" : "Preview workflow"}</button><button type="button" @click=${this._reset}>Reset preview</button></div>
+      <div role="status" aria-live="polite">${this._error ? E`<p class="error">${this._error}</p>` : O}${this._busy ? E`<p>Evaluating the supplied snapshot…</p>` : O}${this._result ? this._renderResult(this._result) : O}</div>
+    </section>`;
+	}
+	_renderResult(e) {
+		return E`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
+      <p>Draft enabled flag: ${e.enabled ? "yes" : "no"}. Preview never activates a workflow.</p>
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => E`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${St[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? E`<ul>${e.condition_results.map((e) => E`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${St[e.reason]}</li>`)}</ul>` : E`<p>No conditions.</p>`}
+      <h3>Planned steps</h3>${e.planned_steps.length ? E`<ol>${e.planned_steps.map((e) => E`<li>${kt[e.kind]} — not executed</li>`)}</ol>` : E`<p>No steps planned.</p>`}
+      <p>Provider calls: 0 · Actions executed: 0</p></div>`;
+	}
+};
+customElements.define(Dt, At);
+//#endregion
+//#region src/panel/ai-orchestrator-panel.ts
+var jt = "ai-orchestrator-panel", $ = [
 	{
 		id: "home",
 		label: "Home"
@@ -2358,12 +2570,12 @@ var _t = "ai-orchestrator-chat-view", vt = {
 		id: "settings",
 		label: "Settings"
 	}
-], xt = {
+], Mt = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, St = {
+}, Nt = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -2393,11 +2605,11 @@ var _t = "ai-orchestrator-chat-view", vt = {
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function Ct(e) {
+function Pt(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
-	return Q.find((e) => e.id === t)?.id;
+	return $.find((e) => e.id === t)?.id;
 }
-var wt = class extends F {
+var Ft = class extends F {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -2420,7 +2632,7 @@ var wt = class extends F {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = Ct(this.route);
+			let e = Pt(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 	}
@@ -2466,7 +2678,7 @@ var wt = class extends F {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${Q.map((e) => E`
+          ${$.map((e) => E`
               <button
                 class="nav-button"
                 type="button"
@@ -2548,7 +2760,7 @@ var wt = class extends F {
 			return E`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${xt[e]}</span>
+                  <span class="status-name">${Mt[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -2585,7 +2797,7 @@ var wt = class extends F {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = St[e], n = Q.find((t) => t.id === e)?.label ?? "Section";
+		let t = Nt[e], n = $.find((t) => t.id === e)?.label ?? "Section";
 		return E`
       <header class="page-header">
         <div>
@@ -2610,6 +2822,7 @@ var wt = class extends F {
 	}
 	_renderWorkflowProbe() {
 		return E`
+      <ai-orchestrator-workflow-preview .hass=${this.hass}></ai-orchestrator-workflow-preview>
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>
@@ -2792,7 +3005,7 @@ var wt = class extends F {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, Tt = "ai-orchestrator-providers-view", $ = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(_t, yt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(bt, wt), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Tt, K), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define($, Ze);
+}, It = "ai-orchestrator-providers-view", Lt = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(vt, bt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(jt, Ft), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(It, ft), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(Lt, Ze);
 //#endregion
-export { wt as AiOrchestratorPanel, $ as CATALOG_VIEW_TAG, _t as CHAT_VIEW_TAG, Ze as CatalogView, yt as ChatView, bt as PANEL_TAG, Tt as PROVIDERS_VIEW_TAG, K as ProvidersView };
+export { Ft as AiOrchestratorPanel, Lt as CATALOG_VIEW_TAG, vt as CHAT_VIEW_TAG, Ze as CatalogView, bt as ChatView, jt as PANEL_TAG, It as PROVIDERS_VIEW_TAG, ft as ProvidersView };

@@ -21,6 +21,7 @@ import { panelStyles } from "../styles/panel-styles";
 import "./catalog-view";
 import "./providers-view";
 import "./chat-view";
+import "./workflow-preview-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -368,6 +369,7 @@ export class AiOrchestratorPanel extends LitElement {
 
   private _renderWorkflowProbe(): TemplateResult {
     return html`
+      <ai-orchestrator-workflow-preview .hass=${this.hass}></ai-orchestrator-workflow-preview>
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>

@@ -115,3 +115,13 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   updated panel/chat worked without clearing caches after the candidate handoff.
   See the owner acceptance addendum in `evidence/2026-09-09-loc-009-resume.md`.
   No live URL trace, Android confirmation or unrelated acceptance is inferred.
+
+## WFL-002B/C candidate acceptance
+
+- ENV-014: WFL-002C Automations preview candidate has not yet been installed and
+  observed on the owner's Home Assistant/Companion App. Verify loaded bundle,
+  evening/daytime preview and usable editors on desktop/Android. Consuming task:
+  WFL-002C. Local automated browser tests do not replace this live acceptance.
+- WFL-002B is an isolated observation harness with no startup wiring. Production
+  configuration ownership, permissions, persisted activation and real restart
+  acceptance remain future WFL-002 work, not inferred from harness tests.

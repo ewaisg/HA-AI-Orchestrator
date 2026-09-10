@@ -103,7 +103,15 @@ is available only when a provider entry is loaded. **Workflow runtime**,
 Conversation agent flag refers to the future native Assist integration, not
 the LOC-006 panel chat.
 
-The Automations section may expose the Phase 0 **lifecycle probe**. That bounded
+The WFL-002C candidate adds **Workflow preview** to Automations. Administrators
+can load an explicitly synthetic example or enter workflow/snapshot JSON and
+inspect trigger/condition pass/fail results. The preview uses only the supplied
+snapshot, makes no provider calls and executes no actions. Drafts are not saved.
+See [the preview guide](OFFLINE-WORKFLOW-PREVIEW.md) for limits and examples.
+A successful offline preview does not establish live trigger or notification
+behavior; the Home page's Workflow runtime flag stays unavailable.
+
+The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded
 test fires one integration-owned internal event and increments an in-memory
 counter. A valid result reports exactly one execution for the trigger, no
 provider contact, and no Home Assistant action call. It is not a published

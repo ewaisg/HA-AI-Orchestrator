@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-09
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **WFL-002A offline workflow preview is DONE and runnable via `scripts/preview_workflow.py`; see `docs/OFFLINE-WORKFLOW-PREVIEW.md`. Close the remaining LOC-003/004/005 and LOC-008 acceptance before LOC-007. Then implement WFL-002 HA trigger/condition lifecycle using the tested evaluator. No production workflow or action execution is enabled.**
+Current resume point: **Install and live-check WFL-002C from `outputs/workflow-preview-panel/ai-orchestrator-workflow-preview.zip`: Automations → Workflow preview, evening scenario passes, daytime scenario blocks, desktop/Android editors work. WFL-002B isolated HA observer harness is verified but not activated. See `docs/evidence/2026-09-09-wfl-002bc-panel-observer.md`. Remaining Phase 1 acceptance and LOC-007 still gate production workflow activation.**
 
 Accepted candidate evidence: the August 29 clean Git-archive Linux gate recorded 340 full, 98 focused, 30 security/evidence/traceability, and 231 pure tests plus Ruff/canary. The frontend recorded 95 browser tests plus lint, typecheck, build, sync, and byte identity (75,409 bytes; SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`). Both independent pre-live reviewers approved the candidate; evidence commit is `dc71eca6d5e8124c2d2101064d44e3269a5f9190`. These are historical gates, not September 5 test reruns. The Windows checkout's CRLF bundle differs physically; use the canonical Git archive for exact-artifact installation.
 
@@ -23,12 +23,12 @@ No task may move to `DONE` based only on an assertion.
 
 | Field | Current value |
 |---|---|
-| Last completed | WFL-002A offline command/evaluator: evening synthetic window scenario plans steps; daytime scenario blocks them. Independent review approved, 82 focused tests, 388 pure tests and 537 backend tests on each named Core pass. |
-| Active work | Remaining Phase 1 live checks and LOC-007; WFL-001 schema and WFL-002A offline evaluator are reviewed and ready for the subsequent runtime stage. |
+| Last completed | WFL-002B isolated HA observer lifecycle verified; WFL-002C panel editor/API implemented and independently reviewed. Final canonical backend suite: 576 tests on each named Core; frontend: 150 tests and byte identity. Complete install ZIP prepared. |
+| Active work | WFL-002C owner desktop/Android acceptance, then remaining Phase 1 acceptance and LOC-007. |
 | Evidence/input needed | LOC-008 needs owner confirmation that only the message area scrolls, the input stays usable with the on-screen keyboard open, and spacing now matches the rest of the UI. LOC-003 needs bounded timeout/cancellation reproduction. LOC-004 needs duplicate-click protection and transport-failure reproduction. LOC-005 needs removal/disable/unavailable/area-device-change checks. First isolated backup restore artifact remains due by 2027-02-23 or earlier after a major change. |
-| Next gate | Complete LOC-008 Android keyboard/transcript/spacing and remaining LOC-003/004/005 acceptance, then LOC-007; reviewed WFL-001 schema work does not publish a runtime. |
-| Production code | Foundation, provider lifecycle/contract, authenticated LM Studio, provider setup/test UI, read-only catalogue, and bounded admin local text chat are implemented. Workflow execution, device actions, Assist, cloud providers and chat persistence remain planned. |
-| Repository | Reviewed clean starting HEAD `a330c9c` on `main` already includes LOC-009 hashing and an initial WFL-001 schema. This session adds uncommitted LOC-009 repair/tests and reconciled evidence/docs. No live installation or remote publish performed this session. |
+| Next gate | Install complete WFL-002C ZIP and verify evening/daytime previews plus usable desktop/Android editors (ENV-014). Then close remaining LOC-003/004/005/008 acceptance and LOC-007 before activation. |
+| Production code | Foundation, provider lifecycle/contract, authenticated LM Studio, provider setup/test UI, read-only catalogue, and bounded admin local text chat are implemented. Offline panel workflow previews are implemented; isolated HA observation harness is not wired into startup. Workflow execution, device actions, Assist, cloud providers and chat persistence remain planned. |
+| Repository | Starting HEAD `d73890b` was clean. Current uncommitted changes add observer harness, offline preview API/UI/tests, bundle and docs. No remote publish or live installation performed. |
 
 ## Repository review and session handoff
 
@@ -79,6 +79,8 @@ No task may move to `DONE` based only on an assertion.
 | WFL-001 | Implement versioned workflow schema and migrations | `REVIEW` | LOC-007 | Schema repaired; 72 new tests and independent review approved. Pure suite 306 passed; full backend 455 on each Core 2026.8.3 and 2026.9.0. Evidence: `docs/evidence/2026-09-09-wfl-001-schema.md`. Code is disconnected from runtime; prerequisite LOC-007 remains open. |
 | WFL-002 | Implement curated deterministic triggers and conditions | `TODO` | WFL-001 | Trigger/condition and restart tests |
 | WFL-002A | Add offline deterministic workflow preview | `DONE` | WFL-001 schema review | CLI, pure evaluator, synthetic examples and guide implemented. 82 focused tests independently verified; pure suite 388, full backend 537 on each named Core; Ruff/canary pass. Evidence: `docs/evidence/2026-09-09-wfl-002a-offline-preview.md`. No HA listeners, actions, provider calls or production activation; LOC-007 remains required before runtime publication. |
+| WFL-002B | Verify observation-only HA trigger lifecycle | `DONE` | WFL-001, WFL-002A | Isolated harness: 19 focused tests on each Core, independent review and final canonical full gates pass. Failed cleanup retry, stale callbacks and deduplication covered. No startup wiring or execution capability. Evidence: `docs/evidence/2026-09-09-wfl-002bc-panel-observer.md`. |
+| WFL-002C | Expose offline workflow preview in Automations | `REVIEW` | WFL-002A | Admin-only bounded WebSocket API and editor with synthetic examples implemented; 20 API/34 UI focused tests, 150 full frontend, 576 full backend on each Core pass; independent review approved. Live owner desktop/Android acceptance remains ENV-014. Evidence: `docs/evidence/2026-09-09-wfl-002bc-panel-observer.md`. |
 | WFL-003 | Implement compose/classify/extract/branch AI steps | `TODO` | WFL-001, LOC-002 | Structured-output and malformed-output tests |
 | WFL-004 | Discover notification and media actions | `TODO` | LOC-005 | Real registry schema validation; no invented action fields |
 | WFL-005 | Build visual workflow studio | `TODO` | WFL-001 through WFL-004 | UI tests and accessibility review |
