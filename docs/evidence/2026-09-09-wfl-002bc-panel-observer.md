@@ -96,3 +96,22 @@ no steps are planned. Confirm both editors work on desktop and Android and that
 the lifecycle probe remains accessible. This is the WFL-002C/ENV-014 live resume
 point; no install, restart or live acceptance was performed by agents this turn.
 Remaining LOC-003/004/005/008 evidence and LOC-007 still gate runtime publication.
+
+## 2026-09-11 fresh install archive from branch HEAD
+
+Built with `git archive --format=zip HEAD custom_components/ai_orchestrator` at
+commit `71501898caeec125b7429187042988c9b82b67ea` on `claude/sharp-sagan-xl2abm`,
+working tree clean. The tracked integration directory is unchanged since
+`1f71fc4`, so the 21 packaged files carry the same content as the September 9
+candidate; only tests and documentation differ between the commits.
+
+| Item | Value |
+|---|---|
+| Archive | `ai-orchestrator-7150189.zip`, 79,101 bytes, 21 files, no CRLF |
+| Archive SHA-256 | `dc1780463cd6e3bc15cbe0dbb8ea89ec02bdecbdaab0a52113b90d2c251d8ceb` |
+| Bundle SHA-256 inside the archive | `c3434c673e13a7a3ee06c01aebfcbe4fa458676941a47786446a0927bb34aa0f` (matches the September 9 bundle) |
+| Per-file hashes | `identity.json` delivered alongside the archive; not committed |
+
+The archive was delivered to the owner from the build container and is not
+stored in the repository. Installing it is the ENV-014 live resume step; no
+install or live acceptance was performed here.
