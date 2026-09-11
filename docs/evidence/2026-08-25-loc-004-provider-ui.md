@@ -154,3 +154,41 @@ Raw logs stayed in the container's session scratch directory and were not
 committed. No live Home Assistant instance was contacted. The LOC-004 live items
 (duplicate-click observation and transport-failure reproduction on the owner's
 instance) remain outstanding; automated coverage does not close them.
+
+### 2026-09-11 independent review of the `d73890b` view repair
+
+A separate read-only reviewer agent inspected the `d73890b` hunk, the current
+`providers-view.ts`, `provider-client.ts`, the fixtures, and the two new tests,
+compared the stale-response handling with `chat-view.ts`, and reran the
+providers test file (9 passed). Verdict: approve with follow-ups. No blocking
+finding.
+
+Verified by the reviewer: the guard and the `checking` write are synchronous and
+precede the first `await`, so no second request for the same connection can be
+sent; nothing resets `_testStates`; the written provider row still satisfies the
+list invariant because a test result never carries `not_tested` or a null
+timestamp; `parseProviderTestResult` rejects a mismatched `connection_id`, so
+cross-row contamination is impossible; only enum-mapped labels and a validated
+timestamp reach the DOM, and the `aria-live` transport message now agrees with
+the badge instead of contradicting a silently reverted badge.
+
+Non-blocking findings and disposition:
+
+1. The duplicate-click test's third click hit a disabled button, which is a
+   no-op per the HTML spec, so its comment overclaimed that the handler guard
+   was exercised. Fixed this session: the test now strips `disabled` before the
+   third click. Mutation check with the handler guard removed: four requests
+   instead of two and the test fails; restored, 9 pass and the full suite
+   passes 152.
+2. `_testConnection` writes reactive state unconditionally when the awaited
+   call settles, with no sequence or `isConnected` guard as `chat-view.ts` has.
+   Pre-existing, state-only, and inert because the parent recreates the view on
+   tab switch; becomes a defect only if a list refresh or hass-change reload is
+   ever added to this view. Left as a recorded follow-up, not changed.
+3. A redundant `requestUpdate()` after reassigning a reactive Map, and focus
+   loss when the focused button becomes `disabled`. Both pre-existing; not
+   changed.
+
+The reviewer was a separate agent in the same session, not the owner's usual
+named reviewer roles. Live duplicate-click and transport-failure observation on
+the owner's instance remains the open LOC-004 item.

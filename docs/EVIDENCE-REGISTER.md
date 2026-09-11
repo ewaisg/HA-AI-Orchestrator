@@ -139,4 +139,4 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
 - The tracker's September 9 statement that the LOC-004 view repair carried
   browser regressions and an independent review was not supported by the
   repository: `d73890b` changed no test file and recorded no review. Regression
-  tests now exist; the review remains an open requirement.
+  tests and a recorded reviewer-agent approval now exist; live reproduction remains.

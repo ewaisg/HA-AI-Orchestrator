@@ -266,8 +266,12 @@ describe("provider setup and connection-test view", () => {
     expect(button?.disabled).toBe(true);
     expect(shadowText(view)).toContain("Testing…");
 
-    // Later duplicate: the disabled button ignores the click; the guard also holds if bypassed.
-    button?.click();
+    // Later duplicate with the disabled attribute stripped (a click on a disabled
+    // control is a no-op per the HTML spec, so this exercises the handler guard itself).
+    if (button !== null && button !== undefined) {
+      button.disabled = false;
+      button.click();
+    }
     await view.updateComplete;
 
     expect(requests).toEqual([
