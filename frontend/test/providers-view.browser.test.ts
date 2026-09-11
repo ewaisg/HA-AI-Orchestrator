@@ -186,4 +186,109 @@ describe("provider setup and connection-test view", () => {
     expect(shadowText(view)).not.toContain("Unavailable");
     expect(shadowText(view)).not.toContain(marker);
   });
+
+  it("keeps health confirmed in this view when a later test transport fails", async () => {
+    const marker = "transport-secret-must-not-render";
+    const requests: Record<string, unknown>[] = [];
+    let failTestTransport = false;
+    const view = await mountView({
+      callWS: async <T>(message: Record<string, unknown>): Promise<T> => {
+        requests.push(message);
+        if (message.type === "ai_orchestrator/providers/list") {
+          return structuredClone(PROVIDER_LIST) as T;
+        }
+        if (failTestTransport) {
+          return Promise.reject(new Error(marker));
+        }
+        return {
+          schema_version: 1,
+          connection_id: CONNECTION_ID,
+          health: "healthy",
+          error_code: null,
+          last_tested_at: "2026-08-28T18:00:00+00:00",
+        } as T;
+      },
+    });
+
+    // The list reported the provider as untested; the first explicit test confirms it.
+    expect(shadowText(view)).toContain("Not tested");
+    view.shadowRoot?.querySelector<HTMLButtonElement>("button.test-button")?.click();
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await view.updateComplete;
+    expect(shadowText(view)).toContain("Healthy");
+    expect(shadowText(view)).toContain("Last tested");
+    expect(shadowText(view)).toContain("Connection test passed");
+    expect(shadowText(view)).not.toContain("Not tested");
+
+    // A later Home Assistant transport failure must not discard that confirmation.
+    failTestTransport = true;
+    view.shadowRoot?.querySelector<HTMLButtonElement>("button.test-button")?.click();
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await view.updateComplete;
+
+    expect(requests).toEqual([
+      { type: "ai_orchestrator/providers/list" },
+      { type: "ai_orchestrator/providers/test", connection_id: CONNECTION_ID },
+      { type: "ai_orchestrator/providers/test", connection_id: CONNECTION_ID },
+    ]);
+    expect(shadowText(view)).toContain("Healthy");
+    expect(shadowText(view)).toContain("Last tested");
+    expect(shadowText(view)).toContain(
+      "Home Assistant communication failed; provider health unchanged",
+    );
+    expect(shadowText(view)).not.toContain("Not tested");
+    expect(shadowText(view)).not.toContain("Connection test passed");
+    expect(shadowText(view)).not.toContain(marker);
+  });
+
+  it("sends one test request for duplicate clicks while a test is in flight", async () => {
+    const requests: Record<string, unknown>[] = [];
+    let resolveTest: ((value: unknown) => void) | undefined;
+    const view = await mountView({
+      callWS: async <T>(message: Record<string, unknown>): Promise<T> => {
+        requests.push(message);
+        if (message.type === "ai_orchestrator/providers/list") {
+          return structuredClone(PROVIDER_LIST) as T;
+        }
+        return new Promise<T>((resolve) => {
+          resolveTest = resolve as (value: unknown) => void;
+        });
+      },
+    });
+
+    const button = view.shadowRoot?.querySelector<HTMLButtonElement>("button.test-button");
+    expect(button?.disabled).toBe(false);
+
+    // Same-tick duplicate: the second click lands before Lit re-renders the disabled button.
+    button?.click();
+    button?.click();
+    await view.updateComplete;
+    expect(button?.disabled).toBe(true);
+    expect(shadowText(view)).toContain("Testing…");
+
+    // Later duplicate: the disabled button ignores the click; the guard also holds if bypassed.
+    button?.click();
+    await view.updateComplete;
+
+    expect(requests).toEqual([
+      { type: "ai_orchestrator/providers/list" },
+      { type: "ai_orchestrator/providers/test", connection_id: CONNECTION_ID },
+    ]);
+    expect(resolveTest).toBeDefined();
+
+    resolveTest?.({
+      schema_version: 1,
+      connection_id: CONNECTION_ID,
+      health: "healthy",
+      error_code: null,
+      last_tested_at: "2026-08-28T18:02:00+00:00",
+    });
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await view.updateComplete;
+
+    expect(requests).toHaveLength(2);
+    expect(button?.disabled).toBe(false);
+    expect(shadowText(view)).toContain("Connection test passed");
+    expect(shadowText(view)).toContain("Healthy");
+  });
 });

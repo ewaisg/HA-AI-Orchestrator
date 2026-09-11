@@ -106,3 +106,51 @@ instrumented measurement, and it is recorded as such. It covers the Providers
 view rendering for LOC-004. Duplicate-click protection and transport-failure
 reproduction remain outstanding. Status remains `REVIEW — LIVE ACCEPTANCE
 PARTIAL` pending those items.
+
+## 2026-09-11 regression coverage for the September 9 view repair
+
+Commit `d73890b` changed `frontend/src/panel/providers-view.ts` in two ways:
+`_testConnection` returns early when the same connection is already `checking`,
+and a completed test result is written into the `_providers` list so the badge
+and timestamp come from confirmed state rather than from the latest request.
+That commit changed no test file, so the tracker's claim of browser regressions
+for this repair was not backed by the repository. The claim of an independent
+review is not recorded anywhere in the repository either and is not asserted here.
+
+This session added two tests to `frontend/test/providers-view.browser.test.ts`:
+
+| Test | Behavior proven |
+|---|---|
+| keeps health confirmed in this view when a later test transport fails | List reports `not_tested`; an explicit test returns `healthy`; a second test whose Home Assistant transport rejects leaves `Healthy` and `Last tested` visible with the bounded transport message, and never shows `Not tested` again or the rejection text |
+| sends one test request for duplicate clicks while a test is in flight | Two synchronous clicks before Lit re-renders, then a third click on the disabled button, produce exactly one `ai_orchestrator/providers/test` request; the button re-enables and the result renders after the deferred response resolves |
+
+Mutation check: with the `d73890b` hunk reversed (`git apply -R`), exactly these
+two tests failed (`Not tested` shown after the transport failure; three requests
+instead of two) and the seven pre-existing tests still passed. With the fix
+restored, all nine pass. The tests therefore detect the defect and are not
+tautological.
+
+Verification environment: an ephemeral Linux container, not the owner's WSL
+runner. Python 3.14.5 was installed through uv 0.12.13 from PyPI because the
+image's uv 0.8.17 had no index entry for it. Node was 22.22.2 rather than the
+pinned >=24.15, and Playwright 1.62.1 ran the image's Chromium 1194 build via a
+local, uncommitted `executablePath` override instead of its expected revision
+1234. Despite the Node difference the Vite build was byte-identical to the
+committed bundle (105,464 bytes, SHA-256
+`c3434c673e13a7a3ee06c01aebfcbe4fa458676941a47786446a0927bb34aa0f`). Only Core
+2026.8.3 (the `uv.lock` pin) was exercised; Core 2026.9.0 was not rerun here.
+
+| Check | Observed result |
+|---|---|
+| `npx vitest run test/providers-view.browser.test.ts` | 9 passed |
+| Same file with `d73890b` view hunk reversed | 2 failed, 7 passed |
+| Frontend gate: scripts check, lint, typecheck, vitest, build, sync, verify:bundle | 152 browser tests in 11 files; all steps exit 0; bundle byte-identical |
+| `uv run python -m pytest -q` (Core 2026.8.3, Python 3.14.5) | 576 passed |
+| `uv run python scripts/run_pure_tests.py` | 388 passed, 5 dependency warnings |
+| `uv run ruff check .` / `ruff format --check scripts tests` | All checks passed / 31 files already formatted |
+| `uv run python scripts/canary_scan.py` | Exit 0, no findings |
+
+Raw logs stayed in the container's session scratch directory and were not
+committed. No live Home Assistant instance was contacted. The LOC-004 live items
+(duplicate-click observation and transport-failure reproduction on the owner's
+instance) remain outstanding; automated coverage does not close them.

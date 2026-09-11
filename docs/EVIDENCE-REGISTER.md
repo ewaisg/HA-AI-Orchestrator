@@ -125,3 +125,18 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
 - WFL-002B is an isolated observation harness with no startup wiring. Production
   configuration ownership, permissions, persisted activation and real restart
   acceptance remain future WFL-002 work, not inferred from harness tests.
+
+## September 11 container verification
+
+- The full gates were rerun in an ephemeral Linux container rather than the
+  owner's WSL runner: Python 3.14.5 (installed via uv 0.12.13 from PyPI), Core
+  2026.8.3 from `uv.lock`, Node 22.22.2 (pinned engine is >=24.15), and
+  Playwright 1.62.1 driving the image's Chromium 1194 through an uncommitted
+  `executablePath` override. The Vite build was still byte-identical to the
+  committed bundle. Core 2026.9.0 was not exercised there. Consuming task:
+  LOC-004. Treat these as current-tree checks, not a substitute for the named
+  dual-Core WSL gate or any live acceptance.
+- The tracker's September 9 statement that the LOC-004 view repair carried
+  browser regressions and an independent review was not supported by the
+  repository: `d73890b` changed no test file and recorded no review. Regression
+  tests now exist; the review remains an open requirement.
