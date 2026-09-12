@@ -2,7 +2,7 @@ import * as axe from "axe-core";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { CHAT_VIEW_TAG, type ChatView } from "../src/entry";
-import { CHAT_LIMITS, parseChatOptions, parseChatResult, prepareChatMessages, sendChat } from "../src/api/chat-client";
+import { CHAT_LIMITS, newRequestId, parseChatOptions, parseChatResult, prepareChatMessages, sendChat } from "../src/api/chat-client";
 import type { HomeAssistantLike } from "../src/ha/hass-contract";
 
 const CONNECTION = "12345678-1234-4234-9234-123456789abc";
@@ -113,6 +113,24 @@ describe("read-only chat interaction",()=>{
       {role:"user",content:"Draft a reminder."},{role:"assistant",content:"A friendly synthetic reminder."},{role:"user",content:"Make it shorter."},
     ]);
     expect(Object.keys(requests[1] ?? {}).sort()).toEqual(["connection_id","messages","request_id","type"]);
+  });
+  it("generates canonical v4 request identifiers without crypto.randomUUID",async()=>{
+    const canonical=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+    const original=Object.getOwnPropertyDescriptor(Crypto.prototype,"randomUUID");
+    Object.defineProperty(Crypto.prototype,"randomUUID",{configurable:true,value:undefined});
+    try {
+      expect(typeof crypto.randomUUID).toBe("undefined");
+      const ids=Array.from({length:200},()=>newRequestId());
+      expect(ids.every((id)=>canonical.test(id))).toBe(true);
+      expect(new Set(ids).size).toBe(ids.length);
+      const requests:Record<string,unknown>[]=[];
+      const view=await mount(fixture(requests));
+      await compose(view,"Insecure context send."); await submit(view);
+      expect(text(view)).toContain("A friendly synthetic reminder.");
+      expect(canonical.test(String(requests[1]?.request_id))).toBe(true);
+    } finally {
+      if (original) Object.defineProperty(Crypto.prototype,"randomUUID",original);
+    }
   });
   it("never renders provider text as HTML",async()=>{
     const view=await mount(fixture([],async r=>result(r,"<img src=x onerror=alert(1)> **plain text**")));

@@ -1,7 +1,7 @@
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 
 import {
-  CHAT_LIMITS, fetchChatOptions, prepareChatMessages, sendChat,
+  CHAT_LIMITS, fetchChatOptions, newRequestId, prepareChatMessages, sendChat,
   type ChatMessage, type ChatOptions,
 } from "../api/chat-client";
 import type { HomeAssistantLike } from "../ha/hass-contract";
@@ -231,7 +231,7 @@ export class ChatView extends LitElement {
     this._error = "";
     this._notice = prepared.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
     try {
-      const result = await sendChat(hass, connectionId, crypto.randomUUID(), prepared.messages);
+      const result = await sendChat(hass, connectionId, newRequestId(), prepared.messages);
       if (sequence !== this._sequence || !this.isConnected) return;
       this._history = [...prepared.messages, {role:"assistant", content:result.text}];
       this._draft = "";

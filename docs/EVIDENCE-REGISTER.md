@@ -151,3 +151,14 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   trigger recorded in the list, restart Core and confirm the workflow is active
   again with counters reset, and confirm `.storage/ai_orchestrator.workflows`
   survives. Consuming task: WFL-002. Simulated restart tests do not replace this.
+
+## September 12 main-branch review (merged onto the branch line)
+
+- LOC-010: the owner reaches Home Assistant over HTTPS (`famhub.pineteck.com`),
+  so the plain-HTTP chat failure fixed on 2026-09-12 is not reproducible on the
+  owner's instance; the fix rests on the browser test that removes
+  `crypto.randomUUID`. Consuming tasks: LOC-010, LOC-007.
+- Owner's live Core reported version 2026.9.2 on 2026-09-12, outside the two
+  named Cores (2026.8.3, 2026.9.0) the WSL gate exercises. No 2026.9.2 test
+  environment exists yet; DEC-023 scope is unchanged. Consuming tasks: COMP-001,
+  LOC-007.

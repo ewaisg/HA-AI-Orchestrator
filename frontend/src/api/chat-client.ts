@@ -92,6 +92,16 @@ export async function fetchChatOptions(hass: HomeAssistantLike): Promise<ChatOpt
   return parseChatOptions(await hass.callWS<unknown>({ type: "ai_orchestrator/chat/options" }));
 }
 
+// crypto.randomUUID exists only in secure contexts (HTTPS or localhost). Plain-HTTP
+// LAN access to Home Assistant must still produce a canonical lowercase v4 UUID.
+export function newRequestId(): string {
+  const random = crypto.getRandomValues(new Uint8Array(16));
+  random[6] = (random[6]! & 0x0f) | 0x40;
+  random[8] = (random[8]! & 0x3f) | 0x80;
+  const hex = [...random].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 export async function sendChat(hass: HomeAssistantLike, connectionId: string, requestId: string, messages: readonly ChatMessage[]): Promise<ChatResult> {
   if (!UUID.test(connectionId) || !UUID.test(requestId) || messages.length === 0 ||
       messages.length > CHAT_LIMITS.max_messages || messages.length % 2 !== 1 ||
