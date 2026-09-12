@@ -21,8 +21,9 @@ or starts execution. No storage repository, cloud route, provider selection,
 notification payload binding, or Home Assistant action executor is implemented
 by this module.
 
-Before connecting this schema to a runtime, complete LOC-007 and the relevant
-WFL-002 through WFL-006 tasks. Action discovery and exact targets must come from
+The 2026-09-12 owner direction connected this schema to persistence and
+observation-only activation (WFL-002) ahead of LOC-007. Step execution still
+waits on LOC-007 and WFL-003 through WFL-006. Action discovery and exact targets must come from
 Home Assistant evidence. Storage atomicity, corruption/restart handling,
 backup/restore and upgrade migration fixtures remain separate implementation
 requirements under ADR-0005. No device-action or compatibility claim follows

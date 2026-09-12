@@ -43,6 +43,7 @@ from .providers.lm_studio import (
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
+from .workflow_manager import WorkflowManager
 from .workflow_probe import (
     async_setup_workflow_probe,
     async_unload_workflow_probe,
@@ -90,6 +91,10 @@ async def async_setup_entry(
     if not runtime.loaded_foundation_entry_ids:
         runtime.owns_panel = await async_register_panel(hass)
         async_setup_workflow_probe(hass)
+        # A manager left over from a failed cleanup retries that cleanup first.
+        if runtime.workflow_manager is None:
+            runtime.workflow_manager = WorkflowManager(hass)
+        await runtime.workflow_manager.async_start()
     runtime.loaded_foundation_entry_ids.add(entry.entry_id)
     entry.runtime_data = None
     return True
@@ -114,6 +119,8 @@ async def async_unload_entry(
         return True
 
     async_unload_workflow_probe(hass)
+    if runtime.workflow_manager is not None and runtime.workflow_manager.async_stop():
+        runtime.workflow_manager = None
     if runtime.owns_panel:
         async_unregister_panel(hass)
         runtime.owns_panel = False

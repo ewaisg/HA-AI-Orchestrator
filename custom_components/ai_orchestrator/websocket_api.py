@@ -29,6 +29,13 @@ from .providers.contract import (
     safe_provider_error_code,
 )
 from .runtime import ProviderTestStatus, async_get_runtime, is_foundation_loaded
+from .workflow_api import (
+    websocket_workflow_delete,
+    websocket_workflow_list,
+    websocket_workflow_run_manual,
+    websocket_workflow_save,
+    websocket_workflow_set_enabled,
+)
 from .workflow_preview_api import websocket_workflow_preview
 from .workflow_probe import WorkflowProbeInvariantError, async_run_workflow_probe
 
@@ -312,3 +319,8 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_chat_options)
     websocket_api.async_register_command(hass, websocket_chat_send)
     websocket_api.async_register_command(hass, websocket_workflow_preview)
+    websocket_api.async_register_command(hass, websocket_workflow_list)
+    websocket_api.async_register_command(hass, websocket_workflow_save)
+    websocket_api.async_register_command(hass, websocket_workflow_delete)
+    websocket_api.async_register_command(hass, websocket_workflow_set_enabled)
+    websocket_api.async_register_command(hass, websocket_workflow_run_manual)

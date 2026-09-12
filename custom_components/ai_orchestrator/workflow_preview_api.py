@@ -29,6 +29,18 @@ def _reject_constant(_value: str) -> None:
     raise ValueError("Nonstandard JSON number")
 
 
+def load_bounded_json(text: str) -> Any:
+    """Parse caller JSON strictly: bounded size, unique keys, standard numbers.
+
+    Raises ValueError or RecursionError; callers map both to a static error.
+    """
+    if len(text) > MAX_PREVIEW_JSON_CHARS:
+        raise ValueError("JSON input is too large")
+    return json.loads(
+        text, object_pairs_hook=_unique_object, parse_constant=_reject_constant
+    )
+
+
 @websocket_api.require_admin
 @websocket_api.websocket_command(
     vol.All(
@@ -52,19 +64,10 @@ def websocket_workflow_preview(
         connection.send_error(msg["id"], "not_loaded", "The foundation is not loaded.")
         return
     try:
-        documents = []
-        for field in ("workflow_json", "snapshot_json"):
-            text = msg[field]
-            if len(text) > MAX_PREVIEW_JSON_CHARS:
-                raise ValueError("Preview input is too large")
-            documents.append(
-                json.loads(
-                    text,
-                    object_pairs_hook=_unique_object,
-                    parse_constant=_reject_constant,
-                )
-            )
-        result = preview_workflow(documents[0], documents[1])
+        result = preview_workflow(
+            load_bounded_json(msg["workflow_json"]),
+            load_bounded_json(msg["snapshot_json"]),
+        )
     except ValueError, RecursionError:
         connection.send_error(
             msg["id"], "invalid_preview", "Check the workflow and snapshot JSON."

@@ -11,6 +11,7 @@ from .const import DOMAIN
 if TYPE_CHECKING:
     from .chat import PendingChat
     from .provider_entry import ProviderEntryAdapter
+    from .workflow_manager import WorkflowManager
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +40,7 @@ class AIOrchestratorRuntime:
     workflow_probe_unsubscribe: Callable[[], None] | None = None
     workflow_probe_execution_count: int = 0
     workflow_probe_registration_count: int = 0
+    workflow_manager: WorkflowManager | None = None
 
 
 @callback
