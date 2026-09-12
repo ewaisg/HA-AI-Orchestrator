@@ -43,6 +43,7 @@ from .providers.lm_studio import (
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
+from .workflow_dry_run_api import async_cancel_provider_dry_runs
 from .workflow_manager import WorkflowManager
 from .workflow_probe import (
     async_setup_workflow_probe,
@@ -112,6 +113,7 @@ async def async_unload_entry(
         runtime.loaded_provider_entry_ids.discard(entry.entry_id)
         entry.runtime_data = None
         async_cancel_provider_chats(hass, entry.entry_id)
+        async_cancel_provider_dry_runs(hass, entry.entry_id)
         return True
 
     runtime.loaded_foundation_entry_ids.discard(entry.entry_id)

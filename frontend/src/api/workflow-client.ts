@@ -86,7 +86,12 @@ function parseExecutionRecord(value: unknown): ExecutionRecord {
     }
     return item as unknown as ExecutionStep;
   });
-  if (value.completed && (value.error !== null || steps.some((step) => step.status === "failed" || step.status === "skipped"))) throw new WorkflowContractError();
+  // A run is completed exactly when it carries no error; a failed step always
+  // means an error, and steps after a not-taken branch (or after the failure,
+  // or when no provider was available) are skipped.
+  if (value.completed !== (value.error === null) || (value.completed && steps.some((step) => step.status === "failed"))) throw new WorkflowContractError();
+  const stopAt = steps.findIndex((step) => step.status === "failed" || step.status === "not_taken");
+  if (steps.some((step, index) => step.status === "skipped" && !(stopAt !== -1 && index > stopAt) && !(value.error === "provider_unavailable"))) throw new WorkflowContractError();
   if (value.actions_executed !== steps.filter((step) => step.status === "delivered").length) throw new WorkflowContractError();
   return { ...(value as unknown as ExecutionRecord), steps };
 }

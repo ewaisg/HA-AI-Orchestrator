@@ -395,3 +395,61 @@ async def test_branch_not_taken_completes_without_delivery(hass, hass_storage):
         "skipped",
     ]
     assert status(manager)["execution_failures"] == 0
+
+
+async def test_disable_during_run_cancels_it_and_delivers_nothing(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    release = asyncio.Event()
+
+    async def slow(request):
+        await release.wait()
+        return TextGenerationResult(text=COMPOSED)
+
+    provider.generate.side_effect = slow
+    calls = register_notify_service(hass)
+    manager = await start_manager(hass, workflow())
+    hass.states.async_set("binary_sensor.synthetic_window", "off")
+    await hass.async_block_till_done()
+    hass.states.async_set("binary_sensor.synthetic_window", "on")
+    await asyncio.sleep(0)
+    assert status(manager)["execution_running"] is True
+
+    await manager.async_set_enabled(WORKFLOW_ID, False)
+    release.set()
+    await hass.async_block_till_done()
+
+    assert calls == []
+    result = status(manager)
+    assert result["execution_running"] is False
+    assert result["executions"] == 0
+    assert result["last_execution"] is None
+    assert manager._running == set()  # noqa: SLF001
+
+
+async def test_stop_during_run_cancels_it_so_a_new_manager_can_run(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    release = asyncio.Event()
+
+    async def slow(request):
+        await release.wait()
+        return TextGenerationResult(text=COMPOSED)
+
+    provider.generate.side_effect = slow
+    calls = register_notify_service(hass)
+    manager = await start_manager(hass, workflow())
+    hass.states.async_set("binary_sensor.synthetic_window", "off")
+    await hass.async_block_till_done()
+    hass.states.async_set("binary_sensor.synthetic_window", "on")
+    await asyncio.sleep(0)
+
+    assert manager.async_stop() is True
+    release.set()
+    await hass.async_block_till_done()
+    assert calls == []
+
+    provider.generate.side_effect = None
+    provider.generate.return_value = TextGenerationResult(text=COMPOSED)
+    await manager.async_start()
+    await trigger(hass)
+    assert len(calls) == 1
+    assert status(manager)["executions"] == 1

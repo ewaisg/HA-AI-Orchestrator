@@ -128,6 +128,17 @@ describe("structured workflow builder", () => {
     button(view, "Start a new one").click(); await settle(view);
     expect(text(view)).toContain("Build a workflow"); expect(view.document().workflow_id).not.toBe(STORED_WORKFLOW_ID);
   });
+  it("preserves a description and an any-transition trigger through an edit round trip", async () => {
+    const view = await mount(createRoutedFakeHass(ROUTES));
+    const stored = { ...STORED_WORKFLOW, description: "Keep me", triggers: [{ kind: "state", entity_ids: ["binary_sensor.kitchen_window"] }], steps: [{ step_id: "notify", kind: "notify", notify_service: "notify.kitchen_speaker" }] };
+    view.draft = { json: JSON.stringify(stored), sequence: 1 }; await settle(view);
+    expect(field<HTMLInputElement>(view, "wb-description").value).toBe("Keep me");
+    expect(field<HTMLInputElement>(view, "wb-to-state").value).toBe("");
+    expect(view.problems()).toEqual([]);
+    const doc = view.document();
+    expect(doc.description).toBe("Keep me");
+    expect(doc.triggers).toEqual([{ kind: "state", entity_ids: ["binary_sensor.kitchen_window"] }]);
+  });
   it("declines a document shape it cannot represent and points to the JSON editor", async () => {
     const view = await mount(createRoutedFakeHass(ROUTES));
     view.draft = { json: JSON.stringify({ ...STORED_WORKFLOW, triggers: [{ kind: "manual" }, { kind: "time", at_time: "07:00" }] }), sequence: 1 }; await settle(view);

@@ -34,7 +34,7 @@ export class WorkflowBuilderView extends LitElement {
   public static override properties = {
     hass: { attribute: false }, draft: { attribute: false }, _editing: { state: true }, _notice: { state: true },
     _entities: { state: true }, _providers: { state: true }, _targets: { state: true },
-    _name: { state: true }, _runMode: { state: true }, _providerId: { state: true }, _enabled: { state: true },
+    _name: { state: true }, _description: { state: true }, _runMode: { state: true }, _providerId: { state: true }, _enabled: { state: true },
     _triggerKind: { state: true }, _triggerEntity: { state: true }, _toState: { state: true }, _atTime: { state: true },
     _conditions: { state: true }, _steps: { state: true }, _busy: { state: true }, _error: { state: true }, _saved: { state: true },
   };
@@ -59,6 +59,7 @@ export class WorkflowBuilderView extends LitElement {
   private declare _providers: ChatProvider[];
   private declare _targets: NotifyTarget[];
   private declare _name: string;
+  private declare _description: string;
   private declare _runMode: "observe" | "execute";
   private declare _providerId: string;
   private declare _enabled: boolean;
@@ -79,7 +80,7 @@ export class WorkflowBuilderView extends LitElement {
   public constructor() {
     super();
     this._entities = []; this._providers = []; this._targets = [];
-    this._name = ""; this._runMode = "observe"; this._providerId = ""; this._enabled = false;
+    this._name = ""; this._description = ""; this._runMode = "observe"; this._providerId = ""; this._enabled = false;
     this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
     this._conditions = [];
     this._steps = [{ kind: "ai_compose", prompt: "Write a short, friendly household reminder about this event." }, { kind: "notify", notify_service: "" }];
@@ -122,7 +123,8 @@ export class WorkflowBuilderView extends LitElement {
     const problems: string[] = [];
     if (!this._name.trim() || this._name.length > 128) problems.push("Give the workflow a name of up to 128 characters.");
     if (this._triggerKind === "state" && !ENTITY.test(this._triggerEntity)) problems.push("Choose a trigger entity.");
-    if (this._triggerKind === "state" && (!this._toState.trim() || this._toState.length > 255)) problems.push("Enter the trigger's target state.");
+    if (this._triggerKind === "state" && this._toState.length > 255) problems.push("The trigger's target state is too long.");
+    if (this._description.length > 512) problems.push("Keep the description under 512 characters.");
     if (this._triggerKind === "time" && !TIME.test(this._atTime)) problems.push("Enter the trigger time as HH:MM.");
     for (const [index, condition] of this._conditions.entries()) {
       const label = `Condition ${index + 1}`;
@@ -188,11 +190,11 @@ export class WorkflowBuilderView extends LitElement {
       steps.every((s) => ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"].includes(s.kind as string) && typeof s.step_id === "string" && STEP_ID.test(s.step_id));
     if (!representable) { this._notice = "This workflow uses a shape the builder cannot show (for example several triggers); use the JSON editor below."; return; }
     this._workflowId = doc.workflow_id as string; this._editing = true;
-    this._name = doc.name as string; this._enabled = doc.enabled === true; this._runMode = doc.run_mode === "execute" ? "execute" : "observe";
+    this._name = doc.name as string; this._description = typeof doc.description === "string" ? doc.description : ""; this._enabled = doc.enabled === true; this._runMode = doc.run_mode === "execute" ? "execute" : "observe";
     if (typeof doc.provider_connection_id === "string") this._providerId = doc.provider_connection_id;
     this._triggerKind = trigger.kind as TriggerKind;
     this._triggerEntity = trigger.kind === "state" ? String((trigger.entity_ids as string[])[0]) : "";
-    this._toState = trigger.kind === "state" ? String(trigger.to_state ?? "on") : "on";
+    this._toState = trigger.kind === "state" && trigger.to_state !== undefined ? String(trigger.to_state) : "";
     this._atTime = trigger.kind === "time" ? String(trigger.at_time ?? "") : "";
     this._conditions = conditions.map((c): ConditionDraft => c.kind === "time_window"
       ? { kind: "time_window", after_time: String(c.after_time ?? ""), before_time: String(c.before_time ?? "") }
@@ -216,7 +218,7 @@ export class WorkflowBuilderView extends LitElement {
   /** The exact v1 document the backend validates; nothing is sent until an explicit action. */
   public document(): Record<string, unknown> {
     const triggers = this._triggerKind === "state"
-      ? [{ kind: "state", entity_ids: [this._triggerEntity], to_state: this._toState }]
+      ? [this._toState.trim() ? { kind: "state", entity_ids: [this._triggerEntity], to_state: this._toState } : { kind: "state", entity_ids: [this._triggerEntity] }]
       : this._triggerKind === "time" ? [{ kind: "time", at_time: this._atTime }] : [{ kind: "manual" }];
     const conditions = this._conditions.map((condition) => {
       if (condition.kind === "time_window") return { kind: "time_window", after_time: condition.after_time, before_time: condition.before_time };
@@ -237,7 +239,7 @@ export class WorkflowBuilderView extends LitElement {
     });
     const usesAi = this._steps.some((step) => step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract");
     return {
-      schema_version: 1, workflow_id: this._workflowId, name: this._name.trim(), description: "", enabled: this._enabled,
+      schema_version: 1, workflow_id: this._workflowId, name: this._name.trim(), description: this._description, enabled: this._enabled,
       run_mode: this._runMode, provider_connection_id: this._runMode === "execute" && usesAi ? this._providerId : null,
       triggers, conditions, steps,
     };
@@ -268,7 +270,7 @@ export class WorkflowBuilderView extends LitElement {
 
   private readonly _startNew = (): void => {
     this._workflowId = newRequestId(); this._touch(); this._editing = false; this._notice = "";
-    this._name = ""; this._enabled = false; this._runMode = "observe"; this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
+    this._name = ""; this._description = ""; this._enabled = false; this._runMode = "observe"; this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
     this._conditions = []; this._steps = [{ kind: "ai_compose", prompt: "Write a short, friendly household reminder about this event." }, { kind: "notify", notify_service: "" }];
   };
 
@@ -283,6 +285,7 @@ export class WorkflowBuilderView extends LitElement {
       <fieldset><legend>Workflow</legend>
         <div class="row">
           <div><label for="wb-name">Name</label><input id="wb-name" maxlength="128" .value=${this._name} @input=${(e: Event) => { this._touch(); this._name = (e.target as HTMLInputElement).value; }} /></div>
+          <div><label for="wb-description">Description (optional)</label><input id="wb-description" maxlength="512" .value=${this._description} @input=${(e: Event) => { this._touch(); this._description = (e.target as HTMLInputElement).value; }} /></div>
           <div><label for="wb-mode">Mode</label>
             <select id="wb-mode" .value=${this._runMode} @change=${(e: Event) => { this._touch(); this._runMode = (e.target as HTMLSelectElement).value as "observe" | "execute"; }}>
               <option value="observe" ?selected=${this._runMode === "observe"}>Observe only (record outcomes)</option>
@@ -304,7 +307,7 @@ export class WorkflowBuilderView extends LitElement {
         </select>
         ${this._triggerKind === "state" ? html`<div class="row">
           <div>${this._renderEntityPicker("wb-trigger-entity", "Entity", this._triggerEntity, (value) => { this._triggerEntity = value; })}</div>
-          <div><label for="wb-to-state">Changes to state</label><input id="wb-to-state" maxlength="255" .value=${this._toState} @input=${(e: Event) => { this._touch(); this._toState = (e.target as HTMLInputElement).value; }} /></div>
+          <div><label for="wb-to-state">Changes to state (leave empty for any change)</label><input id="wb-to-state" maxlength="255" .value=${this._toState} @input=${(e: Event) => { this._touch(); this._toState = (e.target as HTMLInputElement).value; }} /></div>
         </div>` : nothing}
         ${this._triggerKind === "time" ? html`<label for="wb-at-time">At (HH:MM, local)</label><input id="wb-at-time" placeholder="20:00" maxlength="5" .value=${this._atTime} @input=${(e: Event) => { this._touch(); this._atTime = (e.target as HTMLInputElement).value; }} />` : nothing}
       </fieldset>

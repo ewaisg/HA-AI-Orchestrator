@@ -30,6 +30,9 @@ from custom_components.ai_orchestrator.runtime import async_get_runtime
 from custom_components.ai_orchestrator.websocket_api import (
     async_register_websocket_commands,
 )
+from custom_components.ai_orchestrator.workflow_dry_run_api import (
+    async_cancel_provider_dry_runs,
+)
 from custom_components.ai_orchestrator.workflow_manager import WorkflowManager
 from tests.home_assistant.provider_fakes import (
     SYNTHETIC_CONFIG_FIELD,
@@ -303,3 +306,33 @@ async def test_saved_then_dry_run_round_trip(hass, hass_ws_client, hass_storage)
     response = await call(client, dry_run())
     assert response["success"] is True
     assert response["result"]["workflow_id"] == WORKFLOW_ID
+
+
+async def test_provider_unload_cancels_the_running_dry_run(
+    hass, hass_ws_client, hass_storage
+):
+    provider, entry = await setup(hass)
+    release = asyncio.Event()
+    started = asyncio.Event()
+
+    async def slow(request):
+        started.set()
+        await release.wait()
+        return TextGenerationResult(text="Close the window.")
+
+    provider.generate.side_effect = slow
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(dry_run())
+    await started.wait()
+    runtime = async_get_runtime(hass)
+    assert len(runtime.workflow_dry_run_tasks) == 1
+
+    runtime.loaded_provider_entry_ids.discard(entry.entry_id)
+    async_cancel_provider_dry_runs(hass, entry.entry_id)
+    response = await client.receive_json()
+
+    assert response["success"] is False
+    assert response["error"]["code"] == "dry_run_provider_unavailable"
+    assert runtime.workflow_dry_run_tasks == {}
+    assert runtime.workflow_dry_runs_in_progress == set()
+    release.set()

@@ -61,6 +61,7 @@ class WorkflowManager:
         self._errors: dict[str, str] = {}
         self._executions: dict[str, dict[str, Any]] = {}
         self._running: set[str] = set()
+        self._tasks: dict[str, asyncio.Task[None]] = {}
         self._store_state = STORE_NOT_LOADED
         self._started = False
         self._lock = asyncio.Lock()
@@ -102,9 +103,23 @@ class WorkflowManager:
         """Detach every observer; return whether all cleanup succeeded."""
         for workflow_id in list(self._observers):
             self._deactivate(workflow_id)
+        self._cancel_all_runs()
         self._retry_stale()
         self._started = False
         return not self._stale
+
+    @callback
+    def _cancel_run(self, workflow_id: str) -> None:
+        """Stop an in-flight run so a disabled or removed workflow delivers nothing."""
+        task = self._tasks.pop(workflow_id, None)
+        if task is not None and not task.done():
+            task.cancel()
+        self._running.discard(workflow_id)
+
+    @callback
+    def _cancel_all_runs(self) -> None:
+        for workflow_id in list(self._tasks):
+            self._cancel_run(workflow_id)
 
     @callback
     def _retry_stale(self) -> None:
@@ -155,7 +170,7 @@ class WorkflowManager:
             return
         self._running.add(workflow_id)
         stats["execution_running"] = True
-        self._hass.async_create_task(
+        self._tasks[workflow_id] = self._hass.async_create_task(
             self._async_run(document, snapshot), f"ai_orchestrator_run_{workflow_id}"
         )
 
@@ -195,7 +210,12 @@ class WorkflowManager:
             }
         finally:
             self._running.discard(workflow_id)
+            self._tasks.pop(workflow_id, None)
             stats["execution_running"] = False
+        if self._executions.get(workflow_id) is not stats:
+            # Disabled, replaced or removed while running: its evidence was reset
+            # on purpose and a record for the old document must not reappear.
+            return
         stats["executions"] = min(MAX_EXECUTION_COUNTER, stats["executions"] + 1)
         if not record["completed"]:
             stats["execution_failures"] = min(
@@ -208,6 +228,7 @@ class WorkflowManager:
         observer = self._observers.pop(workflow_id, None)
         self._errors.pop(workflow_id, None)
         self._executions.pop(workflow_id, None)
+        self._cancel_run(workflow_id)
         if observer is None:
             return
         try:

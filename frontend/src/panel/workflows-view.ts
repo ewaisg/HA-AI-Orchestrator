@@ -329,8 +329,9 @@ export class WorkflowsView extends LitElement {
         <h2 id="workflows-title">Stored workflows</h2>
         <p>
           Enabled workflows watch their triggers in Home Assistant and record whether the
-          deterministic conditions passed. No step runs yet: no text is generated, no
-          notification is sent, and no device action executes.
+          deterministic conditions passed. A workflow in observe mode runs nothing. A workflow
+          in execute mode runs its AI steps and delivers to its notify target; no other Home
+          Assistant action can be called.
         </p>
         <div class="actions">
           <button

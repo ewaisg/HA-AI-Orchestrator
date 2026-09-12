@@ -1,8 +1,9 @@
 """Domain-wide runtime state for AI Orchestrator."""
 
+import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import HomeAssistant, callback
 
@@ -42,6 +43,10 @@ class AIOrchestratorRuntime:
     workflow_probe_registration_count: int = 0
     workflow_manager: WorkflowManager | None = None
     workflow_dry_runs_in_progress: set[str] = field(default_factory=set)
+    # user_id -> (provider entry_id, task) so a provider unload can cancel it.
+    workflow_dry_run_tasks: dict[str, tuple[str, asyncio.Task[Any]]] = field(
+        default_factory=dict
+    )
 
 
 @callback

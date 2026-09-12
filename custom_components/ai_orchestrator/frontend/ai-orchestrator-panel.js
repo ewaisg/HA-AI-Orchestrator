@@ -2506,7 +2506,9 @@ function Qt(e) {
 		].includes(e.target)) throw new K();
 		return e;
 	});
-	if (e.completed && (e.error !== null || n.some((e) => e.status === "failed" || e.status === "skipped")) || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new K();
+	if (e.completed !== (e.error === null) || e.completed && n.some((e) => e.status === "failed")) throw new K();
+	let r = n.findIndex((e) => e.status === "failed" || e.status === "not_taken");
+	if (n.some((t, n) => t.status === "skipped" && !(r !== -1 && n > r) && e.error !== "provider_unavailable") || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new K();
 	return {
 		...e,
 		steps: n
@@ -2683,6 +2685,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 		_providers: { state: !0 },
 		_targets: { state: !0 },
 		_name: { state: !0 },
+		_description: { state: !0 },
 		_runMode: { state: !0 },
 		_providerId: { state: !0 },
 		_enabled: { state: !0 },
@@ -2713,7 +2716,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 	_userId;
 	_workflowId = H();
 	constructor() {
-		super(), this._entities = [], this._providers = [], this._targets = [], this._name = "", this._runMode = "observe", this._providerId = "", this._enabled = !1, this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
+		super(), this._entities = [], this._providers = [], this._targets = [], this._name = "", this._description = "", this._runMode = "observe", this._providerId = "", this._enabled = !1, this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
 			kind: "ai_compose",
 			prompt: "Write a short, friendly household reminder about this event."
 		}, {
@@ -2743,7 +2746,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 	}
 	problems() {
 		let e = [];
-		(!this._name.trim() || this._name.length > 128) && e.push("Give the workflow a name of up to 128 characters."), this._triggerKind === "state" && !hn.test(this._triggerEntity) && e.push("Choose a trigger entity."), this._triggerKind === "state" && (!this._toState.trim() || this._toState.length > 255) && e.push("Enter the trigger's target state."), this._triggerKind === "time" && !mn.test(this._atTime) && e.push("Enter the trigger time as HH:MM.");
+		(!this._name.trim() || this._name.length > 128) && e.push("Give the workflow a name of up to 128 characters."), this._triggerKind === "state" && !hn.test(this._triggerEntity) && e.push("Choose a trigger entity."), this._triggerKind === "state" && this._toState.length > 255 && e.push("The trigger's target state is too long."), this._description.length > 512 && e.push("Keep the description under 512 characters."), this._triggerKind === "time" && !mn.test(this._atTime) && e.push("Enter the trigger time as HH:MM.");
 		for (let [t, n] of this._conditions.entries()) {
 			let r = `Condition ${t + 1}`;
 			n.kind === "time_window" && (!mn.test(n.after_time) || !mn.test(n.before_time)) && e.push(`${r}: both times must be HH:MM.`), n.kind === "state" && (!hn.test(n.entity_id) || !n.state.trim()) && e.push(`${r}: choose an entity and a state.`), n.kind === "numeric_state" && (!hn.test(n.entity_id) || !n.above.trim() && !n.below.trim() || [n.above, n.below].some((e) => e.trim() && !Number.isFinite(Number(e)))) && e.push(`${r}: choose an entity and a finite bound.`);
@@ -2813,7 +2816,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 			this._notice = "This workflow uses a shape the builder cannot show (for example several triggers); use the JSON editor below.";
 			return;
 		}
-		this._workflowId = t.workflow_id, this._editing = !0, this._name = t.name, this._enabled = t.enabled === !0, this._runMode = t.run_mode === "execute" ? "execute" : "observe", typeof t.provider_connection_id == "string" && (this._providerId = t.provider_connection_id), this._triggerKind = a.kind, this._triggerEntity = a.kind === "state" ? String(a.entity_ids[0]) : "", this._toState = a.kind === "state" ? String(a.to_state ?? "on") : "on", this._atTime = a.kind === "time" ? String(a.at_time ?? "") : "", this._conditions = r.map((e) => e.kind === "time_window" ? {
+		this._workflowId = t.workflow_id, this._editing = !0, this._name = t.name, this._description = typeof t.description == "string" ? t.description : "", this._enabled = t.enabled === !0, this._runMode = t.run_mode === "execute" ? "execute" : "observe", typeof t.provider_connection_id == "string" && (this._providerId = t.provider_connection_id), this._triggerKind = a.kind, this._triggerEntity = a.kind === "state" ? String(a.entity_ids[0]) : "", this._toState = a.kind === "state" && a.to_state !== void 0 ? String(a.to_state) : "", this._atTime = a.kind === "time" ? String(a.at_time ?? "") : "", this._conditions = r.map((e) => e.kind === "time_window" ? {
 			kind: "time_window",
 			after_time: String(e.after_time ?? ""),
 			before_time: String(e.before_time ?? "")
@@ -2861,10 +2864,13 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 		return [i[t], i[r]] = [i[r], i[t]], i;
 	}
 	document() {
-		let e = this._triggerKind === "state" ? [{
+		let e = this._triggerKind === "state" ? [this._toState.trim() ? {
 			kind: "state",
 			entity_ids: [this._triggerEntity],
 			to_state: this._toState
+		} : {
+			kind: "state",
+			entity_ids: [this._triggerEntity]
 		}] : this._triggerKind === "time" ? [{
 			kind: "time",
 			at_time: this._atTime
@@ -2915,7 +2921,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 			schema_version: 1,
 			workflow_id: this._workflowId,
 			name: this._name.trim(),
-			description: "",
+			description: this._description,
 			enabled: this._enabled,
 			run_mode: this._runMode,
 			provider_connection_id: this._runMode === "execute" && i ? this._providerId : null,
@@ -2951,7 +2957,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
 		}
 	};
 	_startNew = () => {
-		this._workflowId = H(), this._touch(), this._editing = !1, this._notice = "", this._name = "", this._enabled = !1, this._runMode = "observe", this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
+		this._workflowId = H(), this._touch(), this._editing = !1, this._notice = "", this._name = "", this._description = "", this._enabled = !1, this._runMode = "observe", this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
 			kind: "ai_compose",
 			prompt: "Write a short, friendly household reminder about this event."
 		}, {
@@ -2970,6 +2976,9 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
         <div class="row">
           <div><label for="wb-name">Name</label><input id="wb-name" maxlength="128" .value=${this._name} @input=${(e) => {
 			this._touch(), this._name = e.target.value;
+		}} /></div>
+          <div><label for="wb-description">Description (optional)</label><input id="wb-description" maxlength="512" .value=${this._description} @input=${(e) => {
+			this._touch(), this._description = e.target.value;
 		}} /></div>
           <div><label for="wb-mode">Mode</label>
             <select id="wb-mode" .value=${this._runMode} @change=${(e) => {
@@ -3002,7 +3011,7 @@ var dn = "ai-orchestrator-workflow-builder", fn = /^[a-z][a-z0-9_]{0,63}$/u, pn 
           <div>${this._renderEntityPicker("wb-trigger-entity", "Entity", this._triggerEntity, (e) => {
 			this._triggerEntity = e;
 		})}</div>
-          <div><label for="wb-to-state">Changes to state</label><input id="wb-to-state" maxlength="255" .value=${this._toState} @input=${(e) => {
+          <div><label for="wb-to-state">Changes to state (leave empty for any change)</label><input id="wb-to-state" maxlength="255" .value=${this._toState} @input=${(e) => {
 			this._touch(), this._toState = e.target.value;
 		}} /></div>
         </div>` : w}
@@ -3715,8 +3724,9 @@ var Ln = "ai-orchestrator-workflows", Rn = {
         <h2 id="workflows-title">Stored workflows</h2>
         <p>
           Enabled workflows watch their triggers in Home Assistant and record whether the
-          deterministic conditions passed. No step runs yet: no text is generated, no
-          notification is sent, and no device action executes.
+          deterministic conditions passed. A workflow in observe mode runs nothing. A workflow
+          in execute mode runs its AI steps and delivers to its notify target; no other Home
+          Assistant action can be called.
         </p>
         <div class="actions">
           <button

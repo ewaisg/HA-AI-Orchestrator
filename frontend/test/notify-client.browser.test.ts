@@ -33,5 +33,10 @@ describe("notification target and execution contracts", () => {
       expect(() => parseWorkflowList({ schema_version: 1, store: "ready", workflows: [{ workflow: STORED_WORKFLOW, status: bad }] })).toThrow();
     }
     expect(() => parseWorkflowList({ schema_version: 1, store: "ready", workflows: [{ workflow: { ...STORED_WORKFLOW, run_mode: "always" }, status: EXECUTED_STATUS }] })).toThrow();
+    const notTaken = { ...last, steps: [{ index: 0, step_id: "classify", kind: "ai_classify", executed: true, status: "ok", category: "routine" }, { index: 1, step_id: "gate", kind: "branch", executed: false, status: "not_taken" }, { index: 2, step_id: "compose", kind: "ai_compose", executed: false, status: "skipped" }, { index: 3, step_id: "notify", kind: "notify", executed: false, status: "skipped" }], provider_calls: 1, actions_executed: 0, completed: true, error: null };
+    const parsed = parseWorkflowList({ schema_version: 1, store: "ready", workflows: [{ workflow: STORED_WORKFLOW, status: { ...EXECUTED_STATUS, last_execution: notTaken } }] });
+    expect(parsed.workflows[0]!.status.last_execution?.completed).toBe(true);
+    const noProvider = { ...last, steps: [{ index: 0, step_id: "compose", kind: "ai_compose", executed: false, status: "skipped" }], provider_calls: 0, actions_executed: 0, completed: false, error: "provider_unavailable" };
+    expect(parseWorkflowList({ schema_version: 1, store: "ready", workflows: [{ workflow: STORED_WORKFLOW, status: { ...EXECUTED_STATUS, last_execution: noProvider } }] }).workflows[0]!.status.last_execution?.error).toBe("provider_unavailable");
   });
 });

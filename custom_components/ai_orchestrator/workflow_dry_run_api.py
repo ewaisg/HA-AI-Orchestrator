@@ -14,7 +14,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from .chat import _canonical_uuid, _local_connections
 from .const import WORKFLOW_DRY_RUN_WEBSOCKET_TYPE
@@ -28,6 +28,18 @@ from .workflow_schema import WorkflowValidationError, parse_workflow
 from .workflow_steps import StepContext, WorkflowStepError, run_ai_steps
 
 DRY_RUN_RESPONSE_SCHEMA_VERSION = 1
+
+
+@callback
+def async_cancel_provider_dry_runs(hass: HomeAssistant, entry_id: str) -> None:
+    """Cancel dry runs bound to a provider entry that is unloading."""
+    for pending_entry_id, task in list(
+        async_get_runtime(hass).workflow_dry_run_tasks.values()
+    ):
+        if pending_entry_id == entry_id and not task.done():
+            task.cancel()
+
+
 ERR_INVALID_SNAPSHOT = "invalid_snapshot"
 ERR_PROVIDER_UNAVAILABLE = "dry_run_provider_unavailable"
 ERR_BUSY = "dry_run_busy"
@@ -149,7 +161,12 @@ async def websocket_workflow_dry_run(
                 if entity_id in condition_entities
             },
         )
-        outcome = await run_ai_steps(workflow, context, loaded.provider)
+        task = hass.async_create_task(
+            run_ai_steps(workflow, context, loaded.provider),
+            f"ai_orchestrator_dry_run_{user_id}",
+        )
+        runtime.workflow_dry_run_tasks[user_id] = (entry.entry_id, task)
+        outcome = await task
     except WorkflowStepError:
         connection.send_error(
             msg["id"], ERR_INVALID_SNAPSHOT, "Check the snapshot JSON."
@@ -166,6 +183,7 @@ async def websocket_workflow_dry_run(
         raise
     finally:
         runtime.workflow_dry_runs_in_progress.discard(user_id)
+        runtime.workflow_dry_run_tasks.pop(user_id, None)
     if (
         entry.entry_id not in runtime.loaded_provider_entry_ids
         or getattr(entry, "runtime_data", None) is not loaded
