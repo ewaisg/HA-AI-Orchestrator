@@ -4,31 +4,31 @@ HA AI Orchestrator is a private Home Assistant product for configuring local and
 
 ## Current state
 
-The project is in **Phase 1: local provider and onboarding MVP**. The repository
-implements Home Assistant config-entry lifecycle, authenticated LM Studio
-connections, provider setup and connection testing, a read-only entity/device/area
-catalogue, and a bundled TypeScript/Lit panel.
+The repository implements, and the owner's Home Assistant runs live (Core
+2026.9.2, r9 candidate):
 
-`LOC-006` provides an administrator chat: select a local provider, send
-text, and continue a bounded conversation in the open view. It sends no automatic
-household context and exposes no tools or device actions. Replies arrive when
-complete; history is not persisted. Generation is an explicit trial, not a claim
-that the selected model's capabilities have been verified.
+- Config-entry lifecycle, authenticated LM Studio connections, provider setup
+  and connection testing, a read-only entity/device/area catalogue (bounded
+  to 10,000 records per list, with omissions reported), and a bundled
+  TypeScript/Lit panel served at a content-addressed path.
+- Administrator chat with a local provider (bounded, no household context, no
+  tools, not persisted).
+- Workflows (closed v1 schema, Home Assistant `Store` persistence): a
+  structured builder with pickers backed by the real catalogue, discovered
+  notification targets and loaded providers; a JSON editor with offline
+  preview; stored workflows that observe their triggers and record redacted
+  outcomes; AI-step dry runs (compose, classify with a closed category enum,
+  extract with typed fields, branch on a classification) against a local
+  provider; and `execute` mode, which runs the AI steps and delivers the
+  composed text through a notify entity or legacy notify service that Home
+  Assistant actually has. One run per workflow at a time, no retries, first
+  failure stops, evidence is redacted.
 
-Local chat has recorded live acceptance, and the owner confirmed the cache-safe
-update loaded panel/chat without manually clearing caches.
-Historical live evidence targets Core **2026.8.3**; the owner's now-installed
-Core **2026.9.0** is undergoing compatibility validation in `COMP-001`.
-Provider/catalogue live acceptance and the Phase 1 release gate remain open.
-See the [chat candidate evidence](docs/evidence/2026-09-05-loc-006-local-chat.md)
-and tracker for exact checks and installation state.
-
-Stored workflows (WFL-002) can be saved from the Automations editor and enabled;
-an enabled workflow watches its curated state/time triggers in Home Assistant
-and records whether its deterministic conditions passed. No workflow step runs
-yet. Visual workflow building, notification and AI steps, entity/action
-permissions, Assist, cloud adapters and routing, persistent chat/audit storage,
-and security workflows remain planned.
+Only the notify namespace can be called. Nothing runs live unless a workflow
+is saved with `run_mode: execute` and enabled. Cloud providers, Assist,
+persistent chat, routing policies and security workflows remain planned.
+The Phase 1 release gate (LOC-007) and the Phase 2 gate (WFL-008) are open;
+the tracker records exactly what has live evidence.
 
 - [Manual installation and current usage](docs/INSTALLATION.md)
 - [Preview, save, and observe a workflow in Automations](docs/OFFLINE-WORKFLOW-PREVIEW.md)
