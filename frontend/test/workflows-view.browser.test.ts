@@ -232,6 +232,8 @@ describe("stored workflows view", () => {
     expect(button(view, "Disable").disabled).toBe(false);
     expect(button(view, "Reload workflows").disabled).toBe(false);
     expect(text(view)).not.toContain("Saving…");
+    // The refresh requested during the mutation is replayed once it settles.
+    expect(requests.filter((t) => t === "ai_orchestrator/workflows/list")).toHaveLength(2);
 
     button(view, "Disable").click();
     await settle(view);

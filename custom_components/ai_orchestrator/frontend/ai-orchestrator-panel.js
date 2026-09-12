@@ -2837,6 +2837,7 @@ var $t = "ai-orchestrator-workflows", en = {
     }
   `;
 	_sequence = 0;
+	_refreshRequested = !1;
 	_connection;
 	_userId;
 	_callWS;
@@ -2844,7 +2845,7 @@ var $t = "ai-orchestrator-workflows", en = {
 		super(), this.refreshToken = 0, this._viewState = "waiting", this._store = "not_loaded", this._entries = [], this._error = "";
 	}
 	_reset = () => {
-		this._sequence++, this._viewState = "waiting", this._store = "not_loaded", this._entries = [], this._pending = void 0, this._confirmDeleteId = void 0, this._error = "", this._observation = void 0;
+		this._sequence++, this._viewState = "waiting", this._store = "not_loaded", this._entries = [], this._pending = void 0, this._refreshRequested = !1, this._confirmDeleteId = void 0, this._error = "", this._observation = void 0;
 	};
 	connectedCallback() {
 		super.connectedCallback(), this._connection?.addEventListener("disconnected", this._reset), this._callWS !== void 0 && this.hass !== void 0 && queueMicrotask(() => void this._load());
@@ -2860,7 +2861,12 @@ var $t = "ai-orchestrator-workflows", en = {
 	}
 	_load = async () => {
 		let e = this.hass;
-		if (e === void 0 || e.connection?.connected === !1 || this._pending !== void 0) return;
+		if (e === void 0 || e.connection?.connected === !1) return;
+		if (this._pending !== void 0) {
+			this._refreshRequested = !0;
+			return;
+		}
+		this._refreshRequested = !1;
 		let t = ++this._sequence;
 		this._viewState = "loading", this._error = "";
 		try {
@@ -2897,7 +2903,7 @@ var $t = "ai-orchestrator-workflows", en = {
 			if (!this._current(n, t)) return;
 			this._error = e.action === "observe" ? en.observe : en.mutate;
 		} finally {
-			this._pending === e && (this._pending = void 0);
+			this._pending === e && (this._pending = void 0, this._refreshRequested && this._current(n, t) && queueMicrotask(() => void this._load()));
 		}
 	}
 	_loadIntoEditor(e) {

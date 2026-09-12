@@ -81,5 +81,29 @@ re-read the store on the next setup until Core restarts; a draft handed to the
 editor while a save is in flight suppresses that save's list refresh.
 
 After the fixes: 628 backend tests, 388 pure, 186 browser tests, lint, format,
-canary, and bundle identity pass. The reviewer's verdict on the fixed revision
-is recorded separately below when available.
+canary, and bundle identity pass.
+
+## Reviewer verdict on the fixed revision, and follow-ups
+
+The same reviewer re-examined a078519, reverted each fix in a scratch copy to
+confirm the new tests fail without it, and returned **approve with
+follow-ups**: no blocking finding; read-back verified sound against the Store's
+invalidation and `_data` handling; lost-update paths closed except one window
+where a delete in flight across an unload and re-setup could leave an orphan
+observer, and the manager lock was not yet load-bearing in any test.
+
+Follow-ups applied in the next commit: `async_start` now waits on the manager
+lock so an in-flight mutation finishes before activation reads the store
+(test: delete blocked across stop and start, no orphan, start waits); an
+interleaved save/delete test makes the manager lock load-bearing; the schema
+rejects lone-surrogate strings with a field message instead of surfacing them
+as a storage failure (test); a panel refresh requested during a mutation is
+replayed when it settles instead of dropped (test). Recorded, not changed:
+while Core is stopping, Home Assistant defers the write and answers the
+read-back from the pending payload, so a final-write failure at shutdown is
+only logged by Home Assistant; the `OSError` variant of the write-failure test
+is not discriminating because Home Assistant converts it to `WriteError`.
+
+Final gates on the follow-up revision: 631 backend, 389 pure, 186 browser,
+lint, format, canary; bundle 122,751 bytes, SHA-256
+`29d0396789ff5bae171478d014f8a6445a4369cd7015d81cca0bf23dad12d243`.

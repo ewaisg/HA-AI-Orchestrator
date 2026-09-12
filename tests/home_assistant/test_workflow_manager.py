@@ -317,6 +317,63 @@ async def test_overlapping_saves_keep_observers_consistent_with_the_store(
     assert manager.async_stop() is True
 
 
+async def test_delete_in_flight_across_stop_and_start_leaves_no_orphan(
+    hass, hass_storage
+):
+    seed(hass_storage, document(WORKFLOW_A))
+    manager = WorkflowManager(hass)
+    await manager.async_start()
+    original = Store._async_write_data
+    release = asyncio.Event()
+
+    async def blocked_write(self, data):
+        await release.wait()
+        await original(self, data)
+
+    with patch(
+        "homeassistant.helpers.storage.Store._async_write_data", new=blocked_write
+    ):
+        delete = asyncio.ensure_future(manager.async_delete(WORKFLOW_A))
+        await asyncio.sleep(0)
+        assert manager.async_stop() is True
+        restart = asyncio.ensure_future(manager.async_start())
+        await asyncio.sleep(0)
+        assert not manager.started  # start waits for the in-flight delete
+        release.set()
+        assert await delete is True
+        await restart
+    assert manager.started
+    assert manager.status() == {"store": STORE_READY, "workflows": []}
+    assert manager._observers == {}  # noqa: SLF001 -- orphan check needs internals
+    await flip(hass)
+    assert manager._observers == {}  # noqa: SLF001
+    assert manager.async_stop() is True
+
+
+async def test_interleaved_save_and_delete_of_the_same_workflow(hass, hass_storage):
+    manager = WorkflowManager(hass)
+    await manager.async_start()
+    original = Store._async_write_data
+
+    async def yielding_write(self, data):
+        await asyncio.sleep(0)
+        await original(self, data)
+
+    with patch(
+        "homeassistant.helpers.storage.Store._async_write_data", new=yielding_write
+    ):
+        saved, deleted = await asyncio.gather(
+            manager.async_save(document(WORKFLOW_A)),
+            manager.async_delete(WORKFLOW_A),
+        )
+    assert saved["workflow_id"] == WORKFLOW_A
+    assert deleted is True
+    assert manager.status()["workflows"] == []
+    assert hass_storage[STORAGE_KEY]["data"] == {"workflows": []}
+    assert manager._observers == {}  # noqa: SLF001 -- no active listener may remain
+    assert manager.async_stop() is True
+
+
 async def test_foundation_entry_owns_manager_across_unload_and_restart(
     hass: HomeAssistant, hass_storage
 ) -> None:

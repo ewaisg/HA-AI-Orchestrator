@@ -151,6 +151,7 @@ export class WorkflowsView extends LitElement {
   private declare _error: string;
   private declare _observation?: { id: string; result: WorkflowObservation };
   private _sequence = 0;
+  private _refreshRequested = false;
   private _connection?: HomeAssistantLike["connection"];
   private _userId?: string;
   private _callWS?: HomeAssistantLike["callWS"];
@@ -170,6 +171,7 @@ export class WorkflowsView extends LitElement {
     this._store = "not_loaded";
     this._entries = [];
     this._pending = undefined;
+    this._refreshRequested = false;
     this._confirmDeleteId = undefined;
     this._error = "";
     this._observation = undefined;
@@ -230,10 +232,13 @@ export class WorkflowsView extends LitElement {
     if (hass === undefined || hass.connection?.connected === false) {
       return;
     }
-    // A reload during a mutation would strand that mutation's pending state.
+    // A reload during a mutation would strand that mutation's pending state;
+    // remember the request and replay it once the mutation settles.
     if (this._pending !== undefined) {
+      this._refreshRequested = true;
       return;
     }
+    this._refreshRequested = false;
     const sequence = ++this._sequence;
     this._viewState = "loading";
     this._error = "";
@@ -290,6 +295,9 @@ export class WorkflowsView extends LitElement {
       // was reset or its identity changed meanwhile, so controls never stick.
       if (this._pending === pending) {
         this._pending = undefined;
+        if (this._refreshRequested && this._current(sequence, hass)) {
+          queueMicrotask(() => void this._load());
+        }
       }
     }
   }

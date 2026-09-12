@@ -243,3 +243,24 @@ def test_prompt_limit():
     schema.parse_step({**STEPS[0], "prompt": "x" * 4000})
     with pytest.raises(schema.WorkflowValidationError):
         schema.parse_step({**STEPS[0], "prompt": "x" * 4001})
+
+
+def test_lone_surrogate_text_is_rejected_with_a_field_message() -> None:
+    from custom_components.ai_orchestrator.workflow_schema import (
+        WorkflowValidationError,
+        parse_workflow,
+    )
+
+    document = {
+        "schema_version": 1,
+        "workflow_id": "12345678-1234-4123-8123-123456789abc",
+        "name": "\ud800",
+    }
+    with pytest.raises(
+        WorkflowValidationError, match="workflow.name must be valid text"
+    ):
+        parse_workflow(document)
+    document["name"] = "fine"
+    document["steps"] = [{"step_id": "a", "kind": "ai_compose", "prompt": "\udfff"}]
+    with pytest.raises(WorkflowValidationError, match="step.prompt must be valid text"):
+        parse_workflow(document)

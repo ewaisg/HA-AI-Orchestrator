@@ -208,6 +208,11 @@ def _require_bounded_str(
         raise WorkflowValidationError(
             f"{field_name} must be at most {max_chars} characters"
         )
+    # JSON escapes can produce lone surrogates that no storage encoder accepts.
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise WorkflowValidationError(f"{field_name} must be valid text") from None
     return value
 
 

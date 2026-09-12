@@ -59,21 +59,24 @@ class WorkflowManager:
         leaves every workflow inactive and refuses writes; the foundation
         entry still loads so the rest of the panel keeps working.
         """
-        if self._started:
-            return
-        self._retry_stale()
-        if not self._store.loaded:
-            try:
-                await self._store.async_load()
-            except WorkflowStoreError:
-                self._store_state = STORE_UNREADABLE
-                self._started = True
+        # Waiting on the lock lets a mutation that was in flight across an
+        # unload/reload finish before activation reads the store.
+        async with self._lock:
+            if self._started:
                 return
-        self._store_state = STORE_READY
-        self._started = True
-        for document in self._store.list():
-            if document["enabled"]:
-                self._activate(document)
+            self._retry_stale()
+            if not self._store.loaded:
+                try:
+                    await self._store.async_load()
+                except WorkflowStoreError:
+                    self._store_state = STORE_UNREADABLE
+                    self._started = True
+                    return
+            self._store_state = STORE_READY
+            self._started = True
+            for document in self._store.list():
+                if document["enabled"]:
+                    self._activate(document)
 
     @callback
     def async_stop(self) -> bool:
