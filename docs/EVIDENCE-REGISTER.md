@@ -161,3 +161,11 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   named Cores (2026.8.3, 2026.9.0) the WSL gate exercises. No 2026.9.2 test
   environment exists yet; DEC-023 scope is unchanged. Consuming tasks: COMP-001,
   LOC-007.
+
+## WFL-004 live delivery
+
+- ENV-004 (reopened for WFL-004): the first live delivery needs an
+  owner-chosen trigger entity and notify target. Discovery on 2026-09-12 listed
+  17 targets (phone/tablet notify entities, Echo `announce`/`speak` entities,
+  legacy `mobile_app_*` services). Agents must not pick a household device to
+  notify on their own. Consuming tasks: WFL-004, WFL-007.
