@@ -59,3 +59,17 @@ the provider select and the 17 targets were populated, and the dry run
 rendered `Classify text — category: routine`, `Branch — not taken, later
 steps skipped`, compose and notification `skipped`, `Provider calls: 1 ·
 Actions executed: 0`, in about 3 seconds. The test workflow was deleted.
+
+## r9: builder editing, live
+
+Commit `3c75d9e`; archive `outputs/r9/ai-orchestrator-r9.zip` (SHA-256
+`420c05dbedc086def69ffa0b7e22b8fd36cacaf4d37071f5444970043f8183a9`, bundle
+`7a6b75fd…f011`, 167,772 bytes); installed with rollback `before-r9-plaq__sj`,
+files removed, foundation entry reloaded; the panel registered
+`/api/ai_orchestrator/panel/7a6b75fd3da22159/ai-orchestrator-panel.js`.
+Live: saved the synthetic evening example, then **Edit in builder** switched
+the builder to "Edit a workflow" with the stored name loaded; the builder
+refused to save because the example's `notify.synthetic` target does not
+exist on the instance ("choose a notification target that Home Assistant
+has"), which is the intended fail-closed behaviour. The test workflow was
+deleted. 243 browser tests (`artifacts/review-2026-09-12/frontend-builder2.txt`).
