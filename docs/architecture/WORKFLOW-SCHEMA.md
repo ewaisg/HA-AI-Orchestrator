@@ -28,3 +28,17 @@ Home Assistant evidence. Storage atomicity, corruption/restart handling,
 backup/restore and upgrade migration fixtures remain separate implementation
 requirements under ADR-0005. No device-action or compatibility claim follows
 from these pure schema tests.
+
+## Run mode and provider binding (added 2026-09-12, still schema version 1)
+
+Two optional top-level fields were added without a version bump because a
+document that omits them keeps exactly its previous meaning:
+
+- `run_mode`: `"observe"` (default) or `"execute"`. Only `execute` lets the
+  manager hand eligible outcomes to the execution engine.
+- `provider_connection_id`: canonical UUID of a loaded local provider, or
+  `null`. Required when `run_mode` is `execute` and the workflow has an AI step.
+
+Both are normalized into every stored document by `as_dict`. Documents written
+by this version are rejected by older versions' closed key check, which is the
+documented "replace backend and bundle together" rule.

@@ -28,6 +28,7 @@ WORKFLOW_DELETE_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflows/delete"
 WORKFLOW_SET_ENABLED_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflows/set_enabled"
 WORKFLOW_RUN_MANUAL_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflows/run_manual"
 WORKFLOW_DRY_RUN_WEBSOCKET_TYPE: Final = f"{DOMAIN}/workflows/dry_run"
+NOTIFY_TARGETS_WEBSOCKET_TYPE: Final = f"{DOMAIN}/notify/targets"
 
 PANEL_ELEMENT_NAME: Final = "ai-orchestrator-panel"
 PANEL_FILENAME: Final = "ai-orchestrator-panel.js"

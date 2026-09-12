@@ -155,6 +155,7 @@ async def test_dry_run_runs_ai_steps_without_any_action(
         "executed": False,
         "status": "planned",
         "message_step_id": "compose",
+        "target": "missing",
     }
     action.assert_not_called()
     request = provider.generate.await_args.args[0]

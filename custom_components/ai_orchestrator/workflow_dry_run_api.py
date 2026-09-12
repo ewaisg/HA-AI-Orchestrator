@@ -21,6 +21,7 @@ from .const import WORKFLOW_DRY_RUN_WEBSOCKET_TYPE
 from .runtime import async_get_runtime, is_foundation_loaded
 from .workflow_api import ERR_NOT_FOUND, ERR_NOT_LOADED, ERR_STORE_UNAVAILABLE
 from .workflow_manager import WorkflowManagerError
+from .workflow_notify import async_resolve_notify_target
 from .workflow_preview import preview_workflow
 from .workflow_preview_api import MAX_PREVIEW_JSON_CHARS, load_bounded_json
 from .workflow_schema import WorkflowValidationError, parse_workflow
@@ -175,4 +176,11 @@ async def websocket_workflow_dry_run(
             "The provider changed during the dry run.",
         )
         return
+    # Report where each planned notification would go, without sending it.
+    references = {step.step_id: step.notify_service for step in workflow.steps}
+    for step in outcome["steps"]:
+        if step["kind"] == "notify" and step["status"] == "planned":
+            step["target"] = async_resolve_notify_target(
+                hass, references.get(step["step_id"]) or ""
+            )
     connection.send_result(msg["id"], {**base, **outcome})

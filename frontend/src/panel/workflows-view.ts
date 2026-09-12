@@ -1,6 +1,7 @@
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 
 import {
+  type ExecutionRecord,
   deleteWorkflow,
   fetchWorkflows,
   observeWorkflow,
@@ -389,6 +390,12 @@ export class WorkflowsView extends LitElement {
           Observations ${status.observations} · Ignored events ${status.ignored_events} ·
           Listeners ${status.registrations}
         </p>
+        <p class="meta">
+          ${workflow.run_mode === "execute"
+            ? html`Mode: <strong>execute</strong> — eligible outcomes run the steps and deliver notifications. Executions ${status.executions} · Failures ${status.execution_failures} · Skipped while busy ${status.skipped_busy}${status.execution_running ? " · running now" : ""}`
+            : html`Mode: observe — outcomes are recorded; no step runs.`}
+        </p>
+        ${status.last_execution ? this._renderExecution(status.last_execution) : nothing}
         ${status.latest ? this._renderOutcome("Latest observation", status.latest) : nothing}
         ${observation ? this._renderOutcome("Manual observation", observation) : nothing}
         <div class="actions">
@@ -436,6 +443,15 @@ export class WorkflowsView extends LitElement {
         </div>
       </article>
     `;
+  }
+
+  private _renderExecution(record: ExecutionRecord): TemplateResult {
+    const summary = record.steps.map((step) => `${step.step_id}: ${step.status}${step.target ? ` (${step.target})` : ""}${step.error ? ` — ${step.error}` : ""}`).join(" · ");
+    return html`<p class="meta">
+      Last execution: ${record.completed ? "completed" : `failed (${record.error ?? "unknown"})`} ·
+      provider calls ${record.provider_calls} · notifications delivered ${record.actions_executed}
+      ${summary ? html`<br />${summary}` : nothing}
+    </p>`;
   }
 
   private _renderOutcome(label: string, outcome: WorkflowObservation): TemplateResult {

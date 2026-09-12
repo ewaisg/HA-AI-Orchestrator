@@ -57,9 +57,38 @@ run; later steps are `skipped`. Provider failures use the normalized error
 codes. `actions_executed` is always 0. Results go back to the administrator
 who asked and are not stored. One dry run per administrator runs at a time.
 
-Observation is the whole runtime today. Steps are never executed, so an eligible
-outcome means "this workflow would have started", not that anything happened.
-Enabling a workflow that has no trigger or no step is refused.
+## Run a workflow live (execute mode, WFL-004)
+
+A stored workflow runs its steps only when its document says so:
+
+```json
+"run_mode": "execute",
+"provider_connection_id": "<connection id of a local provider>"
+```
+
+`run_mode` defaults to `observe`; a document without it, including every
+document saved before this version, never executes. `provider_connection_id`
+is required when an executing workflow has AI steps and must name a loaded
+local provider (the same ids the chat and dry-run provider selects use).
+Enable the workflow as usual. When a trigger fires and every condition passes,
+the foundation runs, in order: each AI step once (as in a dry run), then each
+`notify` step, delivering the last composed text with the workflow name as the
+title. A `notify_service` reference `notify.<name>` is resolved at delivery
+time against Home Assistant itself: a notify entity with that id is sent
+through `notify.send_message`; otherwise a legacy notify service with that
+name is called; otherwise the step fails as `notify_target_missing` and
+nothing is guessed. The editor lists the targets Home Assistant actually has.
+
+One execution runs per workflow at a time; an eligible event that arrives
+while a run is in progress is counted as skipped, never queued or replayed.
+The first failure stops the run and later steps are skipped. Deliveries are
+never retried. The list shows executions, failures, skips, and a redacted
+last-execution record (statuses, error codes, provider calls, deliveries);
+message text is not retained.
+
+Observation stays the default. An eligible outcome in `observe` mode means
+"this workflow would have started", not that anything happened. Enabling a
+workflow that has no trigger or no step is refused.
 
 This is an offline draft editor, not a visual workflow builder. It reads no live
 household state and sends no data to an AI provider. JSON drafts stay in the open

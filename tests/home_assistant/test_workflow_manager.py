@@ -89,6 +89,11 @@ async def test_start_activates_only_enabled_documents(hass, hass_storage):
         "registrations": 0,
         "latest": None,
         "error": None,
+        "executions": 0,
+        "execution_failures": 0,
+        "skipped_busy": 0,
+        "execution_running": False,
+        "last_execution": None,
     }
 
     await flip(hass)

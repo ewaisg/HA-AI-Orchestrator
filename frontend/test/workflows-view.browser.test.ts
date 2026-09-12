@@ -4,14 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { HomeAssistantLike } from "../src/ha/hass-contract";
 import { WORKFLOWS_VIEW_TAG, type WorkflowsView } from "../src/panel/workflows-view";
 import { createRoutedFakeHass } from "./fixtures/fake-hass";
-import {
-  EMPTY_LIST,
-  INACTIVE_STATUS,
-  OBSERVATION,
-  STORED_WORKFLOW,
-  STORED_WORKFLOW_ID,
-  WORKFLOW_LIST,
-} from "./fixtures/workflows";
+import { EMPTY_LIST, EXECUTED_STATUS, INACTIVE_STATUS, OBSERVATION, STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
 
 const mounted: WorkflowsView[] = [];
 
@@ -47,6 +40,14 @@ afterEach(() => {
 });
 
 describe("stored workflows view", () => {
+  it("shows execute mode and redacted execution evidence", async () => {
+    const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflows/list": { schema_version: 1, store: "ready", workflows: [{ workflow: { ...STORED_WORKFLOW, run_mode: "execute", provider_connection_id: "12345678-1234-4234-9234-123456789abc" }, status: EXECUTED_STATUS }] } }));
+    const shown = text(view);
+    expect(shown).toContain("Mode: execute");
+    expect(shown).toContain("Executions 3 · Failures 1 · Skipped while busy 1");
+    expect(shown).toContain("Last execution: completed · provider calls 1 · notifications delivered 1");
+    expect(shown).toContain("notify: delivered (entity)");
+  });
   it("lists stored workflows with redacted live status after one list request", async () => {
     const requests: Record<string, unknown>[] = [];
     const view = await mount(

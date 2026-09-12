@@ -32,9 +32,20 @@ class WorkflowObserverError(RuntimeError):
 class WorkflowObserver:
     """Observe a fixed validated draft with bounded HA state/time listeners."""
 
-    def __init__(self, hass: HomeAssistant, workflow_raw: Any) -> None:
-        """Capture a normalized private copy, independent of caller mutations."""
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        workflow_raw: Any,
+        on_eligible: Callable[[dict[str, Any], dict[str, Any]], None] | None = None,
+    ) -> None:
+        """Capture a normalized private copy, independent of caller mutations.
+
+        `on_eligible` is invoked, in the event loop, with the redacted outcome
+        and the snapshot it was evaluated against whenever an observation is
+        eligible. The observer itself never executes anything.
+        """
         self._hass = hass
+        self._on_eligible = on_eligible
         self._workflow = parse_workflow(workflow_raw)
         self._raw = self._workflow.as_dict()
         self._condition_entities = frozenset(
@@ -165,15 +176,15 @@ class WorkflowObserver:
             state = self._hass.states.get(entity_id)
             if self._bounded_state(state):
                 states[entity_id] = state.state
-        result = preview_workflow(
-            self._raw,
-            {
-                "states": states,
-                "time": dt_util.as_local(now).strftime("%H:%M"),
-                "event": event,
-            },
-        )
+        snapshot = {
+            "states": states,
+            "time": dt_util.as_local(now).strftime("%H:%M"),
+            "event": event,
+        }
+        result = preview_workflow(self._raw, snapshot)
         result["mode"] = "observation_only"
         self._latest = result
         self._observations = min(MAX_OBSERVATIONS, self._observations + 1)
+        if result["eligible"] and self._on_eligible is not None:
+            self._on_eligible(deepcopy(result), deepcopy(snapshot))
         return deepcopy(result)

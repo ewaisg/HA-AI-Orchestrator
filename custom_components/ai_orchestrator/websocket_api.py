@@ -37,6 +37,7 @@ from .workflow_api import (
     websocket_workflow_set_enabled,
 )
 from .workflow_dry_run_api import websocket_workflow_dry_run
+from .workflow_notify_api import websocket_notify_targets
 from .workflow_preview_api import websocket_workflow_preview
 from .workflow_probe import WorkflowProbeInvariantError, async_run_workflow_probe
 
@@ -326,3 +327,4 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_workflow_set_enabled)
     websocket_api.async_register_command(hass, websocket_workflow_run_manual)
     websocket_api.async_register_command(hass, websocket_workflow_dry_run)
+    websocket_api.async_register_command(hass, websocket_notify_targets)

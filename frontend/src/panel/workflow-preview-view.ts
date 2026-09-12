@@ -1,5 +1,6 @@
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { fetchChatOptions, type ChatProvider } from "../api/chat-client";
+import { fetchNotifyTargets, type NotifyTarget } from "../api/notify-client";
 import { saveWorkflow } from "../api/workflow-client";
 import { DRY_RUN_ERRORS, dryRunWorkflow, type DryRunResult, type DryRunStep } from "../api/workflow-dry-run-client";
 import { PREVIEW_INPUT_LIMIT, PREVIEW_REASONS, previewWorkflow, type WorkflowPreview } from "../api/workflow-preview-client";
@@ -24,7 +25,7 @@ const DRY_RUN_MESSAGES: Record<string, string> = {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 
 export class WorkflowPreviewView extends LitElement {
-  public static override properties = { hass: { attribute: false }, draft: { attribute: false }, _workflow: { state: true }, _snapshot: { state: true }, _busy: { state: true }, _error: { state: true }, _result: { state: true }, _saved: { state: true }, _providers: { state: true }, _connectionId: { state: true }, _dryRun: { state: true } };
+  public static override properties = { hass: { attribute: false }, draft: { attribute: false }, _workflow: { state: true }, _snapshot: { state: true }, _busy: { state: true }, _error: { state: true }, _result: { state: true }, _saved: { state: true }, _providers: { state: true }, _connectionId: { state: true }, _dryRun: { state: true }, _targets: { state: true } };
   public static override styles = css`
     :host { display:block; min-width:0; color:var(--primary-text-color,#233642); margin-bottom:32px; }
     * { box-sizing:border-box; } h1 { font-size:26px; margin:0 0 10px; } h2 { font-size:20px; }
@@ -46,13 +47,14 @@ export class WorkflowPreviewView extends LitElement {
   private declare _error: string;
   private declare _result?: WorkflowPreview;
   private declare _providers: ChatProvider[];
+  private declare _targets: NotifyTarget[];
   private declare _connectionId: string;
   private declare _dryRun?: DryRunResult;
   private _sequence = 0;
   private _connection?: HomeAssistantLike["connection"];
   private _userId?: string;
   private _callWS?: HomeAssistantLike["callWS"];
-  public constructor() { super(); this._workflow = ""; this._snapshot = ""; this._busy = false; this._error = ""; this._saved = false; this._providers = []; this._connectionId = ""; }
+  public constructor() { super(); this._workflow = ""; this._snapshot = ""; this._busy = false; this._error = ""; this._saved = false; this._providers = []; this._connectionId = ""; this._targets = []; }
   private readonly _reset = (): void => { this._invalidate(); this._workflow = ""; this._snapshot = ""; };
   private _invalidate(): void { this._sequence++; this._busy = false; this._error = ""; this._result = undefined; this._saved = false; this._dryRun = undefined; }
   private _unbind(): void { this._connection?.removeEventListener("disconnected", this._reset); }
@@ -64,8 +66,9 @@ export class WorkflowPreviewView extends LitElement {
     if (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) {
       this._unbind(); this._reset(); this._connection = this.hass?.connection; this._userId = this.hass?.user?.id; this._callWS = this.hass?.callWS;
       this._connection?.addEventListener("disconnected", this._reset);
-      this._providers = []; this._connectionId = "";
+      this._providers = []; this._connectionId = ""; this._targets = [];
       void this._loadProviders();
+      void this._loadTargets();
     }
   }
   /** Local providers eligible for an explicit trial; a failed lookup simply disables the dry run. */
@@ -79,6 +82,17 @@ export class WorkflowPreviewView extends LitElement {
       this._providers = options.providers;
       this._connectionId = options.providers[0]?.connection_id ?? "";
     } catch { /* no providers available for a dry run */ }
+  }
+  /** Real notify entities and legacy notify services; a failed lookup leaves the list empty. */
+  private async _loadTargets(): Promise<void> {
+    const hass = this.hass;
+    if (!hass) return;
+    const sequence = this._sequence;
+    try {
+      const targets = await fetchNotifyTargets(hass);
+      if (sequence !== this._sequence || !this.isConnected || this.hass?.callWS !== hass.callWS) return;
+      this._targets = targets;
+    } catch { /* discovery unavailable */ }
   }
   private _storedWorkflowId(): string | undefined {
     try { const id = (JSON.parse(this._workflow) as { workflow_id?: unknown }).workflow_id; return typeof id === "string" && UUID.test(id) ? id : undefined; } catch { return undefined; }
@@ -145,6 +159,10 @@ export class WorkflowPreviewView extends LitElement {
         </select>
         <button id="dry-run" type="button" ?disabled=${!this._canDryRun()} @click=${this._runDry}>${this._busy ? "Working…" : "Dry run AI steps"}</button>
       </div>
+      <details><summary>Notification targets found in Home Assistant (${this._targets.length})</summary>
+        ${this._targets.length ? html`<ul>${this._targets.map((target) => html`<li><code>${target.reference}</code> — ${target.name} (notify ${target.kind})</li>`)}</ul>` : html`<p>No notify entity or notify service was found, or discovery is unavailable.</p>`}
+        <p>Use one of these references as a notify step's <code>notify_service</code>. To run a workflow live, set <code>"run_mode": "execute"</code> and, for AI steps, <code>"provider_connection_id"</code> to a local provider, then save and enable it.</p>
+      </details>
       <p>A dry run evaluates the <em>stored</em> workflow against the snapshot above, then runs its AI steps once against the selected local provider. The model sees only the step prompt, the event, the time, and the states of entities named by the workflow's conditions. Notifications are only planned; nothing is sent, stored, or executed.</p>
       <div role="status" aria-live="polite">${this._error ? html`<p class="error">${this._error}</p>` : nothing}${this._saved ? html`<p>Workflow saved. It appears in the stored workflows list below.</p>` : nothing}${this._busy ? html`<p>Working…</p>` : nothing}${this._result ? this._renderResult(this._result) : nothing}${this._dryRun ? this._renderDryRun(this._dryRun) : nothing}</div>
     </section>`;
@@ -169,7 +187,7 @@ export class WorkflowPreviewView extends LitElement {
     const label = KIND_LABELS[step.kind];
     if (step.status === "ok" && step.text !== undefined) return html`<li>${label} — composed:<div class="composed">${step.text}</div></li>`;
     if (step.status === "ok") return html`<li>${label} — category: ${step.category}</li>`;
-    if (step.status === "planned") return html`<li>${label} — planned, not sent${step.message_step_id ? ` (would use text from step ${step.message_step_id})` : ""}</li>`;
+    if (step.status === "planned") return html`<li>${label} — planned, not sent${step.message_step_id ? ` (would use text from step ${step.message_step_id})` : ""}${step.target === "missing" ? " — target not found in Home Assistant" : step.target ? ` — target resolves to a notify ${step.target}` : ""}</li>`;
     if (step.status === "failed") return html`<li>${label} — failed: ${DRY_RUN_ERRORS[step.error as keyof typeof DRY_RUN_ERRORS] ?? "Provider error"}</li>`;
     return html`<li>${label} — skipped</li>`;
   }

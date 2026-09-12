@@ -13,9 +13,10 @@ export const DRY_RUN_ERRORS = {
 
 export type DryRunStatus = (typeof DRY_RUN_STATUSES)[number];
 export type DryRunStepKind = (typeof DRY_RUN_STEP_KINDS)[number];
+export const DRY_RUN_TARGETS = ["entity", "service", "missing"] as const;
 export interface DryRunStep {
   index: number; step_id: string; kind: DryRunStepKind; executed: boolean; status: DryRunStatus;
-  text?: string; category?: string; error?: string; message_step_id?: string | null;
+  text?: string; category?: string; error?: string; message_step_id?: string | null; target?: (typeof DRY_RUN_TARGETS)[number];
 }
 export interface DryRunResult {
   schema_version: 1; mode: "dry_run"; workflow_id: string; destination: "local";
@@ -55,7 +56,7 @@ function step(value: unknown, index: number): value is DryRunStep {
         ? keys(value, [...base, "text"]) && text(value.text, DRY_RUN_MAX_TEXT_CHARS)
         : keys(value, [...base, "category"]) && text(value.category, 64);
     case "planned":
-      return !ai && value.executed === false && keys(value, [...base, "message_step_id"]) &&
+      return !ai && value.executed === false && (keys(value, [...base, "message_step_id"]) || (keys(value, [...base, "message_step_id", "target"]) && DRY_RUN_TARGETS.includes(value.target as never))) &&
         (value.message_step_id === null || (text(value.message_step_id, 64) && STEP_ID.test(value.message_step_id as string)));
     case "failed":
       return ai && value.executed === false && keys(value, [...base, "error"]) && text(value.error, 64);

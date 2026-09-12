@@ -192,6 +192,7 @@ describe("AI Orchestrator panel shell", () => {
     // The workflow editor's local-provider lookup is a read, not a side effect.
     expect([...requestTypes].sort()).toEqual([
       "ai_orchestrator/chat/options",
+      "ai_orchestrator/notify/targets",
       "ai_orchestrator/status",
       "ai_orchestrator/workflow/probe/run",
       "ai_orchestrator/workflows/list",

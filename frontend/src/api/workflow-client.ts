@@ -9,6 +9,11 @@ export const WORKFLOW_RESPONSE_SCHEMA_VERSION = 1;
 export const WORKFLOW_LIMIT = 50;
 export const STORE_STATES = ["ready", "unreadable", "not_loaded"] as const;
 export const STATUS_ERRORS = ["activation_failed", "cleanup_failed"] as const;
+export const RUN_MODES = ["observe", "execute"] as const;
+export const EXECUTION_STEP_STATUSES = ["ok", "planned", "failed", "skipped", "delivered"] as const;
+export type RunMode = (typeof RUN_MODES)[number];
+export interface ExecutionStep { index: number; step_id: string; kind: string; executed: boolean; status: (typeof EXECUTION_STEP_STATUSES)[number]; error?: string; category?: string; target?: string }
+export interface ExecutionRecord { started_at: string; finished_at?: string; steps: ExecutionStep[]; provider_calls: number; actions_executed: number; completed: boolean; error: string | null }
 
 export type StoreState = (typeof STORE_STATES)[number];
 export type WorkflowStatusError = (typeof STATUS_ERRORS)[number];
@@ -19,6 +24,8 @@ export interface StoredWorkflow {
   name: string;
   description: string;
   enabled: boolean;
+  run_mode: RunMode;
+  provider_connection_id: string | null;
   triggers: Record<string, unknown>[];
   conditions: Record<string, unknown>[];
   steps: Record<string, unknown>[];
@@ -31,6 +38,11 @@ export interface WorkflowStatus {
   registrations: number;
   latest: WorkflowObservation | null;
   error: WorkflowStatusError | null;
+  executions: number;
+  execution_failures: number;
+  skipped_busy: number;
+  execution_running: boolean;
+  last_execution: ExecutionRecord | null;
 }
 
 export interface WorkflowEntry {
@@ -52,6 +64,32 @@ export class WorkflowContractError extends Error {
 }
 
 const WORKFLOW_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+const CONNECTION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+const STEP_ID = /^[a-z][a-z0-9_]{0,63}$/u;
+
+function parseExecutionRecord(value: unknown): ExecutionRecord {
+  const keys = ["started_at", "steps", "provider_calls", "actions_executed", "completed", "error"];
+  if (!record(value) || !(exactKeys(value, keys) || exactKeys(value, [...keys, "finished_at"])) ||
+      typeof value.started_at !== "string" || value.started_at.length > 40 ||
+      ("finished_at" in value && (typeof value.finished_at !== "string" || value.finished_at.length > 40)) ||
+      !Array.isArray(value.steps) || value.steps.length > 25 || !counter(value.provider_calls) || !counter(value.actions_executed) ||
+      typeof value.completed !== "boolean" || (value.error !== null && (typeof value.error !== "string" || value.error.length > 64))) {
+    throw new WorkflowContractError();
+  }
+  const steps = value.steps.map((item: unknown, index): ExecutionStep => {
+    if (!record(item) || item.index !== index || typeof item.step_id !== "string" || !STEP_ID.test(item.step_id) || typeof item.kind !== "string" ||
+        typeof item.executed !== "boolean" || !(EXECUTION_STEP_STATUSES as readonly unknown[]).includes(item.status) ||
+        Object.keys(item).some((key) => !["index", "step_id", "kind", "executed", "status", "error", "category", "target"].includes(key)) ||
+        ("error" in item && (typeof item.error !== "string" || item.error.length > 64)) || ("category" in item && (typeof item.category !== "string" || item.category.length > 64)) ||
+        ("target" in item && !["entity", "service", "missing"].includes(item.target as string))) {
+      throw new WorkflowContractError();
+    }
+    return item as unknown as ExecutionStep;
+  });
+  if (value.completed && (value.error !== null || steps.some((step) => step.status === "failed" || step.status === "skipped"))) throw new WorkflowContractError();
+  if (value.actions_executed !== steps.filter((step) => step.status === "delivered").length) throw new WorkflowContractError();
+  return { ...(value as unknown as ExecutionRecord), steps };
+}
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -81,11 +119,15 @@ export function parseStoredWorkflow(value: unknown): StoredWorkflow {
       "name",
       "description",
       "enabled",
+      "run_mode",
+      "provider_connection_id",
       "triggers",
       "conditions",
       "steps",
     ]) ||
     value.schema_version !== 1 ||
+    !(RUN_MODES as readonly unknown[]).includes(value.run_mode) ||
+    (value.provider_connection_id !== null && (typeof value.provider_connection_id !== "string" || !CONNECTION_ID.test(value.provider_connection_id))) ||
     typeof value.workflow_id !== "string" ||
     !WORKFLOW_ID.test(value.workflow_id) ||
     typeof value.name !== "string" ||
@@ -106,6 +148,8 @@ export function parseStoredWorkflow(value: unknown): StoredWorkflow {
     name: value.name,
     description: value.description,
     enabled: value.enabled,
+    run_mode: value.run_mode as RunMode,
+    provider_connection_id: value.provider_connection_id as string | null,
     triggers: value.triggers,
     conditions: value.conditions,
     steps: value.steps,
@@ -122,8 +166,15 @@ function parseStatus(value: unknown): WorkflowStatus {
       "registrations",
       "latest",
       "error",
+      "executions",
+      "execution_failures",
+      "skipped_busy",
+      "execution_running",
+      "last_execution",
     ]) ||
     typeof value.active !== "boolean" ||
+    !counter(value.executions) || !counter(value.execution_failures) || !counter(value.skipped_busy) || typeof value.execution_running !== "boolean" ||
+    (value.execution_failures as number) > (value.executions as number) ||
     !counter(value.observations) ||
     !counter(value.ignored_events) ||
     !counter(value.registrations) ||
@@ -140,6 +191,8 @@ function parseStatus(value: unknown): WorkflowStatus {
       throw new WorkflowContractError();
     }
   }
+  let lastExecution: ExecutionRecord | null = null;
+  if (value.last_execution !== null) lastExecution = parseExecutionRecord(value.last_execution);
   return {
     active: value.active,
     observations: value.observations,
@@ -147,6 +200,11 @@ function parseStatus(value: unknown): WorkflowStatus {
     registrations: value.registrations,
     latest,
     error: value.error as WorkflowStatusError | null,
+    executions: value.executions as number,
+    execution_failures: value.execution_failures as number,
+    skipped_busy: value.skipped_busy as number,
+    execution_running: value.execution_running as boolean,
+    last_execution: lastExecution,
   };
 }
 

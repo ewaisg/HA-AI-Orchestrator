@@ -3,9 +3,10 @@
 The manager loads the workflow store when the foundation entry starts and keeps
 one `WorkflowObserver` per enabled workflow. Observers evaluate the curated
 deterministic triggers and conditions against live Home Assistant state and
-record a redacted outcome. No step executes: there is no provider call, no
-notification, and no Home Assistant action in this module. Step execution is
-separate tracked work (WFL-003, WFL-004) behind the release gate.
+record a redacted outcome. A workflow stored with `run_mode: execute` also
+has its eligible outcomes handed to `workflow_execution`, one run at a time
+per workflow; everything else stays observation-only. The manager keeps
+only redacted execution evidence (statuses, error codes, counters).
 """
 
 from __future__ import annotations
@@ -17,7 +18,11 @@ from typing import Any, Final
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import dt as dt_util
 
+from .providers.contract import Provider
+from .workflow_execution import async_execute_workflow
 from .workflow_observer import WorkflowObserver, WorkflowObserverError
+from .workflow_schema import RUN_MODE_EXECUTE, parse_workflow
+from .workflow_steps import StepContext, WorkflowStepError
 from .workflow_store import WorkflowStore, WorkflowStoreError
 
 STORE_READY: Final = "ready"
@@ -26,6 +31,18 @@ STORE_UNREADABLE: Final = "unreadable"
 
 ERROR_ACTIVATION_FAILED: Final = "activation_failed"
 ERROR_CLEANUP_FAILED: Final = "cleanup_failed"
+ERROR_EXECUTION_CONTEXT: Final = "execution_context_invalid"
+MAX_EXECUTION_COUNTER: Final = 1_000_000
+
+
+def _empty_execution_stats() -> dict[str, Any]:
+    return {
+        "executions": 0,
+        "execution_failures": 0,
+        "skipped_busy": 0,
+        "execution_running": False,
+        "last_execution": None,
+    }
 
 
 class WorkflowManagerError(RuntimeError):
@@ -42,6 +59,8 @@ class WorkflowManager:
         self._observers: dict[str, WorkflowObserver] = {}
         self._stale: dict[str, WorkflowObserver] = {}
         self._errors: dict[str, str] = {}
+        self._executions: dict[str, dict[str, Any]] = {}
+        self._running: set[str] = set()
         self._store_state = STORE_NOT_LOADED
         self._started = False
         self._lock = asyncio.Lock()
@@ -103,7 +122,15 @@ class WorkflowManager:
         if workflow_id in self._stale:
             self._errors[workflow_id] = ERROR_CLEANUP_FAILED
             return
-        observer = WorkflowObserver(self._hass, document)
+        on_eligible = None
+        if document.get("run_mode") == RUN_MODE_EXECUTE:
+            snapshot_document = deepcopy(document)
+
+            @callback
+            def on_eligible(_result: dict[str, Any], snapshot: dict[str, Any]) -> None:
+                self._schedule_execution(snapshot_document, snapshot)
+
+        observer = WorkflowObserver(self._hass, document, on_eligible)
         try:
             observer.start()
         except WorkflowObserverError:
@@ -113,9 +140,74 @@ class WorkflowManager:
         self._errors.pop(workflow_id, None)
 
     @callback
+    def _schedule_execution(
+        self, document: dict[str, Any], snapshot: dict[str, Any]
+    ) -> None:
+        """Start one execution per eligible outcome, never two at once."""
+        workflow_id = document["workflow_id"]
+        stats = self._executions.setdefault(workflow_id, _empty_execution_stats())
+        if not self._started or workflow_id not in self._observers:
+            return
+        if workflow_id in self._running:
+            stats["skipped_busy"] = min(
+                MAX_EXECUTION_COUNTER, stats["skipped_busy"] + 1
+            )
+            return
+        self._running.add(workflow_id)
+        stats["execution_running"] = True
+        self._hass.async_create_task(
+            self._async_run(document, snapshot), f"ai_orchestrator_run_{workflow_id}"
+        )
+
+    def _lookup_provider(self, connection_id: str) -> Provider | None:
+        # Imported lazily: chat depends on runtime, which depends on this module.
+        from .chat import _local_connections  # noqa: PLC0415
+
+        for _entry, loaded in _local_connections(self._hass):
+            if loaded.connection_id == connection_id:
+                return loaded.provider
+        return None
+
+    async def _async_run(
+        self, document: dict[str, Any], snapshot: dict[str, Any]
+    ) -> None:
+        workflow_id = document["workflow_id"]
+        stats = self._executions.setdefault(workflow_id, _empty_execution_stats())
+        try:
+            workflow = parse_workflow(document)
+            context = StepContext(
+                workflow_name=workflow.name,
+                event=snapshot["event"],
+                time=snapshot["time"],
+                states=snapshot["states"],
+            )
+            record = await async_execute_workflow(
+                self._hass, workflow, context, self._lookup_provider
+            )
+        except WorkflowStepError, Exception:  # noqa: BLE001 -- keep evidence static
+            record = {
+                "started_at": dt_util.utcnow().isoformat(),
+                "steps": [],
+                "provider_calls": 0,
+                "actions_executed": 0,
+                "completed": False,
+                "error": ERROR_EXECUTION_CONTEXT,
+            }
+        finally:
+            self._running.discard(workflow_id)
+            stats["execution_running"] = False
+        stats["executions"] = min(MAX_EXECUTION_COUNTER, stats["executions"] + 1)
+        if not record["completed"]:
+            stats["execution_failures"] = min(
+                MAX_EXECUTION_COUNTER, stats["execution_failures"] + 1
+            )
+        stats["last_execution"] = record
+
+    @callback
     def _deactivate(self, workflow_id: str) -> None:
         observer = self._observers.pop(workflow_id, None)
         self._errors.pop(workflow_id, None)
+        self._executions.pop(workflow_id, None)
         if observer is None:
             return
         try:
@@ -203,10 +295,15 @@ class WorkflowManager:
                     "latest": None,
                 }
             )
+            stats = self._executions.get(workflow_id) or _empty_execution_stats()
             workflows.append(
                 {
                     "workflow": deepcopy(document),
-                    "status": {**report, "error": self._errors.get(workflow_id)},
+                    "status": {
+                        **report,
+                        "error": self._errors.get(workflow_id),
+                        **deepcopy(stats),
+                    },
                 }
             )
         return {"store": self._store_state, "workflows": workflows}

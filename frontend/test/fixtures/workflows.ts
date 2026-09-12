@@ -6,6 +6,8 @@ export const STORED_WORKFLOW: Record<string, unknown> = {
   name: "Synthetic evening window",
   description: "",
   enabled: true,
+  run_mode: "observe",
+  provider_connection_id: null,
   triggers: [{ kind: "state", entity_ids: ["binary_sensor.synthetic_window"], to_state: "on" }],
   conditions: [{ kind: "time_window", after_time: "18:00", before_time: "06:00" }],
   steps: [{ step_id: "compose", kind: "ai_compose", prompt: "Write a short window reminder." }],
@@ -31,6 +33,11 @@ export const ACTIVE_STATUS: Record<string, unknown> = {
   registrations: 1,
   latest: OBSERVATION,
   error: null,
+  executions: 0,
+  execution_failures: 0,
+  skipped_busy: 0,
+  execution_running: false,
+  last_execution: null,
 };
 
 export const INACTIVE_STATUS: Record<string, unknown> = {
@@ -40,6 +47,11 @@ export const INACTIVE_STATUS: Record<string, unknown> = {
   registrations: 0,
   latest: null,
   error: null,
+  executions: 0,
+  execution_failures: 0,
+  skipped_busy: 0,
+  execution_running: false,
+  last_execution: null,
 };
 
 export const WORKFLOW_LIST: Record<string, unknown> = {
@@ -62,7 +74,7 @@ export const DRY_RUN: Record<string, unknown> = {
   condition_results: [{ index: 0, passed: true, reason: "matched" }],
   steps: [
     { index: 0, step_id: "compose", kind: "ai_compose", executed: true, status: "ok", text: "Please close the window." },
-    { index: 1, step_id: "notify", kind: "notify", executed: false, status: "planned", message_step_id: "compose" },
+    { index: 1, step_id: "notify", kind: "notify", executed: false, status: "planned", message_step_id: "compose", target: "entity" },
   ],
   provider_calls: 1,
   actions_executed: 0,
@@ -77,4 +89,32 @@ export const CHAT_OPTIONS: Record<string, unknown> = {
   household_context: false,
   actions: false,
   history_persisted: false,
+};
+
+export const EXECUTED_STATUS: Record<string, unknown> = {
+  ...ACTIVE_STATUS,
+  executions: 3,
+  execution_failures: 1,
+  skipped_busy: 1,
+  execution_running: false,
+  last_execution: {
+    started_at: "2026-09-12T14:00:00+00:00",
+    finished_at: "2026-09-12T14:00:03+00:00",
+    steps: [
+      { index: 0, step_id: "compose", kind: "ai_compose", executed: true, status: "ok" },
+      { index: 1, step_id: "notify", kind: "notify", executed: true, status: "delivered", target: "entity" },
+    ],
+    provider_calls: 1,
+    actions_executed: 1,
+    completed: true,
+    error: null,
+  },
+};
+
+export const NOTIFY_TARGETS: Record<string, unknown> = {
+  schema_version: 1,
+  targets: [
+    { reference: "notify.kitchen_speaker", kind: "entity", name: "Kitchen speaker" },
+    { reference: "notify.mobile_app_synthetic", kind: "service", name: "mobile_app_synthetic" },
+  ],
 };

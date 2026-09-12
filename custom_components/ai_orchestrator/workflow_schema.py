@@ -26,6 +26,14 @@ MAX_CONDITIONS_PER_WORKFLOW: Final = 20
 MAX_PROMPT_CHARS: Final = 4000
 MAX_ENTITY_IDS_PER_TRIGGER: Final = 50
 
+# How an enabled workflow behaves when its triggers and conditions pass.
+RUN_MODE_OBSERVE: Final = "observe"
+RUN_MODE_EXECUTE: Final = "execute"
+RUN_MODES: Final = frozenset({RUN_MODE_OBSERVE, RUN_MODE_EXECUTE})
+_CONNECTION_ID_PATTERN: Final = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+)
+
 _WORKFLOW_ID_PATTERN: Final = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 )
@@ -163,6 +171,11 @@ class Workflow:
     triggers: tuple[WorkflowTrigger, ...] = ()
     conditions: tuple[WorkflowCondition, ...] = ()
     steps: tuple[WorkflowStep, ...] = ()
+    # `observe` records outcomes only; `execute` runs the steps live. Missing
+    # run_mode always means observe, so an older document never gains a side
+    # effect by being loaded.
+    run_mode: str = RUN_MODE_OBSERVE
+    provider_connection_id: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         """Return the exact serializable form stored and sent to the panel."""
@@ -172,6 +185,8 @@ class Workflow:
             "name": self.name,
             "description": self.description,
             "enabled": self.enabled,
+            "run_mode": self.run_mode,
+            "provider_connection_id": self.provider_connection_id,
             "triggers": [trigger.as_dict() for trigger in self.triggers],
             "conditions": [condition.as_dict() for condition in self.conditions],
             "steps": [step.as_dict() for step in self.steps],
@@ -290,6 +305,8 @@ _WORKFLOW_KEYS = frozenset(
         "name",
         "description",
         "enabled",
+        "run_mode",
+        "provider_connection_id",
         "triggers",
         "conditions",
         "steps",
@@ -498,6 +515,17 @@ def parse_workflow(raw: Any) -> Workflow:
         allow_empty=True,
     )
     enabled = _require_bool(data.get("enabled", False), "workflow.enabled")
+    run_mode = data.get("run_mode", RUN_MODE_OBSERVE)
+    if type(run_mode) is not str or run_mode not in RUN_MODES:
+        raise WorkflowValidationError("workflow.run_mode must be observe or execute")
+    provider_connection_id = data.get("provider_connection_id")
+    if provider_connection_id is not None and (
+        type(provider_connection_id) is not str
+        or _CONNECTION_ID_PATTERN.fullmatch(provider_connection_id) is None
+    ):
+        raise WorkflowValidationError(
+            "workflow.provider_connection_id must be a canonical UUID or null"
+        )
 
     triggers = tuple(
         parse_trigger(item)
@@ -532,6 +560,16 @@ def parse_workflow(raw: Any) -> Workflow:
         raise WorkflowValidationError("an enabled workflow requires a trigger")
     if enabled and not steps:
         raise WorkflowValidationError("an enabled workflow requires a step")
+    # Execution must name the provider its AI steps will use; it is never
+    # inferred from whatever happens to be loaded.
+    if (
+        run_mode == RUN_MODE_EXECUTE
+        and any(step.kind is not StepKind.NOTIFY for step in steps)
+        and provider_connection_id is None
+    ):
+        raise WorkflowValidationError(
+            "an executing workflow with AI steps requires provider_connection_id"
+        )
 
     return Workflow(
         workflow_id=workflow_id,
@@ -541,6 +579,8 @@ def parse_workflow(raw: Any) -> Workflow:
         triggers=triggers,
         conditions=conditions,
         steps=steps,
+        run_mode=run_mode,
+        provider_connection_id=provider_connection_id,
     )
 
 

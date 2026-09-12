@@ -133,8 +133,14 @@ reported as saved.
 once against a selected local provider using the editor's snapshot. It is an
 explicit administrator trial like chat: the model receives the step prompt and
 a bounded context only, notifications are planned but never sent, and nothing
-is stored. The Home page's Workflow runtime flag stays unavailable until
-notification execution and the release gate exist.
+is stored.
+
+A workflow saved with `"run_mode": "execute"` (and a `provider_connection_id`
+when it has AI steps) runs live once enabled: its AI steps run and its notify
+steps deliver the composed text to a notify entity or legacy notify service
+that Home Assistant actually has. Nothing else can be called. See
+[the guide](OFFLINE-WORKFLOW-PREVIEW.md) for the exact rules. The Home page's
+Workflow runtime flag stays unavailable until the release gate.
 
 The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded
 test fires one integration-owned internal event and increments an in-memory
