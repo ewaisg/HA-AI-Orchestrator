@@ -189,7 +189,9 @@ describe("AI Orchestrator panel shell", () => {
     await panel.updateComplete;
 
     // The stored-workflows list load and the probe click race across microtasks.
+    // The workflow editor's local-provider lookup is a read, not a side effect.
     expect([...requestTypes].sort()).toEqual([
+      "ai_orchestrator/chat/options",
       "ai_orchestrator/status",
       "ai_orchestrator/workflow/probe/run",
       "ai_orchestrator/workflows/list",

@@ -25,7 +25,7 @@ function record(value: unknown): value is Record<string, unknown> {
 function keys(value: Record<string, unknown>, names: string[]): boolean {
   return Object.keys(value).length === names.length && names.every((name) => Object.hasOwn(value, name));
 }
-function checks(value: unknown, max: number, reasons: string[]): value is PreviewCheck[] {
+export function previewChecks(value: unknown, max: number, reasons: readonly string[]): value is PreviewCheck[] {
   return Array.isArray(value) && value.length <= max && value.every((item: unknown, index) =>
     record(item) && keys(item, ["index", "passed", "reason"]) && item.index === index &&
     typeof item.passed === "boolean" && typeof item.reason === "string" && reasons.includes(item.reason) &&
@@ -50,8 +50,8 @@ function parseEvaluation(value: Record<string, unknown>): Record<string, unknown
   if (typeof value.enabled !== "boolean" ||
     typeof value.triggered !== "boolean" || typeof value.conditions_passed !== "boolean" || typeof value.eligible !== "boolean" ||
     value.provider_calls !== 0 || value.actions_executed !== 0 ||
-    !checks(value.trigger_results, 10, ["matched", "event_kind_mismatch", "state_unchanged", "entity_not_selected", "target_state_mismatch", "time_mismatch"]) ||
-    !checks(value.condition_results, 20, ["matched", "outside_time_window", "state_unavailable", "state_mismatch", "state_not_numeric", "outside_numeric_bounds"]) ||
+    !previewChecks(value.trigger_results, 10, ["matched", "event_kind_mismatch", "state_unchanged", "entity_not_selected", "target_state_mismatch", "time_mismatch"]) ||
+    !previewChecks(value.condition_results, 20, ["matched", "outside_time_window", "state_unavailable", "state_mismatch", "state_not_numeric", "outside_numeric_bounds"]) ||
     !Array.isArray(value.planned_steps) || value.planned_steps.length > 25 ||
     !value.planned_steps.every((step: unknown, index) => record(step) && keys(step, ["index", "kind"]) && step.index === index && ["ai_compose", "ai_classify", "notify"].includes(step.kind as string)) ||
     value.triggered !== value.trigger_results.some((item) => item.passed) ||

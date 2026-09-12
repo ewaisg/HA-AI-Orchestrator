@@ -26,9 +26,17 @@ now** records one manual observation at the current time (only a manual trigger
 can match it). Counters and the latest outcome are shown per workflow; they reset
 when the workflow is saved again, disabled, or the foundation entry reloads.
 
-## Dry-run the AI steps (WFL-003, administrator command)
+## Dry-run the AI steps (WFL-003)
 
-`ai_orchestrator/workflows/dry_run` takes a stored `workflow_id`, a local
+In the panel, after saving a workflow (or loading a stored one into the
+editor), choose a local provider under **Local provider for a dry run** and
+select **Dry run AI steps**. The result lists each step: composed text or the
+chosen category for AI steps, `planned, not sent` for notifications, and a
+static reason for a failed step. The control is disabled until the editor
+holds a stored workflow id, the snapshot is non-empty, and a local provider
+is available; a dry run of an unsaved draft is refused by the backend.
+
+The underlying command `ai_orchestrator/workflows/dry_run` takes a stored `workflow_id`, a local
 provider `connection_id`, and a `snapshot_json` in the same shape as the
 preview snapshot. Triggers and conditions are evaluated offline against that
 snapshot first; if the scenario is not eligible, no provider is contacted and

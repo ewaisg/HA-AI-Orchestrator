@@ -127,8 +127,14 @@ is active; restore the file from a backup or remove it after copying it aside.
 A file that is not valid JSON at all is handled by Home Assistant itself: it is
 renamed aside with a `.corrupt` suffix, a repair issue is raised, and the list
 shows no stored workflows. Every save is read back from storage before it is
-reported as saved. The Home page's Workflow runtime flag stays unavailable until
-step execution exists.
+reported as saved.
+
+**Dry run AI steps** (WFL-003) runs a stored workflow's compose/classify steps
+once against a selected local provider using the editor's snapshot. It is an
+explicit administrator trial like chat: the model receives the step prompt and
+a bounded context only, notifications are planned but never sent, and nothing
+is stored. The Home page's Workflow runtime flag stays unavailable until
+notification execution and the release gate exist.
 
 The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded
 test fires one integration-owned internal event and increments an in-memory

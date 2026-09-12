@@ -5,7 +5,7 @@ import { WORKFLOW_PREVIEW_TAG, type WorkflowPreviewView } from "../src/panel/wor
 import type { HomeAssistantLike } from "../src/ha/hass-contract";
 import { createRoutedFakeHass } from "./fixtures/fake-hass";
 import { VALID_PREVIEW } from "./fixtures/workflow-preview";
-import { STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
+import { CHAT_OPTIONS, DRY_RUN, STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
 
 const mounted: WorkflowPreviewView[] = [];
 async function settle(view: WorkflowPreviewView): Promise<void> { await view.updateComplete; await new Promise<void>((resolve) => setTimeout(resolve, 0)); await view.updateComplete; }
@@ -18,18 +18,21 @@ function button(view: WorkflowPreviewView, label: string): HTMLButtonElement {
   if (!result) throw new Error("Button missing"); return result;
 }
 function text(view: WorkflowPreviewView): string { return view.shadowRoot?.textContent ?? ""; }
+const OPTIONS_LOOKUP = "ai_orchestrator/chat/options";
+function actions(requests: Record<string, unknown>[]): Record<string, unknown>[] { return requests.filter((m) => m.type !== OPTIONS_LOOKUP); }
+function dryRunButton(view: WorkflowPreviewView): HTMLButtonElement { return view.shadowRoot!.querySelector<HTMLButtonElement>("#dry-run")!; }
 afterEach(() => { for (const view of mounted.splice(0)) view.remove(); });
 
 describe("offline workflow editor", () => {
   it("requires explicit sample loading and preview; shows readable results", async () => {
     const requests: Record<string, unknown>[] = [];
     const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflow/preview": VALID_PREVIEW }, (message) => requests.push(message)));
-    expect(requests).toEqual([]); expect(button(view, "Preview workflow").disabled).toBe(true);
+    expect(actions(requests)).toEqual([]); expect(button(view, "Preview workflow").disabled).toBe(true);
     button(view, "evening").click(); await settle(view);
-    expect(requests).toEqual([]);
+    expect(actions(requests)).toEqual([]);
     button(view, "Preview workflow").click(); await settle(view);
-    expect(requests).toHaveLength(1);
-    expect(JSON.parse(requests[0]!.snapshot_json as string).time).toBe("20:00");
+    expect(actions(requests)).toHaveLength(1);
+    expect(JSON.parse(actions(requests)[0]!.snapshot_json as string).time).toBe("20:00");
     expect(text(view)).toContain("Scenario passes"); expect(text(view)).toContain("Trigger 1: Pass");
     expect(text(view)).toContain("Notification — not executed"); expect(text(view)).toContain("Provider calls: 0");
     button(view, "daytime").click(); await settle(view);
@@ -45,7 +48,7 @@ describe("offline workflow editor", () => {
     let resolve!: (value: unknown) => void;
     let calls = 0;
     const listeners = new Map<string, () => void>();
-    const hass: HomeAssistantLike = { user: { id: "admin" }, connection: { connected: true, addEventListener: (name, cb) => { listeners.set(name, cb); }, removeEventListener: (name) => { listeners.delete(name); } }, callWS: <T>() => { calls++; return new Promise<T>((done) => { resolve = done as (value: unknown) => void; }); } };
+    const hass: HomeAssistantLike = { user: { id: "admin" }, connection: { connected: true, addEventListener: (name, cb) => { listeners.set(name, cb); }, removeEventListener: (name) => { listeners.delete(name); } }, callWS: <T>(message: Record<string, unknown>) => { if (message.type === OPTIONS_LOOKUP) return Promise.reject(new Error("no providers")); calls++; return new Promise<T>((done) => { resolve = done as (value: unknown) => void; }); } };
     const view = await mount(hass); button(view, "evening").click(); await settle(view);
     const submit = button(view, "Preview workflow"); submit.click(); submit.click(); await settle(view);
     expect(calls).toBe(1); expect(submit.disabled).toBe(true);
@@ -83,11 +86,11 @@ describe("offline workflow editor", () => {
     view.addEventListener("workflow-saved", (event) => savedEvents.push(event));
     expect(button(view, "Save as workflow").disabled).toBe(true);
     button(view, "evening").click(); await settle(view);
-    expect(requests).toEqual([]);
+    expect(actions(requests)).toEqual([]);
     button(view, "Save as workflow").click(); await settle(view);
-    expect(requests).toHaveLength(1);
-    expect(requests[0]!.type).toBe("ai_orchestrator/workflows/save");
-    expect(JSON.parse(requests[0]!.workflow_json as string).workflow_id).toBe(STORED_WORKFLOW_ID);
+    expect(actions(requests)).toHaveLength(1);
+    expect(actions(requests)[0]!.type).toBe("ai_orchestrator/workflows/save");
+    expect(JSON.parse(actions(requests)[0]!.workflow_json as string).workflow_id).toBe(STORED_WORKFLOW_ID);
     expect(text(view)).toContain("Workflow saved");
     expect(savedEvents).toHaveLength(1);
     expect(JSON.parse(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value).enabled).toBe(false);
@@ -106,6 +109,59 @@ describe("offline workflow editor", () => {
     view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
     expect(JSON.parse(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value)).toEqual(STORED_WORKFLOW);
     expect(text(view)).not.toContain("Scenario passes");
+  });
+  it("dry-runs only a stored workflow with a selected local provider and renders the composed text", async () => {
+    const requests: Record<string, unknown>[] = [];
+    const view = await mount(createRoutedFakeHass({ "ai_orchestrator/chat/options": CHAT_OPTIONS, "ai_orchestrator/workflows/dry_run": DRY_RUN, "ai_orchestrator/workflow/preview": VALID_PREVIEW }, (message) => requests.push(message)));
+    expect(requests.map((m) => m.type)).toEqual(["ai_orchestrator/chat/options"]);
+    expect(dryRunButton(view).disabled).toBe(true);
+    view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
+    expect(dryRunButton(view).disabled).toBe(true);
+    const snapshot = view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!;
+    snapshot.value = JSON.stringify({ states: { "binary_sensor.synthetic_window": "on" }, time: "20:00", event: { kind: "manual" } }); snapshot.dispatchEvent(new Event("input")); await settle(view);
+    expect(dryRunButton(view).disabled).toBe(false);
+    dryRunButton(view).click(); await settle(view);
+    const sent = requests.find((m) => m.type === "ai_orchestrator/workflows/dry_run")!;
+    expect(sent.workflow_id).toBe(STORED_WORKFLOW_ID); expect(sent.connection_id).toBe("12345678-1234-4234-9234-123456789abc");
+    expect(JSON.parse(sent.snapshot_json as string).time).toBe("20:00");
+    expect(text(view)).toContain("Dry run completed — nothing was sent");
+    expect(text(view)).toContain("Please close the window."); expect(text(view)).toContain("Notification — planned, not sent");
+    expect(text(view)).toContain("Provider calls: 1 · Actions executed: 0");
+    snapshot.value = "{}"; snapshot.dispatchEvent(new Event("input")); await settle(view);
+    expect(text(view)).not.toContain("Please close the window.");
+  });
+  it("disables the dry run when no local provider is available and never fails the editor", async () => {
+    const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflow/preview": VALID_PREVIEW }));
+    button(view, "evening").click(); await settle(view);
+    expect(dryRunButton(view).disabled).toBe(true);
+    expect(text(view)).toContain("No local provider available"); expect(text(view)).not.toContain("could not be completed");
+    button(view, "Preview workflow").click(); await settle(view); expect(text(view)).toContain("Scenario passes");
+  });
+  it("maps dry-run failures to static messages without echoing details", async () => {
+    const view = await mount({ callWS: async <T>(message: Record<string, unknown>): Promise<T> => {
+      if (message.type === "ai_orchestrator/chat/options") return structuredClone(CHAT_OPTIONS) as T;
+      throw Object.assign(new Error("private-secret"), { code: "workflow_not_found" });
+    } });
+    view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
+    const snapshot = view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!;
+    snapshot.value = JSON.stringify({ states: {}, time: "20:00", event: { kind: "manual" } }); snapshot.dispatchEvent(new Event("input")); await settle(view);
+    dryRunButton(view).click(); await settle(view);
+    expect(text(view)).toContain("Save the workflow first"); expect(text(view)).not.toContain("private-secret");
+  });
+  it("drops a late dry-run result after the snapshot is edited", async () => {
+    let resolve!: (value: unknown) => void;
+    const view = await mount({ callWS: <T>(message: Record<string, unknown>): Promise<T> => {
+      if (message.type === "ai_orchestrator/chat/options") return Promise.resolve(structuredClone(CHAT_OPTIONS) as T);
+      return new Promise<T>((done) => { resolve = done as (value: unknown) => void; });
+    } });
+    view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
+    const snapshot = view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!;
+    snapshot.value = JSON.stringify({ states: {}, time: "20:00", event: { kind: "manual" } }); snapshot.dispatchEvent(new Event("input")); await settle(view);
+    dryRunButton(view).click(); await settle(view);
+    expect(dryRunButton(view).disabled).toBe(true);
+    snapshot.value = "{}"; snapshot.dispatchEvent(new Event("input")); await settle(view);
+    resolve(DRY_RUN); await settle(view);
+    expect(text(view)).not.toContain("Please close the window."); expect(text(view)).not.toContain("Working…");
   });
   it("fits a 390px container and has accessible controls", async () => {
     const view = await mount(); view.style.width = "390px"; view.style.fontFamily = "Arial, sans-serif";

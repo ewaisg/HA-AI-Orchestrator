@@ -29,11 +29,11 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: ee, getOwnPropertySymbols: te, getPrototypeOf: ne } = Object, f = globalThis, re = f.trustedTypes, ie = re ? re.emptyScript : "", ae = f.reactiveElementPolyfillSupport, p = (e, t) => e, m = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: ee, getOwnPropertyNames: te, getOwnPropertySymbols: ne, getPrototypeOf: re } = Object, d = globalThis, ie = d.trustedTypes, ae = ie ? ie.emptyScript : "", oe = d.reactiveElementPolyfillSupport, f = (e, t) => e, se = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? ie : null;
+				e = e ? ae : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -58,30 +58,30 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, oe = (e, t) => !l(e, t), se = {
+}, ce = (e, t) => !l(e, t), le = {
 	attribute: !0,
 	type: String,
-	converter: m,
+	converter: se,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: oe
+	hasChanged: ce
 };
-Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var h = class extends HTMLElement {
+Symbol.metadata ??= Symbol("metadata"), d.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+var p = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = se) {
+	static createProperty(e, t = le) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
 		}
 	}
 	static getPropertyDescriptor(e, t, n) {
-		let { get: r, set: i } = d(this.prototype, e) ?? {
+		let { get: r, set: i } = ee(this.prototype, e) ?? {
 			get() {
 				return this[t];
 			},
@@ -100,17 +100,17 @@ var h = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? se;
+		return this.elementProperties.get(e) ?? le;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(p("elementProperties"))) return;
-		let e = ne(this);
+		if (this.hasOwnProperty(f("elementProperties"))) return;
+		let e = re(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(p("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(p("properties"))) {
-			let e = this.properties, t = [...ee(e), ...te(e)];
+		if (this.hasOwnProperty(f("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(f("properties"))) {
+			let e = this.properties, t = [...te(e), ...ne(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
 		let e = this[Symbol.metadata];
@@ -171,14 +171,14 @@ var h = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? m : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? se : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? m : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? se : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var h = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? oe)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? ce)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,28 +251,28 @@ var h = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-h.elementStyles = [], h.shadowRootOptions = { mode: "open" }, h[p("elementProperties")] = /* @__PURE__ */ new Map(), h[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: h }), (f.reactiveElementVersions ??= []).push("2.1.2");
+p.elementStyles = [], p.shadowRootOptions = { mode: "open" }, p[f("elementProperties")] = /* @__PURE__ */ new Map(), p[f("finalized")] = /* @__PURE__ */ new Map(), oe?.({ ReactiveElement: p }), (d.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var g = globalThis, ce = (e) => e, _ = g.trustedTypes, le = _ ? _.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ue = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, de = "?" + v, fe = `<${de}>`, y = document, b = () => y.createComment(""), x = (e) => e === null || typeof e != "object" && typeof e != "function", pe = Array.isArray, me = (e) => pe(e) || typeof e?.[Symbol.iterator] == "function", he = "[ 	\n\f\r]", S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ge = /-->/g, _e = />/g, C = RegExp(`>|${he}(?:([^\\s"'>=/]+)(${he}*=${he}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ve = /'/g, ye = /"/g, be = /^(?:script|style|textarea|title)$/i, w = ((e) => (t, ...n) => ({
+var m = globalThis, ue = (e) => e, h = m.trustedTypes, de = h ? h.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + g, me = `<${pe}>`, _ = document, v = () => _.createComment(""), y = (e) => e === null || typeof e != "object" && typeof e != "function", b = Array.isArray, he = (e) => b(e) || typeof e?.[Symbol.iterator] == "function", x = "[ 	\n\f\r]", S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ge = /-->/g, _e = />/g, C = RegExp(`>|${x}(?:([^\\s"'>=/]+)(${x}*=${x}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ve = /'/g, ye = /"/g, be = /^(?:script|style|textarea|title)$/i, w = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), T = Symbol.for("lit-noChange"), E = Symbol.for("lit-nothing"), xe = /* @__PURE__ */ new WeakMap(), D = y.createTreeWalker(y, 129);
+}))(1), T = Symbol.for("lit-noChange"), E = Symbol.for("lit-nothing"), xe = /* @__PURE__ */ new WeakMap(), D = _.createTreeWalker(_, 129);
 function Se(e, t) {
-	if (!pe(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return le === void 0 ? t : le.createHTML(t);
+	if (!b(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return de === void 0 ? t : de.createHTML(t);
 }
 var Ce = (e, t) => {
 	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = S;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
 		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === S ? c[1] === "!--" ? o = ge : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = C) : (be.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = C) : o = _e : o === C ? c[0] === ">" ? (o = i ?? S, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? C : c[3] === "\"" ? ye : ve) : o === ye || o === ve ? o = C : o === ge || o === _e ? o = S : (o = C, i = void 0);
-		let d = o === C && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === S ? n + fe : l >= 0 ? (r.push(s), n.slice(0, l) + ue + n.slice(l) + v + d) : n + v + (l === -2 ? t : d);
+		let ee = o === C && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === S ? n + me : l >= 0 ? (r.push(s), n.slice(0, l) + fe + n.slice(l) + g + ee) : n + g + (l === -2 ? t : ee);
 	}
 	return [Se(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, O = class e {
+}, we = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
@@ -283,57 +283,57 @@ var Ce = (e, t) => {
 		}
 		for (; (i = D.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(ue)) {
-					let t = u[o++], n = i.getAttribute(e).split(v), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(fe)) {
+					let t = u[o++], n = i.getAttribute(e).split(g), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? Te : r[1] === "?" ? Ee : r[1] === "@" ? De : j
+						ctor: r[1] === "." ? De : r[1] === "?" ? Oe : r[1] === "@" ? ke : k
 					}), i.removeAttribute(e);
-				} else e.startsWith(v) && (c.push({
+				} else e.startsWith(g) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
 				if (be.test(i.tagName)) {
-					let e = i.textContent.split(v), t = e.length - 1;
+					let e = i.textContent.split(g), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = _ ? _.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], b()), D.nextNode(), c.push({
+						i.textContent = h ? h.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], v()), D.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], b());
+						i.append(e[t], v());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === de) c.push({
+				if (i.data === pe) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(v, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(g, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += v.length - 1;
+					}), e += g.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = y.createElement("template");
+		let n = _.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function k(e, t, n = e, r) {
+function O(e, t, n = e, r) {
 	if (t === T) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = x(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = k(e, i._$AS(e, t.values), i, r)), t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = y(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = O(e, i._$AS(e, t.values), i, r)), t;
 }
-var we = class {
+var Te = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,23 +344,23 @@ var we = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? y).importNode(t, !0);
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? _).importNode(t, !0);
 		D.currentNode = r;
 		let i = D.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new A(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Oe(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new Ee(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ae(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
 			a !== s?.index && (i = D.nextNode(), a++);
 		}
-		return D.currentNode = y, r;
+		return D.currentNode = _, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, A = class e {
+}, Ee = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
@@ -378,7 +378,7 @@ var we = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = k(this, e, t), x(e) ? e === E || e == null || e === "" ? (this._$AH !== E && this._$AR(), this._$AH = E) : e !== this._$AH && e !== T && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? me(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = O(this, e, t), y(e) ? e === E || e == null || e === "" ? (this._$AH !== E && this._$AR(), this._$AH = E) : e !== this._$AH && e !== T && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var we = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== E && x(this._$AH) ? this._$AA.nextSibling.data = e : this.T(y.createTextNode(e)), this._$AH = e;
+		this._$AH !== E && y(this._$AH) ? this._$AA.nextSibling.data = e : this.T(_.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = O.createElement(Se(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = we.createElement(Se(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new we(r, this), n = e.u(this.options);
+			let e = new Te(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
 		let t = xe.get(e.strings);
-		return t === void 0 && xe.set(e.strings, t = new O(e)), t;
+		return t === void 0 && xe.set(e.strings, t = new we(e)), t;
 	}
 	k(t) {
-		pe(this._$AH) || (this._$AH = [], this._$AR());
+		b(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(b()), this.O(b()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(v()), this.O(v()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = ce(e).nextSibling;
-			ce(e).remove(), e = t;
+			let t = ue(e).nextSibling;
+			ue(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, j = class {
+}, k = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -428,43 +428,43 @@ var we = class {
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = k(this, e, t, 0), a = !x(e) || e !== this._$AH && e !== T, a && (this._$AH = e);
+		if (i === void 0) e = O(this, e, t, 0), a = !y(e) || e !== this._$AH && e !== T, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = k(this, r[n + o], t, o), s === T && (s = this._$AH[o]), a ||= !x(s) || s !== this._$AH[o], s === E ? e = E : e !== E && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = O(this, r[n + o], t, o), s === T && (s = this._$AH[o]), a ||= !y(s) || s !== this._$AH[o], s === E ? e = E : e !== E && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
 		e === E ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, Te = class extends j {
+}, De = class extends k {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
 		this.element[this.name] = e === E ? void 0 : e;
 	}
-}, Ee = class extends j {
+}, Oe = class extends k {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
 		this.element.toggleAttribute(this.name, !!e && e !== E);
 	}
-}, De = class extends j {
+}, ke = class extends k {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = k(this, e, t, 0) ?? E) === T) return;
+		if ((e = O(this, e, t, 0) ?? E) === T) return;
 		let n = this._$AH, r = e === E && n !== E || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== E && (n === E || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Oe = class {
+}, Ae = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var we = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		k(this, e);
+		O(this, e);
 	}
-}, ke = g.litHtmlPolyfillSupport;
-ke?.(O, A), (g.litHtmlVersions ??= []).push("3.3.3");
-var Ae = (e, t, n) => {
+}, je = m.litHtmlPolyfillSupport;
+je?.(we, Ee), (m.litHtmlVersions ??= []).push("3.3.3");
+var Me = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new A(t.insertBefore(b(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new Ee(t.insertBefore(v(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, M = globalThis, N = class extends h {
+}, A = globalThis, j = class extends p {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var Ae = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ae(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Me(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -505,36 +505,36 @@ var Ae = (e, t, n) => {
 		return T;
 	}
 };
-N._$litElement$ = !0, N.finalized = !0, M.litElementHydrateSupport?.({ LitElement: N });
-var je = M.litElementPolyfillSupport;
-je?.({ LitElement: N }), (M.litElementVersions ??= []).push("4.2.2");
+j._$litElement$ = !0, j.finalized = !0, A.litElementHydrateSupport?.({ LitElement: j });
+var Ne = A.litElementPolyfillSupport;
+Ne?.({ LitElement: j }), (A.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var Me = Object.freeze({ type: "ai_orchestrator/status" }), P = [
+var Pe = Object.freeze({ type: "ai_orchestrator/status" }), M = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], F = class extends Error {
+], N = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function I(e) {
+function P(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Ne(e, t) {
+function Fe(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Pe(e) {
-	if (!I(e) || !Ne(e, [
+function Ie(e) {
+	if (!P(e) || !Fe(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !I(e.features) || !Ne(e.features, P)) throw new F();
+	]) || !P(e.features) || !Fe(e.features, M)) throw new N();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || P.some((e) => typeof t[e] != "boolean")) throw new F();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || M.some((e) => typeof t[e] != "boolean")) throw new N();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,30 +547,30 @@ function Pe(e) {
 		}
 	};
 }
-async function Fe(e) {
-	return Pe(await e.callWS({ ...Me }));
+async function Le(e) {
+	return Ie(await e.callWS({ ...Pe }));
 }
-function Ie(e) {
-	return I(e) && e.code === "unauthorized";
+function Re(e) {
+	return P(e) && e.code === "unauthorized";
 }
 //#endregion
 //#region src/api/workflow-probe-client.ts
-var Le = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Re = class extends Error {
+var ze = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Be = class extends Error {
 	constructor() {
 		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
 	}
 };
-function ze(e) {
+function Ve(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Be(e, t) {
+function He(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Ve(e) {
+function Ue(e) {
 	return typeof e == "number" && Number.isInteger(e) && e > 0;
 }
-function He(e) {
-	if (!ze(e) || !Be(e, [
+function We(e) {
+	if (!Ve(e) || !He(e, [
 		"schema_version",
 		"workflow_id",
 		"trigger_type",
@@ -579,15 +579,15 @@ function He(e) {
 		"registration_count",
 		"provider_contacted",
 		"home_assistant_action_called"
-	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ve(e.execution_count) || e.executions_for_trigger !== 1 || !Ve(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Re();
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ue(e.execution_count) || e.executions_for_trigger !== 1 || !Ue(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Be();
 	return e;
 }
-async function Ue(e) {
-	return He(await e.callWS({ ...Le }));
+async function Ge(e) {
+	return We(await e.callWS({ ...ze }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var We = o`
+var Ke = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1334,45 +1334,45 @@ var We = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Ge = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Ke = [
+`, qe = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Je = [
 	"available",
 	"unavailable",
 	"not_loaded"
-], qe = ["entity", "device"], L = 1e4;
-function R(e) {
+], Ye = ["entity", "device"], F = 1e4;
+function I(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function z(e, t) {
+function L(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function B(e) {
+function R(e) {
 	return e === null || typeof e == "string";
 }
-function V(e) {
+function z(e) {
 	return typeof e == "string" && e.length > 0 && e.length <= 255;
 }
-function Je(e) {
-	if (!Array.isArray(e) || e.length > L) throw Error("Invalid area catalogue");
+function Xe(e) {
+	if (!Array.isArray(e) || e.length > F) throw Error("Invalid area catalogue");
 	return e.map((e) => {
-		if (!R(e) || !z(e, ["area_id", "name"]) || !V(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
+		if (!I(e) || !L(e, ["area_id", "name"]) || !z(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
 		return {
 			area_id: e.area_id,
 			name: e.name
 		};
 	});
 }
-function Ye(e) {
-	if (!Array.isArray(e) || e.length > L) throw Error("Invalid device catalogue");
+function Ze(e) {
+	if (!Array.isArray(e) || e.length > F) throw Error("Invalid device catalogue");
 	return e.map((e) => {
-		if (!R(e) || !z(e, [
+		if (!I(e) || !L(e, [
 			"device_id",
 			"name",
 			"area_id",
 			"manufacturer",
 			"model",
 			"disabled"
-		]) || !V(e.device_id) || !B(e.name) || e.area_id !== null && !V(e.area_id) || !B(e.manufacturer) || !B(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
+		]) || !z(e.device_id) || !R(e.name) || e.area_id !== null && !z(e.area_id) || !R(e.manufacturer) || !R(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
 		return {
 			device_id: e.device_id,
 			name: e.name,
@@ -1383,10 +1383,10 @@ function Ye(e) {
 		};
 	});
 }
-function Xe(e) {
-	if (!Array.isArray(e) || e.length > L) throw Error("Invalid entity catalogue");
+function Qe(e) {
+	if (!Array.isArray(e) || e.length > F) throw Error("Invalid entity catalogue");
 	return e.map((e) => {
-		if (!R(e) || !z(e, [
+		if (!I(e) || !L(e, [
 			"registry_id",
 			"entity_id",
 			"domain",
@@ -1397,7 +1397,7 @@ function Xe(e) {
 			"area_source",
 			"disabled",
 			"availability"
-		]) || !V(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !V(e.platform) || !B(e.name) || e.device_id !== null && !V(e.device_id) || e.area_id !== null && !V(e.area_id) || e.area_source !== null && !qe.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Ke.includes(e.availability)) throw Error("Invalid entity entry");
+		]) || !z(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !z(e.platform) || !R(e.name) || e.device_id !== null && !z(e.device_id) || e.area_id !== null && !z(e.area_id) || e.area_source !== null && !Ye.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Je.includes(e.availability)) throw Error("Invalid entity entry");
 		return {
 			registry_id: e.registry_id,
 			entity_id: e.entity_id,
@@ -1412,8 +1412,8 @@ function Xe(e) {
 		};
 	});
 }
-function Ze(e) {
-	if (!R(e) || !z(e, [
+function $e(e) {
+	if (!I(e) || !L(e, [
 		"schema_version",
 		"areas",
 		"devices",
@@ -1421,17 +1421,17 @@ function Ze(e) {
 	]) || e.schema_version !== 1) throw Error("Invalid catalogue response");
 	return {
 		schema_version: 1,
-		areas: Je(e.areas),
-		devices: Ye(e.devices),
-		entities: Xe(e.entities)
+		areas: Xe(e.areas),
+		devices: Ze(e.devices),
+		entities: Qe(e.entities)
 	};
 }
-async function Qe(e) {
-	return Ze(await e.callWS({ ...Ge }));
+async function et(e) {
+	return $e(await e.callWS({ ...qe }));
 }
 //#endregion
 //#region src/panel/catalog-view.ts
-var $e = class extends N {
+var tt = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		_state: { state: !0 },
@@ -1561,7 +1561,7 @@ var $e = class extends N {
 		if (this.hass !== void 0) {
 			this._hasLoaded = !0, this._state = "loading";
 			try {
-				this._catalog = await Qe(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
+				this._catalog = await et(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
 			} catch {
 				this._catalog = void 0, this._state = "error";
 			}
@@ -1572,13 +1572,13 @@ var $e = class extends N {
 			this._loadScheduled = !1, this._load();
 		}));
 	}
-}, et = Object.freeze({ type: "ai_orchestrator/providers/list" }), tt = [
+}, nt = Object.freeze({ type: "ai_orchestrator/providers/list" }), rt = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], nt = [
+], it = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1595,37 +1595,37 @@ var $e = class extends N {
 	"unsupported",
 	"unknown"
 ];
-function H(e) {
+function at(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function U(e, t) {
+function ot(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function rt(e) {
+function st(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
 }
-function it(e) {
-	return typeof e == "string" && tt.includes(e);
+function ct(e) {
+	return typeof e == "string" && rt.includes(e);
 }
-function at(e) {
-	return typeof e == "string" && nt.includes(e);
+function lt(e) {
+	return typeof e == "string" && it.includes(e);
 }
-function ot(e) {
+function ut(e) {
 	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
 }
-function st(e) {
-	if (!H(e) || !U(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+function dt(e) {
+	if (!at(e) || !ot(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!H(n) || !U(n, [
+		if (!at(n) || !ot(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
 			"health",
 			"last_tested_at"
-		]) || !rt(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !it(n.health) || n.last_tested_at !== null && !ot(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
+		]) || !st(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ct(n.health) || n.last_tested_at !== null && !ut(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
@@ -1640,14 +1640,14 @@ function st(e) {
 		providers: t
 	};
 }
-function ct(e, t) {
-	if (!H(e) || !U(e, [
+function ft(e, t) {
+	if (!at(e) || !ot(e, [
 		"schema_version",
 		"connection_id",
 		"health",
 		"error_code",
 		"last_tested_at"
-	]) || e.schema_version !== 1 || !rt(e.connection_id) || t !== void 0 && e.connection_id !== t || !it(e.health) || e.error_code !== null && !at(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !ot(e.last_tested_at)) throw Error("Invalid provider test response");
+	]) || e.schema_version !== 1 || !st(e.connection_id) || t !== void 0 && e.connection_id !== t || !ct(e.health) || e.error_code !== null && !lt(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !ut(e.last_tested_at)) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
@@ -1656,18 +1656,18 @@ function ct(e, t) {
 		last_tested_at: e.last_tested_at
 	};
 }
-async function lt(e) {
-	return st(await e.callWS({ ...et }));
+async function pt(e) {
+	return dt(await e.callWS({ ...nt }));
 }
-async function ut(e, t) {
-	return ct(await e.callWS({
+async function mt(e, t) {
+	return ft(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var dt = "/config/integrations/integration/ai_orchestrator", ft = {
+var ht = "/config/integrations/integration/ai_orchestrator", gt = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1683,13 +1683,13 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, pt = {
+}, _t = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, mt = class extends N {
+}, vt = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1903,11 +1903,11 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${dt}>Add provider connection</a>
+          <a class="primary-link" href=${ht}>Add provider connection</a>
         </div>
       ` : w`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${dt}>Manage provider connections</a>
+        <a class="primary-link" href=${ht}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1923,7 +1923,7 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${pt[r]}</span>
+          <span class="state-badge ${r}">${_t[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
         <p class="provider-meta">
@@ -1958,7 +1958,7 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = ft[t.error_code ?? "unknown"] ?? "Test failed";
+			let e = gt[t.error_code ?? "unknown"] ?? "Test failed";
 			return w`<span
         class="test-result ${t.health}"
         role="status"
@@ -1972,7 +1972,7 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await lt(e);
+				let t = await pt(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1989,7 +1989,7 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
 		if (t !== void 0 && this._testStates.get(e) !== "checking") {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await ut(t, e);
+				let n = await mt(t, e);
 				this._providers = this._providers.map((t) => t.connection_id === e ? {
 					...t,
 					health: n.health,
@@ -2002,24 +2002,24 @@ var dt = "/config/integrations/integration/ai_orchestrator", ft = {
 			}
 		}
 	}
-}, W = Object.freeze({
+}, B = Object.freeze({
 	max_messages: 21,
 	max_message_chars: 4e3,
 	max_total_chars: 16e3,
 	max_response_chars: 4e3,
 	timeout_seconds: 60
-}), G = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-function K(e) {
+}), yt = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function V(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function q(e, t) {
+function H(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function J(e, t) {
+function U(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function ht(e) {
-	if (!K(e) || !q(e, [
+function bt(e) {
+	if (!V(e) || !H(e, [
 		"schema_version",
 		"providers",
 		"limits",
@@ -2027,20 +2027,20 @@ function ht(e) {
 		"household_context",
 		"actions",
 		"history_persisted"
-	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !K(e.limits) || !q(e.limits, Object.keys(W))) throw Error("Unsupported chat options");
+	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !V(e.limits) || !H(e.limits, Object.keys(B))) throw Error("Unsupported chat options");
 	let t = e.limits;
-	if (Object.entries(W).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
+	if (Object.entries(B).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
 	let n = /* @__PURE__ */ new Set();
 	return {
 		schema_version: 1,
 		providers: e.providers.map((e) => {
-			if (!K(e) || !q(e, [
+			if (!V(e) || !H(e, [
 				"connection_id",
 				"title",
 				"display_name",
 				"destination",
 				"capability_verified"
-			]) || typeof e.connection_id != "string" || !G.test(e.connection_id) || !J(e.title, 1e3) || !J(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
+			]) || typeof e.connection_id != "string" || !yt.test(e.connection_id) || !U(e.title, 1e3) || !U(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
 			return n.add(e.connection_id), {
 				connection_id: e.connection_id,
 				title: e.title,
@@ -2049,22 +2049,22 @@ function ht(e) {
 				capability_verified: !1
 			};
 		}),
-		limits: W,
+		limits: B,
 		streaming: !1,
 		household_context: !1,
 		actions: !1,
 		history_persisted: !1
 	};
 }
-function gt(e, t, n) {
-	if (!K(e) || !q(e, [
+function xt(e, t, n) {
+	if (!V(e) || !H(e, [
 		"schema_version",
 		"connection_id",
 		"request_id",
 		"text",
 		"destination",
 		"streaming"
-	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !J(e.text, W.max_response_chars)) throw Error("Unsupported chat response");
+	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !U(e.text, B.max_response_chars)) throw Error("Unsupported chat response");
 	return {
 		schema_version: 1,
 		connection_id: t,
@@ -2074,18 +2074,18 @@ function gt(e, t, n) {
 		streaming: !1
 	};
 }
-async function _t(e) {
-	return ht(await e.callWS({ type: "ai_orchestrator/chat/options" }));
+async function St(e) {
+	return bt(await e.callWS({ type: "ai_orchestrator/chat/options" }));
 }
-function vt() {
+function Ct() {
 	let e = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
 	e[6] = e[6] & 15 | 64, e[8] = e[8] & 63 | 128;
 	let t = [...e].map((e) => e.toString(16).padStart(2, "0")).join("");
 	return `${t.slice(0, 8)}-${t.slice(8, 12)}-${t.slice(12, 16)}-${t.slice(16, 20)}-${t.slice(20)}`;
 }
-async function yt(e, t, n, r) {
-	if (!G.test(t) || !G.test(n) || r.length === 0 || r.length > W.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !J(e.content, W.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > W.max_total_chars) throw Error("Invalid chat request");
-	return gt(await e.callWS({
+async function wt(e, t, n, r) {
+	if (!yt.test(t) || !yt.test(n) || r.length === 0 || r.length > B.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !U(e.content, B.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > B.max_total_chars) throw Error("Invalid chat request");
+	return xt(await e.callWS({
 		type: "ai_orchestrator/chat/send",
 		connection_id: t,
 		request_id: n,
@@ -2095,12 +2095,12 @@ async function yt(e, t, n, r) {
 		}))
 	}), t, n);
 }
-function bt(e, t) {
+function Tt(e, t) {
 	let n = [...e.map((e) => ({ ...e })), {
 		role: "user",
 		content: t
 	}], r = !1;
-	for (; n.length > 1 && (n.length > W.max_messages || n.reduce((e, t) => e + t.content.length, 0) > W.max_total_chars);) n.splice(0, 2), r = !0;
+	for (; n.length > 1 && (n.length > B.max_messages || n.reduce((e, t) => e + t.content.length, 0) > B.max_total_chars);) n.splice(0, 2), r = !0;
 	return {
 		messages: n,
 		omitted: r
@@ -2108,7 +2108,7 @@ function bt(e, t) {
 }
 //#endregion
 //#region src/panel/chat-view.ts
-var xt = "ai-orchestrator-chat-view", St = {
+var Et = "ai-orchestrator-chat-view", Dt = {
 	unauthorized: "Administrator access is required for chat.",
 	chat_busy: "A request is still running. Wait a moment, then send again.",
 	chat_duplicate_request: "This request was already submitted. Start a new request to retry.",
@@ -2119,7 +2119,7 @@ var xt = "ai-orchestrator-chat-view", St = {
 	chat_connection: "Home Assistant could not reach the local provider.",
 	chat_not_found: "The configured model is not available. Check provider settings.",
 	chat_unsupported: "This provider does not support the requested text generation."
-}, Ct = class extends N {
+}, Ot = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		_options: { state: !0 },
@@ -2240,7 +2240,7 @@ var xt = "ai-orchestrator-chat-view", St = {
 		let t = ++this._loadSequence;
 		this._loading = !0, this._error = "";
 		try {
-			let n = await _t(e);
+			let n = await St(e);
 			if (t !== this._loadSequence || !this.isConnected) return;
 			this._options = n, n.providers.some((e) => e.connection_id === this._connectionId) || (this._sequence += 1, this._history = [], this._draft = "", this._notice = "", this._connectionId = n.providers[0]?.connection_id ?? "");
 		} catch {
@@ -2253,11 +2253,11 @@ var xt = "ai-orchestrator-chat-view", St = {
 	async _send(e) {
 		e?.preventDefault();
 		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
-		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > W.max_message_chars || this.hass?.connection?.connected === !1) return;
-		let i = bt(this._history, n), a = ++this._sequence, o = this._connectionId;
+		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > B.max_message_chars || this.hass?.connection?.connected === !1) return;
+		let i = Tt(this._history, n), a = ++this._sequence, o = this._connectionId;
 		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
 		try {
-			let e = await yt(t, o, vt(), i.messages);
+			let e = await wt(t, o, Ct(), i.messages);
 			if (a !== this._sequence || !this.isConnected) return;
 			this._history = [...i.messages, {
 				role: "assistant",
@@ -2268,7 +2268,7 @@ var xt = "ai-orchestrator-chat-view", St = {
 		} catch (e) {
 			if (a !== this._sequence || !this.isConnected) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = St[t] ?? "The reply could not be completed. Your message is ready to try again.";
+			this._error = Dt[t] ?? "The reply could not be completed. Your message is ready to try again.";
 		} finally {
 			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
 		}
@@ -2323,7 +2323,7 @@ var xt = "ai-orchestrator-chat-view", St = {
       ${this._notice ? w`<p class="notice" role="status">${this._notice}</p>` : E}
       <form class="compose" @submit=${(e) => void this._send(e)}>
         <label for="message">Your message</label>
-        <textarea id="message" rows="1" maxlength=${W.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${B.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
           @input=${(e) => {
 			let t = e.target;
@@ -2332,12 +2332,12 @@ var xt = "ai-orchestrator-chat-view", St = {
           @keydown=${(e) => {
 			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
 		}}></textarea>
-        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${W.max_message_chars} · Ctrl/⌘ + Enter to send</span>
+        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${B.max_message_chars} · Ctrl/⌘ + Enter to send</span>
           <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !e || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>
       </form>
     </div>`;
 	}
-}, wt = 131072, Tt = {
+}, kt = 131072, W = {
 	matched: "Matched",
 	event_kind_mismatch: "Event type did not match",
 	state_unchanged: "State did not change",
@@ -2349,25 +2349,25 @@ var xt = "ai-orchestrator-chat-view", St = {
 	state_mismatch: "State did not match",
 	state_not_numeric: "State is not numeric",
 	outside_numeric_bounds: "Outside numeric bounds"
-}, Y = class extends Error {
+}, G = class extends Error {
 	constructor() {
 		super("Workflow preview response is unsupported.");
 	}
 };
-function Et(e) {
+function At(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Dt(e, t) {
+function jt(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Ot(e, t, n) {
-	return Array.isArray(e) && e.length <= t && e.every((e, t) => Et(e) && Dt(e, [
+function K(e, t, n) {
+	return Array.isArray(e) && e.length <= t && e.every((e, t) => At(e) && jt(e, [
 		"index",
 		"passed",
 		"reason"
 	]) && e.index === t && typeof e.passed == "boolean" && typeof e.reason == "string" && n.includes(e.reason) && e.passed === (e.reason === "matched"));
 }
-var kt = [
+var Mt = [
 	"mode",
 	"enabled",
 	"triggered",
@@ -2379,70 +2379,70 @@ var kt = [
 	"provider_calls",
 	"actions_executed"
 ];
-function At(e, t, n) {
-	return Et(e) && Dt(e, n ? ["schema_version", ...kt] : kt) && (!n || e.schema_version === 1) && e.mode === t;
+function Nt(e, t, n) {
+	return At(e) && jt(e, n ? ["schema_version", ...Mt] : Mt) && (!n || e.schema_version === 1) && e.mode === t;
 }
-function jt(e) {
-	if (!At(e, "observation_only", !1)) throw new Y();
-	return Nt(e);
+function Pt(e) {
+	if (!Nt(e, "observation_only", !1)) throw new G();
+	return It(e);
 }
-function Mt(e) {
-	if (!At(e, "offline", !0)) throw new Y();
-	return Nt(e);
+function Ft(e) {
+	if (!Nt(e, "offline", !0)) throw new G();
+	return It(e);
 }
-function Nt(e) {
-	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !Ot(e.trigger_results, 10, [
+function It(e) {
+	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !K(e.trigger_results, 10, [
 		"matched",
 		"event_kind_mismatch",
 		"state_unchanged",
 		"entity_not_selected",
 		"target_state_mismatch",
 		"time_mismatch"
-	]) || !Ot(e.condition_results, 20, [
+	]) || !K(e.condition_results, 20, [
 		"matched",
 		"outside_time_window",
 		"state_unavailable",
 		"state_mismatch",
 		"state_not_numeric",
 		"outside_numeric_bounds"
-	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Et(e) && Dt(e, ["index", "kind"]) && e.index === t && [
+	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => At(e) && jt(e, ["index", "kind"]) && e.index === t && [
 		"ai_compose",
 		"ai_classify",
 		"notify"
-	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new Y();
+	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new G();
 	return e;
 }
-async function Pt(e, t, n) {
-	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new Y();
-	return Mt(await e.callWS({
+async function Lt(e, t, n) {
+	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new G();
+	return Ft(await e.callWS({
 		type: "ai_orchestrator/workflow/preview",
 		workflow_json: t,
 		snapshot_json: n
 	}));
 }
-var Ft = [
+var Rt = [
 	"ready",
 	"unreadable",
 	"not_loaded"
-], It = ["activation_failed", "cleanup_failed"], X = class extends Error {
+], zt = ["activation_failed", "cleanup_failed"], q = class extends Error {
 	constructor() {
 		super("The workflow response does not match the supported contract."), this.name = "WorkflowContractError";
 	}
-}, Lt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-function Z(e) {
+}, Bt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function J(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Q(e, t) {
+function Y(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Rt(e, t) {
-	return Array.isArray(e) && e.length <= t && e.every(Z);
+function Vt(e, t) {
+	return Array.isArray(e) && e.length <= t && e.every(J);
 }
-function zt(e) {
+function Ht(e) {
 	return Number.isSafeInteger(e) && e >= 0;
 }
-function Bt(e) {
-	if (!Z(e) || !Q(e, [
+function Ut(e) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"workflow_id",
 		"name",
@@ -2451,7 +2451,7 @@ function Bt(e) {
 		"triggers",
 		"conditions",
 		"steps"
-	]) || e.schema_version !== 1 || typeof e.workflow_id != "string" || !Lt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Rt(e.triggers, 10) || !Rt(e.conditions, 20) || !Rt(e.steps, 25)) throw new X();
+	]) || e.schema_version !== 1 || typeof e.workflow_id != "string" || !Bt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Vt(e.triggers, 10) || !Vt(e.conditions, 20) || !Vt(e.steps, 25)) throw new q();
 	return {
 		schema_version: 1,
 		workflow_id: e.workflow_id,
@@ -2463,20 +2463,20 @@ function Bt(e) {
 		steps: e.steps
 	};
 }
-function Vt(e) {
-	if (!Z(e) || !Q(e, [
+function Wt(e) {
+	if (!J(e) || !Y(e, [
 		"active",
 		"observations",
 		"ignored_events",
 		"registrations",
 		"latest",
 		"error"
-	]) || typeof e.active != "boolean" || !zt(e.observations) || !zt(e.ignored_events) || !zt(e.registrations) || e.error !== null && !It.includes(e.error) || e.active && e.error !== null) throw new X();
+	]) || typeof e.active != "boolean" || !Ht(e.observations) || !Ht(e.ignored_events) || !Ht(e.registrations) || e.error !== null && !zt.includes(e.error) || e.active && e.error !== null) throw new q();
 	let t = null;
 	if (e.latest !== null) try {
-		t = jt(e.latest);
+		t = Pt(e.latest);
 	} catch {
-		throw new X();
+		throw new q();
 	}
 	return {
 		active: e.active,
@@ -2487,87 +2487,175 @@ function Vt(e) {
 		error: e.error
 	};
 }
-function Ht(e) {
-	if (!Array.isArray(e) || e.length > 50) throw new X();
+function Gt(e) {
+	if (!Array.isArray(e) || e.length > 50) throw new q();
 	let t = /* @__PURE__ */ new Set();
 	return e.map((e) => {
-		if (!Z(e) || !Q(e, ["workflow", "status"])) throw new X();
-		let n = Bt(e.workflow);
-		if (t.has(n.workflow_id)) throw new X();
+		if (!J(e) || !Y(e, ["workflow", "status"])) throw new q();
+		let n = Ut(e.workflow);
+		if (t.has(n.workflow_id)) throw new q();
 		return t.add(n.workflow_id), {
 			workflow: n,
-			status: Vt(e.status)
+			status: Wt(e.status)
 		};
 	});
 }
-function Ut(e) {
-	if (!Z(e) || !Q(e, [
+function X(e) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"store",
 		"workflows"
-	]) || e.schema_version !== 1 || !Ft.includes(e.store)) throw new X();
-	let t = Ht(e.workflows);
-	if (e.store !== "ready" && t.length > 0) throw new X();
+	]) || e.schema_version !== 1 || !Rt.includes(e.store)) throw new q();
+	let t = Gt(e.workflows);
+	if (e.store !== "ready" && t.length > 0) throw new q();
 	return {
 		schema_version: 1,
 		store: e.store,
 		workflows: t
 	};
 }
-function Wt(e, t) {
-	if (!Z(e) || !Object.hasOwn(e, "workflow")) throw new X();
-	let { workflow: n, ...r } = e, i = Bt(n);
-	if (t !== void 0 && i.workflow_id !== t) throw new X();
-	let a = Ut(r);
-	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new X();
+function Kt(e, t) {
+	if (!J(e) || !Object.hasOwn(e, "workflow")) throw new q();
+	let { workflow: n, ...r } = e, i = Ut(n);
+	if (t !== void 0 && i.workflow_id !== t) throw new q();
+	let a = X(r);
+	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new q();
 	return {
 		...a,
 		workflow: i
 	};
 }
-async function Gt(e) {
-	return Ut(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
+async function qt(e) {
+	return X(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
 }
-async function Kt(e, t) {
-	if (!t.trim() || t.length > 131072) throw new X();
-	return Wt(await e.callWS({
+async function Jt(e, t) {
+	if (!t.trim() || t.length > 131072) throw new q();
+	return Kt(await e.callWS({
 		type: "ai_orchestrator/workflows/save",
 		workflow_json: t
 	}));
 }
-async function qt(e, t, n) {
-	let r = Wt(await e.callWS({
+async function Yt(e, t, n) {
+	let r = Kt(await e.callWS({
 		type: "ai_orchestrator/workflows/set_enabled",
 		workflow_id: t,
 		enabled: n
 	}), t);
-	if (r.workflow.enabled !== n) throw new X();
+	if (r.workflow.enabled !== n) throw new q();
 	return r;
 }
-async function Jt(e, t) {
-	let n = Ut(await e.callWS({
+async function Xt(e, t) {
+	let n = X(await e.callWS({
 		type: "ai_orchestrator/workflows/delete",
 		workflow_id: t
 	}));
-	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new X();
+	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new q();
 	return n;
 }
-async function Yt(e, t) {
+async function Zt(e, t) {
 	let n = await e.callWS({
 		type: "ai_orchestrator/workflows/run_manual",
 		workflow_id: t
 	});
-	if (!Z(n) || n.schema_version !== 1) throw new X();
+	if (!J(n) || n.schema_version !== 1) throw new q();
 	let r = Object.fromEntries(Object.entries(n).filter(([e]) => e !== "schema_version"));
 	try {
-		return jt(r);
+		return Pt(r);
 	} catch {
-		throw new X();
+		throw new q();
 	}
+}
+var Qt = [
+	"ok",
+	"planned",
+	"failed",
+	"skipped"
+], $t = [
+	"ai_compose",
+	"ai_classify",
+	"notify"
+], en = {
+	invalid_output: "The model reply did not match the required shape",
+	timeout: "The provider took too long to reply",
+	provider_failed: "The provider request failed"
+}, Z = class extends Error {
+	constructor() {
+		super("Workflow dry-run response is unsupported.");
+	}
+}, tn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, nn = /^[a-z][a-z0-9_]{0,63}$/u, rn = [
+	"schema_version",
+	"mode",
+	"workflow_id",
+	"destination",
+	"triggered",
+	"conditions_passed",
+	"eligible",
+	"trigger_results",
+	"condition_results",
+	"steps",
+	"provider_calls",
+	"actions_executed",
+	"completed"
+], an = [
+	"matched",
+	"event_kind_mismatch",
+	"state_unchanged",
+	"entity_not_selected",
+	"target_state_mismatch",
+	"time_mismatch"
+], on = [
+	"matched",
+	"outside_time_window",
+	"state_unavailable",
+	"state_mismatch",
+	"state_not_numeric",
+	"outside_numeric_bounds"
+];
+function sn(e) {
+	return typeof e == "object" && !!e && !Array.isArray(e);
+}
+function Q(e, t) {
+	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
+}
+function $(e, t) {
+	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
+}
+function cn(e, t) {
+	if (!sn(e) || e.index !== t || !$(e.step_id, 64) || !nn.test(e.step_id) || !$t.includes(e.kind) || typeof e.executed != "boolean" || !Qt.includes(e.status)) return !1;
+	let n = [
+		"index",
+		"step_id",
+		"kind",
+		"executed",
+		"status"
+	], r = e.kind !== "notify";
+	switch (e.status) {
+		case "ok": return !r || e.executed !== !0 ? !1 : e.kind === "ai_compose" ? Q(e, [...n, "text"]) && $(e.text, 2e3) : Q(e, [...n, "category"]) && $(e.category, 64);
+		case "planned": return !r && e.executed === !1 && Q(e, [...n, "message_step_id"]) && (e.message_step_id === null || $(e.message_step_id, 64) && nn.test(e.message_step_id));
+		case "failed": return r && e.executed === !1 && Q(e, [...n, "error"]) && $(e.error, 64);
+		default: return e.executed === !1 && Q(e, n);
+	}
+}
+function ln(e, t) {
+	if (!sn(e) || !Q(e, rn) || e.schema_version !== 1 || e.mode !== "dry_run" || e.workflow_id !== t || e.destination !== "local" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || typeof e.completed != "boolean" || e.actions_executed !== 0 || !Number.isInteger(e.provider_calls) || e.provider_calls < 0 || !K(e.trigger_results, 10, an) || !K(e.condition_results, 20, on) || !Array.isArray(e.steps) || e.steps.length > 25 || !e.steps.every((e, t) => cn(e, t)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed)) throw new Z();
+	let n = e.steps, r = n.filter((e) => e.kind !== "notify" && (e.status === "ok" || e.status === "failed")).length, i = e.eligible;
+	if (!i && (n.length > 0 || e.provider_calls !== 0 || e.completed !== !1) || i && (!(e.triggered && e.conditions_passed) || n.length === 0 || e.provider_calls !== r || e.completed !== n.every((e) => e.status === "ok" || e.status === "planned"))) throw new Z();
+	let a = n.findIndex((e) => e.status === "failed");
+	if (n.some((e, t) => e.status === "skipped" != (a !== -1 && t > a))) throw new Z();
+	return e;
+}
+async function un(e, t, n, r) {
+	if (!tn.test(t) || !tn.test(n) || !r.trim() || r.length > 131072) throw new Z();
+	return ln(await e.callWS({
+		type: "ai_orchestrator/workflows/dry_run",
+		workflow_id: t,
+		connection_id: n,
+		snapshot_json: r
+	}), t);
 }
 //#endregion
 //#region src/panel/workflow-preview-view.ts
-var Xt = "ai-orchestrator-workflow-preview", Zt = {
+var dn = "ai-orchestrator-workflow-preview", fn = {
 	schema_version: 1,
 	workflow_id: "12345678-1234-4123-8123-123456789abc",
 	name: "Synthetic evening window preview",
@@ -2595,11 +2683,17 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
 		kind: "notify",
 		notify_service: "notify.synthetic"
 	}]
-}, Qt = {
+}, pn = {
 	ai_compose: "Compose text",
 	ai_classify: "Classify text",
 	notify: "Notification"
-}, $t = class extends N {
+}, mn = {
+	workflow_not_found: "Save the workflow first; a dry run uses the stored version.",
+	dry_run_provider_unavailable: "Select an available local provider.",
+	dry_run_busy: "A dry run is already running. Try again shortly.",
+	invalid_snapshot: "Check the snapshot JSON.",
+	workflow_store_unavailable: "Workflow storage is unavailable."
+}, hn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, gn = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		draft: { attribute: !1 },
@@ -2608,7 +2702,10 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
 		_busy: { state: !0 },
 		_error: { state: !0 },
 		_result: { state: !0 },
-		_saved: { state: !0 }
+		_saved: { state: !0 },
+		_providers: { state: !0 },
+		_connectionId: { state: !0 },
+		_dryRun: { state: !0 }
 	};
 	static styles = o`
     :host { display:block; min-width:0; color:var(--primary-text-color,#233642); margin-bottom:32px; }
@@ -2619,20 +2716,20 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
     .primary { background:#175e56; color:#fff; } button:disabled { opacity:.55; cursor:default; }
     button:focus-visible,textarea:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
     .result { border:1px solid var(--divider-color,#ccd9da); border-radius:12px; padding:16px; overflow-wrap:anywhere; }
-    .error { color:var(--error-color,#852e23); } li { margin:8px 0; } @media(max-width:700px) { .editors { grid-template-columns:minmax(0,1fr); } textarea { height:220px; } }
+    .error { color:var(--error-color,#852e23); } li { margin:8px 0; } select { min-height:44px; padding:8px 12px; font:inherit; border:1px solid #7d969c; border-radius:8px; background:var(--card-background-color,#fff); color:inherit; max-width:100%; } .composed { white-space:pre-wrap; border-left:3px solid #175e56; padding-left:12px; } @media(max-width:700px) { .editors { grid-template-columns:minmax(0,1fr); } textarea { height:220px; } }
   `;
 	_sequence = 0;
 	_connection;
 	_userId;
 	_callWS;
 	constructor() {
-		super(), this._workflow = "", this._snapshot = "", this._busy = !1, this._error = "", this._saved = !1;
+		super(), this._workflow = "", this._snapshot = "", this._busy = !1, this._error = "", this._saved = !1, this._providers = [], this._connectionId = "";
 	}
 	_reset = () => {
 		this._invalidate(), this._workflow = "", this._snapshot = "";
 	};
 	_invalidate() {
-		this._sequence++, this._busy = !1, this._error = "", this._result = void 0, this._saved = !1;
+		this._sequence++, this._busy = !1, this._error = "", this._result = void 0, this._saved = !1, this._dryRun = void 0;
 	}
 	_unbind() {
 		this._connection?.removeEventListener("disconnected", this._reset);
@@ -2644,10 +2741,47 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
 		this._unbind(), this._reset(), super.disconnectedCallback();
 	}
 	willUpdate(e) {
-		e.has("draft") && this.draft !== void 0 && (this._invalidate(), this._workflow = this.draft.json), e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset));
+		e.has("draft") && this.draft !== void 0 && (this._invalidate(), this._workflow = this.draft.json), e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset), this._providers = [], this._connectionId = "", this._loadProviders());
 	}
+	async _loadProviders() {
+		let e = this.hass;
+		if (!e) return;
+		let t = this._sequence;
+		try {
+			let n = await St(e);
+			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
+			this._providers = n.providers, this._connectionId = n.providers[0]?.connection_id ?? "";
+		} catch {}
+	}
+	_storedWorkflowId() {
+		try {
+			let e = JSON.parse(this._workflow).workflow_id;
+			return typeof e == "string" && hn.test(e) ? e : void 0;
+		} catch {
+			return;
+		}
+	}
+	_canDryRun() {
+		return !this._busy && !!this.hass && this.hass.connection?.connected !== !1 && !!this._snapshot.trim() && this._storedWorkflowId() !== void 0 && this._providers.some((e) => e.connection_id === this._connectionId);
+	}
+	_runDry = async () => {
+		let e = this.hass, t = this._storedWorkflowId(), n = this._connectionId;
+		if (!this._canDryRun() || !e || t === void 0) return;
+		this._invalidate(), this._busy = !0;
+		let r = this._sequence, i = () => r === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
+		try {
+			let r = await un(e, t, n, this._snapshot);
+			i() && (this._dryRun = r);
+		} catch (e) {
+			if (!i()) return;
+			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
+			this._error = mn[t] ?? "The dry run could not be completed. Check the snapshot JSON, the selected provider, administrator access, and the installed integration version.";
+		} finally {
+			i() && (this._busy = !1);
+		}
+	};
 	_example(e) {
-		this._invalidate(), this._workflow = JSON.stringify(Zt, null, 2), this._snapshot = JSON.stringify({
+		this._invalidate(), this._workflow = JSON.stringify(fn, null, 2), this._snapshot = JSON.stringify({
 			states: { "binary_sensor.synthetic_window": "on" },
 			time: e ? "12:00" : "20:00",
 			event: {
@@ -2669,7 +2803,7 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Pt(e, this._workflow, this._snapshot);
+			let t = await Lt(e, this._workflow, this._snapshot);
 			n() && (this._result = t);
 		} catch {
 			n() && (this._error = "Preview could not be completed. Check both JSON documents, administrator access, and the installed integration version.");
@@ -2683,7 +2817,7 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Kt(e, this._workflow);
+			let t = await Jt(e, this._workflow);
 			if (!n()) return;
 			this._workflow = JSON.stringify(t.workflow, null, 2), this._saved = !0, this.dispatchEvent(new CustomEvent("workflow-saved", {
 				bubbles: !0,
@@ -2701,29 +2835,50 @@ var Xt = "ai-orchestrator-workflow-preview", Zt = {
       <p>Experimental offline JSON editor. Test a draft against a supplied snapshot: previewing reads no live home state, contacts no provider, and executes no action. "Save as workflow" stores the workflow document in Home Assistant; an enabled saved workflow then watches its triggers and records outcomes without running any step.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
       <div class="actions"><button type="button" @click=${() => this._example(!1)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(!0)}>Load synthetic daytime example</button></div>
-      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${wt} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
-      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${wt} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
+      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${kt} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
+      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${kt} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
       <div class="actions"><button class="primary" type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim() || !this._snapshot.trim()} @click=${this._preview}>${this._busy ? "Previewing…" : "Preview workflow"}</button><button type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim()} @click=${this._save}>${this._busy ? "Working…" : "Save as workflow"}</button><button type="button" @click=${this._reset}>Reset preview</button></div>
-      <div role="status" aria-live="polite">${this._error ? w`<p class="error">${this._error}</p>` : E}${this._saved ? w`<p>Workflow saved. It appears in the stored workflows list below.</p>` : E}${this._busy ? w`<p>Evaluating the supplied snapshot…</p>` : E}${this._result ? this._renderResult(this._result) : E}</div>
+      <div class="actions">
+        <label for="dry-run-provider">Local provider for a dry run</label>
+        <select id="dry-run-provider" ?disabled=${this._busy || this._providers.length === 0} .value=${this._connectionId} @change=${(e) => {
+			this._invalidate(), this._connectionId = e.target.value;
+		}}>
+          ${this._providers.length === 0 ? w`<option value="">No local provider available</option>` : this._providers.map((e) => w`<option value=${e.connection_id} ?selected=${e.connection_id === this._connectionId}>${e.title}</option>`)}
+        </select>
+        <button id="dry-run" type="button" ?disabled=${!this._canDryRun()} @click=${this._runDry}>${this._busy ? "Working…" : "Dry run AI steps"}</button>
+      </div>
+      <p>A dry run evaluates the <em>stored</em> workflow against the snapshot above, then runs its AI steps once against the selected local provider. The model sees only the step prompt, the event, the time, and the states of entities named by the workflow's conditions. Notifications are only planned; nothing is sent, stored, or executed.</p>
+      <div role="status" aria-live="polite">${this._error ? w`<p class="error">${this._error}</p>` : E}${this._saved ? w`<p>Workflow saved. It appears in the stored workflows list below.</p>` : E}${this._busy ? w`<p>Working…</p>` : E}${this._result ? this._renderResult(this._result) : E}${this._dryRun ? this._renderDryRun(this._dryRun) : E}</div>
     </section>`;
 	}
 	_renderResult(e) {
 		return w`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
       <p>Draft enabled flag: ${e.enabled ? "yes" : "no"}. Preview never activates a workflow.</p>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => w`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${Tt[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? w`<ul>${e.condition_results.map((e) => w`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${Tt[e.reason]}</li>`)}</ul>` : w`<p>No conditions.</p>`}
-      <h3>Planned steps</h3>${e.planned_steps.length ? w`<ol>${e.planned_steps.map((e) => w`<li>${Qt[e.kind]} — not executed</li>`)}</ol>` : w`<p>No steps planned.</p>`}
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => w`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? w`<ul>${e.condition_results.map((e) => w`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>` : w`<p>No conditions.</p>`}
+      <h3>Planned steps</h3>${e.planned_steps.length ? w`<ol>${e.planned_steps.map((e) => w`<li>${pn[e.kind]} — not executed</li>`)}</ol>` : w`<p>No steps planned.</p>`}
       <p>Provider calls: 0 · Actions executed: 0</p></div>`;
 	}
+	_renderDryRun(e) {
+		return w`<div class="result"><h2>${e.eligible ? e.completed ? "Dry run completed — nothing was sent" : "Dry run stopped at a failed step" : "Dry run: scenario blocked — no AI step ran"}</h2>
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => w`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? w`<ul>${e.condition_results.map((e) => w`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>` : w`<p>No conditions.</p>`}
+      <h3>Steps</h3>${e.steps.length ? w`<ol>${e.steps.map((e) => this._renderDryRunStep(e))}</ol>` : w`<p>No steps ran.</p>`}
+      <p>Provider calls: ${e.provider_calls} · Actions executed: 0 · Destination: local</p></div>`;
+	}
+	_renderDryRunStep(e) {
+		let t = pn[e.kind];
+		return e.status === "ok" && e.text !== void 0 ? w`<li>${t} — composed:<div class="composed">${e.text}</div></li>` : e.status === "ok" ? w`<li>${t} — category: ${e.category}</li>` : e.status === "planned" ? w`<li>${t} — planned, not sent${e.message_step_id ? ` (would use text from step ${e.message_step_id})` : ""}</li>` : e.status === "failed" ? w`<li>${t} — failed: ${en[e.error] ?? "Provider error"}</li>` : w`<li>${t} — skipped</li>`;
+	}
 };
-customElements.define(Xt, $t);
+customElements.define(dn, gn);
 //#endregion
 //#region src/panel/workflows-view.ts
-var en = "ai-orchestrator-workflows", tn = {
+var _n = "ai-orchestrator-workflows", vn = {
 	load: "Stored workflows could not be read from Home Assistant. Check administrator access and the installed integration version.",
 	mutate: "The change could not be completed. Nothing was executed; reload to see the current stored state.",
 	observe: "The observation could not be completed. Nothing was executed."
-}, nn = class extends N {
+}, yn = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		refreshToken: {
@@ -2876,12 +3031,12 @@ var en = "ai-orchestrator-workflows", tn = {
 		let t = ++this._sequence;
 		this._viewState = "loading", this._error = "";
 		try {
-			let n = await Gt(e);
+			let n = await qt(e);
 			if (!this._current(t, e)) return;
 			this._store = n.store, this._entries = n.workflows, this._viewState = "ready";
 		} catch {
 			if (!this._current(t, e)) return;
-			this._entries = [], this._viewState = "error", this._error = tn.load;
+			this._entries = [], this._viewState = "error", this._error = vn.load;
 		}
 	};
 	async _mutate(e) {
@@ -2891,23 +3046,23 @@ var en = "ai-orchestrator-workflows", tn = {
 		this._pending = e, this._error = "", e.action !== "observe" && (this._observation = void 0);
 		try {
 			if (e.action === "observe") {
-				let r = await Yt(t, e.id);
+				let r = await Zt(t, e.id);
 				if (!this._current(n, t)) return;
 				this._observation = {
 					id: e.id,
 					result: r
 				};
-				let i = await Gt(t);
+				let i = await qt(t);
 				if (!this._current(n, t)) return;
 				this._store = i.store, this._entries = i.workflows;
 				return;
 			}
-			let r = e.action === "delete" ? await Jt(t, e.id) : await qt(t, e.id, e.action === "enable");
+			let r = e.action === "delete" ? await Xt(t, e.id) : await Yt(t, e.id, e.action === "enable");
 			if (!this._current(n, t)) return;
 			this._store = r.store, this._entries = r.workflows, this._confirmDeleteId = void 0;
 		} catch {
 			if (!this._current(n, t)) return;
-			this._error = e.action === "observe" ? tn.observe : tn.mutate;
+			this._error = e.action === "observe" ? vn.observe : vn.mutate;
 		} finally {
 			this._pending === e && (this._pending = void 0, this._refreshRequested && this._current(n, t) && queueMicrotask(() => void this._load()));
 		}
@@ -3034,10 +3189,10 @@ var en = "ai-orchestrator-workflows", tn = {
     </p>`;
 	}
 };
-customElements.define(en, nn);
+customElements.define(_n, yn);
 //#endregion
 //#region src/panel/ai-orchestrator-panel.ts
-var rn = "ai-orchestrator-panel", $ = [
+var bn = "ai-orchestrator-panel", xn = [
 	{
 		id: "home",
 		label: "Home"
@@ -3070,12 +3225,12 @@ var rn = "ai-orchestrator-panel", $ = [
 		id: "settings",
 		label: "Settings"
 	}
-], an = {
+], Sn = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, on = {
+}, Cn = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -3105,11 +3260,11 @@ var rn = "ai-orchestrator-panel", $ = [
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function sn(e) {
+function wn(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
-	return $.find((e) => e.id === t)?.id;
+	return xn.find((e) => e.id === t)?.id;
 }
-var cn = class extends N {
+var Tn = class extends j {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -3123,7 +3278,7 @@ var cn = class extends N {
 		_workflowsRefresh: { state: !0 },
 		_draft: { state: !0 }
 	};
-	static styles = We;
+	static styles = Ke;
 	_draftSequence = 0;
 	_hasRequested = !1;
 	_requestSequence = 0;
@@ -3135,7 +3290,7 @@ var cn = class extends N {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = sn(this.route);
+			let e = wn(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 		e.has("_activeSection") && this._activeSection !== "automations" && (this._draft = void 0);
@@ -3182,7 +3337,7 @@ var cn = class extends N {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${$.map((e) => w`
+          ${xn.map((e) => w`
               <button
                 class="nav-button"
                 type="button"
@@ -3259,12 +3414,12 @@ var cn = class extends N {
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${P.map((e) => {
+          ${M.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
 			return w`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${an[e]}</span>
+                  <span class="status-name">${Sn[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -3301,7 +3456,7 @@ var cn = class extends N {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = on[e], n = $.find((t) => t.id === e)?.label ?? "Section";
+		let t = Cn[e], n = xn.find((t) => t.id === e)?.label ?? "Section";
 		return w`
       <header class="page-header">
         <div>
@@ -3504,12 +3659,12 @@ var cn = class extends N {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await Fe(e);
+			let n = await Le(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof F ? "incompatible" : Ie(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof N ? "incompatible" : Re(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -3520,12 +3675,12 @@ var cn = class extends N {
 		}
 		this._probeLoadState = "loading", this._probeResult = void 0;
 		try {
-			this._probeResult = await Ue(e), this._probeLoadState = "ready";
+			this._probeResult = await Ge(e), this._probeLoadState = "ready";
 		} catch {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, ln = "ai-orchestrator-providers-view", un = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(xt, Ct), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(rn, cn), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(ln, mt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(un, $e);
+}, En = "ai-orchestrator-providers-view", Dn = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(Et, Ot), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(bn, Tn), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(En, vt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(Dn, tt);
 //#endregion
-export { cn as AiOrchestratorPanel, un as CATALOG_VIEW_TAG, xt as CHAT_VIEW_TAG, $e as CatalogView, Ct as ChatView, rn as PANEL_TAG, ln as PROVIDERS_VIEW_TAG, mt as ProvidersView };
+export { Tn as AiOrchestratorPanel, Dn as CATALOG_VIEW_TAG, Et as CHAT_VIEW_TAG, tt as CatalogView, Ot as ChatView, bn as PANEL_TAG, En as PROVIDERS_VIEW_TAG, vt as ProvidersView };

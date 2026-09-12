@@ -49,3 +49,32 @@ export const WORKFLOW_LIST: Record<string, unknown> = {
 };
 
 export const EMPTY_LIST: Record<string, unknown> = { schema_version: 1, store: "ready", workflows: [] };
+
+export const DRY_RUN: Record<string, unknown> = {
+  schema_version: 1,
+  mode: "dry_run",
+  workflow_id: STORED_WORKFLOW_ID,
+  destination: "local",
+  triggered: true,
+  conditions_passed: true,
+  eligible: true,
+  trigger_results: [{ index: 0, passed: true, reason: "matched" }],
+  condition_results: [{ index: 0, passed: true, reason: "matched" }],
+  steps: [
+    { index: 0, step_id: "compose", kind: "ai_compose", executed: true, status: "ok", text: "Please close the window." },
+    { index: 1, step_id: "notify", kind: "notify", executed: false, status: "planned", message_step_id: "compose" },
+  ],
+  provider_calls: 1,
+  actions_executed: 0,
+  completed: true,
+};
+
+export const CHAT_OPTIONS: Record<string, unknown> = {
+  schema_version: 1,
+  providers: [{ connection_id: "12345678-1234-4234-9234-123456789abc", title: "Synthetic local AI", display_name: "Synthetic Provider", destination: "local", capability_verified: false }],
+  limits: { max_messages: 21, max_message_chars: 4000, max_total_chars: 16000, max_response_chars: 4000, timeout_seconds: 60 },
+  streaming: false,
+  household_context: false,
+  actions: false,
+  history_persisted: false,
+};
