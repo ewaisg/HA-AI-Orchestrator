@@ -35,3 +35,27 @@ three provider calls, `completed: true`: `classify ok routine`, `gate taken`,
 required typed fields; it chose an empty room string since the snapshot names
 no room), `compose ok` with the reminder text, `notify planned` resolving to
 a notify entity. Nothing was sent; `actions_executed` stayed 0.
+
+## Panel defect found and fixed (r8)
+
+Driving the same dry run through the panel left the dry-run control disabled
+with no result and no error. Instrumenting the view showed its provider and
+notify-target lists empty: the lookups were guarded by the editor's edit
+sequence, so loading the example (or any edit) before the lookups resolved
+discarded them. Fixed in commit `2393634` by tying lookups to the Home
+Assistant identity only; a browser test now edits the editor before the
+lookups resolve and asserts the provider select and target list still fill
+and the dry run becomes available. 240 browser tests
+(`artifacts/review-2026-09-12/frontend-lookupfix.txt`). Packaged as r8
+(`outputs/r8/ai-orchestrator-r8.zip`, SHA-256
+`bd5a829a8d17c4304cd26a52dfdc576709e51a932e6d7e9867283685fedaaed3`, bundle
+`ee9a6e35…e561`) and installed with rollback `before-r8-kc1_afnb`.
+
+After the foundation entry reload the panel registered
+`/api/ai_orchestrator/panel/ee9a6e35da4fe0f9/ai-orchestrator-panel.js`
+(162,672 bytes). Reproducing the earlier sequence through the panel (open
+Automations and load the example immediately, then edit, save, dry run):
+the provider select and the 17 targets were populated, and the dry run
+rendered `Classify text — category: routine`, `Branch — not taken, later
+steps skipped`, compose and notification `skipped`, `Provider calls: 1 ·
+Actions executed: 0`, in about 3 seconds. The test workflow was deleted.
