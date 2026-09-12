@@ -118,10 +118,12 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
 
 ## WFL-002B/C candidate acceptance
 
-- ENV-014: WFL-002C Automations preview candidate has not yet been installed and
-  observed on the owner's Home Assistant/Companion App. Verify loaded bundle,
-  evening/daytime preview and usable editors on desktop/Android. Consuming task:
-  WFL-002C. Local automated browser tests do not replace this live acceptance.
+- ENV-014 `RESOLVED FOR WFL-002C` (2026-09-12): the owner installed the
+  September 11 archive `ai-orchestrator-7150189.zip` and reported that the
+  evening example passes, the daytime example blocks, and the editors work on
+  desktop and Android. Owner-reported, no screenshot or trace. Lifecycle-probe
+  accessibility, install-time Core version, and scoped logs were not reported.
+  Consuming task: WFL-002C (closed); LOC-007 remains the runtime gate.
 - WFL-002B is an isolated observation harness with no startup wiring. Production
   configuration ownership, permissions, persisted activation and real restart
   acceptance remain future WFL-002 work, not inferred from harness tests.

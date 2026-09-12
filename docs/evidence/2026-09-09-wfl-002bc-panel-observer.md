@@ -115,3 +115,14 @@ candidate; only tests and documentation differ between the commits.
 The archive was delivered to the owner from the build container and is not
 stored in the repository. Installing it is the ENV-014 live resume step; no
 install or live acceptance was performed here.
+
+## 2026-09-12 owner live acceptance (ENV-014)
+
+The owner installed `ai-orchestrator-7150189.zip` and reported: evening example
+passes, daytime example blocks, and the editors work on desktop and Android.
+This is owner-reported evidence in conversation, not an agent-observed trace or
+screenshot. It closes the WFL-002C live acceptance items named in the resume
+point. Not reported and therefore not claimed: that the lifecycle probe remains
+accessible below the preview, the Core version in use at install time, and any
+scoped-log check. WFL-002C is DONE for its offline preview scope; the Workflow
+runtime flag stays unavailable and LOC-007 still gates any runtime activation.
