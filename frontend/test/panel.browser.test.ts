@@ -190,7 +190,9 @@ describe("AI Orchestrator panel shell", () => {
 
     // The stored-workflows list load and the probe click race across microtasks.
     // The workflow editor's local-provider lookup is a read, not a side effect.
-    expect([...requestTypes].sort()).toEqual([
+    // Lookups (catalogue, providers, targets) may be requested by more than one view.
+    expect([...new Set(requestTypes)].sort()).toEqual([
+      "ai_orchestrator/catalog/list",
       "ai_orchestrator/chat/options",
       "ai_orchestrator/notify/targets",
       "ai_orchestrator/status",

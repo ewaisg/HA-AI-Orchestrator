@@ -29,7 +29,7 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: ee, getOwnPropertyNames: te, getOwnPropertySymbols: ne, getPrototypeOf: re } = Object, d = globalThis, ie = d.trustedTypes, ae = ie ? ie.emptyScript : "", oe = d.reactiveElementPolyfillSupport, f = (e, t) => e, se = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: ee, getOwnPropertyNames: te, getOwnPropertySymbols: ne, getPrototypeOf: re } = Object, d = globalThis, ie = d.trustedTypes, ae = ie ? ie.emptyScript : "", oe = d.reactiveElementPolyfillSupport, f = (e, t) => e, p = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, ce = (e, t) => !l(e, t), le = {
+}, se = (e, t) => !l(e, t), ce = {
 	attribute: !0,
 	type: String,
-	converter: se,
+	converter: p,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: ce
+	hasChanged: se
 };
 Symbol.metadata ??= Symbol("metadata"), d.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var p = class extends HTMLElement {
+var m = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = le) {
+	static createProperty(e, t = ce) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,7 +100,7 @@ var p = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? le;
+		return this.elementProperties.get(e) ?? ce;
 	}
 	static _$Ei() {
 		if (this.hasOwnProperty(f("elementProperties"))) return;
@@ -171,14 +171,14 @@ var p = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? se : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? p : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? se : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? p : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var p = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? ce)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? se)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,89 +251,89 @@ var p = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-p.elementStyles = [], p.shadowRootOptions = { mode: "open" }, p[f("elementProperties")] = /* @__PURE__ */ new Map(), p[f("finalized")] = /* @__PURE__ */ new Map(), oe?.({ ReactiveElement: p }), (d.reactiveElementVersions ??= []).push("2.1.2");
+m.elementStyles = [], m.shadowRootOptions = { mode: "open" }, m[f("elementProperties")] = /* @__PURE__ */ new Map(), m[f("finalized")] = /* @__PURE__ */ new Map(), oe?.({ ReactiveElement: m }), (d.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var ue = globalThis, de = (e) => e, m = ue.trustedTypes, fe = m ? m.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, pe = "$lit$", h = `lit$${Math.random().toFixed(9).slice(2)}$`, me = "?" + h, he = `<${me}>`, g = document, _ = () => g.createComment(""), v = (e) => e === null || typeof e != "object" && typeof e != "function", y = Array.isArray, ge = (e) => y(e) || typeof e?.[Symbol.iterator] == "function", _e = "[ 	\n\f\r]", b = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ve = /-->/g, ye = />/g, x = RegExp(`>|${_e}(?:([^\\s"'>=/]+)(${_e}*=${_e}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), be = /'/g, xe = /"/g, Se = /^(?:script|style|textarea|title)$/i, S = ((e) => (t, ...n) => ({
+var le = globalThis, ue = (e) => e, h = le.trustedTypes, de = h ? h.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + g, me = `<${pe}>`, _ = document, v = () => _.createComment(""), y = (e) => e === null || typeof e != "object" && typeof e != "function", b = Array.isArray, he = (e) => b(e) || typeof e?.[Symbol.iterator] == "function", ge = "[ 	\n\f\r]", x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${ge}(?:([^\\s"'>=/]+)(${ge}*=${ge}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, C = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), C = Symbol.for("lit-noChange"), w = Symbol.for("lit-nothing"), Ce = /* @__PURE__ */ new WeakMap(), T = g.createTreeWalker(g, 129);
-function we(e, t) {
-	if (!y(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return fe === void 0 ? t : fe.createHTML(t);
+}))(1), w = Symbol.for("lit-noChange"), T = Symbol.for("lit-nothing"), Se = /* @__PURE__ */ new WeakMap(), E = _.createTreeWalker(_, 129);
+function Ce(e, t) {
+	if (!b(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return de === void 0 ? t : de.createHTML(t);
 }
-var Te = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = b;
+var we = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = x;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === b ? c[1] === "!--" ? o = ve : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = x) : (Se.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = x) : o = ye : o === x ? c[0] === ">" ? (o = i ?? b, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? x : c[3] === "\"" ? xe : be) : o === xe || o === be ? o = x : o === ve || o === ye ? o = b : (o = x, i = void 0);
-		let ee = o === x && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === b ? n + he : l >= 0 ? (r.push(s), n.slice(0, l) + pe + n.slice(l) + h + ee) : n + h + (l === -2 ? t : ee);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === x ? c[1] === "!--" ? o = _e : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = S) : (xe.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = S) : o = ve : o === S ? c[0] === ">" ? (o = i ?? x, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? S : c[3] === "\"" ? be : ye) : o === be || o === ye ? o = S : o === _e || o === ve ? o = x : (o = S, i = void 0);
+		let ee = o === S && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === x ? n + me : l >= 0 ? (r.push(s), n.slice(0, l) + fe + n.slice(l) + g + ee) : n + g + (l === -2 ? t : ee);
 	}
-	return [we(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, Ee = class e {
+	return [Ce(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, Te = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = Te(t, n);
-		if (this.el = e.createElement(l, r), T.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = we(t, n);
+		if (this.el = e.createElement(l, r), E.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = T.nextNode()) !== null && c.length < s;) {
+		for (; (i = E.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(pe)) {
-					let t = u[o++], n = i.getAttribute(e).split(h), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(fe)) {
+					let t = u[o++], n = i.getAttribute(e).split(g), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ke : r[1] === "?" ? Ae : r[1] === "@" ? je : D
+						ctor: r[1] === "." ? Oe : r[1] === "?" ? ke : r[1] === "@" ? Ae : O
 					}), i.removeAttribute(e);
-				} else e.startsWith(h) && (c.push({
+				} else e.startsWith(g) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (Se.test(i.tagName)) {
-					let e = i.textContent.split(h), t = e.length - 1;
+				if (xe.test(i.tagName)) {
+					let e = i.textContent.split(g), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = m ? m.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], _()), T.nextNode(), c.push({
+						i.textContent = h ? h.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], v()), E.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], _());
+						i.append(e[t], v());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === me) c.push({
+				if (i.data === pe) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(h, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(g, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += h.length - 1;
+					}), e += g.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = g.createElement("template");
+		let n = _.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function E(e, t, n = e, r) {
-	if (t === C) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = v(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = E(e, i._$AS(e, t.values), i, r)), t;
+function D(e, t, n = e, r) {
+	if (t === w) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = y(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = D(e, i._$AS(e, t.values), i, r)), t;
 }
-var De = class {
+var Ee = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? g).importNode(t, !0);
-		T.currentNode = r;
-		let i = T.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? _).importNode(t, !0);
+		E.currentNode = r;
+		let i = E.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new Oe(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Me(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new De(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new je(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = T.nextNode(), a++);
+			a !== s?.index && (i = E.nextNode(), a++);
 		}
-		return T.currentNode = g, r;
+		return E.currentNode = _, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, Oe = class e {
+}, De = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = w, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = T, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var De = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = E(this, e, t), v(e) ? e === w || e == null || e === "" ? (this._$AH !== w && this._$AR(), this._$AH = w) : e !== this._$AH && e !== C && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ge(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = D(this, e, t), y(e) ? e === T || e == null || e === "" ? (this._$AH !== T && this._$AR(), this._$AH = T) : e !== this._$AH && e !== w && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var De = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== w && v(this._$AH) ? this._$AA.nextSibling.data = e : this.T(g.createTextNode(e)), this._$AH = e;
+		this._$AH !== T && y(this._$AH) ? this._$AA.nextSibling.data = e : this.T(_.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = Ee.createElement(we(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = Te.createElement(Ce(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new De(r, this), n = e.u(this.options);
+			let e = new Ee(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = Ce.get(e.strings);
-		return t === void 0 && Ce.set(e.strings, t = new Ee(e)), t;
+		let t = Se.get(e.strings);
+		return t === void 0 && Se.set(e.strings, t = new Te(e)), t;
 	}
 	k(t) {
-		y(this._$AH) || (this._$AH = [], this._$AR());
+		b(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(_()), this.O(_()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(v()), this.O(v()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = de(e).nextSibling;
-			de(e).remove(), e = t;
+			let t = ue(e).nextSibling;
+			ue(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, D = class {
+}, O = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = w, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = w;
+		this.type = 1, this._$AH = T, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = T;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = E(this, e, t, 0), a = !v(e) || e !== this._$AH && e !== C, a && (this._$AH = e);
+		if (i === void 0) e = D(this, e, t, 0), a = !y(e) || e !== this._$AH && e !== w, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = E(this, r[n + o], t, o), s === C && (s = this._$AH[o]), a ||= !v(s) || s !== this._$AH[o], s === w ? e = w : e !== w && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = D(this, r[n + o], t, o), s === w && (s = this._$AH[o]), a ||= !y(s) || s !== this._$AH[o], s === T ? e = T : e !== T && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === w ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === T ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ke = class extends D {
+}, Oe = class extends O {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === w ? void 0 : e;
+		this.element[this.name] = e === T ? void 0 : e;
 	}
-}, Ae = class extends D {
+}, ke = class extends O {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== w);
+		this.element.toggleAttribute(this.name, !!e && e !== T);
 	}
-}, je = class extends D {
+}, Ae = class extends O {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = E(this, e, t, 0) ?? w) === C) return;
-		let n = this._$AH, r = e === w && n !== w || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== w && (n === w || r);
+		if ((e = D(this, e, t, 0) ?? T) === w) return;
+		let n = this._$AH, r = e === T && n !== T || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== T && (n === T || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Me = class {
+}, je = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		E(this, e);
+		D(this, e);
 	}
-}, Ne = ue.litHtmlPolyfillSupport;
-Ne?.(Ee, Oe), (ue.litHtmlVersions ??= []).push("3.3.3");
-var Pe = (e, t, n) => {
+}, Me = le.litHtmlPolyfillSupport;
+Me?.(Te, De), (le.litHtmlVersions ??= []).push("3.3.3");
+var Ne = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new Oe(t.insertBefore(_(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new De(t.insertBefore(v(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, O = globalThis, k = class extends p {
+}, k = globalThis, A = class extends m {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var Pe = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Pe(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ne(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,39 +502,39 @@ var Pe = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return C;
+		return w;
 	}
 };
-k._$litElement$ = !0, k.finalized = !0, O.litElementHydrateSupport?.({ LitElement: k });
-var Fe = O.litElementPolyfillSupport;
-Fe?.({ LitElement: k }), (O.litElementVersions ??= []).push("4.2.2");
+A._$litElement$ = !0, A.finalized = !0, k.litElementHydrateSupport?.({ LitElement: A });
+var Pe = k.litElementPolyfillSupport;
+Pe?.({ LitElement: A }), (k.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var Ie = Object.freeze({ type: "ai_orchestrator/status" }), A = [
+var Fe = Object.freeze({ type: "ai_orchestrator/status" }), j = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], j = class extends Error {
+], Ie = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
 };
-function M(e) {
+function Le(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Le(e, t) {
+function Re(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Re(e) {
-	if (!M(e) || !Le(e, [
+function ze(e) {
+	if (!Le(e) || !Re(e, [
 		"schema_version",
 		"phase",
 		"configured",
 		"features"
-	]) || !M(e.features) || !Le(e.features, A)) throw new j();
+	]) || !Le(e.features) || !Re(e.features, j)) throw new Ie();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || A.some((e) => typeof t[e] != "boolean")) throw new j();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || j.some((e) => typeof t[e] != "boolean")) throw new Ie();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -547,30 +547,30 @@ function Re(e) {
 		}
 	};
 }
-async function ze(e) {
-	return Re(await e.callWS({ ...Ie }));
+async function Be(e) {
+	return ze(await e.callWS({ ...Fe }));
 }
-function Be(e) {
-	return M(e) && e.code === "unauthorized";
+function Ve(e) {
+	return Le(e) && e.code === "unauthorized";
 }
 //#endregion
 //#region src/api/workflow-probe-client.ts
-var Ve = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), He = class extends Error {
+var He = Object.freeze({ type: "ai_orchestrator/workflow/probe/run" }), Ue = class extends Error {
 	constructor() {
 		super("The workflow lifecycle probe response does not match the supported contract."), this.name = "WorkflowProbeContractError";
 	}
 };
-function Ue(e) {
+function We(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function We(e, t) {
+function Ge(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Ge(e) {
+function Ke(e) {
 	return typeof e == "number" && Number.isInteger(e) && e > 0;
 }
-function Ke(e) {
-	if (!Ue(e) || !We(e, [
+function qe(e) {
+	if (!We(e) || !Ge(e, [
 		"schema_version",
 		"workflow_id",
 		"trigger_type",
@@ -579,15 +579,15 @@ function Ke(e) {
 		"registration_count",
 		"provider_contacted",
 		"home_assistant_action_called"
-	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ge(e.execution_count) || e.executions_for_trigger !== 1 || !Ge(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new He();
+	]) || e.schema_version !== 1 || e.workflow_id !== "foundation_lifecycle_probe" || e.trigger_type !== "integration_event" || !Ke(e.execution_count) || e.executions_for_trigger !== 1 || !Ke(e.registration_count) || e.provider_contacted !== !1 || e.home_assistant_action_called !== !1) throw new Ue();
 	return e;
 }
-async function qe(e) {
-	return Ke(await e.callWS({ ...Ve }));
+async function Je(e) {
+	return qe(await e.callWS({ ...He }));
 }
 //#endregion
 //#region src/styles/panel-styles.ts
-var Je = o`
+var Ye = o`
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -1334,45 +1334,45 @@ var Je = o`
       outline: 2px solid CanvasText;
     }
   }
-`, Ye = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Xe = [
+`, Xe = Object.freeze({ type: "ai_orchestrator/catalog/list" }), Ze = [
 	"available",
 	"unavailable",
 	"not_loaded"
-], Ze = ["entity", "device"], N = 1e4;
-function P(e) {
+], Qe = ["entity", "device"], $e = 1e4;
+function M(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function F(e, t) {
+function N(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function I(e) {
+function P(e) {
 	return e === null || typeof e == "string";
 }
-function L(e) {
+function F(e) {
 	return typeof e == "string" && e.length > 0 && e.length <= 255;
 }
-function Qe(e) {
-	if (!Array.isArray(e) || e.length > N) throw Error("Invalid area catalogue");
+function et(e) {
+	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid area catalogue");
 	return e.map((e) => {
-		if (!P(e) || !F(e, ["area_id", "name"]) || !L(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
+		if (!M(e) || !N(e, ["area_id", "name"]) || !F(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
 		return {
 			area_id: e.area_id,
 			name: e.name
 		};
 	});
 }
-function $e(e) {
-	if (!Array.isArray(e) || e.length > N) throw Error("Invalid device catalogue");
+function tt(e) {
+	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid device catalogue");
 	return e.map((e) => {
-		if (!P(e) || !F(e, [
+		if (!M(e) || !N(e, [
 			"device_id",
 			"name",
 			"area_id",
 			"manufacturer",
 			"model",
 			"disabled"
-		]) || !L(e.device_id) || !I(e.name) || e.area_id !== null && !L(e.area_id) || !I(e.manufacturer) || !I(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
+		]) || !F(e.device_id) || !P(e.name) || e.area_id !== null && !F(e.area_id) || !P(e.manufacturer) || !P(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
 		return {
 			device_id: e.device_id,
 			name: e.name,
@@ -1383,10 +1383,10 @@ function $e(e) {
 		};
 	});
 }
-function et(e) {
-	if (!Array.isArray(e) || e.length > N) throw Error("Invalid entity catalogue");
+function nt(e) {
+	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid entity catalogue");
 	return e.map((e) => {
-		if (!P(e) || !F(e, [
+		if (!M(e) || !N(e, [
 			"registry_id",
 			"entity_id",
 			"domain",
@@ -1397,7 +1397,7 @@ function et(e) {
 			"area_source",
 			"disabled",
 			"availability"
-		]) || !L(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !L(e.platform) || !I(e.name) || e.device_id !== null && !L(e.device_id) || e.area_id !== null && !L(e.area_id) || e.area_source !== null && !Ze.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Xe.includes(e.availability)) throw Error("Invalid entity entry");
+		]) || !F(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !F(e.platform) || !P(e.name) || e.device_id !== null && !F(e.device_id) || e.area_id !== null && !F(e.area_id) || e.area_source !== null && !Qe.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Ze.includes(e.availability)) throw Error("Invalid entity entry");
 		return {
 			registry_id: e.registry_id,
 			entity_id: e.entity_id,
@@ -1412,8 +1412,8 @@ function et(e) {
 		};
 	});
 }
-function tt(e) {
-	if (!P(e) || !F(e, [
+function rt(e) {
+	if (!M(e) || !N(e, [
 		"schema_version",
 		"areas",
 		"devices",
@@ -1421,17 +1421,17 @@ function tt(e) {
 	]) || e.schema_version !== 1) throw Error("Invalid catalogue response");
 	return {
 		schema_version: 1,
-		areas: Qe(e.areas),
-		devices: $e(e.devices),
-		entities: et(e.entities)
+		areas: et(e.areas),
+		devices: tt(e.devices),
+		entities: nt(e.entities)
 	};
 }
-async function nt(e) {
-	return tt(await e.callWS({ ...Ye }));
+async function it(e) {
+	return rt(await e.callWS({ ...Xe }));
 }
 //#endregion
 //#region src/panel/catalog-view.ts
-var rt = class extends k {
+var at = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		_state: { state: !0 },
@@ -1494,12 +1494,12 @@ var rt = class extends k {
 		this._scheduleLoad();
 	}
 	render() {
-		if (this._state === "loading") return S`<div class="message" role="status" aria-busy="true">Reading Home Assistant registries…</div>`;
-		if (this._state === "error") return S`<div class="message"><p>The registry catalogue could not be loaded.</p><button type="button" @click=${this._load}>Retry</button></div>`;
+		if (this._state === "loading") return C`<div class="message" role="status" aria-busy="true">Reading Home Assistant registries…</div>`;
+		if (this._state === "error") return C`<div class="message"><p>The registry catalogue could not be loaded.</p><button type="button" @click=${this._load}>Retry</button></div>`;
 		let e = this._catalog;
-		if (e === void 0 || this._state === "empty") return S`<div class="message"><p>No registered entities are available.</p><button type="button" @click=${this._load}>Refresh</button></div>`;
+		if (e === void 0 || this._state === "empty") return C`<div class="message"><p>No registered entities are available.</p><button type="button" @click=${this._load}>Refresh</button></div>`;
 		let t = this._filteredEntities(e);
-		return S`
+		return C`
       <div class="summary" aria-label="Registry totals">
         <span>${e.entities.length} entities</span>
         <span>${e.devices.length} devices</span>
@@ -1516,12 +1516,12 @@ var rt = class extends k {
         />
         <button type="button" @click=${this._load}>Refresh registries</button>
       </div>
-      ${t.length === 0 ? S`<div class="message" role="status">No entities match this search.</div>` : this._renderTable(e, t)}
+      ${t.length === 0 ? C`<div class="message" role="status">No entities match this search.</div>` : this._renderTable(e, t)}
     `;
 	}
 	_renderTable(e, t) {
 		let n = new Map(e.areas.map((e) => [e.area_id, e.name])), r = new Map(e.devices.map((e) => [e.device_id, e]));
-		return S`
+		return C`
       <div class="table-wrap">
         <table>
           <thead><tr><th>Entity</th><th>Area / device</th><th>Status</th><th>AI permission</th></tr></thead>
@@ -1532,7 +1532,7 @@ var rt = class extends k {
 	}
 	_renderEntity(e, t, n) {
 		let r = e.area_id === null ? "No area" : t.get(e.area_id) ?? "Unresolved area", i = e.device_id === null ? void 0 : n.get(e.device_id), a = e.disabled ? "Disabled" : e.availability.replace("_", " ");
-		return S`
+		return C`
       <tr>
         <td data-label="Entity"><span class="name">${e.name ?? e.entity_id}</span><code>${e.entity_id}</code><span class="detail">${e.platform}</span></td>
         <td data-label="Area / device"><span>${r}</span><span class="detail">${i?.name ?? (e.device_id === null ? "No device" : "Unresolved device")}</span></td>
@@ -1561,7 +1561,7 @@ var rt = class extends k {
 		if (this.hass !== void 0) {
 			this._hasLoaded = !0, this._state = "loading";
 			try {
-				this._catalog = await nt(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
+				this._catalog = await it(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
 			} catch {
 				this._catalog = void 0, this._state = "error";
 			}
@@ -1572,13 +1572,13 @@ var rt = class extends k {
 			this._loadScheduled = !1, this._load();
 		}));
 	}
-}, it = Object.freeze({ type: "ai_orchestrator/providers/list" }), at = [
+}, ot = Object.freeze({ type: "ai_orchestrator/providers/list" }), st = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], ot = [
+], ct = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1595,37 +1595,37 @@ var rt = class extends k {
 	"unsupported",
 	"unknown"
 ];
-function st(e) {
+function lt(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function ct(e, t) {
+function ut(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function lt(e) {
+function dt(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
 }
-function ut(e) {
-	return typeof e == "string" && at.includes(e);
-}
-function dt(e) {
-	return typeof e == "string" && ot.includes(e);
-}
 function ft(e) {
-	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
+	return typeof e == "string" && st.includes(e);
 }
 function pt(e) {
-	if (!st(e) || !ct(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+	return typeof e == "string" && ct.includes(e);
+}
+function mt(e) {
+	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
+}
+function ht(e) {
+	if (!lt(e) || !ut(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!st(n) || !ct(n, [
+		if (!lt(n) || !ut(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
 			"health",
 			"last_tested_at"
-		]) || !lt(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ut(n.health) || n.last_tested_at !== null && !ft(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
+		]) || !dt(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ft(n.health) || n.last_tested_at !== null && !mt(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
@@ -1640,14 +1640,14 @@ function pt(e) {
 		providers: t
 	};
 }
-function mt(e, t) {
-	if (!st(e) || !ct(e, [
+function gt(e, t) {
+	if (!lt(e) || !ut(e, [
 		"schema_version",
 		"connection_id",
 		"health",
 		"error_code",
 		"last_tested_at"
-	]) || e.schema_version !== 1 || !lt(e.connection_id) || t !== void 0 && e.connection_id !== t || !ut(e.health) || e.error_code !== null && !dt(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !ft(e.last_tested_at)) throw Error("Invalid provider test response");
+	]) || e.schema_version !== 1 || !dt(e.connection_id) || t !== void 0 && e.connection_id !== t || !ft(e.health) || e.error_code !== null && !pt(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !mt(e.last_tested_at)) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
@@ -1656,18 +1656,18 @@ function mt(e, t) {
 		last_tested_at: e.last_tested_at
 	};
 }
-async function ht(e) {
-	return pt(await e.callWS({ ...it }));
+async function _t(e) {
+	return ht(await e.callWS({ ...ot }));
 }
-async function gt(e, t) {
-	return mt(await e.callWS({
+async function vt(e, t) {
+	return gt(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var _t = "/config/integrations/integration/ai_orchestrator", vt = {
+var yt = "/config/integrations/integration/ai_orchestrator", bt = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1683,13 +1683,13 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, yt = {
+}, xt = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, bt = class extends k {
+}, St = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1887,27 +1887,27 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
 		this._scheduleLoad();
 	}
 	render() {
-		return this._viewState === "loading" ? S`<div role="status" aria-label="Loading providers" aria-busy="true">
+		return this._viewState === "loading" ? C`<div role="status" aria-label="Loading providers" aria-busy="true">
         Loading provider connections…
-      </div>` : this._viewState === "error" ? S`
+      </div>` : this._viewState === "error" ? C`
         <div class="error-state">
           <p>Could not load provider connections.</p>
           <button class="refresh-button" type="button" @click=${this._loadProviders}>
             Retry
           </button>
         </div>
-      ` : this._viewState === "empty" ? S`
+      ` : this._viewState === "empty" ? C`
         <div class="empty-state">
           <h3>No provider connections</h3>
           <p>
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${_t}>Add provider connection</a>
+          <a class="primary-link" href=${yt}>Add provider connection</a>
         </div>
-      ` : S`
+      ` : C`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${_t}>Manage provider connections</a>
+        <a class="primary-link" href=${yt}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1916,14 +1916,14 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
 	}
 	_renderProviderCard(e) {
 		let t = this._testStates.get(e.connection_id) ?? "idle", n = this._testResults.get(e.connection_id), r = e.health, i = e.last_tested_at;
-		return S`
+		return C`
       <article class="provider-card" role="listitem">
         <div class="provider-card-header">
           <div>
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${yt[r]}</span>
+          <span class="state-badge ${r}">${xt[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
         <p class="provider-meta">
@@ -1944,35 +1944,35 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
     `;
 	}
 	_renderTestResult(e, t) {
-		if (e === "checking") return S`<span class="test-result checking" role="status" aria-live="polite">
+		if (e === "checking") return C`<span class="test-result checking" role="status" aria-live="polite">
         Checking…
       </span>`;
-		if (t === "transport_failure") return S`<span
+		if (t === "transport_failure") return C`<span
         class="test-result transport-failure"
         role="status"
         aria-live="polite"
       >
         Home Assistant communication failed; provider health unchanged
       </span>`;
-		if (t?.health === "healthy") return S`<span class="test-result healthy" role="status" aria-live="polite">
+		if (t?.health === "healthy") return C`<span class="test-result healthy" role="status" aria-live="polite">
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = vt[t.error_code ?? "unknown"] ?? "Test failed";
-			return S`<span
+			let e = bt[t.error_code ?? "unknown"] ?? "Test failed";
+			return C`<span
         class="test-result ${t.health}"
         role="status"
         aria-live="polite"
       >${e}</span>`;
 		}
-		return w;
+		return T;
 	}
 	_loadProviders = async () => {
 		let e = this.hass;
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await ht(e);
+				let t = await _t(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1989,7 +1989,7 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
 		if (t !== void 0 && this._testStates.get(e) !== "checking") {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await gt(t, e);
+				let n = await vt(t, e);
 				this._providers = this._providers.map((t) => t.connection_id === e ? {
 					...t,
 					health: n.health,
@@ -2002,24 +2002,24 @@ var _t = "/config/integrations/integration/ai_orchestrator", vt = {
 			}
 		}
 	}
-}, R = Object.freeze({
+}, I = Object.freeze({
 	max_messages: 21,
 	max_message_chars: 4e3,
 	max_total_chars: 16e3,
 	max_response_chars: 4e3,
 	timeout_seconds: 60
-}), z = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-function B(e) {
+}), L = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function R(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function V(e, t) {
+function z(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function H(e, t) {
+function B(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function xt(e) {
-	if (!B(e) || !V(e, [
+function Ct(e) {
+	if (!R(e) || !z(e, [
 		"schema_version",
 		"providers",
 		"limits",
@@ -2027,20 +2027,20 @@ function xt(e) {
 		"household_context",
 		"actions",
 		"history_persisted"
-	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !B(e.limits) || !V(e.limits, Object.keys(R))) throw Error("Unsupported chat options");
+	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !R(e.limits) || !z(e.limits, Object.keys(I))) throw Error("Unsupported chat options");
 	let t = e.limits;
-	if (Object.entries(R).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
+	if (Object.entries(I).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
 	let n = /* @__PURE__ */ new Set();
 	return {
 		schema_version: 1,
 		providers: e.providers.map((e) => {
-			if (!B(e) || !V(e, [
+			if (!R(e) || !z(e, [
 				"connection_id",
 				"title",
 				"display_name",
 				"destination",
 				"capability_verified"
-			]) || typeof e.connection_id != "string" || !z.test(e.connection_id) || !H(e.title, 1e3) || !H(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
+			]) || typeof e.connection_id != "string" || !L.test(e.connection_id) || !B(e.title, 1e3) || !B(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
 			return n.add(e.connection_id), {
 				connection_id: e.connection_id,
 				title: e.title,
@@ -2049,22 +2049,22 @@ function xt(e) {
 				capability_verified: !1
 			};
 		}),
-		limits: R,
+		limits: I,
 		streaming: !1,
 		household_context: !1,
 		actions: !1,
 		history_persisted: !1
 	};
 }
-function St(e, t, n) {
-	if (!B(e) || !V(e, [
+function wt(e, t, n) {
+	if (!R(e) || !z(e, [
 		"schema_version",
 		"connection_id",
 		"request_id",
 		"text",
 		"destination",
 		"streaming"
-	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !H(e.text, R.max_response_chars)) throw Error("Unsupported chat response");
+	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !B(e.text, I.max_response_chars)) throw Error("Unsupported chat response");
 	return {
 		schema_version: 1,
 		connection_id: t,
@@ -2074,18 +2074,18 @@ function St(e, t, n) {
 		streaming: !1
 	};
 }
-async function Ct(e) {
-	return xt(await e.callWS({ type: "ai_orchestrator/chat/options" }));
+async function V(e) {
+	return Ct(await e.callWS({ type: "ai_orchestrator/chat/options" }));
 }
-function wt() {
+function H() {
 	let e = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
 	e[6] = e[6] & 15 | 64, e[8] = e[8] & 63 | 128;
 	let t = [...e].map((e) => e.toString(16).padStart(2, "0")).join("");
 	return `${t.slice(0, 8)}-${t.slice(8, 12)}-${t.slice(12, 16)}-${t.slice(16, 20)}-${t.slice(20)}`;
 }
 async function Tt(e, t, n, r) {
-	if (!z.test(t) || !z.test(n) || r.length === 0 || r.length > R.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !H(e.content, R.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > R.max_total_chars) throw Error("Invalid chat request");
-	return St(await e.callWS({
+	if (!L.test(t) || !L.test(n) || r.length === 0 || r.length > I.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !B(e.content, I.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > I.max_total_chars) throw Error("Invalid chat request");
+	return wt(await e.callWS({
 		type: "ai_orchestrator/chat/send",
 		connection_id: t,
 		request_id: n,
@@ -2100,7 +2100,7 @@ function Et(e, t) {
 		role: "user",
 		content: t
 	}], r = !1;
-	for (; n.length > 1 && (n.length > R.max_messages || n.reduce((e, t) => e + t.content.length, 0) > R.max_total_chars);) n.splice(0, 2), r = !0;
+	for (; n.length > 1 && (n.length > I.max_messages || n.reduce((e, t) => e + t.content.length, 0) > I.max_total_chars);) n.splice(0, 2), r = !0;
 	return {
 		messages: n,
 		omitted: r
@@ -2119,7 +2119,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 	chat_connection: "Home Assistant could not reach the local provider.",
 	chat_not_found: "The configured model is not available. Check provider settings.",
 	chat_unsupported: "This provider does not support the requested text generation."
-}, kt = class extends k {
+}, kt = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		_options: { state: !0 },
@@ -2240,7 +2240,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 		let t = ++this._loadSequence;
 		this._loading = !0, this._error = "";
 		try {
-			let n = await Ct(e);
+			let n = await V(e);
 			if (t !== this._loadSequence || !this.isConnected) return;
 			this._options = n, n.providers.some((e) => e.connection_id === this._connectionId) || (this._sequence += 1, this._history = [], this._draft = "", this._notice = "", this._connectionId = n.providers[0]?.connection_id ?? "");
 		} catch {
@@ -2253,11 +2253,11 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 	async _send(e) {
 		e?.preventDefault();
 		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
-		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > R.max_message_chars || this.hass?.connection?.connected === !1) return;
+		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > I.max_message_chars || this.hass?.connection?.connected === !1) return;
 		let i = Et(this._history, n), a = ++this._sequence, o = this._connectionId;
 		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
 		try {
-			let e = await Tt(t, o, wt(), i.messages);
+			let e = await Tt(t, o, H(), i.messages);
 			if (a !== this._sequence || !this.isConnected) return;
 			this._history = [...i.messages, {
 				role: "assistant",
@@ -2287,7 +2287,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 	}
 	render() {
 		let e = this._options?.providers.find((e) => e.connection_id === this._connectionId);
-		return S`<div class="chat">
+		return C`<div class="chat">
       <header><p class="eyebrow">Local AI · Read-only chat</p><h1>Talk to your local AI</h1>
         <p class="intro">Try a question, draft an announcement, or explore an idea.</p></header>
       <section class="controls" aria-label="Chat provider">
@@ -2296,8 +2296,8 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
             @change=${(e) => {
 			this._reset(), this._connectionId = e.target.value;
 		}}>
-            ${this._options?.providers.length ? w : S`<option value="">${this._loading ? "Loading providers…" : "No local provider available"}</option>`}
-            ${this._options?.providers.map((e) => S`<option value=${e.connection_id}>${e.title}</option>`)}
+            ${this._options?.providers.length ? T : C`<option value="">${this._loading ? "Loading providers…" : "No local provider available"}</option>`}
+            ${this._options?.providers.map((e) => C`<option value=${e.connection_id}>${e.title}</option>`)}
           </select></div>
         <button type="button" ?disabled=${this._busy || this._loading} @click=${() => void this._load()}>Refresh providers</button>
         <button type="button" @click=${() => {
@@ -2310,20 +2310,20 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
         <div class="privacy-detail">
           Only messages in this conversation are sent when you press Send. No household context or device actions.
           History stays in this open chat view and clears when you leave. Replies arrive when complete; streaming is unavailable.
-          ${e ? S`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : w}
+          ${e ? C`<br>Generation is an explicit trial; this model's capabilities have not been verified.` : T}
         </div>
       </details>
-      ${!this._loading && this._options?.providers.length === 0 ? S`<p class="setup-hint">Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : w}
+      ${!this._loading && this._options?.providers.length === 0 ? C`<p class="setup-hint">Add a local connection in <a href="/config/integrations/integration/ai_orchestrator">provider settings</a>, then refresh providers.</p>` : T}
       <div class="transcript" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
-        ${this._history.length === 0 && !this._busy ? S`<div class="empty"><h2>A fresh conversation</h2><p>For example: “Draft a friendly reminder to close a window.”<br>This chat can write the words; it cannot check or control devices.</p></div>` : w}
-        ${this._history.map((e) => S`<article class="message ${e.role}"><strong>${e.role === "user" ? "You" : "AI reply"}</strong><p>${e.content}</p></article>`)}
-        ${this._busy ? S`<article class="message user"><strong>You</strong><p>${this._pendingPrompt}</p></article><p class="pending" role="status">Waiting for your local provider…</p>` : w}
+        ${this._history.length === 0 && !this._busy ? C`<div class="empty"><h2>A fresh conversation</h2><p>For example: “Draft a friendly reminder to close a window.”<br>This chat can write the words; it cannot check or control devices.</p></div>` : T}
+        ${this._history.map((e) => C`<article class="message ${e.role}"><strong>${e.role === "user" ? "You" : "AI reply"}</strong><p>${e.content}</p></article>`)}
+        ${this._busy ? C`<article class="message user"><strong>You</strong><p>${this._pendingPrompt}</p></article><p class="pending" role="status">Waiting for your local provider…</p>` : T}
       </div>
-      ${this._error ? S`<div class="error" role="alert">${this._error}</div>` : w}
-      ${this._notice ? S`<p class="notice" role="status">${this._notice}</p>` : w}
+      ${this._error ? C`<div class="error" role="alert">${this._error}</div>` : T}
+      ${this._notice ? C`<p class="notice" role="status">${this._notice}</p>` : T}
       <form class="compose" @submit=${(e) => void this._send(e)}>
         <label for="message">Your message</label>
-        <textarea id="message" rows="1" maxlength=${R.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${I.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
           @input=${(e) => {
 			let t = e.target;
@@ -2332,7 +2332,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
           @keydown=${(e) => {
 			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
 		}}></textarea>
-        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${R.max_message_chars} · Ctrl/⌘ + Enter to send</span>
+        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${I.max_message_chars} · Ctrl/⌘ + Enter to send</span>
           <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !e || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>
       </form>
     </div>`;
@@ -2379,20 +2379,20 @@ var It = 131072, U = {
 		super("Workflow preview response is unsupported.");
 	}
 };
-function G(e) {
+function Lt(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Lt(e, t) {
+function Rt(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function K(e, t, n) {
-	return Array.isArray(e) && e.length <= t && e.every((e, t) => G(e) && Lt(e, [
+function G(e, t, n) {
+	return Array.isArray(e) && e.length <= t && e.every((e, t) => Lt(e) && Rt(e, [
 		"index",
 		"passed",
 		"reason"
 	]) && e.index === t && typeof e.passed == "boolean" && typeof e.reason == "string" && n.includes(e.reason) && e.passed === (e.reason === "matched"));
 }
-var Rt = [
+var zt = [
 	"mode",
 	"enabled",
 	"triggered",
@@ -2404,63 +2404,63 @@ var Rt = [
 	"provider_calls",
 	"actions_executed"
 ];
-function zt(e, t, n) {
-	return G(e) && Lt(e, n ? ["schema_version", ...Rt] : Rt) && (!n || e.schema_version === 1) && e.mode === t;
-}
-function Bt(e) {
-	if (!zt(e, "observation_only", !1)) throw new W();
-	return Ht(e);
+function Bt(e, t, n) {
+	return Lt(e) && Rt(e, n ? ["schema_version", ...zt] : zt) && (!n || e.schema_version === 1) && e.mode === t;
 }
 function Vt(e) {
-	if (!zt(e, "offline", !0)) throw new W();
-	return Ht(e);
+	if (!Bt(e, "observation_only", !1)) throw new W();
+	return Ut(e);
 }
 function Ht(e) {
-	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !K(e.trigger_results, 10, [
+	if (!Bt(e, "offline", !0)) throw new W();
+	return Ut(e);
+}
+function Ut(e) {
+	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !G(e.trigger_results, 10, [
 		"matched",
 		"event_kind_mismatch",
 		"state_unchanged",
 		"entity_not_selected",
 		"target_state_mismatch",
 		"time_mismatch"
-	]) || !K(e.condition_results, 20, [
+	]) || !G(e.condition_results, 20, [
 		"matched",
 		"outside_time_window",
 		"state_unavailable",
 		"state_mismatch",
 		"state_not_numeric",
 		"outside_numeric_bounds"
-	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => G(e) && Lt(e, ["index", "kind"]) && e.index === t && [
+	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Lt(e) && Rt(e, ["index", "kind"]) && e.index === t && [
 		"ai_compose",
 		"ai_classify",
 		"notify"
 	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new W();
 	return e;
 }
-async function Ut(e, t, n) {
+async function Wt(e, t, n) {
 	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new W();
-	return Vt(await e.callWS({
+	return Ht(await e.callWS({
 		type: "ai_orchestrator/workflow/preview",
 		workflow_json: t,
 		snapshot_json: n
 	}));
 }
-var Wt = [
+var Gt = [
 	"ready",
 	"unreadable",
 	"not_loaded"
-], Gt = ["activation_failed", "cleanup_failed"], Kt = ["observe", "execute"], qt = [
+], Kt = ["activation_failed", "cleanup_failed"], qt = ["observe", "execute"], Jt = [
 	"ok",
 	"planned",
 	"failed",
 	"skipped",
 	"delivered"
-], q = class extends Error {
+], K = class extends Error {
 	constructor() {
 		super("The workflow response does not match the supported contract."), this.name = "WorkflowContractError";
 	}
-}, Jt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Yt = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Xt = /^[a-z][a-z0-9_]{0,63}$/u;
-function Zt(e) {
+}, Yt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Xt = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Zt = /^[a-z][a-z0-9_]{0,63}$/u;
+function Qt(e) {
 	let t = [
 		"started_at",
 		"steps",
@@ -2469,9 +2469,9 @@ function Zt(e) {
 		"completed",
 		"error"
 	];
-	if (!J(e) || !(Y(e, t) || Y(e, [...t, "finished_at"])) || typeof e.started_at != "string" || e.started_at.length > 40 || "finished_at" in e && (typeof e.finished_at != "string" || e.finished_at.length > 40) || !Array.isArray(e.steps) || e.steps.length > 25 || !X(e.provider_calls) || !X(e.actions_executed) || typeof e.completed != "boolean" || e.error !== null && (typeof e.error != "string" || e.error.length > 64)) throw new q();
+	if (!q(e) || !(J(e, t) || J(e, [...t, "finished_at"])) || typeof e.started_at != "string" || e.started_at.length > 40 || "finished_at" in e && (typeof e.finished_at != "string" || e.finished_at.length > 40) || !Array.isArray(e.steps) || e.steps.length > 25 || !Y(e.provider_calls) || !Y(e.actions_executed) || typeof e.completed != "boolean" || e.error !== null && (typeof e.error != "string" || e.error.length > 64)) throw new K();
 	let n = e.steps.map((e, t) => {
-		if (!J(e) || e.index !== t || typeof e.step_id != "string" || !Xt.test(e.step_id) || typeof e.kind != "string" || typeof e.executed != "boolean" || !qt.includes(e.status) || Object.keys(e).some((e) => ![
+		if (!q(e) || e.index !== t || typeof e.step_id != "string" || !Zt.test(e.step_id) || typeof e.kind != "string" || typeof e.executed != "boolean" || !Jt.includes(e.status) || Object.keys(e).some((e) => ![
 			"index",
 			"step_id",
 			"kind",
@@ -2484,29 +2484,29 @@ function Zt(e) {
 			"entity",
 			"service",
 			"missing"
-		].includes(e.target)) throw new q();
+		].includes(e.target)) throw new K();
 		return e;
 	});
-	if (e.completed && (e.error !== null || n.some((e) => e.status === "failed" || e.status === "skipped")) || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new q();
+	if (e.completed && (e.error !== null || n.some((e) => e.status === "failed" || e.status === "skipped")) || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new K();
 	return {
 		...e,
 		steps: n
 	};
 }
-function J(e) {
+function q(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Y(e, t) {
+function J(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Qt(e, t) {
-	return Array.isArray(e) && e.length <= t && e.every(J);
+function $t(e, t) {
+	return Array.isArray(e) && e.length <= t && e.every(q);
 }
-function X(e) {
+function Y(e) {
 	return Number.isSafeInteger(e) && e >= 0;
 }
-function $t(e) {
-	if (!J(e) || !Y(e, [
+function en(e) {
+	if (!q(e) || !J(e, [
 		"schema_version",
 		"workflow_id",
 		"name",
@@ -2517,7 +2517,7 @@ function $t(e) {
 		"triggers",
 		"conditions",
 		"steps"
-	]) || e.schema_version !== 1 || !Kt.includes(e.run_mode) || e.provider_connection_id !== null && (typeof e.provider_connection_id != "string" || !Yt.test(e.provider_connection_id)) || typeof e.workflow_id != "string" || !Jt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Qt(e.triggers, 10) || !Qt(e.conditions, 20) || !Qt(e.steps, 25)) throw new q();
+	]) || e.schema_version !== 1 || !qt.includes(e.run_mode) || e.provider_connection_id !== null && (typeof e.provider_connection_id != "string" || !Xt.test(e.provider_connection_id)) || typeof e.workflow_id != "string" || !Yt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !$t(e.triggers, 10) || !$t(e.conditions, 20) || !$t(e.steps, 25)) throw new K();
 	return {
 		schema_version: 1,
 		workflow_id: e.workflow_id,
@@ -2531,8 +2531,8 @@ function $t(e) {
 		steps: e.steps
 	};
 }
-function en(e) {
-	if (!J(e) || !Y(e, [
+function tn(e) {
+	if (!q(e) || !J(e, [
 		"active",
 		"observations",
 		"ignored_events",
@@ -2544,15 +2544,15 @@ function en(e) {
 		"skipped_busy",
 		"execution_running",
 		"last_execution"
-	]) || typeof e.active != "boolean" || !X(e.executions) || !X(e.execution_failures) || !X(e.skipped_busy) || typeof e.execution_running != "boolean" || e.execution_failures > e.executions || !X(e.observations) || !X(e.ignored_events) || !X(e.registrations) || e.error !== null && !Gt.includes(e.error) || e.active && e.error !== null) throw new q();
+	]) || typeof e.active != "boolean" || !Y(e.executions) || !Y(e.execution_failures) || !Y(e.skipped_busy) || typeof e.execution_running != "boolean" || e.execution_failures > e.executions || !Y(e.observations) || !Y(e.ignored_events) || !Y(e.registrations) || e.error !== null && !Kt.includes(e.error) || e.active && e.error !== null) throw new K();
 	let t = null;
 	if (e.latest !== null) try {
-		t = Bt(e.latest);
+		t = Vt(e.latest);
 	} catch {
-		throw new q();
+		throw new K();
 	}
 	let n = null;
-	return e.last_execution !== null && (n = Zt(e.last_execution)), {
+	return e.last_execution !== null && (n = Qt(e.last_execution)), {
 		active: e.active,
 		observations: e.observations,
 		ignored_events: e.ignored_events,
@@ -2566,27 +2566,27 @@ function en(e) {
 		last_execution: n
 	};
 }
-function tn(e) {
-	if (!Array.isArray(e) || e.length > 50) throw new q();
+function nn(e) {
+	if (!Array.isArray(e) || e.length > 50) throw new K();
 	let t = /* @__PURE__ */ new Set();
 	return e.map((e) => {
-		if (!J(e) || !Y(e, ["workflow", "status"])) throw new q();
-		let n = $t(e.workflow);
-		if (t.has(n.workflow_id)) throw new q();
+		if (!q(e) || !J(e, ["workflow", "status"])) throw new K();
+		let n = en(e.workflow);
+		if (t.has(n.workflow_id)) throw new K();
 		return t.add(n.workflow_id), {
 			workflow: n,
-			status: en(e.status)
+			status: tn(e.status)
 		};
 	});
 }
-function nn(e) {
-	if (!J(e) || !Y(e, [
+function X(e) {
+	if (!q(e) || !J(e, [
 		"schema_version",
 		"store",
 		"workflows"
-	]) || e.schema_version !== 1 || !Wt.includes(e.store)) throw new q();
-	let t = tn(e.workflows);
-	if (e.store !== "ready" && t.length > 0) throw new q();
+	]) || e.schema_version !== 1 || !Gt.includes(e.store)) throw new K();
+	let t = nn(e.workflows);
+	if (e.store !== "ready" && t.length > 0) throw new K();
 	return {
 		schema_version: 1,
 		store: e.store,
@@ -2594,21 +2594,21 @@ function nn(e) {
 	};
 }
 function rn(e, t) {
-	if (!J(e) || !Object.hasOwn(e, "workflow")) throw new q();
-	let { workflow: n, ...r } = e, i = $t(n);
-	if (t !== void 0 && i.workflow_id !== t) throw new q();
-	let a = nn(r);
-	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new q();
+	if (!q(e) || !Object.hasOwn(e, "workflow")) throw new K();
+	let { workflow: n, ...r } = e, i = en(n);
+	if (t !== void 0 && i.workflow_id !== t) throw new K();
+	let a = X(r);
+	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new K();
 	return {
 		...a,
 		workflow: i
 	};
 }
 async function an(e) {
-	return nn(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
+	return X(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
 }
 async function on(e, t) {
-	if (!t.trim() || t.length > 131072) throw new q();
+	if (!t.trim() || t.length > 131072) throw new K();
 	return rn(await e.callWS({
 		type: "ai_orchestrator/workflows/save",
 		workflow_json: t
@@ -2620,15 +2620,15 @@ async function sn(e, t, n) {
 		workflow_id: t,
 		enabled: n
 	}), t);
-	if (r.workflow.enabled !== n) throw new q();
+	if (r.workflow.enabled !== n) throw new K();
 	return r;
 }
 async function cn(e, t) {
-	let n = nn(await e.callWS({
+	let n = X(await e.callWS({
 		type: "ai_orchestrator/workflows/delete",
 		workflow_id: t
 	}));
-	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new q();
+	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new K();
 	return n;
 }
 async function ln(e, t) {
@@ -2636,28 +2636,366 @@ async function ln(e, t) {
 		type: "ai_orchestrator/workflows/run_manual",
 		workflow_id: t
 	});
-	if (!J(n) || n.schema_version !== 1) throw new q();
+	if (!q(n) || n.schema_version !== 1) throw new K();
 	let r = Object.fromEntries(Object.entries(n).filter(([e]) => e !== "schema_version"));
 	try {
-		return Bt(r);
+		return Vt(r);
 	} catch {
-		throw new q();
+		throw new K();
 	}
 }
-var un = [
+//#endregion
+//#region src/panel/workflow-builder-view.ts
+var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, fn = /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/u, pn = 40, mn = {
+	invalid_workflow: "Home Assistant rejected the workflow. Check the highlighted fields.",
+	workflow_store_unavailable: "Workflow storage is unavailable.",
+	not_loaded: "The foundation is not loaded."
+}, hn = class extends A {
+	static properties = {
+		hass: { attribute: !1 },
+		_entities: { state: !0 },
+		_providers: { state: !0 },
+		_targets: { state: !0 },
+		_name: { state: !0 },
+		_runMode: { state: !0 },
+		_providerId: { state: !0 },
+		_enabled: { state: !0 },
+		_triggerKind: { state: !0 },
+		_triggerEntity: { state: !0 },
+		_toState: { state: !0 },
+		_atTime: { state: !0 },
+		_conditions: { state: !0 },
+		_steps: { state: !0 },
+		_busy: { state: !0 },
+		_error: { state: !0 },
+		_saved: { state: !0 }
+	};
+	static styles = o`
+    :host { display:block; min-width:0; color:var(--primary-text-color,#233642); margin-bottom:32px; }
+    * { box-sizing:border-box; } h1 { font-size:26px; margin:0 0 10px; } h2 { font-size:18px; margin:18px 0 8px; }
+    p { line-height:1.6; } fieldset { border:1px solid var(--divider-color,#ccd9da); border-radius:12px; padding:12px 16px; margin:0 0 14px; min-width:0; }
+    legend { font-weight:600; padding:0 6px; } label { display:block; font-weight:600; margin:10px 0 4px; }
+    input, select, textarea { width:100%; min-width:0; min-height:44px; padding:8px 12px; font:inherit; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:8px; }
+    textarea { min-height:96px; resize:vertical; } .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:12px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; } button { cursor:pointer; min-height:44px; padding:10px 14px; font:inherit; border:1px solid #7d969c; border-radius:8px; background:var(--card-background-color,#fff); color:inherit; }
+    .primary { background:#175e56; color:#fff; } button:disabled { opacity:.55; cursor:default; } .error { color:var(--error-color,#852e23); }
+    .hint { font-size:13px; opacity:.85; margin:4px 0 0; } .check { display:flex; align-items:center; gap:8px; font-weight:600; margin:10px 0; } .check input { width:auto; min-height:0; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
+  `;
+	_sequence = 0;
+	_callWS;
+	_userId;
+	_workflowId = H();
+	constructor() {
+		super(), this._entities = [], this._providers = [], this._targets = [], this._name = "", this._runMode = "observe", this._providerId = "", this._enabled = !1, this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
+			kind: "ai_compose",
+			prompt: "Write a short, friendly household reminder about this event."
+		}, {
+			kind: "notify",
+			notify_service: ""
+		}], this._busy = !1, this._error = "", this._saved = !1;
+	}
+	willUpdate(e) {
+		e.has("hass") && (this._callWS !== this.hass?.callWS || this._userId !== this.hass?.user?.id) && (this._callWS = this.hass?.callWS, this._userId = this.hass?.user?.id, this._sequence++, this._entities = [], this._providers = [], this._targets = [], this._busy = !1, this._error = "", this._saved = !1, this._loadLookups());
+	}
+	async _loadLookups() {
+		let e = this.hass;
+		if (!e) return;
+		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS, [r, i, a] = await Promise.allSettled([
+			it(e),
+			V(e),
+			Ft(e)
+		]);
+		n() && (r.status === "fulfilled" && (this._entities = r.value.entities.filter((e) => !e.disabled)), i.status === "fulfilled" && (this._providers = i.value.providers, this._providerId ||= i.value.providers[0]?.connection_id ?? ""), a.status === "fulfilled" && (this._targets = a.value));
+	}
+	_matches(e) {
+		let t = e.trim().toLowerCase();
+		return t.length < 2 ? [] : this._entities.filter((e) => e.entity_id.includes(t) || (e.name ?? "").toLowerCase().includes(t)).slice(0, pn);
+	}
+	_touch() {
+		this._error = "", this._saved = !1;
+	}
+	problems() {
+		let e = [];
+		(!this._name.trim() || this._name.length > 128) && e.push("Give the workflow a name of up to 128 characters."), this._triggerKind === "state" && !fn.test(this._triggerEntity) && e.push("Choose a trigger entity."), this._triggerKind === "state" && (!this._toState.trim() || this._toState.length > 255) && e.push("Enter the trigger's target state."), this._triggerKind === "time" && !dn.test(this._atTime) && e.push("Enter the trigger time as HH:MM.");
+		for (let [t, n] of this._conditions.entries()) {
+			let r = `Condition ${t + 1}`;
+			n.kind === "time_window" && (!dn.test(n.after_time) || !dn.test(n.before_time)) && e.push(`${r}: both times must be HH:MM.`), n.kind === "state" && (!fn.test(n.entity_id) || !n.state.trim()) && e.push(`${r}: choose an entity and a state.`), n.kind === "numeric_state" && (!fn.test(n.entity_id) || !n.above.trim() && !n.below.trim() || [n.above, n.below].some((e) => e.trim() && !Number.isFinite(Number(e)))) && e.push(`${r}: choose an entity and a finite bound.`);
+		}
+		this._steps.length === 0 && e.push("Add at least one step.");
+		for (let [t, n] of this._steps.entries()) {
+			let r = `Step ${t + 1}`;
+			if (n.kind !== "notify" && (!n.prompt.trim() || n.prompt.length > 4e3) && e.push(`${r}: enter a prompt of up to 4,000 characters.`), n.kind === "ai_classify") {
+				let t = this._categories(n.categories);
+				(t.length < 2 || t.length > 20 || new Set(t).size !== t.length || t.some((e) => e.length > 64)) && e.push(`${r}: list two to twenty unique categories.`);
+			}
+			n.kind === "notify" && !this._targets.some((e) => e.reference === n.notify_service) && e.push(`${r}: choose a notification target that Home Assistant has.`);
+		}
+		return this._runMode === "execute" && this._steps.some((e) => e.kind !== "notify") && !this._providers.some((e) => e.connection_id === this._providerId) && e.push("Execute mode with AI steps needs a local provider."), e;
+	}
+	_categories(e) {
+		return e.split(",").map((e) => e.trim()).filter(Boolean);
+	}
+	document() {
+		let e = this._triggerKind === "state" ? [{
+			kind: "state",
+			entity_ids: [this._triggerEntity],
+			to_state: this._toState
+		}] : this._triggerKind === "time" ? [{
+			kind: "time",
+			at_time: this._atTime
+		}] : [{ kind: "manual" }], t = this._conditions.map((e) => {
+			if (e.kind === "time_window") return {
+				kind: "time_window",
+				after_time: e.after_time,
+				before_time: e.before_time
+			};
+			if (e.kind === "state") return {
+				kind: "state",
+				entity_id: e.entity_id,
+				state: e.state
+			};
+			let t = {
+				kind: "numeric_state",
+				entity_id: e.entity_id
+			};
+			return e.above.trim() && (t.above = Number(e.above)), e.below.trim() && (t.below = Number(e.below)), t;
+		}), n = {}, r = this._steps.map((e) => {
+			let t = e.kind === "ai_compose" ? "compose" : e.kind === "ai_classify" ? "classify" : "notify";
+			n[t] = (n[t] ?? 0) + 1;
+			let r = n[t] === 1 ? t : `${t}_${n[t]}`;
+			return e.kind === "ai_compose" ? {
+				step_id: r,
+				kind: "ai_compose",
+				prompt: e.prompt
+			} : e.kind === "ai_classify" ? {
+				step_id: r,
+				kind: "ai_classify",
+				prompt: e.prompt,
+				categories: this._categories(e.categories)
+			} : {
+				step_id: r,
+				kind: "notify",
+				notify_service: e.notify_service
+			};
+		}), i = this._steps.some((e) => e.kind !== "notify");
+		return {
+			schema_version: 1,
+			workflow_id: this._workflowId,
+			name: this._name.trim(),
+			description: "",
+			enabled: this._enabled,
+			run_mode: this._runMode,
+			provider_connection_id: this._runMode === "execute" && i ? this._providerId : null,
+			triggers: e,
+			conditions: t,
+			steps: r
+		};
+	}
+	_toEditor = () => {
+		this._touch(), this.dispatchEvent(new CustomEvent("workflow-draft", {
+			bubbles: !0,
+			composed: !0,
+			detail: { json: JSON.stringify(this.document(), null, 2) }
+		}));
+	};
+	_save = async () => {
+		let e = this.hass;
+		if (this._busy || !e || e.connection?.connected === !1 || this.problems().length > 0) return;
+		this._touch(), this._busy = !0;
+		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.user?.id === e.user?.id;
+		try {
+			if (await on(e, JSON.stringify(this.document())), !n()) return;
+			this._saved = !0, this.dispatchEvent(new CustomEvent("workflow-saved", {
+				bubbles: !0,
+				composed: !0
+			}));
+		} catch (e) {
+			if (!n()) return;
+			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "", r = t === "invalid_workflow" && typeof e == "object" && e && "message" in e && typeof e.message == "string" && e.message.length <= 160 ? ` ${e.message}` : "";
+			this._error = (mn[t] ?? "The workflow could not be saved. Check administrator access and the installed integration version.") + r;
+		} finally {
+			n() && (this._busy = !1);
+		}
+	};
+	_startNew = () => {
+		this._workflowId = H(), this._touch(), this._name = "", this._enabled = !1, this._runMode = "observe", this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
+			kind: "ai_compose",
+			prompt: "Write a short, friendly household reminder about this event."
+		}, {
+			kind: "notify",
+			notify_service: ""
+		}];
+	};
+	render() {
+		let e = this.problems(), t = !this.hass || this.hass.connection?.connected === !1;
+		return C`<section aria-labelledby="builder-title">
+      <h1 id="builder-title">Build a workflow</h1>
+      <p>Assemble a workflow from what Home Assistant actually has: a trigger, optional deterministic conditions, AI steps, and a notification target. Nothing is sent until you save; a saved workflow only runs live when its mode is <strong>execute</strong> and it is enabled.</p>
+      <fieldset><legend>Workflow</legend>
+        <div class="row">
+          <div><label for="wb-name">Name</label><input id="wb-name" maxlength="128" .value=${this._name} @input=${(e) => {
+			this._touch(), this._name = e.target.value;
+		}} /></div>
+          <div><label for="wb-mode">Mode</label>
+            <select id="wb-mode" .value=${this._runMode} @change=${(e) => {
+			this._touch(), this._runMode = e.target.value;
+		}}>
+              <option value="observe" ?selected=${this._runMode === "observe"}>Observe only (record outcomes)</option>
+              <option value="execute" ?selected=${this._runMode === "execute"}>Execute (run AI steps and deliver)</option>
+            </select></div>
+          <div><label for="wb-provider">Local provider for AI steps</label>
+            <select id="wb-provider" ?disabled=${this._providers.length === 0} .value=${this._providerId} @change=${(e) => {
+			this._touch(), this._providerId = e.target.value;
+		}}>
+              ${this._providers.length === 0 ? C`<option value="">No local provider available</option>` : this._providers.map((e) => C`<option value=${e.connection_id} ?selected=${e.connection_id === this._providerId}>${e.title}</option>`)}
+            </select></div>
+        </div>
+        <label class="check" for="wb-enabled"><input id="wb-enabled" type="checkbox" .checked=${this._enabled} @change=${(e) => {
+			this._touch(), this._enabled = e.target.checked;
+		}} /> Enable after saving</label>
+      </fieldset>
+      <fieldset><legend>Trigger</legend>
+        <label for="wb-trigger-kind">Kind</label>
+        <select id="wb-trigger-kind" .value=${this._triggerKind} @change=${(e) => {
+			this._touch(), this._triggerKind = e.target.value;
+		}}>
+          <option value="state" ?selected=${this._triggerKind === "state"}>An entity changes to a state</option>
+          <option value="time" ?selected=${this._triggerKind === "time"}>A time of day</option>
+          <option value="manual" ?selected=${this._triggerKind === "manual"}>Manual only (Observe now)</option>
+        </select>
+        ${this._triggerKind === "state" ? C`<div class="row">
+          <div>${this._renderEntityPicker("wb-trigger-entity", "Entity", this._triggerEntity, (e) => {
+			this._triggerEntity = e;
+		})}</div>
+          <div><label for="wb-to-state">Changes to state</label><input id="wb-to-state" maxlength="255" .value=${this._toState} @input=${(e) => {
+			this._touch(), this._toState = e.target.value;
+		}} /></div>
+        </div>` : T}
+        ${this._triggerKind === "time" ? C`<label for="wb-at-time">At (HH:MM, local)</label><input id="wb-at-time" placeholder="20:00" maxlength="5" .value=${this._atTime} @input=${(e) => {
+			this._touch(), this._atTime = e.target.value;
+		}} />` : T}
+      </fieldset>
+      <fieldset><legend>Conditions (all must pass)</legend>
+        ${this._conditions.map((e, t) => this._renderCondition(e, t))}
+        <div class="actions">
+          <button type="button" @click=${() => this._addCondition({
+			kind: "time_window",
+			after_time: "18:00",
+			before_time: "06:00"
+		})}>Add time window</button>
+          <button type="button" @click=${() => this._addCondition({
+			kind: "state",
+			entity_id: "",
+			state: "on"
+		})}>Add entity state</button>
+          <button type="button" @click=${() => this._addCondition({
+			kind: "numeric_state",
+			entity_id: "",
+			above: "",
+			below: ""
+		})}>Add numeric bound</button>
+        </div>
+      </fieldset>
+      <fieldset><legend>Steps (in order)</legend>
+        ${this._steps.map((e, t) => this._renderStep(e, t))}
+        <div class="actions">
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
+			kind: "ai_compose",
+			prompt: ""
+		})}>Add compose text</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
+			kind: "ai_classify",
+			prompt: "",
+			categories: "urgent, routine"
+		})}>Add classify</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
+			kind: "notify",
+			notify_service: ""
+		})}>Add notification</button>
+        </div>
+      </fieldset>
+      ${e.length ? C`<ul class="error" id="wb-problems">${e.map((e) => C`<li>${e}</li>`)}</ul>` : T}
+      <div class="actions">
+        <button class="primary" id="wb-save" type="button" ?disabled=${this._busy || t || e.length > 0} @click=${this._save}>${this._busy ? "Saving…" : "Save workflow"}</button>
+        <button id="wb-to-editor" type="button" @click=${this._toEditor}>Open in JSON editor</button>
+        <button type="button" @click=${this._startNew}>Start a new one</button>
+      </div>
+      <div role="status" aria-live="polite">${this._error ? C`<p class="error">${this._error}</p>` : T}${this._saved ? C`<p>Workflow saved. It appears in the stored workflows list below; enable it there or with the checkbox above before saving.</p>` : T}</div>
+    </section>`;
+	}
+	_renderEntityPicker(e, t, n, r) {
+		let i = this._matches(n);
+		return C`<label for=${e}>${t}</label>
+      <input id=${e} list="${e}-list" placeholder="Type to search entities" autocomplete="off" maxlength="255" .value=${n} @input=${(e) => {
+			this._touch(), r(e.target.value), this.requestUpdate();
+		}} />
+      <datalist id="${e}-list">${i.map((e) => C`<option value=${e.entity_id}>${e.name ?? e.entity_id}</option>`)}</datalist>
+      <p class="hint">${this._entities.length ? `${this._entities.length} entities in the catalogue` : "Catalogue unavailable; type an entity id"}${i.length ? ` · ${i.length} match(es)` : ""}</p>`;
+	}
+	_addCondition(e) {
+		this._conditions.length < 20 && (this._touch(), this._conditions = [...this._conditions, e]);
+	}
+	_addStep(e) {
+		this._touch(), this._steps = [...this._steps, e];
+	}
+	_updateCondition(e, t) {
+		this._touch(), this._conditions = this._conditions.map((n, r) => r === e ? {
+			...n,
+			...t
+		} : n);
+	}
+	_updateStep(e, t) {
+		this._touch(), this._steps = this._steps.map((n, r) => r === e ? {
+			...n,
+			...t
+		} : n);
+	}
+	_renderCondition(e, t) {
+		let n = C`<button type="button" @click=${() => {
+			this._touch(), this._conditions = this._conditions.filter((e, n) => n !== t);
+		}}>Remove condition ${t + 1}</button>`;
+		return e.kind === "time_window" ? C`<fieldset><legend>Condition ${t + 1}: time window</legend><div class="row">
+      <div><label for="wb-c${t}-after">From (HH:MM)</label><input id="wb-c${t}-after" maxlength="5" .value=${e.after_time} @input=${(e) => this._updateCondition(t, { after_time: e.target.value })} /></div>
+      <div><label for="wb-c${t}-before">Until (HH:MM, exclusive)</label><input id="wb-c${t}-before" maxlength="5" .value=${e.before_time} @input=${(e) => this._updateCondition(t, { before_time: e.target.value })} /></div></div>${n}</fieldset>` : e.kind === "state" ? C`<fieldset><legend>Condition ${t + 1}: entity state</legend><div class="row">
+      <div>${this._renderEntityPicker(`wb-c${t}-entity`, "Entity", e.entity_id, (e) => this._updateCondition(t, { entity_id: e }))}</div>
+      <div><label for="wb-c${t}-state">Is in state</label><input id="wb-c${t}-state" maxlength="255" .value=${e.state} @input=${(e) => this._updateCondition(t, { state: e.target.value })} /></div></div>${n}</fieldset>` : C`<fieldset><legend>Condition ${t + 1}: numeric bound</legend><div class="row">
+      <div>${this._renderEntityPicker(`wb-c${t}-entity`, "Entity", e.entity_id, (e) => this._updateCondition(t, { entity_id: e }))}</div>
+      <div><label for="wb-c${t}-above">Above (exclusive)</label><input id="wb-c${t}-above" inputmode="decimal" .value=${e.above} @input=${(e) => this._updateCondition(t, { above: e.target.value })} /></div>
+      <div><label for="wb-c${t}-below">Below (exclusive)</label><input id="wb-c${t}-below" inputmode="decimal" .value=${e.below} @input=${(e) => this._updateCondition(t, { below: e.target.value })} /></div></div>${n}</fieldset>`;
+	}
+	_renderStep(e, t) {
+		let n = C`<button type="button" @click=${() => {
+			this._touch(), this._steps = this._steps.filter((e, n) => n !== t);
+		}}>Remove step ${t + 1}</button>`;
+		return e.kind === "notify" ? C`<fieldset><legend>Step ${t + 1}: send a notification</legend>
+      <label for="wb-s${t}-target">Target (from Home Assistant)</label>
+      <select id="wb-s${t}-target" .value=${e.notify_service} @change=${(e) => this._updateStep(t, { notify_service: e.target.value })}>
+        <option value="" ?selected=${e.notify_service === ""}>Choose a target…</option>
+        ${this._targets.map((t) => C`<option value=${t.reference} ?selected=${t.reference === e.notify_service}>${t.name} — ${t.reference} (${t.kind})</option>`)}
+      </select>
+      <p class="hint">The message is the text composed by the most recent compose step; the workflow name is the title.</p>${n}</fieldset>` : C`<fieldset><legend>Step ${t + 1}: ${e.kind === "ai_compose" ? "compose text with AI" : "classify with AI"}</legend>
+      <label for="wb-s${t}-prompt">Prompt</label>
+      <textarea id="wb-s${t}-prompt" maxlength="4000" .value=${e.prompt} @input=${(e) => this._updateStep(t, { prompt: e.target.value })}></textarea>
+      ${e.kind === "ai_classify" ? C`<label for="wb-s${t}-categories">Categories (comma separated, 2–20)</label><input id="wb-s${t}-categories" .value=${e.categories} @input=${(e) => this._updateStep(t, { categories: e.target.value })} />` : T}
+      <p class="hint">The model receives only this prompt plus the event, time, and the states of entities named by your conditions.</p>${n}</fieldset>`;
+	}
+};
+customElements.define(un, hn);
+var gn = [
 	"ok",
 	"planned",
 	"failed",
 	"skipped"
-], dn = [
+], _n = [
 	"ai_compose",
 	"ai_classify",
 	"notify"
-], fn = {
+], vn = {
 	invalid_output: "The model reply did not match the required shape",
 	timeout: "The provider took too long to reply",
 	provider_failed: "The provider request failed"
-}, pn = [
+}, yn = [
 	"entity",
 	"service",
 	"missing"
@@ -2665,7 +3003,7 @@ var un = [
 	constructor() {
 		super("Workflow dry-run response is unsupported.");
 	}
-}, mn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, hn = /^[a-z][a-z0-9_]{0,63}$/u, gn = [
+}, bn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, xn = /^[a-z][a-z0-9_]{0,63}$/u, Sn = [
 	"schema_version",
 	"mode",
 	"workflow_id",
@@ -2679,14 +3017,14 @@ var un = [
 	"provider_calls",
 	"actions_executed",
 	"completed"
-], _n = [
+], Cn = [
 	"matched",
 	"event_kind_mismatch",
 	"state_unchanged",
 	"entity_not_selected",
 	"target_state_mismatch",
 	"time_mismatch"
-], vn = [
+], wn = [
 	"matched",
 	"outside_time_window",
 	"state_unavailable",
@@ -2694,7 +3032,7 @@ var un = [
 	"state_not_numeric",
 	"outside_numeric_bounds"
 ];
-function yn(e) {
+function Tn(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
 function Q(e, t) {
@@ -2703,8 +3041,8 @@ function Q(e, t) {
 function $(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function bn(e, t) {
-	if (!yn(e) || e.index !== t || !$(e.step_id, 64) || !hn.test(e.step_id) || !dn.includes(e.kind) || typeof e.executed != "boolean" || !un.includes(e.status)) return !1;
+function En(e, t) {
+	if (!Tn(e) || e.index !== t || !$(e.step_id, 64) || !xn.test(e.step_id) || !_n.includes(e.kind) || typeof e.executed != "boolean" || !gn.includes(e.status)) return !1;
 	let n = [
 		"index",
 		"step_id",
@@ -2718,22 +3056,22 @@ function bn(e, t) {
 			...n,
 			"message_step_id",
 			"target"
-		]) && pn.includes(e.target)) && (e.message_step_id === null || $(e.message_step_id, 64) && hn.test(e.message_step_id));
+		]) && yn.includes(e.target)) && (e.message_step_id === null || $(e.message_step_id, 64) && xn.test(e.message_step_id));
 		case "failed": return r && e.executed === !1 && Q(e, [...n, "error"]) && $(e.error, 64);
 		default: return e.executed === !1 && Q(e, n);
 	}
 }
-function xn(e, t) {
-	if (!yn(e) || !Q(e, gn) || e.schema_version !== 1 || e.mode !== "dry_run" || e.workflow_id !== t || e.destination !== "local" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || typeof e.completed != "boolean" || e.actions_executed !== 0 || !Number.isInteger(e.provider_calls) || e.provider_calls < 0 || !K(e.trigger_results, 10, _n) || !K(e.condition_results, 20, vn) || !Array.isArray(e.steps) || e.steps.length > 25 || !e.steps.every((e, t) => bn(e, t)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed)) throw new Z();
+function Dn(e, t) {
+	if (!Tn(e) || !Q(e, Sn) || e.schema_version !== 1 || e.mode !== "dry_run" || e.workflow_id !== t || e.destination !== "local" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || typeof e.completed != "boolean" || e.actions_executed !== 0 || !Number.isInteger(e.provider_calls) || e.provider_calls < 0 || !G(e.trigger_results, 10, Cn) || !G(e.condition_results, 20, wn) || !Array.isArray(e.steps) || e.steps.length > 25 || !e.steps.every((e, t) => En(e, t)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed)) throw new Z();
 	let n = e.steps, r = n.filter((e) => e.kind !== "notify" && (e.status === "ok" || e.status === "failed")).length, i = e.eligible;
 	if (!i && (n.length > 0 || e.provider_calls !== 0 || e.completed !== !1) || i && (!(e.triggered && e.conditions_passed) || n.length === 0 || e.provider_calls !== r || e.completed !== n.every((e) => e.status === "ok" || e.status === "planned"))) throw new Z();
 	let a = n.findIndex((e) => e.status === "failed");
 	if (n.some((e, t) => e.status === "skipped" != (a !== -1 && t > a))) throw new Z();
 	return e;
 }
-async function Sn(e, t, n, r) {
-	if (!mn.test(t) || !mn.test(n) || !r.trim() || r.length > 131072) throw new Z();
-	return xn(await e.callWS({
+async function On(e, t, n, r) {
+	if (!bn.test(t) || !bn.test(n) || !r.trim() || r.length > 131072) throw new Z();
+	return Dn(await e.callWS({
 		type: "ai_orchestrator/workflows/dry_run",
 		workflow_id: t,
 		connection_id: n,
@@ -2742,7 +3080,7 @@ async function Sn(e, t, n, r) {
 }
 //#endregion
 //#region src/panel/workflow-preview-view.ts
-var Cn = "ai-orchestrator-workflow-preview", wn = {
+var kn = "ai-orchestrator-workflow-preview", An = {
 	schema_version: 1,
 	workflow_id: "12345678-1234-4123-8123-123456789abc",
 	name: "Synthetic evening window preview",
@@ -2770,17 +3108,17 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 		kind: "notify",
 		notify_service: "notify.synthetic"
 	}]
-}, Tn = {
+}, jn = {
 	ai_compose: "Compose text",
 	ai_classify: "Classify text",
 	notify: "Notification"
-}, En = {
+}, Mn = {
 	workflow_not_found: "Save the workflow first; a dry run uses the stored version.",
 	dry_run_provider_unavailable: "Select an available local provider.",
 	dry_run_busy: "A dry run is already running. Try again shortly.",
 	invalid_snapshot: "Check the snapshot JSON.",
 	workflow_store_unavailable: "Workflow storage is unavailable."
-}, Dn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, On = class extends k {
+}, Nn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Pn = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		draft: { attribute: !1 },
@@ -2836,7 +3174,7 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 		if (!e) return;
 		let t = this._sequence;
 		try {
-			let n = await Ct(e);
+			let n = await V(e);
 			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
 			this._providers = n.providers, this._connectionId = n.providers[0]?.connection_id ?? "";
 		} catch {}
@@ -2854,7 +3192,7 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 	_storedWorkflowId() {
 		try {
 			let e = JSON.parse(this._workflow).workflow_id;
-			return typeof e == "string" && Dn.test(e) ? e : void 0;
+			return typeof e == "string" && Nn.test(e) ? e : void 0;
 		} catch {
 			return;
 		}
@@ -2868,18 +3206,18 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 		this._invalidate(), this._busy = !0;
 		let r = this._sequence, i = () => r === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let r = await Sn(e, t, n, this._snapshot);
+			let r = await On(e, t, n, this._snapshot);
 			i() && (this._dryRun = r);
 		} catch (e) {
 			if (!i()) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = En[t] ?? "The dry run could not be completed. Check the snapshot JSON, the selected provider, administrator access, and the installed integration version.";
+			this._error = Mn[t] ?? "The dry run could not be completed. Check the snapshot JSON, the selected provider, administrator access, and the installed integration version.";
 		} finally {
 			i() && (this._busy = !1);
 		}
 	};
 	_example(e) {
-		this._invalidate(), this._workflow = JSON.stringify(wn, null, 2), this._snapshot = JSON.stringify({
+		this._invalidate(), this._workflow = JSON.stringify(An, null, 2), this._snapshot = JSON.stringify({
 			states: { "binary_sensor.synthetic_window": "on" },
 			time: e ? "12:00" : "20:00",
 			event: {
@@ -2901,7 +3239,7 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Ut(e, this._workflow, this._snapshot);
+			let t = await Wt(e, this._workflow, this._snapshot);
 			n() && (this._result = t);
 		} catch {
 			n() && (this._error = "Preview could not be completed. Check both JSON documents, administrator access, and the installed integration version.");
@@ -2928,7 +3266,7 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
 		}
 	};
 	render() {
-		return S`<section aria-labelledby="preview-title">
+		return C`<section aria-labelledby="preview-title">
       <h1 id="preview-title">Workflow preview</h1>
       <p>Experimental offline JSON editor. Test a draft against a supplied snapshot: previewing reads no live home state, contacts no provider, and executes no action. "Save as workflow" stores the workflow document in Home Assistant; an enabled saved workflow then watches its triggers and records outcomes without running any step.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
@@ -2941,46 +3279,46 @@ var Cn = "ai-orchestrator-workflow-preview", wn = {
         <select id="dry-run-provider" ?disabled=${this._busy || this._providers.length === 0} .value=${this._connectionId} @change=${(e) => {
 			this._invalidate(), this._connectionId = e.target.value;
 		}}>
-          ${this._providers.length === 0 ? S`<option value="">No local provider available</option>` : this._providers.map((e) => S`<option value=${e.connection_id} ?selected=${e.connection_id === this._connectionId}>${e.title}</option>`)}
+          ${this._providers.length === 0 ? C`<option value="">No local provider available</option>` : this._providers.map((e) => C`<option value=${e.connection_id} ?selected=${e.connection_id === this._connectionId}>${e.title}</option>`)}
         </select>
         <button id="dry-run" type="button" ?disabled=${!this._canDryRun()} @click=${this._runDry}>${this._busy ? "Working…" : "Dry run AI steps"}</button>
       </div>
       <details><summary>Notification targets found in Home Assistant (${this._targets.length})</summary>
-        ${this._targets.length ? S`<ul>${this._targets.map((e) => S`<li><code>${e.reference}</code> — ${e.name} (notify ${e.kind})</li>`)}</ul>` : S`<p>No notify entity or notify service was found, or discovery is unavailable.</p>`}
+        ${this._targets.length ? C`<ul>${this._targets.map((e) => C`<li><code>${e.reference}</code> — ${e.name} (notify ${e.kind})</li>`)}</ul>` : C`<p>No notify entity or notify service was found, or discovery is unavailable.</p>`}
         <p>Use one of these references as a notify step's <code>notify_service</code>. To run a workflow live, set <code>"run_mode": "execute"</code> and, for AI steps, <code>"provider_connection_id"</code> to a local provider, then save and enable it.</p>
       </details>
       <p>A dry run evaluates the <em>stored</em> workflow against the snapshot above, then runs its AI steps once against the selected local provider. The model sees only the step prompt, the event, the time, and the states of entities named by the workflow's conditions. Notifications are only planned; nothing is sent, stored, or executed.</p>
-      <div role="status" aria-live="polite">${this._error ? S`<p class="error">${this._error}</p>` : w}${this._saved ? S`<p>Workflow saved. It appears in the stored workflows list below.</p>` : w}${this._busy ? S`<p>Working…</p>` : w}${this._result ? this._renderResult(this._result) : w}${this._dryRun ? this._renderDryRun(this._dryRun) : w}</div>
+      <div role="status" aria-live="polite">${this._error ? C`<p class="error">${this._error}</p>` : T}${this._saved ? C`<p>Workflow saved. It appears in the stored workflows list below.</p>` : T}${this._busy ? C`<p>Working…</p>` : T}${this._result ? this._renderResult(this._result) : T}${this._dryRun ? this._renderDryRun(this._dryRun) : T}</div>
     </section>`;
 	}
 	_renderResult(e) {
-		return S`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
+		return C`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
       <p>Draft enabled flag: ${e.enabled ? "yes" : "no"}. Preview never activates a workflow.</p>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => S`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? S`<ul>${e.condition_results.map((e) => S`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : S`<p>No conditions.</p>`}
-      <h3>Planned steps</h3>${e.planned_steps.length ? S`<ol>${e.planned_steps.map((e) => S`<li>${Tn[e.kind]} — not executed</li>`)}</ol>` : S`<p>No steps planned.</p>`}
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
+      <h3>Planned steps</h3>${e.planned_steps.length ? C`<ol>${e.planned_steps.map((e) => C`<li>${jn[e.kind]} — not executed</li>`)}</ol>` : C`<p>No steps planned.</p>`}
       <p>Provider calls: 0 · Actions executed: 0</p></div>`;
 	}
 	_renderDryRun(e) {
-		return S`<div class="result"><h2>${e.eligible ? e.completed ? "Dry run completed — nothing was sent" : "Dry run stopped at a failed step" : "Dry run: scenario blocked — no AI step ran"}</h2>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => S`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? S`<ul>${e.condition_results.map((e) => S`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : S`<p>No conditions.</p>`}
-      <h3>Steps</h3>${e.steps.length ? S`<ol>${e.steps.map((e) => this._renderDryRunStep(e))}</ol>` : S`<p>No steps ran.</p>`}
+		return C`<div class="result"><h2>${e.eligible ? e.completed ? "Dry run completed — nothing was sent" : "Dry run stopped at a failed step" : "Dry run: scenario blocked — no AI step ran"}</h2>
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
+      <h3>Steps</h3>${e.steps.length ? C`<ol>${e.steps.map((e) => this._renderDryRunStep(e))}</ol>` : C`<p>No steps ran.</p>`}
       <p>Provider calls: ${e.provider_calls} · Actions executed: 0 · Destination: local</p></div>`;
 	}
 	_renderDryRunStep(e) {
-		let t = Tn[e.kind];
-		return e.status === "ok" && e.text !== void 0 ? S`<li>${t} — composed:<div class="composed">${e.text}</div></li>` : e.status === "ok" ? S`<li>${t} — category: ${e.category}</li>` : e.status === "planned" ? S`<li>${t} — planned, not sent${e.message_step_id ? ` (would use text from step ${e.message_step_id})` : ""}${e.target === "missing" ? " — target not found in Home Assistant" : e.target ? ` — target resolves to a notify ${e.target}` : ""}</li>` : e.status === "failed" ? S`<li>${t} — failed: ${fn[e.error] ?? "Provider error"}</li>` : S`<li>${t} — skipped</li>`;
+		let t = jn[e.kind];
+		return e.status === "ok" && e.text !== void 0 ? C`<li>${t} — composed:<div class="composed">${e.text}</div></li>` : e.status === "ok" ? C`<li>${t} — category: ${e.category}</li>` : e.status === "planned" ? C`<li>${t} — planned, not sent${e.message_step_id ? ` (would use text from step ${e.message_step_id})` : ""}${e.target === "missing" ? " — target not found in Home Assistant" : e.target ? ` — target resolves to a notify ${e.target}` : ""}</li>` : e.status === "failed" ? C`<li>${t} — failed: ${vn[e.error] ?? "Provider error"}</li>` : C`<li>${t} — skipped</li>`;
 	}
 };
-customElements.define(Cn, On);
+customElements.define(kn, Pn);
 //#endregion
 //#region src/panel/workflows-view.ts
-var kn = "ai-orchestrator-workflows", An = {
+var Fn = "ai-orchestrator-workflows", In = {
 	load: "Stored workflows could not be read from Home Assistant. Check administrator access and the installed integration version.",
 	mutate: "The change could not be completed. Nothing was executed; reload to see the current stored state.",
 	observe: "The observation could not be completed. Nothing was executed."
-}, jn = class extends k {
+}, Ln = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		refreshToken: {
@@ -3138,7 +3476,7 @@ var kn = "ai-orchestrator-workflows", An = {
 			this._store = n.store, this._entries = n.workflows, this._viewState = "ready";
 		} catch {
 			if (!this._current(t, e)) return;
-			this._entries = [], this._viewState = "error", this._error = An.load;
+			this._entries = [], this._viewState = "error", this._error = In.load;
 		}
 	};
 	async _mutate(e) {
@@ -3164,7 +3502,7 @@ var kn = "ai-orchestrator-workflows", An = {
 			this._store = r.store, this._entries = r.workflows, this._confirmDeleteId = void 0;
 		} catch {
 			if (!this._current(n, t)) return;
-			this._error = e.action === "observe" ? An.observe : An.mutate;
+			this._error = e.action === "observe" ? In.observe : In.mutate;
 		} finally {
 			this._pending === e && (this._pending = void 0, this._refreshRequested && this._current(n, t) && queueMicrotask(() => void this._load()));
 		}
@@ -3177,7 +3515,7 @@ var kn = "ai-orchestrator-workflows", An = {
 		}));
 	}
 	render() {
-		return S`
+		return C`
       <section aria-labelledby="workflows-title">
         <h2 id="workflows-title">Stored workflows</h2>
         <p>
@@ -3195,31 +3533,31 @@ var kn = "ai-orchestrator-workflows", An = {
           </button>
         </div>
         <div role="status" aria-live="polite">
-          ${this._error ? S`<p class="error">${this._error}</p>` : w}
-          ${this._store === "unreadable" ? S`<p class="notice error">
+          ${this._error ? C`<p class="error">${this._error}</p>` : T}
+          ${this._store === "unreadable" ? C`<p class="notice error">
                 The stored workflow file contains data this version cannot validate. Nothing on
                 disk was changed and no workflow is active; saving is refused until the file is
                 repaired or restored from a backup.
-              </p>` : w}
+              </p>` : T}
         </div>
         ${this._renderList()}
       </section>
     `;
 	}
 	_renderList() {
-		return this._viewState === "ready" ? this._entries.length === 0 ? S`<p class="notice">No stored workflows. Use "Save as workflow" in the editor above.</p>` : S`<div class="list" role="list" aria-label="Stored workflows">
+		return this._viewState === "ready" ? this._entries.length === 0 ? C`<p class="notice">No stored workflows. Use "Save as workflow" in the editor above.</p>` : C`<div class="list" role="list" aria-label="Stored workflows">
       ${this._entries.map((e) => this._renderEntry(e))}
-    </div>` : w;
+    </div>` : T;
 	}
 	_renderEntry(e) {
 		let { workflow: t, status: n } = e, r = t.workflow_id, i = this._pending !== void 0, a = this._pending?.id === r ? this._pending.action : void 0, o = n.error === null ? n.active ? "active" : "inactive" : "error", s = n.error === "activation_failed" ? "Activation failed" : n.error === "cleanup_failed" ? "Cleanup pending" : n.active ? "Active" : t.enabled ? "Enabled, not active" : "Disabled", c = this._observation?.id === r ? this._observation.result : void 0;
-		return S`
+		return C`
       <article class="card" role="listitem">
         <div class="card-header">
           <h3>${t.name}</h3>
           <span class="badge ${o}">${s}</span>
         </div>
-        ${t.description ? S`<p class="meta">${t.description}</p>` : w}
+        ${t.description ? C`<p class="meta">${t.description}</p>` : T}
         <p class="meta">
           ${t.triggers.length} trigger(s) · ${t.conditions.length} condition(s) ·
           ${t.steps.length} step(s)
@@ -3229,11 +3567,11 @@ var kn = "ai-orchestrator-workflows", An = {
           Listeners ${n.registrations}
         </p>
         <p class="meta">
-          ${t.run_mode === "execute" ? S`Mode: <strong>execute</strong> — eligible outcomes run the steps and deliver notifications. Executions ${n.executions} · Failures ${n.execution_failures} · Skipped while busy ${n.skipped_busy}${n.execution_running ? " · running now" : ""}` : S`Mode: observe — outcomes are recorded; no step runs.`}
+          ${t.run_mode === "execute" ? C`Mode: <strong>execute</strong> — eligible outcomes run the steps and deliver notifications. Executions ${n.executions} · Failures ${n.execution_failures} · Skipped while busy ${n.skipped_busy}${n.execution_running ? " · running now" : ""}` : C`Mode: observe — outcomes are recorded; no step runs.`}
         </p>
-        ${n.last_execution ? this._renderExecution(n.last_execution) : w}
-        ${n.latest ? this._renderOutcome("Latest observation", n.latest) : w}
-        ${c ? this._renderOutcome("Manual observation", c) : w}
+        ${n.last_execution ? this._renderExecution(n.last_execution) : T}
+        ${n.latest ? this._renderOutcome("Latest observation", n.latest) : T}
+        ${c ? this._renderOutcome("Manual observation", c) : T}
         <div class="actions">
           <button
             type="button"
@@ -3258,7 +3596,7 @@ var kn = "ai-orchestrator-workflows", An = {
           <button type="button" ?disabled=${i} @click=${() => this._loadIntoEditor(e)}>
             Load into editor
           </button>
-          ${this._confirmDeleteId === r ? S`<button
+          ${this._confirmDeleteId === r ? C`<button
                   class="danger"
                   type="button"
                   ?disabled=${i}
@@ -3273,7 +3611,7 @@ var kn = "ai-orchestrator-workflows", An = {
 			this._confirmDeleteId = void 0;
 		}}>
                   Keep
-                </button>` : S`<button
+                </button>` : C`<button
                 class="danger"
                 type="button"
                 ?disabled=${i}
@@ -3289,24 +3627,24 @@ var kn = "ai-orchestrator-workflows", An = {
 	}
 	_renderExecution(e) {
 		let t = e.steps.map((e) => `${e.step_id}: ${e.status}${e.target ? ` (${e.target})` : ""}${e.error ? ` — ${e.error}` : ""}`).join(" · ");
-		return S`<p class="meta">
+		return C`<p class="meta">
       Last execution: ${e.completed ? "completed" : `failed (${e.error ?? "unknown"})`} ·
       provider calls ${e.provider_calls} · notifications delivered ${e.actions_executed}
-      ${t ? S`<br />${t}` : w}
+      ${t ? C`<br />${t}` : T}
     </p>`;
 	}
 	_renderOutcome(e, t) {
-		return S`<p class="meta">
+		return C`<p class="meta">
       ${e}: triggered ${t.triggered ? "yes" : "no"} · conditions
       ${t.conditions_passed ? "passed" : "failed"} ·
       ${t.eligible ? `${t.planned_steps.length} step(s) planned, none executed` : "no steps planned"}
     </p>`;
 	}
 };
-customElements.define(kn, jn);
+customElements.define(Fn, Ln);
 //#endregion
 //#region src/panel/ai-orchestrator-panel.ts
-var Mn = "ai-orchestrator-panel", Nn = [
+var Rn = "ai-orchestrator-panel", zn = [
 	{
 		id: "home",
 		label: "Home"
@@ -3339,12 +3677,12 @@ var Mn = "ai-orchestrator-panel", Nn = [
 		id: "settings",
 		label: "Settings"
 	}
-], Pn = {
+], Bn = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, Fn = {
+}, Vn = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -3374,11 +3712,11 @@ var Mn = "ai-orchestrator-panel", Nn = [
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function In(e) {
+function Hn(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
-	return Nn.find((e) => e.id === t)?.id;
+	return zn.find((e) => e.id === t)?.id;
 }
-var Ln = class extends k {
+var Un = class extends A {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -3392,7 +3730,7 @@ var Ln = class extends k {
 		_workflowsRefresh: { state: !0 },
 		_draft: { state: !0 }
 	};
-	static styles = Je;
+	static styles = Ye;
 	_draftSequence = 0;
 	_hasRequested = !1;
 	_requestSequence = 0;
@@ -3404,7 +3742,7 @@ var Ln = class extends k {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = In(this.route);
+			let e = Hn(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 		e.has("_activeSection") && this._activeSection !== "automations" && (this._draft = void 0);
@@ -3428,19 +3766,19 @@ var Ln = class extends k {
 	}
 	render() {
 		let e = this._activeSection === "chat";
-		return S`
+		return C`
       <div class="app-frame ${this.narrow ? "narrow" : ""} ${e ? "chat-mode" : ""}">
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : e ? S`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : e ? C`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
     `;
 	}
 	_renderSidebar() {
-		return S`
+		return C`
       <aside class="sidebar">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">AI</span>
@@ -3451,11 +3789,11 @@ var Ln = class extends k {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${Nn.map((e) => S`
+          ${zn.map((e) => C`
               <button
                 class="nav-button"
                 type="button"
-                aria-current=${this._activeSection === e.id ? "page" : w}
+                aria-current=${this._activeSection === e.id ? "page" : T}
                 @click=${() => this._selectSection(e.id)}
               >
                 <span class="nav-marker" aria-hidden="true"></span>
@@ -3474,7 +3812,7 @@ var Ln = class extends k {
 	}
 	_renderHome() {
 		let e = this._statusHeading();
-		return S`
+		return C`
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
@@ -3496,7 +3834,7 @@ var Ln = class extends k {
           <h2 id="foundation-status">${e.title}</h2>
           <p class="hero-description">${e.detail}</p>
           ${this._renderStatusAction()}
-          ${this._loadState === "loading" ? S`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : w}
+          ${this._loadState === "loading" ? C`<div class="loading-bar" role="progressbar" aria-label="Checking integration status"></div>` : T}
         </div>
         <div class="connection-summary" aria-label="Connection summary">
           <p class="summary-label">Home Assistant</p>
@@ -3523,17 +3861,17 @@ var Ln = class extends k {
     `;
 	}
 	_renderFeatureCard() {
-		return S`
+		return C`
       <section class="card" aria-labelledby="feature-status-heading">
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${A.map((e) => {
+          ${j.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
-			return S`
+			return C`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${Pn[e]}</span>
+                  <span class="status-name">${Bn[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -3547,7 +3885,7 @@ var Ln = class extends k {
     `;
 	}
 	_renderNextSteps() {
-		return S`
+		return C`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
         <p class="card-intro">Each capability opens only after its own verification gate.</p>
@@ -3570,8 +3908,8 @@ var Ln = class extends k {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = Fn[e], n = Nn.find((t) => t.id === e)?.label ?? "Section";
-		return S`
+		let t = Vn[e], n = zn.find((t) => t.id === e)?.label ?? "Section";
+		return C`
       <header class="page-header">
         <div>
           <p class="eyebrow">${n}</p>
@@ -3594,7 +3932,19 @@ var Ln = class extends k {
     `;
 	}
 	_renderWorkflowProbe() {
-		return S`
+		return C`
+      <ai-orchestrator-workflow-builder
+        .hass=${this.hass}
+        @workflow-saved=${() => {
+			this._workflowsRefresh += 1;
+		}}
+        @workflow-draft=${(e) => {
+			this._draft = {
+				json: e.detail.json,
+				sequence: ++this._draftSequence
+			};
+		}}
+      ></ai-orchestrator-workflow-builder>
       <ai-orchestrator-workflow-preview
         .hass=${this.hass}
         .draft=${this._draft}
@@ -3652,7 +4002,7 @@ var Ln = class extends k {
     `;
 	}
 	_renderProviders() {
-		return S`
+		return C`
       <header class="page-header">
         <div>
           <p class="eyebrow">Providers</p>
@@ -3669,7 +4019,7 @@ var Ln = class extends k {
     `;
 	}
 	_renderCatalog() {
-		return S`
+		return C`
       <header class="page-header">
         <div>
           <p class="eyebrow">Entities & Permissions</p>
@@ -3685,20 +4035,20 @@ var Ln = class extends k {
     `;
 	}
 	_renderWorkflowProbeResult() {
-		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? S`
+		return this._probeLoadState === "ready" && this._probeResult !== void 0 ? C`
         <strong>One trigger produced exactly one execution.</strong>
         <span>
           Runtime execution ${this._probeResult.execution_count}; listener registration
           ${this._probeResult.registration_count}. Provider contacted: no. Home Assistant action
           called: no.
         </span>
-      ` : this._probeLoadState === "error" ? S`
+      ` : this._probeLoadState === "error" ? C`
         <strong>The lifecycle probe was not confirmed.</strong>
         <span>No provider or Home Assistant action was called. Check the integration and logs.</span>
-      ` : this._probeLoadState === "loading" ? S`<span>Waiting for the bounded integration response.</span>` : S`<span>No lifecycle probe has run in this panel session.</span>`;
+      ` : this._probeLoadState === "loading" ? C`<span>Waiting for the bounded integration response.</span>` : C`<span>No lifecycle probe has run in this panel session.</span>`;
 	}
 	_renderStatusAction() {
-		return this._loadState === "loading" ? w : this._loadState === "ready" && this._status?.configured === !1 ? S`
+		return this._loadState === "loading" ? T : this._loadState === "ready" && this._status?.configured === !1 ? C`
         <div class="hero-actions">
           <button class="secondary-button" type="button" @click=${this._refreshStatus}>
             Check again
@@ -3708,11 +4058,11 @@ var Ln = class extends k {
 			"denied",
 			"incompatible",
 			"error"
-		].includes(this._loadState) ? S`
+		].includes(this._loadState) ? C`
         <div class="hero-actions">
           <button class="primary-button" type="button" @click=${this._refreshStatus}>Retry status check</button>
         </div>
-      ` : w;
+      ` : T;
 	}
 	_statusHeading() {
 		return this._loadState === "loading" ? {
@@ -3773,12 +4123,12 @@ var Ln = class extends k {
 		this._hasRequested = !0, this._loadState = "loading", this._status = void 0;
 		let t = ++this._requestSequence;
 		try {
-			let n = await ze(e);
+			let n = await Be(e);
 			if (t !== this._requestSequence || !this.isConnected) return;
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof j ? "incompatible" : Be(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof Ie ? "incompatible" : Ve(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -3789,12 +4139,12 @@ var Ln = class extends k {
 		}
 		this._probeLoadState = "loading", this._probeResult = void 0;
 		try {
-			this._probeResult = await qe(e), this._probeLoadState = "ready";
+			this._probeResult = await Je(e), this._probeLoadState = "ready";
 		} catch {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, Rn = "ai-orchestrator-providers-view", zn = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(Dt, kt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Mn, Ln), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Rn, bt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(zn, rt);
+}, Wn = "ai-orchestrator-providers-view", Gn = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(Dt, kt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Rn, Un), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Wn, St), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(Gn, at);
 //#endregion
-export { Ln as AiOrchestratorPanel, zn as CATALOG_VIEW_TAG, Dt as CHAT_VIEW_TAG, rt as CatalogView, kt as ChatView, Mn as PANEL_TAG, Rn as PROVIDERS_VIEW_TAG, bt as ProvidersView };
+export { Un as AiOrchestratorPanel, Gn as CATALOG_VIEW_TAG, Dt as CHAT_VIEW_TAG, at as CatalogView, kt as ChatView, Rn as PANEL_TAG, Wn as PROVIDERS_VIEW_TAG, St as ProvidersView };

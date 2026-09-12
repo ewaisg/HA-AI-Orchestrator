@@ -21,6 +21,7 @@ import { panelStyles } from "../styles/panel-styles";
 import "./catalog-view";
 import "./providers-view";
 import "./chat-view";
+import "./workflow-builder-view";
 import "./workflow-preview-view";
 import "./workflows-view";
 
@@ -382,6 +383,13 @@ export class AiOrchestratorPanel extends LitElement {
 
   private _renderWorkflowProbe(): TemplateResult {
     return html`
+      <ai-orchestrator-workflow-builder
+        .hass=${this.hass}
+        @workflow-saved=${() => { this._workflowsRefresh += 1; }}
+        @workflow-draft=${(event: CustomEvent<{ json: string }>) => {
+          this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
+        }}
+      ></ai-orchestrator-workflow-builder>
       <ai-orchestrator-workflow-preview
         .hass=${this.hass}
         .draft=${this._draft}

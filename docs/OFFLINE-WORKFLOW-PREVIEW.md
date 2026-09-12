@@ -6,6 +6,19 @@ also has an administrator panel editor under **Automations**. Previewing never
 activates a workflow; saving and enabling one (WFL-002) is a separate explicit
 step described below.
 
+## Build a workflow with pickers (WFL-005)
+
+**Build a workflow** at the top of Automations assembles a document from what
+Home Assistant actually has: a name, mode (observe or execute), the local
+provider for AI steps, one trigger (an entity changing to a state, chosen from
+the read-only catalogue with search; a time of day; or manual), any number of
+deterministic conditions (time window, entity state, numeric bound), and
+ordered steps (compose, classify, notification with a target chosen from the
+discovered notify entities and services). Field problems are listed until the
+document is valid; **Save workflow** stores it, **Open in JSON editor** hands
+the same document to the editor below for preview or dry run. Nothing is sent
+until you save.
+
 ## Use the panel
 
 After installing the complete WFL-002C candidate, open **Automations**. The
