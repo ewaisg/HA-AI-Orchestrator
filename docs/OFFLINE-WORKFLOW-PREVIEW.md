@@ -17,7 +17,11 @@ ordered steps (compose, classify, notification with a target chosen from the
 discovered notify entities and services). Field problems are listed until the
 document is valid; **Save workflow** stores it, **Open in JSON editor** hands
 the same document to the editor below for preview or dry run. Nothing is sent
-until you save.
+until you save. A stored workflow's **Edit in builder** button loads it back into
+the pickers (its id and step ids are kept, so saving replaces it); steps and
+conditions can be moved up or down. A document the builder cannot represent,
+such as one with several triggers, is declined with a note and stays editable
+as JSON.
 
 ## Use the panel
 

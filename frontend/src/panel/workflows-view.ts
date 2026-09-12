@@ -303,6 +303,16 @@ export class WorkflowsView extends LitElement {
     }
   }
 
+  private _editInBuilder(entry: WorkflowEntry): void {
+    this.dispatchEvent(
+      new CustomEvent("workflow-edit", {
+        detail: { json: JSON.stringify(entry.workflow, null, 2) },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
   private _loadIntoEditor(entry: WorkflowEntry): void {
     this.dispatchEvent(
       new CustomEvent("workflow-load", {
@@ -416,6 +426,9 @@ export class WorkflowsView extends LitElement {
             @click=${() => this._mutate({ id, action: "observe" })}
           >
             ${mine === "observe" ? "Observing…" : "Observe now"}
+          </button>
+          <button type="button" ?disabled=${busy} @click=${() => this._editInBuilder(entry)}>
+            Edit in builder
           </button>
           <button type="button" ?disabled=${busy} @click=${() => this._loadIntoEditor(entry)}>
             Load into editor

@@ -4,7 +4,7 @@ import { WORKFLOW_BUILDER_TAG, type WorkflowBuilderView } from "../src/panel/wor
 import type { HomeAssistantLike } from "../src/ha/hass-contract";
 import { VALID_CATALOG } from "./catalog-client.browser.test";
 import { createRoutedFakeHass } from "./fixtures/fake-hass";
-import { CHAT_OPTIONS, NOTIFY_TARGETS, STORED_WORKFLOW, WORKFLOW_LIST } from "./fixtures/workflows";
+import { CHAT_OPTIONS, NOTIFY_TARGETS, STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
 
 const LOOKUPS = new Set(["ai_orchestrator/catalog/list", "ai_orchestrator/chat/options", "ai_orchestrator/notify/targets"]);
 const ROUTES = { "ai_orchestrator/catalog/list": VALID_CATALOG, "ai_orchestrator/chat/options": CHAT_OPTIONS, "ai_orchestrator/notify/targets": NOTIFY_TARGETS, "ai_orchestrator/workflows/save": { ...WORKFLOW_LIST, workflow: STORED_WORKFLOW } };
@@ -98,6 +98,41 @@ describe("structured workflow builder", () => {
     expect(steps.map((s) => s.step_id)).toEqual(["compose", "notify", "classify", "gate", "extract"]);
     expect(steps[3]).toEqual({ step_id: "gate", kind: "branch", when_step_id: "classify", when_category: "urgent" });
     expect(steps[4]).toMatchObject({ kind: "ai_extract", fields: [{ name: "room", type: "string" }, { name: "needs_action", type: "boolean" }] });
+  });
+  it("edits a stored workflow, keeps its id and step ids, and reorders steps", async () => {
+    const requests: Record<string, unknown>[] = [];
+    const view = await mount(createRoutedFakeHass(ROUTES, (m) => requests.push(m)));
+    const stored = { ...STORED_WORKFLOW, run_mode: "execute", provider_connection_id: "12345678-1234-4234-9234-123456789abc", conditions: [{ kind: "time_window", after_time: "18:00", before_time: "06:00" }, { kind: "state", entity_id: "binary_sensor.kitchen_window", state: "on" }], steps: [{ step_id: "classify", kind: "ai_classify", prompt: "Classify.", categories: ["urgent", "routine"] }, { step_id: "gate", kind: "branch", when_step_id: "classify", when_category: "urgent" }, { step_id: "compose", kind: "ai_compose", prompt: "Write." }, { step_id: "notify", kind: "notify", notify_service: "notify.kitchen_speaker" }] };
+    view.draft = { json: JSON.stringify(stored), sequence: 1 }; await settle(view);
+    expect(text(view)).toContain("Edit a workflow"); expect(text(view)).toContain(STORED_WORKFLOW_ID);
+    expect(field<HTMLInputElement>(view, "wb-name").value).toBe("Synthetic evening window");
+    expect(field<HTMLInputElement>(view, "wb-trigger-entity").value).toBe("binary_sensor.synthetic_window");
+    expect(view.problems()).toEqual([]);
+    const before = view.document();
+    expect(before.workflow_id).toBe(STORED_WORKFLOW_ID);
+    expect((before.steps as Record<string, unknown>[]).map((s) => s.step_id)).toEqual(["classify", "gate", "compose", "notify"]);
+    expect(before.run_mode).toBe("execute");
+    button(view, "Move step 3 down").click(); await settle(view);
+    expect((view.document().steps as Record<string, unknown>[]).map((s) => s.step_id)).toEqual(["classify", "gate", "notify", "compose"]);
+    button(view, "Move condition 2 up").click(); await settle(view);
+    expect((view.document().conditions as Record<string, unknown>[])[0]).toMatchObject({ kind: "state" });
+    button(view, "Add compose text").click(); await settle(view);
+    expect((view.document().steps as Record<string, unknown>[]).map((s) => s.step_id)).toEqual(["classify", "gate", "notify", "compose", "compose_2"]);
+    expect(field<HTMLButtonElement>(view, "wb-save").disabled).toBe(true);
+    button(view, "Remove step 5").click(); await settle(view);
+    expect(field<HTMLButtonElement>(view, "wb-save").disabled).toBe(false);
+    field<HTMLButtonElement>(view, "wb-save").click(); await settle(view);
+    const sent = requests.filter((m) => m.type === "ai_orchestrator/workflows/save");
+    expect(sent).toHaveLength(1);
+    expect(JSON.parse(sent[0]!.workflow_json as string).workflow_id).toBe(STORED_WORKFLOW_ID);
+    button(view, "Start a new one").click(); await settle(view);
+    expect(text(view)).toContain("Build a workflow"); expect(view.document().workflow_id).not.toBe(STORED_WORKFLOW_ID);
+  });
+  it("declines a document shape it cannot represent and points to the JSON editor", async () => {
+    const view = await mount(createRoutedFakeHass(ROUTES));
+    view.draft = { json: JSON.stringify({ ...STORED_WORKFLOW, triggers: [{ kind: "manual" }, { kind: "time", at_time: "07:00" }] }), sequence: 1 }; await settle(view);
+    expect(text(view)).toContain("cannot show"); expect(text(view)).toContain("Build a workflow");
+    expect(view.document().workflow_id).not.toBe(STORED_WORKFLOW_ID);
   });
   it("works without lookups, at 390px, with accessible labels", async () => {
     const view = await mount({ callWS: async () => { throw new Error("private-secret"); } });

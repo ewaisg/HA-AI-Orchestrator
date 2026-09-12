@@ -12,12 +12,13 @@ type ConditionDraft =
   | { kind: "state"; entity_id: string; state: string }
   | { kind: "time_window"; after_time: string; before_time: string }
   | { kind: "numeric_state"; entity_id: string; above: string; below: string };
-type StepDraft =
+type StepDraft = { id?: string } & (
   | { kind: "ai_compose"; prompt: string }
   | { kind: "ai_classify"; prompt: string; categories: string }
   | { kind: "ai_extract"; prompt: string; fields: string }
   | { kind: "branch"; when_step_id: string; when_category: string }
-  | { kind: "notify"; notify_service: string };
+  | { kind: "notify"; notify_service: string });
+const STEP_ID = /^[a-z][a-z0-9_]{0,63}$/u;
 const FIELD_TYPES = ["string", "number", "boolean"];
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
@@ -31,7 +32,7 @@ const SAVE_MESSAGES: Record<string, string> = {
 
 export class WorkflowBuilderView extends LitElement {
   public static override properties = {
-    hass: { attribute: false },
+    hass: { attribute: false }, draft: { attribute: false }, _editing: { state: true }, _notice: { state: true },
     _entities: { state: true }, _providers: { state: true }, _targets: { state: true },
     _name: { state: true }, _runMode: { state: true }, _providerId: { state: true }, _enabled: { state: true },
     _triggerKind: { state: true }, _triggerEntity: { state: true }, _toState: { state: true }, _atTime: { state: true },
@@ -50,6 +51,10 @@ export class WorkflowBuilderView extends LitElement {
     button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid #207e73; outline-offset:3px; }
   `;
   public declare hass?: HomeAssistantLike;
+  /** A stored document to edit; each handoff carries a distinct sequence. */
+  public declare draft?: { json: string; sequence: number };
+  private declare _editing: boolean;
+  private declare _notice: string;
   private declare _entities: CatalogEntity[];
   private declare _providers: ChatProvider[];
   private declare _targets: NotifyTarget[];
@@ -78,10 +83,11 @@ export class WorkflowBuilderView extends LitElement {
     this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
     this._conditions = [];
     this._steps = [{ kind: "ai_compose", prompt: "Write a short, friendly household reminder about this event." }, { kind: "notify", notify_service: "" }];
-    this._busy = false; this._error = ""; this._saved = false;
+    this._busy = false; this._error = ""; this._saved = false; this._editing = false; this._notice = "";
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has("draft") && this.draft !== undefined) this._loadDocument(this.draft.json);
     if (!changed.has("hass")) return;
     if (this._callWS !== this.hass?.callWS || this._userId !== this.hass?.user?.id) {
       this._callWS = this.hass?.callWS; this._userId = this.hass?.user?.id;
@@ -154,10 +160,57 @@ export class WorkflowBuilderView extends LitElement {
   private _fields(value: string): { name: string; type: string }[] {
     return value.split(",").map((item) => item.trim()).filter(Boolean).map((item) => { const [name = "", type = "string"] = item.split(":").map((part) => part.trim()); return { name, type }; });
   }
-  /** Step ids as the generated document will name them, for branch references. */
+  /** Step ids as the document will name them: stored ids are kept, new steps get kind-based ids. */
   private _stepIds(): string[] {
+    const taken = new Set(this._steps.map((step) => step.id).filter((id): id is string => id !== undefined));
     const counts: Record<string, number> = {};
-    return this._steps.map((step) => { const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : step.kind === "ai_extract" ? "extract" : step.kind === "branch" ? "gate" : "notify"; counts[base] = (counts[base] ?? 0) + 1; return counts[base] === 1 ? base : `${base}_${counts[base]}`; });
+    return this._steps.map((step) => {
+      if (step.id !== undefined) return step.id;
+      const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : step.kind === "ai_extract" ? "extract" : step.kind === "branch" ? "gate" : "notify";
+      let candidate: string;
+      do { counts[base] = (counts[base] ?? 0) + 1; candidate = counts[base] === 1 ? base : `${base}_${counts[base]}`; } while (taken.has(candidate));
+      taken.add(candidate);
+      return candidate;
+    });
+  }
+  /** Load a stored v1 document into the pickers when its shape is one the builder can represent. */
+  private _loadDocument(json: string): void {
+    this._touch(); this._notice = "";
+    let doc: Record<string, unknown>;
+    try { doc = JSON.parse(json) as Record<string, unknown>; } catch { this._notice = "That document is not valid JSON; use the JSON editor below."; return; }
+    const triggers = Array.isArray(doc.triggers) ? (doc.triggers as Record<string, unknown>[]) : [];
+    const conditions = Array.isArray(doc.conditions) ? (doc.conditions as Record<string, unknown>[]) : [];
+    const steps = Array.isArray(doc.steps) ? (doc.steps as Record<string, unknown>[]) : [];
+    const trigger = triggers[0];
+    const representable = typeof doc.workflow_id === "string" && typeof doc.name === "string" && triggers.length === 1 && trigger !== undefined &&
+      (trigger.kind === "manual" || trigger.kind === "time" || (trigger.kind === "state" && Array.isArray(trigger.entity_ids) && trigger.entity_ids.length === 1)) &&
+      conditions.every((c) => ["time_window", "state", "numeric_state"].includes(c.kind as string)) &&
+      steps.every((s) => ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"].includes(s.kind as string) && typeof s.step_id === "string" && STEP_ID.test(s.step_id));
+    if (!representable) { this._notice = "This workflow uses a shape the builder cannot show (for example several triggers); use the JSON editor below."; return; }
+    this._workflowId = doc.workflow_id as string; this._editing = true;
+    this._name = doc.name as string; this._enabled = doc.enabled === true; this._runMode = doc.run_mode === "execute" ? "execute" : "observe";
+    if (typeof doc.provider_connection_id === "string") this._providerId = doc.provider_connection_id;
+    this._triggerKind = trigger.kind as TriggerKind;
+    this._triggerEntity = trigger.kind === "state" ? String((trigger.entity_ids as string[])[0]) : "";
+    this._toState = trigger.kind === "state" ? String(trigger.to_state ?? "on") : "on";
+    this._atTime = trigger.kind === "time" ? String(trigger.at_time ?? "") : "";
+    this._conditions = conditions.map((c): ConditionDraft => c.kind === "time_window"
+      ? { kind: "time_window", after_time: String(c.after_time ?? ""), before_time: String(c.before_time ?? "") }
+      : c.kind === "state" ? { kind: "state", entity_id: String(c.entity_id ?? ""), state: String(c.state ?? "") }
+      : { kind: "numeric_state", entity_id: String(c.entity_id ?? ""), above: c.above === undefined ? "" : String(c.above), below: c.below === undefined ? "" : String(c.below) });
+    this._steps = steps.map((s): StepDraft => {
+      const id = s.step_id as string;
+      if (s.kind === "ai_compose") return { id, kind: "ai_compose", prompt: String(s.prompt ?? "") };
+      if (s.kind === "ai_classify") return { id, kind: "ai_classify", prompt: String(s.prompt ?? ""), categories: (Array.isArray(s.categories) ? s.categories : []).join(", ") };
+      if (s.kind === "ai_extract") return { id, kind: "ai_extract", prompt: String(s.prompt ?? ""), fields: (Array.isArray(s.fields) ? (s.fields as Record<string, unknown>[]) : []).map((f) => `${String(f.name)}:${String(f.type)}`).join(", ") };
+      if (s.kind === "branch") return { id, kind: "branch", when_step_id: String(s.when_step_id ?? ""), when_category: String(s.when_category ?? "") };
+      return { id, kind: "notify", notify_service: String(s.notify_service ?? "") };
+    });
+  }
+  private _move<T>(items: T[], index: number, delta: number): T[] {
+    const target = index + delta;
+    if (target < 0 || target >= items.length) return items;
+    const next = [...items]; [next[index], next[target]] = [next[target]!, next[index]!]; return next;
   }
 
   /** The exact v1 document the backend validates; nothing is sent until an explicit action. */
@@ -214,7 +267,7 @@ export class WorkflowBuilderView extends LitElement {
   };
 
   private readonly _startNew = (): void => {
-    this._workflowId = newRequestId(); this._touch();
+    this._workflowId = newRequestId(); this._touch(); this._editing = false; this._notice = "";
     this._name = ""; this._enabled = false; this._runMode = "observe"; this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
     this._conditions = []; this._steps = [{ kind: "ai_compose", prompt: "Write a short, friendly household reminder about this event." }, { kind: "notify", notify_service: "" }];
   };
@@ -223,7 +276,9 @@ export class WorkflowBuilderView extends LitElement {
     const problems = this.problems();
     const offline = !this.hass || this.hass.connection?.connected === false;
     return html`<section aria-labelledby="builder-title">
-      <h1 id="builder-title">Build a workflow</h1>
+      <h1 id="builder-title">${this._editing ? "Edit a workflow" : "Build a workflow"}</h1>
+      ${this._notice ? html`<p class="error" id="wb-notice">${this._notice}</p>` : nothing}
+      ${this._editing ? html`<p id="wb-editing">Editing the stored workflow <code>${this._workflowId}</code>; saving replaces it and resets its live status.</p>` : nothing}
       <p>Assemble a workflow from what Home Assistant actually has: a trigger, optional deterministic conditions, AI steps, and a notification target. Nothing is sent until you save; a saved workflow only runs live when its mode is <strong>execute</strong> and it is enabled.</p>
       <fieldset><legend>Workflow</legend>
         <div class="row">
@@ -295,7 +350,7 @@ export class WorkflowBuilderView extends LitElement {
   private _updateStep(index: number, patch: Partial<StepDraft>): void { this._touch(); this._steps = this._steps.map((s, i) => (i === index ? ({ ...s, ...patch } as StepDraft) : s)); }
 
   private _renderCondition(condition: ConditionDraft, index: number): TemplateResult {
-    const remove = html`<button type="button" @click=${() => { this._touch(); this._conditions = this._conditions.filter((_, i) => i !== index); }}>Remove condition ${index + 1}</button>`;
+    const remove = html`<span class="actions"><button type="button" ?disabled=${index === 0} @click=${() => { this._touch(); this._conditions = this._move(this._conditions, index, -1); }}>Move condition ${index + 1} up</button><button type="button" ?disabled=${index === this._conditions.length - 1} @click=${() => { this._touch(); this._conditions = this._move(this._conditions, index, 1); }}>Move condition ${index + 1} down</button><button type="button" @click=${() => { this._touch(); this._conditions = this._conditions.filter((_, i) => i !== index); }}>Remove condition ${index + 1}</button></span>`;
     if (condition.kind === "time_window") return html`<fieldset><legend>Condition ${index + 1}: time window</legend><div class="row">
       <div><label for="wb-c${index}-after">From (HH:MM)</label><input id="wb-c${index}-after" maxlength="5" .value=${condition.after_time} @input=${(e: Event) => this._updateCondition(index, { after_time: (e.target as HTMLInputElement).value })} /></div>
       <div><label for="wb-c${index}-before">Until (HH:MM, exclusive)</label><input id="wb-c${index}-before" maxlength="5" .value=${condition.before_time} @input=${(e: Event) => this._updateCondition(index, { before_time: (e.target as HTMLInputElement).value })} /></div></div>${remove}</fieldset>`;
@@ -309,7 +364,7 @@ export class WorkflowBuilderView extends LitElement {
   }
 
   private _renderStep(step: StepDraft, index: number): TemplateResult {
-    const remove = html`<button type="button" @click=${() => { this._touch(); this._steps = this._steps.filter((_, i) => i !== index); }}>Remove step ${index + 1}</button>`;
+    const remove = html`<span class="actions"><button type="button" ?disabled=${index === 0} @click=${() => { this._touch(); this._steps = this._move(this._steps, index, -1); }}>Move step ${index + 1} up</button><button type="button" ?disabled=${index === this._steps.length - 1} @click=${() => { this._touch(); this._steps = this._move(this._steps, index, 1); }}>Move step ${index + 1} down</button><button type="button" @click=${() => { this._touch(); this._steps = this._steps.filter((_, i) => i !== index); }}>Remove step ${index + 1}</button></span>`;
     if (step.kind === "notify") return html`<fieldset><legend>Step ${index + 1}: send a notification</legend>
       <label for="wb-s${index}-target">Target (from Home Assistant)</label>
       <select id="wb-s${index}-target" .value=${step.notify_service} @change=${(e: Event) => this._updateStep(index, { notify_service: (e.target as HTMLSelectElement).value })}>

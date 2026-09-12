@@ -105,6 +105,7 @@ export class AiOrchestratorPanel extends LitElement {
     _probeResult: { state: true },
     _workflowsRefresh: { state: true },
     _draft: { state: true },
+    _builderDraft: { state: true },
   };
 
   public static override styles = panelStyles;
@@ -121,6 +122,7 @@ export class AiOrchestratorPanel extends LitElement {
   private declare _probeResult?: WorkflowProbeResult;
   private declare _workflowsRefresh: number;
   private declare _draft?: { json: string; sequence: number };
+  private declare _builderDraft?: { json: string; sequence: number };
   private _draftSequence = 0;
   private _hasRequested = false;
   private _requestSequence = 0;
@@ -153,6 +155,7 @@ export class AiOrchestratorPanel extends LitElement {
     const changedKeys = changed as Map<PropertyKey, unknown>;
     if (changedKeys.has("_activeSection") && this._activeSection !== "automations") {
       this._draft = undefined;
+      this._builderDraft = undefined;
     }
   }
 
@@ -385,6 +388,7 @@ export class AiOrchestratorPanel extends LitElement {
     return html`
       <ai-orchestrator-workflow-builder
         .hass=${this.hass}
+        .draft=${this._builderDraft}
         @workflow-saved=${() => { this._workflowsRefresh += 1; }}
         @workflow-draft=${(event: CustomEvent<{ json: string }>) => {
           this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
@@ -400,6 +404,10 @@ export class AiOrchestratorPanel extends LitElement {
         .refreshToken=${this._workflowsRefresh}
         @workflow-load=${(event: CustomEvent<{ json: string }>) => {
           this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
+        }}
+        @workflow-edit=${(event: CustomEvent<{ json: string }>) => {
+          this._builderDraft = { json: event.detail.json, sequence: ++this._draftSequence };
+          this.renderRoot.querySelector("ai-orchestrator-workflow-builder")?.scrollIntoView({ block: "start" });
         }}
       ></ai-orchestrator-workflows>
       <header class="page-header">

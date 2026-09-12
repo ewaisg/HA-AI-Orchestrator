@@ -40,6 +40,14 @@ afterEach(() => {
 });
 
 describe("stored workflows view", () => {
+  it("offers editing a stored workflow in the builder", async () => {
+    const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflows/list": WORKFLOW_LIST }));
+    const events: string[] = [];
+    view.addEventListener("workflow-edit", (event) => events.push((event as CustomEvent<{ json: string }>).detail.json));
+    [...view.shadowRoot!.querySelectorAll("button")].find((b) => b.textContent?.trim() === "Edit in builder")!.click();
+    expect(events).toHaveLength(1);
+    expect(JSON.parse(events[0]!).workflow_id).toBe(STORED_WORKFLOW_ID);
+  });
   it("shows execute mode and redacted execution evidence", async () => {
     const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflows/list": { schema_version: 1, store: "ready", workflows: [{ workflow: { ...STORED_WORKFLOW, run_mode: "execute", provider_connection_id: "12345678-1234-4234-9234-123456789abc" }, status: EXECUTED_STATUS }] } }));
     const shown = text(view);
