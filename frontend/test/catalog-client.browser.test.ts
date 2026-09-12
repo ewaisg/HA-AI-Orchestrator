@@ -30,9 +30,16 @@ export const VALID_CATALOG = Object.freeze({
       availability: "available",
     },
   ],
+  omitted: { areas: 0, devices: 0, entities: 0 },
 });
 
 describe("registry catalogue client", () => {
+  it("requires the omitted counts and rejects negative or missing ones", () => {
+    expect(parseCatalogSnapshot({ ...VALID_CATALOG, omitted: { areas: 0, devices: 0, entities: 5 } }).omitted.entities).toBe(5);
+    for (const bad of [{ ...VALID_CATALOG, omitted: undefined }, { ...VALID_CATALOG, omitted: { areas: 0, devices: 0 } }, { ...VALID_CATALOG, omitted: { areas: -1, devices: 0, entities: 0 } }, { ...VALID_CATALOG, omitted: { areas: 0, devices: 0, entities: "1" } }]) {
+      const { omitted, ...rest } = bad; expect(() => parseCatalogSnapshot(omitted === undefined ? rest : bad)).toThrow();
+    }
+  });
   it("sends only the bounded list command and parses the exact contract", async () => {
     let request: Record<string, unknown> | undefined;
     const result = await fetchCatalog(

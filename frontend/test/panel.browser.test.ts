@@ -121,6 +121,7 @@ describe("AI Orchestrator panel shell", () => {
           areas: [],
           devices: [],
           entities: [],
+          omitted: { areas: 0, devices: 0, entities: 0 },
         },
       }),
     );

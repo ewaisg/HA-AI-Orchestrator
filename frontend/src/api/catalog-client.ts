@@ -40,11 +40,15 @@ export interface CatalogEntity {
   availability: EntityAvailability;
 }
 
+export interface CatalogOmitted { areas: number; devices: number; entities: number }
+
 export interface CatalogSnapshot {
   schema_version: 1;
   areas: CatalogArea[];
   devices: CatalogDevice[];
   entities: CatalogEntity[];
+  /** Records the backend left out of each list to stay within the bound. */
+  omitted: CatalogOmitted;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -172,8 +176,11 @@ function parseEntities(value: unknown): CatalogEntity[] {
 export function parseCatalogSnapshot(value: unknown): CatalogSnapshot {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ["schema_version", "areas", "devices", "entities"]) ||
-    value.schema_version !== CATALOG_SCHEMA_VERSION
+    !hasExactKeys(value, ["schema_version", "areas", "devices", "entities", "omitted"]) ||
+    value.schema_version !== CATALOG_SCHEMA_VERSION ||
+    !isRecord(value.omitted) ||
+    !hasExactKeys(value.omitted, ["areas", "devices", "entities"]) ||
+    ![value.omitted.areas, value.omitted.devices, value.omitted.entities].every((count) => Number.isInteger(count) && (count as number) >= 0)
   ) {
     throw new Error("Invalid catalogue response");
   }
@@ -182,6 +189,7 @@ export function parseCatalogSnapshot(value: unknown): CatalogSnapshot {
     areas: parseAreas(value.areas),
     devices: parseDevices(value.devices),
     entities: parseEntities(value.entities),
+    omitted: { areas: value.omitted.areas as number, devices: value.omitted.devices as number, entities: value.omitted.entities as number },
   };
 }
 

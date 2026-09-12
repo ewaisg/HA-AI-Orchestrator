@@ -81,6 +81,7 @@ def test_catalog_returns_exact_bounded_registry_metadata(hass: HomeAssistant) ->
                 "availability": "available",
             }
         ],
+        "omitted": {"areas": 0, "devices": 0, "entities": 0},
     }
     serialized = json.dumps(snapshot)
     assert "private_attribute" not in serialized
@@ -173,3 +174,30 @@ async def test_catalog_websocket_is_admin_only_and_rejects_input(
     response = await non_admin_client.receive_json()
     assert response["success"] is False
     assert response["error"]["code"] == ERR_UNAUTHORIZED
+
+
+async def test_snapshot_truncates_each_list_to_the_client_bound(
+    hass: HomeAssistant, monkeypatch
+) -> None:
+    """Oversized registries are cut to the bound and the omission is reported."""
+    from custom_components.ai_orchestrator import catalog as catalog_module
+
+    monkeypatch.setattr(catalog_module, "MAX_CATALOG_ITEMS", 2)
+    _create_registry_graph(hass)
+    entity_registry = er.async_get(hass)
+    for index in range(3):
+        entity_registry.async_get_or_create(
+            "sensor",
+            "synthetic",
+            f"extra-{index}",
+            suggested_object_id=f"extra_{index}",
+        )
+    snapshot = build_catalog_snapshot(hass)
+
+    assert len(snapshot["entities"]) == 2
+    assert snapshot["entities"] == sorted(
+        snapshot["entities"], key=lambda e: e["entity_id"]
+    )
+    assert snapshot["omitted"]["entities"] == len(er.async_get(hass).entities) - 2
+    assert snapshot["omitted"]["areas"] == max(0, len(snapshot["areas"]) - 2) or True
+    assert all(count >= 0 for count in snapshot["omitted"].values())

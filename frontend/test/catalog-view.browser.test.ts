@@ -26,6 +26,12 @@ afterEach(() => {
 });
 
 describe("read-only registry catalogue view", () => {
+  it("says how many registry records the bounded response left out", async () => {
+    const view = await mountView(createRoutedFakeHass({ "ai_orchestrator/catalog/list": { ...VALID_CATALOG, omitted: { areas: 0, devices: 3, entities: 1200 } } }));
+    await view.updateComplete; await new Promise<void>((r) => setTimeout(r, 0)); await view.updateComplete;
+    const shown = view.shadowRoot?.textContent?.replace(/\s+/gu, " ") ?? "";
+    expect(shown).toContain("1200 entities, 3 devices and 0 areas are not shown");
+  });
   it("renders live metadata with explicit zero AI access", async () => {
     const requests: Record<string, unknown>[] = [];
     const view = await mountView(

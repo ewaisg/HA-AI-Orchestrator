@@ -9,6 +9,9 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 CATALOG_SCHEMA_VERSION = 1
+# The panel client refuses lists longer than this; the backend truncates each
+# sorted list to the same bound and reports what was left out (LOC-012).
+MAX_CATALOG_ITEMS = 10_000
 
 type Availability = Literal["available", "unavailable", "not_loaded"]
 
@@ -46,6 +49,14 @@ class CatalogEntity(TypedDict):
     availability: Availability
 
 
+class CatalogOmitted(TypedDict):
+    """How many registry records each list left out to stay within the bound."""
+
+    areas: int
+    devices: int
+    entities: int
+
+
 class CatalogSnapshot(TypedDict):
     """Versioned registry snapshot returned to the administration panel."""
 
@@ -53,6 +64,7 @@ class CatalogSnapshot(TypedDict):
     areas: list[CatalogArea]
     devices: list[CatalogDevice]
     entities: list[CatalogEntity]
+    omitted: CatalogOmitted
 
 
 @callback
@@ -128,7 +140,12 @@ def build_catalog_snapshot(hass: HomeAssistant) -> CatalogSnapshot:
 
     return {
         "schema_version": CATALOG_SCHEMA_VERSION,
-        "areas": areas,
-        "devices": devices,
-        "entities": entities,
+        "areas": areas[:MAX_CATALOG_ITEMS],
+        "devices": devices[:MAX_CATALOG_ITEMS],
+        "entities": entities[:MAX_CATALOG_ITEMS],
+        "omitted": {
+            "areas": max(0, len(areas) - MAX_CATALOG_ITEMS),
+            "devices": max(0, len(devices) - MAX_CATALOG_ITEMS),
+            "entities": max(0, len(entities) - MAX_CATALOG_ITEMS),
+        },
     }

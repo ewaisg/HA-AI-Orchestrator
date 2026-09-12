@@ -1,4 +1,4 @@
-import { css, html, LitElement, type TemplateResult } from "lit";
+import { css, html, LitElement, type TemplateResult, nothing } from "lit";
 
 import {
   fetchCatalog,
@@ -104,6 +104,9 @@ export class CatalogView extends LitElement {
         <span>${catalog.areas.length} areas</span>
         <span>AI access: none</span>
       </div>
+      ${catalog.omitted.entities || catalog.omitted.devices || catalog.omitted.areas
+        ? html`<p class="message" role="status">The registry is larger than this view's bound: ${catalog.omitted.entities} entities, ${catalog.omitted.devices} devices and ${catalog.omitted.areas} areas are not shown. Narrow the search or use Home Assistant's own registry pages for the rest.</p>`
+        : nothing}
       <div class="toolbar">
         <input
           type="search"

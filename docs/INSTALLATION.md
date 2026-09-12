@@ -96,6 +96,8 @@ automated checks alone do not establish a successful live model reply.
 device, and area metadata, relationships, availability, and search. It omits
 state values and attributes. Every entity displays **AI access: none**; this
 screen cannot grant access or run actions.
+Each registry list is bounded to 10,000 records; if a registry is larger, the
+view says how many records are not shown.
 
 The Home page reports authenticated foundation status. **Provider connections**
 is available only when a provider entry is loaded. **Workflow runtime**,
