@@ -41,6 +41,7 @@ class AIOrchestratorRuntime:
     workflow_probe_execution_count: int = 0
     workflow_probe_registration_count: int = 0
     workflow_manager: WorkflowManager | None = None
+    workflow_dry_runs_in_progress: set[str] = field(default_factory=set)
 
 
 @callback

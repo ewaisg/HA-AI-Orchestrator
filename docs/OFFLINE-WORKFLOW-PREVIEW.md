@@ -26,6 +26,29 @@ now** records one manual observation at the current time (only a manual trigger
 can match it). Counters and the latest outcome are shown per workflow; they reset
 when the workflow is saved again, disabled, or the foundation entry reloads.
 
+## Dry-run the AI steps (WFL-003, administrator command)
+
+`ai_orchestrator/workflows/dry_run` takes a stored `workflow_id`, a local
+provider `connection_id`, and a `snapshot_json` in the same shape as the
+preview snapshot. Triggers and conditions are evaluated offline against that
+snapshot first; if the scenario is not eligible, no provider is contacted and
+`steps` is empty. Otherwise each AI step is run once, in order, against the
+selected local provider with a 60-second deadline and no retries:
+
+- `ai_compose` sends a fixed instruction, the step prompt, and a bounded
+  context block (workflow name, time, the event, and only the states of the
+  entities named by the workflow's conditions). The reply must be non-empty
+  text of at most 2,000 characters with no tool calls or structured output.
+- `ai_classify` additionally requests structured output whose only field is
+  `category`, constrained to the step's categories; anything else is rejected.
+- `notify` never runs; it is reported as `planned` with the step whose text
+  would have been used.
+
+Malformed or off-schema output is reported as `invalid_output` and stops the
+run; later steps are `skipped`. Provider failures use the normalized error
+codes. `actions_executed` is always 0. Results go back to the administrator
+who asked and are not stored. One dry run per administrator runs at a time.
+
 Observation is the whole runtime today. Steps are never executed, so an eligible
 outcome means "this workflow would have started", not that anything happened.
 Enabling a workflow that has no trigger or no step is refused.

@@ -168,6 +168,12 @@ class WorkflowManager:
             return document
 
     @callback
+    def get(self, workflow_id: str) -> dict[str, Any] | None:
+        """Return one stored document, or None; raise when storage is unavailable."""
+        self._require_ready()
+        return self._store.get(workflow_id)
+
+    @callback
     def run_manual(self, workflow_id: str) -> dict[str, Any]:
         """Record one manual observation for an active workflow.
 
