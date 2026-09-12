@@ -64,6 +64,12 @@ selected local provider with a 60-second deadline and no retries:
   `category`, constrained to the step's categories; anything else is rejected.
 - `notify` never runs; it is reported as `planned` with the step whose text
   would have been used.
+- `ai_extract` requests structured output with exactly the step's typed
+  fields and reports the accepted `values`; a missing, extra, or wrongly typed
+  field is `invalid_output`.
+- `branch` makes no provider call: it is `taken` when the named earlier
+  classify step produced the named category, otherwise `not_taken`, after
+  which later steps are `skipped` and the run still completes.
 
 Malformed or off-schema output is reported as `invalid_output` and stops the
 run; later steps are `skipped`. Provider failures use the normalized error

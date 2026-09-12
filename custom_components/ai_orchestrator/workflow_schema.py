@@ -80,7 +80,28 @@ class StepKind(StrEnum):
 
     AI_COMPOSE = "ai_compose"
     AI_CLASSIFY = "ai_classify"
+    AI_EXTRACT = "ai_extract"
+    BRANCH = "branch"
     NOTIFY = "notify"
+
+
+AI_STEP_KINDS: Final = frozenset(
+    {StepKind.AI_COMPOSE, StepKind.AI_CLASSIFY, StepKind.AI_EXTRACT}
+)
+EXTRACT_FIELD_TYPES: Final = frozenset({"string", "number", "boolean"})
+MAX_EXTRACT_FIELDS: Final = 10
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractField:
+    """One typed value an `ai_extract` step must return."""
+
+    name: str
+    type: str
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the exact serializable form."""
+        return {"name": self.name, "type": self.type}
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,12 +163,20 @@ class WorkflowStep:
     prompt: str | None = None
     categories: tuple[str, ...] = ()
     notify_service: str | None = None
+    fields: tuple[ExtractField, ...] = ()
+    when_step_id: str | None = None
+    when_category: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         """Return the exact serializable form."""
         data: dict[str, Any] = {"step_id": self.step_id, "kind": self.kind.value}
         if self.prompt is not None:
             data["prompt"] = self.prompt
+        if self.fields:
+            data["fields"] = [field.as_dict() for field in self.fields]
+        if self.when_step_id is not None:
+            data["when_step_id"] = self.when_step_id
+            data["when_category"] = self.when_category
         if self.categories:
             data["categories"] = list(self.categories)
         if self.notify_service is not None:
@@ -297,7 +326,18 @@ _TRIGGER_KEYS = frozenset({"kind", "entity_ids", "to_state", "at_time"})
 _CONDITION_KEYS = frozenset(
     {"kind", "entity_id", "state", "above", "below", "after_time", "before_time"}
 )
-_STEP_KEYS = frozenset({"step_id", "kind", "prompt", "categories", "notify_service"})
+_STEP_KEYS = frozenset(
+    {
+        "step_id",
+        "kind",
+        "prompt",
+        "categories",
+        "notify_service",
+        "fields",
+        "when_step_id",
+        "when_category",
+    }
+)
 _WORKFLOW_KEYS = frozenset(
     {
         "schema_version",
@@ -433,9 +473,64 @@ def parse_step(raw: Any) -> WorkflowStep:
     allowed = {
         StepKind.AI_COMPOSE: frozenset({"step_id", "kind", "prompt"}),
         StepKind.AI_CLASSIFY: frozenset({"step_id", "kind", "prompt", "categories"}),
+        StepKind.AI_EXTRACT: frozenset({"step_id", "kind", "prompt", "fields"}),
+        StepKind.BRANCH: frozenset(
+            {"step_id", "kind", "when_step_id", "when_category"}
+        ),
         StepKind.NOTIFY: frozenset({"step_id", "kind", "notify_service"}),
     }
     _reject_unknown_keys(data, allowed[kind], "step")
+
+    if kind is StepKind.AI_EXTRACT:
+        raw_fields = _require_list(
+            data.get("fields"), "step.fields", max_items=MAX_EXTRACT_FIELDS
+        )
+        if not raw_fields:
+            raise WorkflowValidationError("ai_extract step requires at least one field")
+        fields = []
+        for raw_field in raw_fields:
+            field = _require_mapping(raw_field, "step.fields[]")
+            _reject_unknown_keys(field, frozenset({"name", "type"}), "step.fields[]")
+            name = _require_bounded_str(
+                field.get("name"), "step.fields[].name", max_chars=64
+            )
+            if not _STEP_ID_PATTERN.fullmatch(name):
+                raise WorkflowValidationError(
+                    "step.fields[].name must be a lowercase identifier"
+                )
+            field_type = field.get("type")
+            if type(field_type) is not str or field_type not in EXTRACT_FIELD_TYPES:
+                raise WorkflowValidationError(
+                    "step.fields[].type must be string, number or boolean"
+                )
+            fields.append(ExtractField(name=name, type=field_type))
+        if len({field.name for field in fields}) != len(fields):
+            raise WorkflowValidationError("step.fields names must be unique")
+        return WorkflowStep(
+            step_id=step_id,
+            kind=kind,
+            prompt=_require_bounded_str(
+                data.get("prompt"), "step.prompt", max_chars=MAX_PROMPT_CHARS
+            ),
+            fields=tuple(fields),
+        )
+
+    if kind is StepKind.BRANCH:
+        when_step_id = _require_bounded_str(
+            data.get("when_step_id"), "step.when_step_id", max_chars=64
+        )
+        if not _STEP_ID_PATTERN.fullmatch(when_step_id):
+            raise WorkflowValidationError(
+                "step.when_step_id must be a lowercase identifier"
+            )
+        return WorkflowStep(
+            step_id=step_id,
+            kind=kind,
+            when_step_id=when_step_id,
+            when_category=_require_bounded_str(
+                data.get("when_category"), "step.when_category", max_chars=64
+            ),
+        )
 
     if kind is StepKind.AI_COMPOSE:
         if "categories" in data:
@@ -553,6 +648,27 @@ def parse_workflow(raw: Any) -> Workflow:
     step_ids = [step.step_id for step in steps]
     if len(set(step_ids)) != len(step_ids):
         raise WorkflowValidationError("workflow.steps must have unique step_id values")
+    # A branch may only gate on an earlier classify step and one of its categories,
+    # so the route set is closed at validation time.
+    for index, step in enumerate(steps):
+        if step.kind is not StepKind.BRANCH:
+            continue
+        source = next(
+            (
+                earlier
+                for earlier in steps[:index]
+                if earlier.step_id == step.when_step_id
+            ),
+            None,
+        )
+        if source is None or source.kind is not StepKind.AI_CLASSIFY:
+            raise WorkflowValidationError(
+                "branch.when_step_id must name an earlier ai_classify step"
+            )
+        if step.when_category not in source.categories:
+            raise WorkflowValidationError(
+                "branch.when_category must be one of that step's categories"
+            )
 
     # An enabled workflow must be able to start and to do something, otherwise
     # it would be silently inert while presenting as active.
@@ -564,7 +680,7 @@ def parse_workflow(raw: Any) -> Workflow:
     # inferred from whatever happens to be loaded.
     if (
         run_mode == RUN_MODE_EXECUTE
-        and any(step.kind is not StepKind.NOTIFY for step in steps)
+        and any(step.kind in AI_STEP_KINDS for step in steps)
         and provider_connection_id is None
     ):
         raise WorkflowValidationError(

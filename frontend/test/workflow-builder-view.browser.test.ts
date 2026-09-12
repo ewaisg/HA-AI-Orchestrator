@@ -79,6 +79,26 @@ describe("structured workflow builder", () => {
     field<HTMLButtonElement>(view, "wb-save").click(); await settle(view);
     expect(text(view)).toContain("Home Assistant rejected the workflow"); expect(text(view)).toContain("workflow.name is too long");
   });
+  it("builds extract and branch steps and refuses a branch without a preceding classify", async () => {
+    const view = await mount(createRoutedFakeHass(ROUTES));
+    await type(view, "wb-name", "Gate"); await type(view, "wb-trigger-entity", "binary_sensor.kitchen_window"); await choose(view, "wb-s1-target", "notify.kitchen_speaker");
+    button(view, "Add branch").click(); await settle(view);
+    expect(text(view)).toContain("choose an earlier classify step to branch on");
+    button(view, "Remove step 3").click(); await settle(view);
+    button(view, "Add classify").click(); await settle(view);
+    button(view, "Add branch").click(); await settle(view);
+    button(view, "Add extract values").click(); await settle(view);
+    expect(view.document().steps).toHaveLength(5);
+    await choose(view, "wb-s3-when", "classify");
+    expect(text(view)).toContain("choose one of that step's categories");
+    await choose(view, "wb-s3-category", "urgent");
+    await type(view, "wb-s2-prompt", "Classify it."); await type(view, "wb-s4-prompt", "Extract it.");
+    expect(view.problems()).toEqual([]);
+    const steps = view.document().steps as Record<string, unknown>[];
+    expect(steps.map((s) => s.step_id)).toEqual(["compose", "notify", "classify", "gate", "extract"]);
+    expect(steps[3]).toEqual({ step_id: "gate", kind: "branch", when_step_id: "classify", when_category: "urgent" });
+    expect(steps[4]).toMatchObject({ kind: "ai_extract", fields: [{ name: "room", type: "string" }, { name: "needs_action", type: "boolean" }] });
+  });
   it("works without lookups, at 390px, with accessible labels", async () => {
     const view = await mount({ callWS: async () => { throw new Error("private-secret"); } });
     view.style.width = "390px"; await settle(view);

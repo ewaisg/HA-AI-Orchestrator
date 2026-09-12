@@ -346,3 +346,52 @@ async def test_executor_requires_composed_text_for_notify(hass):
     assert record["actions_executed"] == 0
     assert record["steps"][0]["status"] == "failed"
     assert MARKER not in str(record)
+
+
+async def test_branch_not_taken_completes_without_delivery(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    provider.generate.return_value = TextGenerationResult(
+        text="", structured_output={"category": "routine"}
+    )
+    calls = register_notify_service(hass)
+    manager = await start_manager(
+        hass,
+        workflow(
+            steps=[
+                {
+                    "step_id": "classify",
+                    "kind": "ai_classify",
+                    "prompt": "Classify.",
+                    "categories": ["urgent", "routine"],
+                },
+                {
+                    "step_id": "gate",
+                    "kind": "branch",
+                    "when_step_id": "classify",
+                    "when_category": "urgent",
+                },
+                {"step_id": "compose", "kind": "ai_compose", "prompt": "Write."},
+                {
+                    "step_id": "notify",
+                    "kind": "notify",
+                    "notify_service": "notify.synthetic",
+                },
+            ]
+        ),
+    )
+
+    await trigger(hass)
+
+    assert calls == []
+    provider.generate.assert_awaited_once()
+    last = status(manager)["last_execution"]
+    assert last["completed"] is True
+    assert last["error"] is None
+    assert last["actions_executed"] == 0
+    assert [step["status"] for step in last["steps"]] == [
+        "ok",
+        "not_taken",
+        "skipped",
+        "skipped",
+    ]
+    assert status(manager)["execution_failures"] == 0

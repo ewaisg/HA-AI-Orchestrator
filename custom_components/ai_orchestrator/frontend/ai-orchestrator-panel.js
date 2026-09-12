@@ -254,13 +254,13 @@ var m = class extends HTMLElement {
 m.elementStyles = [], m.shadowRootOptions = { mode: "open" }, m[f("elementProperties")] = /* @__PURE__ */ new Map(), m[f("finalized")] = /* @__PURE__ */ new Map(), oe?.({ ReactiveElement: m }), (d.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var le = globalThis, ue = (e) => e, h = le.trustedTypes, de = h ? h.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + g, me = `<${pe}>`, _ = document, v = () => _.createComment(""), y = (e) => e === null || typeof e != "object" && typeof e != "function", b = Array.isArray, he = (e) => b(e) || typeof e?.[Symbol.iterator] == "function", ge = "[ 	\n\f\r]", x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${ge}(?:([^\\s"'>=/]+)(${ge}*=${ge}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, C = ((e) => (t, ...n) => ({
+var le = globalThis, ue = (e) => e, h = le.trustedTypes, de = h ? h.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, fe = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, pe = "?" + g, me = `<${pe}>`, _ = document, v = () => _.createComment(""), y = (e) => e === null || typeof e != "object" && typeof e != "function", he = Array.isArray, ge = (e) => he(e) || typeof e?.[Symbol.iterator] == "function", b = "[ 	\n\f\r]", x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${b}(?:([^\\s"'>=/]+)(${b}*=${b}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, C = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
 }))(1), w = Symbol.for("lit-noChange"), T = Symbol.for("lit-nothing"), Se = /* @__PURE__ */ new WeakMap(), E = _.createTreeWalker(_, 129);
 function Ce(e, t) {
-	if (!b(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	if (!he(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return de === void 0 ? t : de.createHTML(t);
 }
 var we = (e, t) => {
@@ -378,7 +378,7 @@ var Ee = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = D(this, e, t), y(e) ? e === T || e == null || e === "" ? (this._$AH !== T && this._$AR(), this._$AH = T) : e !== this._$AH && e !== w && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = D(this, e, t), y(e) ? e === T || e == null || e === "" ? (this._$AH !== T && this._$AR(), this._$AH = T) : e !== this._$AH && e !== w && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ge(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -402,7 +402,7 @@ var Ee = class {
 		return t === void 0 && Se.set(e.strings, t = new Te(e)), t;
 	}
 	k(t) {
-		b(this._$AH) || (this._$AH = [], this._$AR());
+		he(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
 		for (let a of t) i === n.length ? n.push(r = new e(this.O(v()), this.O(v()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
@@ -483,7 +483,7 @@ var Ne = (e, t, n) => {
 		r._$litPart$ = i = new De(t.insertBefore(v(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, k = globalThis, A = class extends m {
+}, Pe = globalThis, k = class extends m {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -505,17 +505,17 @@ var Ne = (e, t, n) => {
 		return w;
 	}
 };
-A._$litElement$ = !0, A.finalized = !0, k.litElementHydrateSupport?.({ LitElement: A });
-var Pe = k.litElementPolyfillSupport;
-Pe?.({ LitElement: A }), (k.litElementVersions ??= []).push("4.2.2");
+k._$litElement$ = !0, k.finalized = !0, Pe.litElementHydrateSupport?.({ LitElement: k });
+var Fe = Pe.litElementPolyfillSupport;
+Fe?.({ LitElement: k }), (Pe.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api/status-client.ts
-var Fe = Object.freeze({ type: "ai_orchestrator/status" }), j = [
+var Ie = Object.freeze({ type: "ai_orchestrator/status" }), A = [
 	"providers",
 	"workflows",
 	"conversation",
 	"ai_task"
-], Ie = class extends Error {
+], j = class extends Error {
 	constructor() {
 		super("The status response does not match the supported foundation contract."), this.name = "StatusContractError";
 	}
@@ -532,9 +532,9 @@ function ze(e) {
 		"phase",
 		"configured",
 		"features"
-	]) || !Le(e.features) || !Re(e.features, j)) throw new Ie();
+	]) || !Le(e.features) || !Re(e.features, A)) throw new j();
 	let t = e.features;
-	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || j.some((e) => typeof t[e] != "boolean")) throw new Ie();
+	if (e.schema_version !== 1 || e.phase !== "foundation" || typeof e.configured != "boolean" || A.some((e) => typeof t[e] != "boolean")) throw new j();
 	return {
 		schema_version: 1,
 		phase: "foundation",
@@ -548,7 +548,7 @@ function ze(e) {
 	};
 }
 async function Be(e) {
-	return ze(await e.callWS({ ...Fe }));
+	return ze(await e.callWS({ ...Ie }));
 }
 function Ve(e) {
 	return Le(e) && e.code === "unauthorized";
@@ -1338,41 +1338,41 @@ var Ye = o`
 	"available",
 	"unavailable",
 	"not_loaded"
-], Qe = ["entity", "device"], $e = 1e4;
-function M(e) {
+], Qe = ["entity", "device"], M = 1e4;
+function N(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function N(e, t) {
+function P(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function P(e) {
+function F(e) {
 	return e === null || typeof e == "string";
 }
-function F(e) {
+function I(e) {
 	return typeof e == "string" && e.length > 0 && e.length <= 255;
 }
-function et(e) {
-	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid area catalogue");
+function $e(e) {
+	if (!Array.isArray(e) || e.length > M) throw Error("Invalid area catalogue");
 	return e.map((e) => {
-		if (!M(e) || !N(e, ["area_id", "name"]) || !F(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
+		if (!N(e) || !P(e, ["area_id", "name"]) || !I(e.area_id) || typeof e.name != "string" || e.name.trim() === "") throw Error("Invalid area entry");
 		return {
 			area_id: e.area_id,
 			name: e.name
 		};
 	});
 }
-function tt(e) {
-	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid device catalogue");
+function et(e) {
+	if (!Array.isArray(e) || e.length > M) throw Error("Invalid device catalogue");
 	return e.map((e) => {
-		if (!M(e) || !N(e, [
+		if (!N(e) || !P(e, [
 			"device_id",
 			"name",
 			"area_id",
 			"manufacturer",
 			"model",
 			"disabled"
-		]) || !F(e.device_id) || !P(e.name) || e.area_id !== null && !F(e.area_id) || !P(e.manufacturer) || !P(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
+		]) || !I(e.device_id) || !F(e.name) || e.area_id !== null && !I(e.area_id) || !F(e.manufacturer) || !F(e.model) || typeof e.disabled != "boolean") throw Error("Invalid device entry");
 		return {
 			device_id: e.device_id,
 			name: e.name,
@@ -1383,10 +1383,10 @@ function tt(e) {
 		};
 	});
 }
-function nt(e) {
-	if (!Array.isArray(e) || e.length > $e) throw Error("Invalid entity catalogue");
+function tt(e) {
+	if (!Array.isArray(e) || e.length > M) throw Error("Invalid entity catalogue");
 	return e.map((e) => {
-		if (!M(e) || !N(e, [
+		if (!N(e) || !P(e, [
 			"registry_id",
 			"entity_id",
 			"domain",
@@ -1397,7 +1397,7 @@ function nt(e) {
 			"area_source",
 			"disabled",
 			"availability"
-		]) || !F(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !F(e.platform) || !P(e.name) || e.device_id !== null && !F(e.device_id) || e.area_id !== null && !F(e.area_id) || e.area_source !== null && !Qe.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Ze.includes(e.availability)) throw Error("Invalid entity entry");
+		]) || !I(e.registry_id) || typeof e.entity_id != "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/u.test(e.entity_id) || typeof e.domain != "string" || e.domain !== e.entity_id.split(".", 1)[0] || !I(e.platform) || !F(e.name) || e.device_id !== null && !I(e.device_id) || e.area_id !== null && !I(e.area_id) || e.area_source !== null && !Qe.includes(e.area_source) || e.area_source === null != (e.area_id === null) || typeof e.disabled != "boolean" || !Ze.includes(e.availability)) throw Error("Invalid entity entry");
 		return {
 			registry_id: e.registry_id,
 			entity_id: e.entity_id,
@@ -1412,8 +1412,8 @@ function nt(e) {
 		};
 	});
 }
-function rt(e) {
-	if (!M(e) || !N(e, [
+function nt(e) {
+	if (!N(e) || !P(e, [
 		"schema_version",
 		"areas",
 		"devices",
@@ -1421,17 +1421,17 @@ function rt(e) {
 	]) || e.schema_version !== 1) throw Error("Invalid catalogue response");
 	return {
 		schema_version: 1,
-		areas: et(e.areas),
-		devices: tt(e.devices),
-		entities: nt(e.entities)
+		areas: $e(e.areas),
+		devices: et(e.devices),
+		entities: tt(e.entities)
 	};
 }
-async function it(e) {
-	return rt(await e.callWS({ ...Xe }));
+async function rt(e) {
+	return nt(await e.callWS({ ...Xe }));
 }
 //#endregion
 //#region src/panel/catalog-view.ts
-var at = class extends A {
+var it = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		_state: { state: !0 },
@@ -1561,7 +1561,7 @@ var at = class extends A {
 		if (this.hass !== void 0) {
 			this._hasLoaded = !0, this._state = "loading";
 			try {
-				this._catalog = await it(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
+				this._catalog = await rt(this.hass), this._state = this._catalog.entities.length === 0 ? "empty" : "ready";
 			} catch {
 				this._catalog = void 0, this._state = "error";
 			}
@@ -1572,13 +1572,13 @@ var at = class extends A {
 			this._loadScheduled = !1, this._load();
 		}));
 	}
-}, ot = Object.freeze({ type: "ai_orchestrator/providers/list" }), st = [
+}, at = Object.freeze({ type: "ai_orchestrator/providers/list" }), ot = [
 	"healthy",
 	"degraded",
 	"unavailable",
 	"authentication_required",
 	"not_tested"
-], ct = [
+], st = [
 	"authentication",
 	"authorization",
 	"not_found",
@@ -1595,37 +1595,37 @@ var at = class extends A {
 	"unsupported",
 	"unknown"
 ];
-function lt(e) {
+function ct(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function ut(e, t) {
+function lt(e, t) {
 	let n = Object.keys(e).sort(), r = [...t].sort();
 	return n.length === r.length && n.every((e, t) => e === r[t]);
 }
-function dt(e) {
+function ut(e) {
 	return typeof e == "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(e);
+}
+function dt(e) {
+	return typeof e == "string" && ot.includes(e);
 }
 function ft(e) {
 	return typeof e == "string" && st.includes(e);
 }
 function pt(e) {
-	return typeof e == "string" && ct.includes(e);
-}
-function mt(e) {
 	return typeof e == "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(e) && !Number.isNaN(Date.parse(e));
 }
-function ht(e) {
-	if (!lt(e) || !ut(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
+function mt(e) {
+	if (!ct(e) || !lt(e, ["schema_version", "providers"]) || e.schema_version !== 1 || !Array.isArray(e.providers)) throw Error("Invalid provider list response");
 	let t = [];
 	for (let n of e.providers) {
-		if (!lt(n) || !ut(n, [
+		if (!ct(n) || !lt(n, [
 			"connection_id",
 			"provider_type",
 			"display_name",
 			"title",
 			"health",
 			"last_tested_at"
-		]) || !dt(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !ft(n.health) || n.last_tested_at !== null && !mt(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
+		]) || !ut(n.connection_id) || typeof n.provider_type != "string" || !/^[a-z][a-z0-9_]{0,63}$/u.test(n.provider_type) || typeof n.display_name != "string" || n.display_name.trim() === "" || typeof n.title != "string" || n.title.trim() === "" || !dt(n.health) || n.last_tested_at !== null && !pt(n.last_tested_at) || n.health === "not_tested" != (n.last_tested_at === null)) throw Error("Invalid provider entry in list");
 		t.push({
 			connection_id: n.connection_id,
 			provider_type: n.provider_type,
@@ -1640,14 +1640,14 @@ function ht(e) {
 		providers: t
 	};
 }
-function gt(e, t) {
-	if (!lt(e) || !ut(e, [
+function ht(e, t) {
+	if (!ct(e) || !lt(e, [
 		"schema_version",
 		"connection_id",
 		"health",
 		"error_code",
 		"last_tested_at"
-	]) || e.schema_version !== 1 || !dt(e.connection_id) || t !== void 0 && e.connection_id !== t || !ft(e.health) || e.error_code !== null && !pt(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !mt(e.last_tested_at)) throw Error("Invalid provider test response");
+	]) || e.schema_version !== 1 || !ut(e.connection_id) || t !== void 0 && e.connection_id !== t || !dt(e.health) || e.error_code !== null && !ft(e.error_code) || e.health === "healthy" && e.error_code !== null || e.health !== "healthy" && e.error_code === null || e.health === "not_tested" || !pt(e.last_tested_at)) throw Error("Invalid provider test response");
 	return {
 		schema_version: 1,
 		connection_id: e.connection_id,
@@ -1656,18 +1656,18 @@ function gt(e, t) {
 		last_tested_at: e.last_tested_at
 	};
 }
-async function _t(e) {
-	return ht(await e.callWS({ ...ot }));
+async function gt(e) {
+	return mt(await e.callWS({ ...at }));
 }
-async function vt(e, t) {
-	return gt(await e.callWS({
+async function _t(e, t) {
+	return ht(await e.callWS({
 		type: "ai_orchestrator/providers/test",
 		connection_id: t
 	}), t);
 }
 //#endregion
 //#region src/panel/providers-view.ts
-var yt = "/config/integrations/integration/ai_orchestrator", bt = {
+var vt = "/config/integrations/integration/ai_orchestrator", yt = {
 	authentication: "Authentication failed",
 	authorization: "Authorization denied",
 	not_found: "Model not found",
@@ -1683,13 +1683,13 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
 	cancelled: "Connection test cancelled",
 	unsupported: "Connection test unsupported",
 	unknown: "Test failed"
-}, xt = {
+}, bt = {
 	healthy: "Healthy",
 	degraded: "Degraded",
 	unavailable: "Unavailable",
 	authentication_required: "Authentication required",
 	not_tested: "Not tested"
-}, St = class extends A {
+}, xt = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		_viewState: { state: !0 },
@@ -1903,11 +1903,11 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
             Add a provider through Home Assistant's AI Orchestrator integration page.
             Credentials stay in the backend config flow and never return to this panel.
           </p>
-          <a class="primary-link" href=${yt}>Add provider connection</a>
+          <a class="primary-link" href=${vt}>Add provider connection</a>
         </div>
       ` : C`
       <div class="provider-toolbar">
-        <a class="primary-link" href=${yt}>Manage provider connections</a>
+        <a class="primary-link" href=${vt}>Manage provider connections</a>
       </div>
       <div class="provider-grid" role="list" aria-label="Provider connections">
         ${this._providers.map((e) => this._renderProviderCard(e))}
@@ -1923,7 +1923,7 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
             <h3 class="provider-name">${e.title}</h3>
             <span class="provider-type">${e.display_name}</span>
           </div>
-          <span class="state-badge ${r}">${xt[r]}</span>
+          <span class="state-badge ${r}">${bt[r]}</span>
         </div>
         <p class="provider-meta">Local provider · ${e.provider_type}</p>
         <p class="provider-meta">
@@ -1958,7 +1958,7 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
         Connection test passed
       </span>`;
 		if (t !== void 0) {
-			let e = bt[t.error_code ?? "unknown"] ?? "Test failed";
+			let e = yt[t.error_code ?? "unknown"] ?? "Test failed";
 			return C`<span
         class="test-result ${t.health}"
         role="status"
@@ -1972,7 +1972,7 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
 		if (e !== void 0) {
 			this._hasLoaded = !0, this._viewState = "loading";
 			try {
-				let t = await _t(e);
+				let t = await gt(e);
 				this._providers = t.providers, this._viewState = this._providers.length > 0 ? "ready" : "empty";
 			} catch {
 				this._viewState = "error", this._providers = [];
@@ -1989,7 +1989,7 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
 		if (t !== void 0 && this._testStates.get(e) !== "checking") {
 			this._testStates = new Map(this._testStates).set(e, "checking"), this.requestUpdate();
 			try {
-				let n = await vt(t, e);
+				let n = await _t(t, e);
 				this._providers = this._providers.map((t) => t.connection_id === e ? {
 					...t,
 					health: n.health,
@@ -2002,24 +2002,24 @@ var yt = "/config/integrations/integration/ai_orchestrator", bt = {
 			}
 		}
 	}
-}, I = Object.freeze({
+}, L = Object.freeze({
 	max_messages: 21,
 	max_message_chars: 4e3,
 	max_total_chars: 16e3,
 	max_response_chars: 4e3,
 	timeout_seconds: 60
-}), L = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-function R(e) {
+}), R = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+function z(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function z(e, t) {
+function B(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function B(e, t) {
+function V(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function Ct(e) {
-	if (!R(e) || !z(e, [
+function St(e) {
+	if (!z(e) || !B(e, [
 		"schema_version",
 		"providers",
 		"limits",
@@ -2027,20 +2027,20 @@ function Ct(e) {
 		"household_context",
 		"actions",
 		"history_persisted"
-	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !R(e.limits) || !z(e.limits, Object.keys(I))) throw Error("Unsupported chat options");
+	]) || e.schema_version !== 1 || e.streaming !== !1 || e.household_context !== !1 || e.actions !== !1 || e.history_persisted !== !1 || !Array.isArray(e.providers) || !z(e.limits) || !B(e.limits, Object.keys(L))) throw Error("Unsupported chat options");
 	let t = e.limits;
-	if (Object.entries(I).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
+	if (Object.entries(L).some(([e, n]) => t[e] !== n)) throw Error("Unsupported chat limits");
 	let n = /* @__PURE__ */ new Set();
 	return {
 		schema_version: 1,
 		providers: e.providers.map((e) => {
-			if (!R(e) || !z(e, [
+			if (!z(e) || !B(e, [
 				"connection_id",
 				"title",
 				"display_name",
 				"destination",
 				"capability_verified"
-			]) || typeof e.connection_id != "string" || !L.test(e.connection_id) || !B(e.title, 1e3) || !B(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
+			]) || typeof e.connection_id != "string" || !R.test(e.connection_id) || !V(e.title, 1e3) || !V(e.display_name, 1e3) || e.destination !== "local" || e.capability_verified !== !1 || n.has(e.connection_id)) throw Error("Unsupported chat provider");
 			return n.add(e.connection_id), {
 				connection_id: e.connection_id,
 				title: e.title,
@@ -2049,22 +2049,22 @@ function Ct(e) {
 				capability_verified: !1
 			};
 		}),
-		limits: I,
+		limits: L,
 		streaming: !1,
 		household_context: !1,
 		actions: !1,
 		history_persisted: !1
 	};
 }
-function wt(e, t, n) {
-	if (!R(e) || !z(e, [
+function Ct(e, t, n) {
+	if (!z(e) || !B(e, [
 		"schema_version",
 		"connection_id",
 		"request_id",
 		"text",
 		"destination",
 		"streaming"
-	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !B(e.text, I.max_response_chars)) throw Error("Unsupported chat response");
+	]) || e.schema_version !== 1 || e.connection_id !== t || e.request_id !== n || e.destination !== "local" || e.streaming !== !1 || !V(e.text, L.max_response_chars)) throw Error("Unsupported chat response");
 	return {
 		schema_version: 1,
 		connection_id: t,
@@ -2074,18 +2074,18 @@ function wt(e, t, n) {
 		streaming: !1
 	};
 }
-async function V(e) {
-	return Ct(await e.callWS({ type: "ai_orchestrator/chat/options" }));
+async function H(e) {
+	return St(await e.callWS({ type: "ai_orchestrator/chat/options" }));
 }
-function H() {
+function U() {
 	let e = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
 	e[6] = e[6] & 15 | 64, e[8] = e[8] & 63 | 128;
 	let t = [...e].map((e) => e.toString(16).padStart(2, "0")).join("");
 	return `${t.slice(0, 8)}-${t.slice(8, 12)}-${t.slice(12, 16)}-${t.slice(16, 20)}-${t.slice(20)}`;
 }
-async function Tt(e, t, n, r) {
-	if (!L.test(t) || !L.test(n) || r.length === 0 || r.length > I.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !B(e.content, I.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > I.max_total_chars) throw Error("Invalid chat request");
-	return wt(await e.callWS({
+async function wt(e, t, n, r) {
+	if (!R.test(t) || !R.test(n) || r.length === 0 || r.length > L.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !V(e.content, L.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > L.max_total_chars) throw Error("Invalid chat request");
+	return Ct(await e.callWS({
 		type: "ai_orchestrator/chat/send",
 		connection_id: t,
 		request_id: n,
@@ -2095,12 +2095,12 @@ async function Tt(e, t, n, r) {
 		}))
 	}), t, n);
 }
-function Et(e, t) {
+function Tt(e, t) {
 	let n = [...e.map((e) => ({ ...e })), {
 		role: "user",
 		content: t
 	}], r = !1;
-	for (; n.length > 1 && (n.length > I.max_messages || n.reduce((e, t) => e + t.content.length, 0) > I.max_total_chars);) n.splice(0, 2), r = !0;
+	for (; n.length > 1 && (n.length > L.max_messages || n.reduce((e, t) => e + t.content.length, 0) > L.max_total_chars);) n.splice(0, 2), r = !0;
 	return {
 		messages: n,
 		omitted: r
@@ -2108,7 +2108,7 @@ function Et(e, t) {
 }
 //#endregion
 //#region src/panel/chat-view.ts
-var Dt = "ai-orchestrator-chat-view", Ot = {
+var Et = "ai-orchestrator-chat-view", Dt = {
 	unauthorized: "Administrator access is required for chat.",
 	chat_busy: "A request is still running. Wait a moment, then send again.",
 	chat_duplicate_request: "This request was already submitted. Start a new request to retry.",
@@ -2119,7 +2119,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 	chat_connection: "Home Assistant could not reach the local provider.",
 	chat_not_found: "The configured model is not available. Check provider settings.",
 	chat_unsupported: "This provider does not support the requested text generation."
-}, kt = class extends A {
+}, Ot = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		_options: { state: !0 },
@@ -2240,7 +2240,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 		let t = ++this._loadSequence;
 		this._loading = !0, this._error = "";
 		try {
-			let n = await V(e);
+			let n = await H(e);
 			if (t !== this._loadSequence || !this.isConnected) return;
 			this._options = n, n.providers.some((e) => e.connection_id === this._connectionId) || (this._sequence += 1, this._history = [], this._draft = "", this._notice = "", this._connectionId = n.providers[0]?.connection_id ?? "");
 		} catch {
@@ -2253,11 +2253,11 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 	async _send(e) {
 		e?.preventDefault();
 		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
-		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > I.max_message_chars || this.hass?.connection?.connected === !1) return;
-		let i = Et(this._history, n), a = ++this._sequence, o = this._connectionId;
+		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > L.max_message_chars || this.hass?.connection?.connected === !1) return;
+		let i = Tt(this._history, n), a = ++this._sequence, o = this._connectionId;
 		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
 		try {
-			let e = await Tt(t, o, H(), i.messages);
+			let e = await wt(t, o, U(), i.messages);
 			if (a !== this._sequence || !this.isConnected) return;
 			this._history = [...i.messages, {
 				role: "assistant",
@@ -2268,7 +2268,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
 		} catch (e) {
 			if (a !== this._sequence || !this.isConnected) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = Ot[t] ?? "The reply could not be completed. Your message is ready to try again.";
+			this._error = Dt[t] ?? "The reply could not be completed. Your message is ready to try again.";
 		} finally {
 			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
 		}
@@ -2323,7 +2323,7 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
       ${this._notice ? C`<p class="notice" role="status">${this._notice}</p>` : T}
       <form class="compose" @submit=${(e) => void this._send(e)}>
         <label for="message">Your message</label>
-        <textarea id="message" rows="1" maxlength=${I.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
+        <textarea id="message" rows="1" maxlength=${L.max_message_chars} .value=${this._draft} ?disabled=${this._busy}
           placeholder="Ask your local AI…" aria-describedby="compose-hint"
           @input=${(e) => {
 			let t = e.target;
@@ -2332,24 +2332,24 @@ var Dt = "ai-orchestrator-chat-view", Ot = {
           @keydown=${(e) => {
 			e.key === "Enter" && (e.ctrlKey || e.metaKey) && this._send(e);
 		}}></textarea>
-        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${I.max_message_chars} · Ctrl/⌘ + Enter to send</span>
+        <div class="compose-footer"><span id="compose-hint" class="hint">${this._draft.length} / ${L.max_message_chars} · Ctrl/⌘ + Enter to send</span>
           <button class="primary" type="submit" ?disabled=${this._busy || this._loading || !e || !this._draft.trim()}>${this._busy ? "Waiting…" : "Send"}</button></div>
       </form>
     </div>`;
 	}
-}, At = ["entity", "service"], jt = class extends Error {
+}, kt = ["entity", "service"], At = class extends Error {
 	constructor() {
 		super("Notification target response is unsupported.");
 	}
-}, Mt = /^notify\.[a-z0-9_]{1,250}$/u;
-function Nt(e) {
+}, jt = /^notify\.[a-z0-9_]{1,250}$/u;
+function Mt(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Pt(e) {
-	if (!Nt(e) || Object.keys(e).length !== 2 || e.schema_version !== 1 || !Array.isArray(e.targets) || e.targets.length > 500) throw new jt();
+function Nt(e) {
+	if (!Mt(e) || Object.keys(e).length !== 2 || e.schema_version !== 1 || !Array.isArray(e.targets) || e.targets.length > 500) throw new At();
 	let t = /* @__PURE__ */ new Set();
 	return e.targets.map((e) => {
-		if (!Nt(e) || Object.keys(e).length !== 3 || typeof e.reference != "string" || !Mt.test(e.reference) || !At.includes(e.kind) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 255 || t.has(e.reference)) throw new jt();
+		if (!Mt(e) || Object.keys(e).length !== 3 || typeof e.reference != "string" || !jt.test(e.reference) || !kt.includes(e.kind) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 255 || t.has(e.reference)) throw new At();
 		return t.add(e.reference), {
 			reference: e.reference,
 			kind: e.kind,
@@ -2357,12 +2357,12 @@ function Pt(e) {
 		};
 	});
 }
-async function Ft(e) {
-	return Pt(await e.callWS({ type: "ai_orchestrator/notify/targets" }));
+async function Pt(e) {
+	return Nt(await e.callWS({ type: "ai_orchestrator/notify/targets" }));
 }
 //#endregion
 //#region src/api/workflow-preview-client.ts
-var It = 131072, U = {
+var Ft = 131072, W = {
 	matched: "Matched",
 	event_kind_mismatch: "Event type did not match",
 	state_unchanged: "State did not change",
@@ -2374,25 +2374,25 @@ var It = 131072, U = {
 	state_mismatch: "State did not match",
 	state_not_numeric: "State is not numeric",
 	outside_numeric_bounds: "Outside numeric bounds"
-}, W = class extends Error {
+}, G = class extends Error {
 	constructor() {
 		super("Workflow preview response is unsupported.");
 	}
 };
-function Lt(e) {
+function It(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Rt(e, t) {
+function Lt(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function G(e, t, n) {
-	return Array.isArray(e) && e.length <= t && e.every((e, t) => Lt(e) && Rt(e, [
+function K(e, t, n) {
+	return Array.isArray(e) && e.length <= t && e.every((e, t) => It(e) && Lt(e, [
 		"index",
 		"passed",
 		"reason"
 	]) && e.index === t && typeof e.passed == "boolean" && typeof e.reason == "string" && n.includes(e.reason) && e.passed === (e.reason === "matched"));
 }
-var zt = [
+var Rt = [
 	"mode",
 	"enabled",
 	"triggered",
@@ -2404,63 +2404,67 @@ var zt = [
 	"provider_calls",
 	"actions_executed"
 ];
-function Bt(e, t, n) {
-	return Lt(e) && Rt(e, n ? ["schema_version", ...zt] : zt) && (!n || e.schema_version === 1) && e.mode === t;
+function zt(e, t, n) {
+	return It(e) && Lt(e, n ? ["schema_version", ...Rt] : Rt) && (!n || e.schema_version === 1) && e.mode === t;
+}
+function Bt(e) {
+	if (!zt(e, "observation_only", !1)) throw new G();
+	return Ht(e);
 }
 function Vt(e) {
-	if (!Bt(e, "observation_only", !1)) throw new W();
-	return Ut(e);
+	if (!zt(e, "offline", !0)) throw new G();
+	return Ht(e);
 }
 function Ht(e) {
-	if (!Bt(e, "offline", !0)) throw new W();
-	return Ut(e);
-}
-function Ut(e) {
-	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !G(e.trigger_results, 10, [
+	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !K(e.trigger_results, 10, [
 		"matched",
 		"event_kind_mismatch",
 		"state_unchanged",
 		"entity_not_selected",
 		"target_state_mismatch",
 		"time_mismatch"
-	]) || !G(e.condition_results, 20, [
+	]) || !K(e.condition_results, 20, [
 		"matched",
 		"outside_time_window",
 		"state_unavailable",
 		"state_mismatch",
 		"state_not_numeric",
 		"outside_numeric_bounds"
-	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Lt(e) && Rt(e, ["index", "kind"]) && e.index === t && [
+	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => It(e) && Lt(e, ["index", "kind"]) && e.index === t && [
 		"ai_compose",
 		"ai_classify",
+		"ai_extract",
+		"branch",
 		"notify"
-	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new W();
+	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new G();
 	return e;
 }
-async function Wt(e, t, n) {
-	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new W();
-	return Ht(await e.callWS({
+async function Ut(e, t, n) {
+	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new G();
+	return Vt(await e.callWS({
 		type: "ai_orchestrator/workflow/preview",
 		workflow_json: t,
 		snapshot_json: n
 	}));
 }
-var Gt = [
+var Wt = [
 	"ready",
 	"unreadable",
 	"not_loaded"
-], Kt = ["activation_failed", "cleanup_failed"], qt = ["observe", "execute"], Jt = [
+], Gt = ["activation_failed", "cleanup_failed"], Kt = ["observe", "execute"], qt = [
 	"ok",
 	"planned",
 	"failed",
 	"skipped",
-	"delivered"
-], K = class extends Error {
+	"delivered",
+	"taken",
+	"not_taken"
+], q = class extends Error {
 	constructor() {
 		super("The workflow response does not match the supported contract."), this.name = "WorkflowContractError";
 	}
-}, Yt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Xt = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Zt = /^[a-z][a-z0-9_]{0,63}$/u;
-function Qt(e) {
+}, Jt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Yt = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Xt = /^[a-z][a-z0-9_]{0,63}$/u;
+function Zt(e) {
 	let t = [
 		"started_at",
 		"steps",
@@ -2469,9 +2473,9 @@ function Qt(e) {
 		"completed",
 		"error"
 	];
-	if (!q(e) || !(J(e, t) || J(e, [...t, "finished_at"])) || typeof e.started_at != "string" || e.started_at.length > 40 || "finished_at" in e && (typeof e.finished_at != "string" || e.finished_at.length > 40) || !Array.isArray(e.steps) || e.steps.length > 25 || !Y(e.provider_calls) || !Y(e.actions_executed) || typeof e.completed != "boolean" || e.error !== null && (typeof e.error != "string" || e.error.length > 64)) throw new K();
+	if (!J(e) || !(Y(e, t) || Y(e, [...t, "finished_at"])) || typeof e.started_at != "string" || e.started_at.length > 40 || "finished_at" in e && (typeof e.finished_at != "string" || e.finished_at.length > 40) || !Array.isArray(e.steps) || e.steps.length > 25 || !X(e.provider_calls) || !X(e.actions_executed) || typeof e.completed != "boolean" || e.error !== null && (typeof e.error != "string" || e.error.length > 64)) throw new q();
 	let n = e.steps.map((e, t) => {
-		if (!q(e) || e.index !== t || typeof e.step_id != "string" || !Zt.test(e.step_id) || typeof e.kind != "string" || typeof e.executed != "boolean" || !Jt.includes(e.status) || Object.keys(e).some((e) => ![
+		if (!J(e) || e.index !== t || typeof e.step_id != "string" || !Xt.test(e.step_id) || typeof e.kind != "string" || typeof e.executed != "boolean" || !qt.includes(e.status) || Object.keys(e).some((e) => ![
 			"index",
 			"step_id",
 			"kind",
@@ -2484,29 +2488,29 @@ function Qt(e) {
 			"entity",
 			"service",
 			"missing"
-		].includes(e.target)) throw new K();
+		].includes(e.target)) throw new q();
 		return e;
 	});
-	if (e.completed && (e.error !== null || n.some((e) => e.status === "failed" || e.status === "skipped")) || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new K();
+	if (e.completed && (e.error !== null || n.some((e) => e.status === "failed" || e.status === "skipped")) || e.actions_executed !== n.filter((e) => e.status === "delivered").length) throw new q();
 	return {
 		...e,
 		steps: n
 	};
 }
-function q(e) {
+function J(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function J(e, t) {
+function Y(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function $t(e, t) {
-	return Array.isArray(e) && e.length <= t && e.every(q);
+function Qt(e, t) {
+	return Array.isArray(e) && e.length <= t && e.every(J);
 }
-function Y(e) {
+function X(e) {
 	return Number.isSafeInteger(e) && e >= 0;
 }
-function en(e) {
-	if (!q(e) || !J(e, [
+function $t(e) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"workflow_id",
 		"name",
@@ -2517,7 +2521,7 @@ function en(e) {
 		"triggers",
 		"conditions",
 		"steps"
-	]) || e.schema_version !== 1 || !qt.includes(e.run_mode) || e.provider_connection_id !== null && (typeof e.provider_connection_id != "string" || !Xt.test(e.provider_connection_id)) || typeof e.workflow_id != "string" || !Yt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !$t(e.triggers, 10) || !$t(e.conditions, 20) || !$t(e.steps, 25)) throw new K();
+	]) || e.schema_version !== 1 || !Kt.includes(e.run_mode) || e.provider_connection_id !== null && (typeof e.provider_connection_id != "string" || !Yt.test(e.provider_connection_id)) || typeof e.workflow_id != "string" || !Jt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Qt(e.triggers, 10) || !Qt(e.conditions, 20) || !Qt(e.steps, 25)) throw new q();
 	return {
 		schema_version: 1,
 		workflow_id: e.workflow_id,
@@ -2531,8 +2535,8 @@ function en(e) {
 		steps: e.steps
 	};
 }
-function tn(e) {
-	if (!q(e) || !J(e, [
+function en(e) {
+	if (!J(e) || !Y(e, [
 		"active",
 		"observations",
 		"ignored_events",
@@ -2544,15 +2548,15 @@ function tn(e) {
 		"skipped_busy",
 		"execution_running",
 		"last_execution"
-	]) || typeof e.active != "boolean" || !Y(e.executions) || !Y(e.execution_failures) || !Y(e.skipped_busy) || typeof e.execution_running != "boolean" || e.execution_failures > e.executions || !Y(e.observations) || !Y(e.ignored_events) || !Y(e.registrations) || e.error !== null && !Kt.includes(e.error) || e.active && e.error !== null) throw new K();
+	]) || typeof e.active != "boolean" || !X(e.executions) || !X(e.execution_failures) || !X(e.skipped_busy) || typeof e.execution_running != "boolean" || e.execution_failures > e.executions || !X(e.observations) || !X(e.ignored_events) || !X(e.registrations) || e.error !== null && !Gt.includes(e.error) || e.active && e.error !== null) throw new q();
 	let t = null;
 	if (e.latest !== null) try {
-		t = Vt(e.latest);
+		t = Bt(e.latest);
 	} catch {
-		throw new K();
+		throw new q();
 	}
 	let n = null;
-	return e.last_execution !== null && (n = Qt(e.last_execution)), {
+	return e.last_execution !== null && (n = Zt(e.last_execution)), {
 		active: e.active,
 		observations: e.observations,
 		ignored_events: e.ignored_events,
@@ -2566,27 +2570,27 @@ function tn(e) {
 		last_execution: n
 	};
 }
-function nn(e) {
-	if (!Array.isArray(e) || e.length > 50) throw new K();
+function tn(e) {
+	if (!Array.isArray(e) || e.length > 50) throw new q();
 	let t = /* @__PURE__ */ new Set();
 	return e.map((e) => {
-		if (!q(e) || !J(e, ["workflow", "status"])) throw new K();
-		let n = en(e.workflow);
-		if (t.has(n.workflow_id)) throw new K();
+		if (!J(e) || !Y(e, ["workflow", "status"])) throw new q();
+		let n = $t(e.workflow);
+		if (t.has(n.workflow_id)) throw new q();
 		return t.add(n.workflow_id), {
 			workflow: n,
-			status: tn(e.status)
+			status: en(e.status)
 		};
 	});
 }
-function X(e) {
-	if (!q(e) || !J(e, [
+function nn(e) {
+	if (!J(e) || !Y(e, [
 		"schema_version",
 		"store",
 		"workflows"
-	]) || e.schema_version !== 1 || !Gt.includes(e.store)) throw new K();
-	let t = nn(e.workflows);
-	if (e.store !== "ready" && t.length > 0) throw new K();
+	]) || e.schema_version !== 1 || !Wt.includes(e.store)) throw new q();
+	let t = tn(e.workflows);
+	if (e.store !== "ready" && t.length > 0) throw new q();
 	return {
 		schema_version: 1,
 		store: e.store,
@@ -2594,21 +2598,21 @@ function X(e) {
 	};
 }
 function rn(e, t) {
-	if (!q(e) || !Object.hasOwn(e, "workflow")) throw new K();
-	let { workflow: n, ...r } = e, i = en(n);
-	if (t !== void 0 && i.workflow_id !== t) throw new K();
-	let a = X(r);
-	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new K();
+	if (!J(e) || !Object.hasOwn(e, "workflow")) throw new q();
+	let { workflow: n, ...r } = e, i = $t(n);
+	if (t !== void 0 && i.workflow_id !== t) throw new q();
+	let a = nn(r);
+	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new q();
 	return {
 		...a,
 		workflow: i
 	};
 }
 async function an(e) {
-	return X(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
+	return nn(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
 }
 async function on(e, t) {
-	if (!t.trim() || t.length > 131072) throw new K();
+	if (!t.trim() || t.length > 131072) throw new q();
 	return rn(await e.callWS({
 		type: "ai_orchestrator/workflows/save",
 		workflow_json: t
@@ -2620,15 +2624,15 @@ async function sn(e, t, n) {
 		workflow_id: t,
 		enabled: n
 	}), t);
-	if (r.workflow.enabled !== n) throw new K();
+	if (r.workflow.enabled !== n) throw new q();
 	return r;
 }
 async function cn(e, t) {
-	let n = X(await e.callWS({
+	let n = nn(await e.callWS({
 		type: "ai_orchestrator/workflows/delete",
 		workflow_id: t
 	}));
-	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new K();
+	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new q();
 	return n;
 }
 async function ln(e, t) {
@@ -2636,21 +2640,25 @@ async function ln(e, t) {
 		type: "ai_orchestrator/workflows/run_manual",
 		workflow_id: t
 	});
-	if (!q(n) || n.schema_version !== 1) throw new K();
+	if (!J(n) || n.schema_version !== 1) throw new q();
 	let r = Object.fromEntries(Object.entries(n).filter(([e]) => e !== "schema_version"));
 	try {
-		return Vt(r);
+		return Bt(r);
 	} catch {
-		throw new K();
+		throw new q();
 	}
 }
 //#endregion
 //#region src/panel/workflow-builder-view.ts
-var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, fn = /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/u, pn = 40, mn = {
+var un = "ai-orchestrator-workflow-builder", dn = [
+	"string",
+	"number",
+	"boolean"
+], fn = /^([01]\d|2[0-3]):[0-5]\d$/u, pn = /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/u, mn = 40, hn = {
 	invalid_workflow: "Home Assistant rejected the workflow. Check the highlighted fields.",
 	workflow_store_unavailable: "Workflow storage is unavailable.",
 	not_loaded: "The foundation is not loaded."
-}, hn = class extends A {
+}, gn = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		_entities: { state: !0 },
@@ -2685,7 +2693,7 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 	_sequence = 0;
 	_callWS;
 	_userId;
-	_workflowId = H();
+	_workflowId = U();
 	constructor() {
 		super(), this._entities = [], this._providers = [], this._targets = [], this._name = "", this._runMode = "observe", this._providerId = "", this._enabled = !1, this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
 			kind: "ai_compose",
@@ -2702,39 +2710,62 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 		let e = this.hass;
 		if (!e) return;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS, [r, i, a] = await Promise.allSettled([
-			it(e),
-			V(e),
-			Ft(e)
+			rt(e),
+			H(e),
+			Pt(e)
 		]);
 		n() && (r.status === "fulfilled" && (this._entities = r.value.entities.filter((e) => !e.disabled)), i.status === "fulfilled" && (this._providers = i.value.providers, this._providerId ||= i.value.providers[0]?.connection_id ?? ""), a.status === "fulfilled" && (this._targets = a.value));
 	}
 	_matches(e) {
 		let t = e.trim().toLowerCase();
-		return t.length < 2 ? [] : this._entities.filter((e) => e.entity_id.includes(t) || (e.name ?? "").toLowerCase().includes(t)).slice(0, pn);
+		return t.length < 2 ? [] : this._entities.filter((e) => e.entity_id.includes(t) || (e.name ?? "").toLowerCase().includes(t)).slice(0, mn);
 	}
 	_touch() {
 		this._error = "", this._saved = !1;
 	}
 	problems() {
 		let e = [];
-		(!this._name.trim() || this._name.length > 128) && e.push("Give the workflow a name of up to 128 characters."), this._triggerKind === "state" && !fn.test(this._triggerEntity) && e.push("Choose a trigger entity."), this._triggerKind === "state" && (!this._toState.trim() || this._toState.length > 255) && e.push("Enter the trigger's target state."), this._triggerKind === "time" && !dn.test(this._atTime) && e.push("Enter the trigger time as HH:MM.");
+		(!this._name.trim() || this._name.length > 128) && e.push("Give the workflow a name of up to 128 characters."), this._triggerKind === "state" && !pn.test(this._triggerEntity) && e.push("Choose a trigger entity."), this._triggerKind === "state" && (!this._toState.trim() || this._toState.length > 255) && e.push("Enter the trigger's target state."), this._triggerKind === "time" && !fn.test(this._atTime) && e.push("Enter the trigger time as HH:MM.");
 		for (let [t, n] of this._conditions.entries()) {
 			let r = `Condition ${t + 1}`;
-			n.kind === "time_window" && (!dn.test(n.after_time) || !dn.test(n.before_time)) && e.push(`${r}: both times must be HH:MM.`), n.kind === "state" && (!fn.test(n.entity_id) || !n.state.trim()) && e.push(`${r}: choose an entity and a state.`), n.kind === "numeric_state" && (!fn.test(n.entity_id) || !n.above.trim() && !n.below.trim() || [n.above, n.below].some((e) => e.trim() && !Number.isFinite(Number(e)))) && e.push(`${r}: choose an entity and a finite bound.`);
+			n.kind === "time_window" && (!fn.test(n.after_time) || !fn.test(n.before_time)) && e.push(`${r}: both times must be HH:MM.`), n.kind === "state" && (!pn.test(n.entity_id) || !n.state.trim()) && e.push(`${r}: choose an entity and a state.`), n.kind === "numeric_state" && (!pn.test(n.entity_id) || !n.above.trim() && !n.below.trim() || [n.above, n.below].some((e) => e.trim() && !Number.isFinite(Number(e)))) && e.push(`${r}: choose an entity and a finite bound.`);
 		}
 		this._steps.length === 0 && e.push("Add at least one step.");
 		for (let [t, n] of this._steps.entries()) {
 			let r = `Step ${t + 1}`;
-			if (n.kind !== "notify" && (!n.prompt.trim() || n.prompt.length > 4e3) && e.push(`${r}: enter a prompt of up to 4,000 characters.`), n.kind === "ai_classify") {
+			if ((n.kind === "ai_compose" || n.kind === "ai_classify" || n.kind === "ai_extract") && (!n.prompt.trim() || n.prompt.length > 4e3) && e.push(`${r}: enter a prompt of up to 4,000 characters.`), n.kind === "ai_classify") {
 				let t = this._categories(n.categories);
 				(t.length < 2 || t.length > 20 || new Set(t).size !== t.length || t.some((e) => e.length > 64)) && e.push(`${r}: list two to twenty unique categories.`);
 			}
-			n.kind === "notify" && !this._targets.some((e) => e.reference === n.notify_service) && e.push(`${r}: choose a notification target that Home Assistant has.`);
+			if (n.kind === "notify" && !this._targets.some((e) => e.reference === n.notify_service) && e.push(`${r}: choose a notification target that Home Assistant has.`), n.kind === "ai_extract") {
+				let t = this._fields(n.fields);
+				(t.length < 1 || t.length > 10 || new Set(t.map((e) => e.name)).size !== t.length || t.some((e) => !/^[a-z][a-z0-9_]{0,63}$/u.test(e.name) || !dn.includes(e.type))) && e.push(`${r}: list one to ten fields as name:type (string, number or boolean).`);
+			}
+			if (n.kind === "branch") {
+				let i = this._stepIds().indexOf(n.when_step_id), a = i >= 0 && i < t ? this._steps[i] : void 0;
+				!a || a.kind !== "ai_classify" ? e.push(`${r}: choose an earlier classify step to branch on.`) : this._categories(a.categories).includes(n.when_category) || e.push(`${r}: choose one of that step's categories.`);
+			}
 		}
-		return this._runMode === "execute" && this._steps.some((e) => e.kind !== "notify") && !this._providers.some((e) => e.connection_id === this._providerId) && e.push("Execute mode with AI steps needs a local provider."), e;
+		return this._runMode === "execute" && this._steps.some((e) => e.kind === "ai_compose" || e.kind === "ai_classify" || e.kind === "ai_extract") && !this._providers.some((e) => e.connection_id === this._providerId) && e.push("Execute mode with AI steps needs a local provider."), e;
 	}
 	_categories(e) {
 		return e.split(",").map((e) => e.trim()).filter(Boolean);
+	}
+	_fields(e) {
+		return e.split(",").map((e) => e.trim()).filter(Boolean).map((e) => {
+			let [t = "", n = "string"] = e.split(":").map((e) => e.trim());
+			return {
+				name: t,
+				type: n
+			};
+		});
+	}
+	_stepIds() {
+		let e = {};
+		return this._steps.map((t) => {
+			let n = t.kind === "ai_compose" ? "compose" : t.kind === "ai_classify" ? "classify" : t.kind === "ai_extract" ? "extract" : t.kind === "branch" ? "gate" : "notify";
+			return e[n] = (e[n] ?? 0) + 1, e[n] === 1 ? n : `${n}_${e[n]}`;
+		});
 	}
 	document() {
 		let e = this._triggerKind === "state" ? [{
@@ -2760,10 +2791,8 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 				entity_id: e.entity_id
 			};
 			return e.above.trim() && (t.above = Number(e.above)), e.below.trim() && (t.below = Number(e.below)), t;
-		}), n = {}, r = this._steps.map((e) => {
-			let t = e.kind === "ai_compose" ? "compose" : e.kind === "ai_classify" ? "classify" : "notify";
-			n[t] = (n[t] ?? 0) + 1;
-			let r = n[t] === 1 ? t : `${t}_${n[t]}`;
+		}), n = this._stepIds(), r = this._steps.map((e, t) => {
+			let r = n[t];
 			return e.kind === "ai_compose" ? {
 				step_id: r,
 				kind: "ai_compose",
@@ -2773,12 +2802,22 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 				kind: "ai_classify",
 				prompt: e.prompt,
 				categories: this._categories(e.categories)
+			} : e.kind === "ai_extract" ? {
+				step_id: r,
+				kind: "ai_extract",
+				prompt: e.prompt,
+				fields: this._fields(e.fields)
+			} : e.kind === "branch" ? {
+				step_id: r,
+				kind: "branch",
+				when_step_id: e.when_step_id,
+				when_category: e.when_category
 			} : {
 				step_id: r,
 				kind: "notify",
 				notify_service: e.notify_service
 			};
-		}), i = this._steps.some((e) => e.kind !== "notify");
+		}), i = this._steps.some((e) => e.kind === "ai_compose" || e.kind === "ai_classify" || e.kind === "ai_extract");
 		return {
 			schema_version: 1,
 			workflow_id: this._workflowId,
@@ -2813,13 +2852,13 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 		} catch (e) {
 			if (!n()) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "", r = t === "invalid_workflow" && typeof e == "object" && e && "message" in e && typeof e.message == "string" && e.message.length <= 160 ? ` ${e.message}` : "";
-			this._error = (mn[t] ?? "The workflow could not be saved. Check administrator access and the installed integration version.") + r;
+			this._error = (hn[t] ?? "The workflow could not be saved. Check administrator access and the installed integration version.") + r;
 		} finally {
 			n() && (this._busy = !1);
 		}
 	};
 	_startNew = () => {
-		this._workflowId = H(), this._touch(), this._name = "", this._enabled = !1, this._runMode = "observe", this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
+		this._workflowId = U(), this._touch(), this._name = "", this._enabled = !1, this._runMode = "observe", this._triggerKind = "state", this._triggerEntity = "", this._toState = "on", this._atTime = "", this._conditions = [], this._steps = [{
 			kind: "ai_compose",
 			prompt: "Write a short, friendly household reminder about this event."
 		}, {
@@ -2910,6 +2949,16 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 			categories: "urgent, routine"
 		})}>Add classify</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
+			kind: "ai_extract",
+			prompt: "",
+			fields: "room:string, needs_action:boolean"
+		})}>Add extract values</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
+			kind: "branch",
+			when_step_id: "",
+			when_category: ""
+		})}>Add branch</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({
 			kind: "notify",
 			notify_service: ""
 		})}>Add notification</button>
@@ -2968,34 +3017,65 @@ var un = "ai-orchestrator-workflow-builder", dn = /^([01]\d|2[0-3]):[0-5]\d$/u, 
 		let n = C`<button type="button" @click=${() => {
 			this._touch(), this._steps = this._steps.filter((e, n) => n !== t);
 		}}>Remove step ${t + 1}</button>`;
-		return e.kind === "notify" ? C`<fieldset><legend>Step ${t + 1}: send a notification</legend>
+		if (e.kind === "notify") return C`<fieldset><legend>Step ${t + 1}: send a notification</legend>
       <label for="wb-s${t}-target">Target (from Home Assistant)</label>
       <select id="wb-s${t}-target" .value=${e.notify_service} @change=${(e) => this._updateStep(t, { notify_service: e.target.value })}>
         <option value="" ?selected=${e.notify_service === ""}>Choose a target…</option>
         ${this._targets.map((t) => C`<option value=${t.reference} ?selected=${t.reference === e.notify_service}>${t.name} — ${t.reference} (${t.kind})</option>`)}
       </select>
-      <p class="hint">The message is the text composed by the most recent compose step; the workflow name is the title.</p>${n}</fieldset>` : C`<fieldset><legend>Step ${t + 1}: ${e.kind === "ai_compose" ? "compose text with AI" : "classify with AI"}</legend>
+      <p class="hint">The message is the text composed by the most recent compose step; the workflow name is the title.</p>${n}</fieldset>`;
+		if (e.kind === "branch") {
+			let r = this._stepIds(), i = this._steps.map((e, t) => ({
+				s: e,
+				i: t
+			})).filter(({ s: e, i: n }) => e.kind === "ai_classify" && n < t), a = i.find(({ i: t }) => r[t] === e.when_step_id)?.s, o = a && a.kind === "ai_classify" ? this._categories(a.categories) : [];
+			return C`<fieldset><legend>Step ${t + 1}: branch — continue only when a classification matches</legend>
+        <div class="row"><div><label for="wb-s${t}-when">Classify step</label>
+        <select id="wb-s${t}-when" .value=${e.when_step_id} @change=${(e) => this._updateStep(t, {
+				when_step_id: e.target.value,
+				when_category: ""
+			})}>
+          <option value="" ?selected=${e.when_step_id === ""}>Choose an earlier classify step…</option>
+          ${i.map(({ i: t }) => C`<option value=${r[t]} ?selected=${r[t] === e.when_step_id}>Step ${t + 1} (${r[t]})</option>`)}
+        </select></div>
+        <div><label for="wb-s${t}-category">Continue when category is</label>
+        <select id="wb-s${t}-category" ?disabled=${o.length === 0} .value=${e.when_category} @change=${(e) => this._updateStep(t, { when_category: e.target.value })}>
+          <option value="" ?selected=${e.when_category === ""}>Choose a category…</option>
+          ${o.map((t) => C`<option value=${t} ?selected=${t === e.when_category}>${t}</option>`)}
+        </select></div></div>
+        <p class="hint">If the category differs, every later step is skipped and the run still counts as completed.</p>${n}</fieldset>`;
+		}
+		return e.kind === "ai_extract" ? C`<fieldset><legend>Step ${t + 1}: extract values with AI</legend>
+      <label for="wb-s${t}-prompt">Prompt</label>
+      <textarea id="wb-s${t}-prompt" maxlength="4000" .value=${e.prompt} @input=${(e) => this._updateStep(t, { prompt: e.target.value })}></textarea>
+      <label for="wb-s${t}-fields">Fields (name:type, comma separated; types string, number, boolean)</label>
+      <input id="wb-s${t}-fields" .value=${e.fields} @input=${(e) => this._updateStep(t, { fields: e.target.value })} />
+      <p class="hint">The model must return exactly these fields with these types; anything else fails the step.</p>${n}</fieldset>` : C`<fieldset><legend>Step ${t + 1}: ${e.kind === "ai_compose" ? "compose text with AI" : "classify with AI"}</legend>
       <label for="wb-s${t}-prompt">Prompt</label>
       <textarea id="wb-s${t}-prompt" maxlength="4000" .value=${e.prompt} @input=${(e) => this._updateStep(t, { prompt: e.target.value })}></textarea>
       ${e.kind === "ai_classify" ? C`<label for="wb-s${t}-categories">Categories (comma separated, 2–20)</label><input id="wb-s${t}-categories" .value=${e.categories} @input=${(e) => this._updateStep(t, { categories: e.target.value })} />` : T}
       <p class="hint">The model receives only this prompt plus the event, time, and the states of entities named by your conditions.</p>${n}</fieldset>`;
 	}
 };
-customElements.define(un, hn);
-var gn = [
+customElements.define(un, gn);
+var _n = [
 	"ok",
 	"planned",
 	"failed",
-	"skipped"
-], _n = [
+	"skipped",
+	"taken",
+	"not_taken"
+], vn = [
 	"ai_compose",
 	"ai_classify",
+	"ai_extract",
+	"branch",
 	"notify"
-], vn = {
+], yn = {
 	invalid_output: "The model reply did not match the required shape",
 	timeout: "The provider took too long to reply",
 	provider_failed: "The provider request failed"
-}, yn = [
+}, bn = [
 	"entity",
 	"service",
 	"missing"
@@ -3003,7 +3083,7 @@ var gn = [
 	constructor() {
 		super("Workflow dry-run response is unsupported.");
 	}
-}, bn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, xn = /^[a-z][a-z0-9_]{0,63}$/u, Sn = [
+}, xn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Sn = /^[a-z][a-z0-9_]{0,63}$/u, Cn = [
 	"schema_version",
 	"mode",
 	"workflow_id",
@@ -3017,14 +3097,14 @@ var gn = [
 	"provider_calls",
 	"actions_executed",
 	"completed"
-], Cn = [
+], wn = [
 	"matched",
 	"event_kind_mismatch",
 	"state_unchanged",
 	"entity_not_selected",
 	"target_state_mismatch",
 	"time_mismatch"
-], wn = [
+], Tn = [
 	"matched",
 	"outside_time_window",
 	"state_unavailable",
@@ -3032,7 +3112,7 @@ var gn = [
 	"state_not_numeric",
 	"outside_numeric_bounds"
 ];
-function Tn(e) {
+function En(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
 function Q(e, t) {
@@ -3041,37 +3121,39 @@ function Q(e, t) {
 function $(e, t) {
 	return typeof e == "string" && e.trim().length > 0 && e.length <= t;
 }
-function En(e, t) {
-	if (!Tn(e) || e.index !== t || !$(e.step_id, 64) || !xn.test(e.step_id) || !_n.includes(e.kind) || typeof e.executed != "boolean" || !gn.includes(e.status)) return !1;
+function Dn(e, t) {
+	if (!En(e) || e.index !== t || !$(e.step_id, 64) || !Sn.test(e.step_id) || !vn.includes(e.kind) || typeof e.executed != "boolean" || !_n.includes(e.status)) return !1;
 	let n = [
 		"index",
 		"step_id",
 		"kind",
 		"executed",
 		"status"
-	], r = e.kind !== "notify";
+	], r = e.kind === "ai_compose" || e.kind === "ai_classify" || e.kind === "ai_extract";
 	switch (e.status) {
-		case "ok": return !r || e.executed !== !0 ? !1 : e.kind === "ai_compose" ? Q(e, [...n, "text"]) && $(e.text, 2e3) : Q(e, [...n, "category"]) && $(e.category, 64);
+		case "ok": return !r || e.executed !== !0 ? !1 : e.kind === "ai_compose" ? Q(e, [...n, "text"]) && $(e.text, 2e3) : e.kind === "ai_classify" ? Q(e, [...n, "category"]) && $(e.category, 64) : Q(e, [...n, "values"]) && En(e.values) && Object.keys(e.values).length <= 10 && Object.entries(e.values).every(([e, t]) => Sn.test(e) && (typeof t == "string" && t.length <= 500 || typeof t == "number" && Number.isFinite(t) || typeof t == "boolean"));
+		case "taken":
+		case "not_taken": return e.kind === "branch" && e.executed === !1 && Q(e, n);
 		case "planned": return !r && e.executed === !1 && (Q(e, [...n, "message_step_id"]) || Q(e, [
 			...n,
 			"message_step_id",
 			"target"
-		]) && yn.includes(e.target)) && (e.message_step_id === null || $(e.message_step_id, 64) && xn.test(e.message_step_id));
+		]) && bn.includes(e.target)) && (e.message_step_id === null || $(e.message_step_id, 64) && Sn.test(e.message_step_id));
 		case "failed": return r && e.executed === !1 && Q(e, [...n, "error"]) && $(e.error, 64);
 		default: return e.executed === !1 && Q(e, n);
 	}
 }
-function Dn(e, t) {
-	if (!Tn(e) || !Q(e, Sn) || e.schema_version !== 1 || e.mode !== "dry_run" || e.workflow_id !== t || e.destination !== "local" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || typeof e.completed != "boolean" || e.actions_executed !== 0 || !Number.isInteger(e.provider_calls) || e.provider_calls < 0 || !G(e.trigger_results, 10, Cn) || !G(e.condition_results, 20, wn) || !Array.isArray(e.steps) || e.steps.length > 25 || !e.steps.every((e, t) => En(e, t)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed)) throw new Z();
+function On(e, t) {
+	if (!En(e) || !Q(e, Cn) || e.schema_version !== 1 || e.mode !== "dry_run" || e.workflow_id !== t || e.destination !== "local" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || typeof e.completed != "boolean" || e.actions_executed !== 0 || !Number.isInteger(e.provider_calls) || e.provider_calls < 0 || !K(e.trigger_results, 10, wn) || !K(e.condition_results, 20, Tn) || !Array.isArray(e.steps) || e.steps.length > 25 || !e.steps.every((e, t) => Dn(e, t)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed)) throw new Z();
 	let n = e.steps, r = n.filter((e) => e.kind !== "notify" && (e.status === "ok" || e.status === "failed")).length, i = e.eligible;
-	if (!i && (n.length > 0 || e.provider_calls !== 0 || e.completed !== !1) || i && (!(e.triggered && e.conditions_passed) || n.length === 0 || e.provider_calls !== r || e.completed !== n.every((e) => e.status === "ok" || e.status === "planned"))) throw new Z();
-	let a = n.findIndex((e) => e.status === "failed");
-	if (n.some((e, t) => e.status === "skipped" != (a !== -1 && t > a))) throw new Z();
+	if (!i && (n.length > 0 || e.provider_calls !== 0 || e.completed !== !1) || i && (!(e.triggered && e.conditions_passed) || n.length === 0 || e.provider_calls !== r || e.completed !== !n.some((e) => e.status === "failed"))) throw new Z();
+	let a = n.findIndex((e) => e.status === "failed" || e.status === "not_taken");
+	if (n.some((e, t) => e.status === "skipped" != (a !== -1 && t > a)) || n.some((e) => e.kind === "branch" && e.status !== "taken" && e.status !== "not_taken" && e.status !== "skipped")) throw new Z();
 	return e;
 }
-async function On(e, t, n, r) {
-	if (!bn.test(t) || !bn.test(n) || !r.trim() || r.length > 131072) throw new Z();
-	return Dn(await e.callWS({
+async function kn(e, t, n, r) {
+	if (!xn.test(t) || !xn.test(n) || !r.trim() || r.length > 131072) throw new Z();
+	return On(await e.callWS({
 		type: "ai_orchestrator/workflows/dry_run",
 		workflow_id: t,
 		connection_id: n,
@@ -3080,7 +3162,7 @@ async function On(e, t, n, r) {
 }
 //#endregion
 //#region src/panel/workflow-preview-view.ts
-var kn = "ai-orchestrator-workflow-preview", An = {
+var An = "ai-orchestrator-workflow-preview", jn = {
 	schema_version: 1,
 	workflow_id: "12345678-1234-4123-8123-123456789abc",
 	name: "Synthetic evening window preview",
@@ -3108,17 +3190,19 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 		kind: "notify",
 		notify_service: "notify.synthetic"
 	}]
-}, jn = {
+}, Mn = {
 	ai_compose: "Compose text",
 	ai_classify: "Classify text",
+	ai_extract: "Extract values",
+	branch: "Branch",
 	notify: "Notification"
-}, Mn = {
+}, Nn = {
 	workflow_not_found: "Save the workflow first; a dry run uses the stored version.",
 	dry_run_provider_unavailable: "Select an available local provider.",
 	dry_run_busy: "A dry run is already running. Try again shortly.",
 	invalid_snapshot: "Check the snapshot JSON.",
 	workflow_store_unavailable: "Workflow storage is unavailable."
-}, Nn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Pn = class extends A {
+}, Pn = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u, Fn = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		draft: { attribute: !1 },
@@ -3174,7 +3258,7 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 		if (!e) return;
 		let t = this._sequence;
 		try {
-			let n = await V(e);
+			let n = await H(e);
 			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
 			this._providers = n.providers, this._connectionId = n.providers[0]?.connection_id ?? "";
 		} catch {}
@@ -3184,7 +3268,7 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 		if (!e) return;
 		let t = this._sequence;
 		try {
-			let n = await Ft(e);
+			let n = await Pt(e);
 			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
 			this._targets = n;
 		} catch {}
@@ -3192,7 +3276,7 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 	_storedWorkflowId() {
 		try {
 			let e = JSON.parse(this._workflow).workflow_id;
-			return typeof e == "string" && Nn.test(e) ? e : void 0;
+			return typeof e == "string" && Pn.test(e) ? e : void 0;
 		} catch {
 			return;
 		}
@@ -3206,18 +3290,18 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 		this._invalidate(), this._busy = !0;
 		let r = this._sequence, i = () => r === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let r = await On(e, t, n, this._snapshot);
+			let r = await kn(e, t, n, this._snapshot);
 			i() && (this._dryRun = r);
 		} catch (e) {
 			if (!i()) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = Mn[t] ?? "The dry run could not be completed. Check the snapshot JSON, the selected provider, administrator access, and the installed integration version.";
+			this._error = Nn[t] ?? "The dry run could not be completed. Check the snapshot JSON, the selected provider, administrator access, and the installed integration version.";
 		} finally {
 			i() && (this._busy = !1);
 		}
 	};
 	_example(e) {
-		this._invalidate(), this._workflow = JSON.stringify(An, null, 2), this._snapshot = JSON.stringify({
+		this._invalidate(), this._workflow = JSON.stringify(jn, null, 2), this._snapshot = JSON.stringify({
 			states: { "binary_sensor.synthetic_window": "on" },
 			time: e ? "12:00" : "20:00",
 			event: {
@@ -3239,7 +3323,7 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Wt(e, this._workflow, this._snapshot);
+			let t = await Ut(e, this._workflow, this._snapshot);
 			n() && (this._result = t);
 		} catch {
 			n() && (this._error = "Preview could not be completed. Check both JSON documents, administrator access, and the installed integration version.");
@@ -3271,8 +3355,8 @@ var kn = "ai-orchestrator-workflow-preview", An = {
       <p>Experimental offline JSON editor. Test a draft against a supplied snapshot: previewing reads no live home state, contacts no provider, and executes no action. "Save as workflow" stores the workflow document in Home Assistant; an enabled saved workflow then watches its triggers and records outcomes without running any step.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
       <div class="actions"><button type="button" @click=${() => this._example(!1)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(!0)}>Load synthetic daytime example</button></div>
-      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${It} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
-      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${It} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
+      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${Ft} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
+      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${Ft} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
       <div class="actions"><button class="primary" type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim() || !this._snapshot.trim()} @click=${this._preview}>${this._busy ? "Previewing…" : "Preview workflow"}</button><button type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim()} @click=${this._save}>${this._busy ? "Working…" : "Save as workflow"}</button><button type="button" @click=${this._reset}>Reset preview</button></div>
       <div class="actions">
         <label for="dry-run-provider">Local provider for a dry run</label>
@@ -3294,31 +3378,31 @@ var kn = "ai-orchestrator-workflow-preview", An = {
 	_renderResult(e) {
 		return C`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
       <p>Draft enabled flag: ${e.enabled ? "yes" : "no"}. Preview never activates a workflow.</p>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
-      <h3>Planned steps</h3>${e.planned_steps.length ? C`<ol>${e.planned_steps.map((e) => C`<li>${jn[e.kind]} — not executed</li>`)}</ol>` : C`<p>No steps planned.</p>`}
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
+      <h3>Planned steps</h3>${e.planned_steps.length ? C`<ol>${e.planned_steps.map((e) => C`<li>${Mn[e.kind]} — not executed</li>`)}</ol>` : C`<p>No steps planned.</p>`}
       <p>Provider calls: 0 · Actions executed: 0</p></div>`;
 	}
 	_renderDryRun(e) {
 		return C`<div class="result"><h2>${e.eligible ? e.completed ? "Dry run completed — nothing was sent" : "Dry run stopped at a failed step" : "Dry run: scenario blocked — no AI step ran"}</h2>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${U[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => C`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? C`<ul>${e.condition_results.map((e) => C`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${W[e.reason]}</li>`)}</ul>` : C`<p>No conditions.</p>`}
       <h3>Steps</h3>${e.steps.length ? C`<ol>${e.steps.map((e) => this._renderDryRunStep(e))}</ol>` : C`<p>No steps ran.</p>`}
       <p>Provider calls: ${e.provider_calls} · Actions executed: 0 · Destination: local</p></div>`;
 	}
 	_renderDryRunStep(e) {
-		let t = jn[e.kind];
-		return e.status === "ok" && e.text !== void 0 ? C`<li>${t} — composed:<div class="composed">${e.text}</div></li>` : e.status === "ok" ? C`<li>${t} — category: ${e.category}</li>` : e.status === "planned" ? C`<li>${t} — planned, not sent${e.message_step_id ? ` (would use text from step ${e.message_step_id})` : ""}${e.target === "missing" ? " — target not found in Home Assistant" : e.target ? ` — target resolves to a notify ${e.target}` : ""}</li>` : e.status === "failed" ? C`<li>${t} — failed: ${vn[e.error] ?? "Provider error"}</li>` : C`<li>${t} — skipped</li>`;
+		let t = Mn[e.kind];
+		return e.status === "ok" && e.text !== void 0 ? C`<li>${t} — composed:<div class="composed">${e.text}</div></li>` : e.status === "ok" && e.values !== void 0 ? C`<li>${t} — values: ${Object.entries(e.values).map(([e, t]) => `${e} = ${String(t)}`).join(", ")}</li>` : e.status === "ok" ? C`<li>${t} — category: ${e.category}</li>` : e.status === "taken" ? C`<li>${t} — taken, later steps continue</li>` : e.status === "not_taken" ? C`<li>${t} — not taken, later steps skipped</li>` : e.status === "planned" ? C`<li>${t} — planned, not sent${e.message_step_id ? ` (would use text from step ${e.message_step_id})` : ""}${e.target === "missing" ? " — target not found in Home Assistant" : e.target ? ` — target resolves to a notify ${e.target}` : ""}</li>` : e.status === "failed" ? C`<li>${t} — failed: ${yn[e.error] ?? "Provider error"}</li>` : C`<li>${t} — skipped</li>`;
 	}
 };
-customElements.define(kn, Pn);
+customElements.define(An, Fn);
 //#endregion
 //#region src/panel/workflows-view.ts
-var Fn = "ai-orchestrator-workflows", In = {
+var In = "ai-orchestrator-workflows", Ln = {
 	load: "Stored workflows could not be read from Home Assistant. Check administrator access and the installed integration version.",
 	mutate: "The change could not be completed. Nothing was executed; reload to see the current stored state.",
 	observe: "The observation could not be completed. Nothing was executed."
-}, Ln = class extends A {
+}, Rn = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		refreshToken: {
@@ -3476,7 +3560,7 @@ var Fn = "ai-orchestrator-workflows", In = {
 			this._store = n.store, this._entries = n.workflows, this._viewState = "ready";
 		} catch {
 			if (!this._current(t, e)) return;
-			this._entries = [], this._viewState = "error", this._error = In.load;
+			this._entries = [], this._viewState = "error", this._error = Ln.load;
 		}
 	};
 	async _mutate(e) {
@@ -3502,7 +3586,7 @@ var Fn = "ai-orchestrator-workflows", In = {
 			this._store = r.store, this._entries = r.workflows, this._confirmDeleteId = void 0;
 		} catch {
 			if (!this._current(n, t)) return;
-			this._error = e.action === "observe" ? In.observe : In.mutate;
+			this._error = e.action === "observe" ? Ln.observe : Ln.mutate;
 		} finally {
 			this._pending === e && (this._pending = void 0, this._refreshRequested && this._current(n, t) && queueMicrotask(() => void this._load()));
 		}
@@ -3641,10 +3725,10 @@ var Fn = "ai-orchestrator-workflows", In = {
     </p>`;
 	}
 };
-customElements.define(Fn, Ln);
+customElements.define(In, Rn);
 //#endregion
 //#region src/panel/ai-orchestrator-panel.ts
-var Rn = "ai-orchestrator-panel", zn = [
+var zn = "ai-orchestrator-panel", Bn = [
 	{
 		id: "home",
 		label: "Home"
@@ -3677,12 +3761,12 @@ var Rn = "ai-orchestrator-panel", zn = [
 		id: "settings",
 		label: "Settings"
 	}
-], Bn = {
+], Vn = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, Vn = {
+}, Hn = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -3712,11 +3796,11 @@ var Rn = "ai-orchestrator-panel", zn = [
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function Hn(e) {
+function Un(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
-	return zn.find((e) => e.id === t)?.id;
+	return Bn.find((e) => e.id === t)?.id;
 }
-var Un = class extends A {
+var Wn = class extends k {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -3742,7 +3826,7 @@ var Un = class extends A {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = Hn(this.route);
+			let e = Un(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 		e.has("_activeSection") && this._activeSection !== "automations" && (this._draft = void 0);
@@ -3789,7 +3873,7 @@ var Un = class extends A {
         </div>
 
         <nav class="section-nav" aria-label="AI Orchestrator sections">
-          ${zn.map((e) => C`
+          ${Bn.map((e) => C`
               <button
                 class="nav-button"
                 type="button"
@@ -3866,12 +3950,12 @@ var Un = class extends A {
         <h2 id="feature-status-heading">Foundation capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
-          ${j.map((e) => {
+          ${A.map((e) => {
 			let t = this._loadState === "ready", n = t && this._status?.features[e] === !0, r = t ? n ? "Available" : "Not available" : "Unknown";
 			return C`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${Bn[e]}</span>
+                  <span class="status-name">${Vn[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -3908,7 +3992,7 @@ var Un = class extends A {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = Vn[e], n = zn.find((t) => t.id === e)?.label ?? "Section";
+		let t = Hn[e], n = Bn.find((t) => t.id === e)?.label ?? "Section";
 		return C`
       <header class="page-header">
         <div>
@@ -4128,7 +4212,7 @@ var Un = class extends A {
 			this._status = n, this._loadState = "ready";
 		} catch (e) {
 			if (t !== this._requestSequence || !this.isConnected) return;
-			this._status = void 0, this._loadState = e instanceof Ie ? "incompatible" : Ve(e) ? "denied" : "error";
+			this._status = void 0, this._loadState = e instanceof j ? "incompatible" : Ve(e) ? "denied" : "error";
 		}
 	};
 	_runWorkflowProbe = async () => {
@@ -4144,7 +4228,7 @@ var Un = class extends A {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, Wn = "ai-orchestrator-providers-view", Gn = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(Dt, kt), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(Rn, Un), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Wn, St), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(Gn, at);
+}, Gn = "ai-orchestrator-providers-view", Kn = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(Et, Ot), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(zn, Wn), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(Gn, xt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(Kn, it);
 //#endregion
-export { Un as AiOrchestratorPanel, Gn as CATALOG_VIEW_TAG, Dt as CHAT_VIEW_TAG, at as CatalogView, kt as ChatView, Rn as PANEL_TAG, Wn as PROVIDERS_VIEW_TAG, St as ProvidersView };
+export { Wn as AiOrchestratorPanel, Kn as CATALOG_VIEW_TAG, Et as CHAT_VIEW_TAG, it as CatalogView, Ot as ChatView, zn as PANEL_TAG, Gn as PROVIDERS_VIEW_TAG, xt as ProvidersView };

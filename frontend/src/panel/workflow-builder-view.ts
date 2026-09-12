@@ -15,7 +15,10 @@ type ConditionDraft =
 type StepDraft =
   | { kind: "ai_compose"; prompt: string }
   | { kind: "ai_classify"; prompt: string; categories: string }
+  | { kind: "ai_extract"; prompt: string; fields: string }
+  | { kind: "branch"; when_step_id: string; when_category: string }
   | { kind: "notify"; notify_service: string };
+const FIELD_TYPES = ["string", "number", "boolean"];
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/u;
 const ENTITY = /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/u;
@@ -124,18 +127,38 @@ export class WorkflowBuilderView extends LitElement {
     if (this._steps.length === 0) problems.push("Add at least one step.");
     for (const [index, step] of this._steps.entries()) {
       const label = `Step ${index + 1}`;
-      if (step.kind !== "notify" && (!step.prompt.trim() || step.prompt.length > 4000)) problems.push(`${label}: enter a prompt of up to 4,000 characters.`);
+      if ((step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract") && (!step.prompt.trim() || step.prompt.length > 4000)) problems.push(`${label}: enter a prompt of up to 4,000 characters.`);
       if (step.kind === "ai_classify") {
         const categories = this._categories(step.categories);
         if (categories.length < 2 || categories.length > 20 || new Set(categories).size !== categories.length || categories.some((c) => c.length > 64)) problems.push(`${label}: list two to twenty unique categories.`);
       }
       if (step.kind === "notify" && !this._targets.some((target) => target.reference === step.notify_service)) problems.push(`${label}: choose a notification target that Home Assistant has.`);
+      if (step.kind === "ai_extract") {
+        const fields = this._fields(step.fields);
+        if (fields.length < 1 || fields.length > 10 || new Set(fields.map((f) => f.name)).size !== fields.length || fields.some((f) => !/^[a-z][a-z0-9_]{0,63}$/u.test(f.name) || !FIELD_TYPES.includes(f.type))) problems.push(`${label}: list one to ten fields as name:type (string, number or boolean).`);
+      }
+      if (step.kind === "branch") {
+        const ids = this._stepIds();
+        const sourceIndex = ids.indexOf(step.when_step_id);
+        const source = sourceIndex >= 0 && sourceIndex < index ? this._steps[sourceIndex] : undefined;
+        if (!source || source.kind !== "ai_classify") problems.push(`${label}: choose an earlier classify step to branch on.`);
+        else if (!this._categories(source.categories).includes(step.when_category)) problems.push(`${label}: choose one of that step's categories.`);
+      }
     }
-    if (this._runMode === "execute" && this._steps.some((step) => step.kind !== "notify") && !this._providers.some((p) => p.connection_id === this._providerId)) problems.push("Execute mode with AI steps needs a local provider.");
+    if (this._runMode === "execute" && this._steps.some((step) => step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract") && !this._providers.some((p) => p.connection_id === this._providerId)) problems.push("Execute mode with AI steps needs a local provider.");
     return problems;
   }
 
   private _categories(value: string): string[] { return value.split(",").map((item) => item.trim()).filter(Boolean); }
+  /** `name:type` pairs, comma separated, e.g. `room:string, minutes_open:number`. */
+  private _fields(value: string): { name: string; type: string }[] {
+    return value.split(",").map((item) => item.trim()).filter(Boolean).map((item) => { const [name = "", type = "string"] = item.split(":").map((part) => part.trim()); return { name, type }; });
+  }
+  /** Step ids as the generated document will name them, for branch references. */
+  private _stepIds(): string[] {
+    const counts: Record<string, number> = {};
+    return this._steps.map((step) => { const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : step.kind === "ai_extract" ? "extract" : step.kind === "branch" ? "gate" : "notify"; counts[base] = (counts[base] ?? 0) + 1; return counts[base] === 1 ? base : `${base}_${counts[base]}`; });
+  }
 
   /** The exact v1 document the backend validates; nothing is sent until an explicit action. */
   public document(): Record<string, unknown> {
@@ -150,16 +173,16 @@ export class WorkflowBuilderView extends LitElement {
       if (condition.below.trim()) numeric.below = Number(condition.below);
       return numeric;
     });
-    const counts: Record<string, number> = {};
-    const steps = this._steps.map((step) => {
-      const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : "notify";
-      counts[base] = (counts[base] ?? 0) + 1;
-      const step_id = counts[base] === 1 ? base : `${base}_${counts[base]}`;
+    const ids = this._stepIds();
+    const steps = this._steps.map((step, index) => {
+      const step_id = ids[index]!;
       if (step.kind === "ai_compose") return { step_id, kind: "ai_compose", prompt: step.prompt };
       if (step.kind === "ai_classify") return { step_id, kind: "ai_classify", prompt: step.prompt, categories: this._categories(step.categories) };
+      if (step.kind === "ai_extract") return { step_id, kind: "ai_extract", prompt: step.prompt, fields: this._fields(step.fields) };
+      if (step.kind === "branch") return { step_id, kind: "branch", when_step_id: step.when_step_id, when_category: step.when_category };
       return { step_id, kind: "notify", notify_service: step.notify_service };
     });
-    const usesAi = this._steps.some((step) => step.kind !== "notify");
+    const usesAi = this._steps.some((step) => step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract");
     return {
       schema_version: 1, workflow_id: this._workflowId, name: this._name.trim(), description: "", enabled: this._enabled,
       run_mode: this._runMode, provider_connection_id: this._runMode === "execute" && usesAi ? this._providerId : null,
@@ -243,6 +266,8 @@ export class WorkflowBuilderView extends LitElement {
         <div class="actions">
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_compose", prompt: "" })}>Add compose text</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_classify", prompt: "", categories: "urgent, routine" })}>Add classify</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_extract", prompt: "", fields: "room:string, needs_action:boolean" })}>Add extract values</button>
+          <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "branch", when_step_id: "", when_category: "" })}>Add branch</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "notify", notify_service: "" })}>Add notification</button>
         </div>
       </fieldset>
@@ -292,6 +317,30 @@ export class WorkflowBuilderView extends LitElement {
         ${this._targets.map((target) => html`<option value=${target.reference} ?selected=${target.reference === step.notify_service}>${target.name} — ${target.reference} (${target.kind})</option>`)}
       </select>
       <p class="hint">The message is the text composed by the most recent compose step; the workflow name is the title.</p>${remove}</fieldset>`;
+    if (step.kind === "branch") {
+      const ids = this._stepIds();
+      const sources = this._steps.map((s, i) => ({ s, i })).filter(({ s, i }) => s.kind === "ai_classify" && i < index);
+      const source = sources.find(({ i }) => ids[i] === step.when_step_id)?.s;
+      const categories = source && source.kind === "ai_classify" ? this._categories(source.categories) : [];
+      return html`<fieldset><legend>Step ${index + 1}: branch — continue only when a classification matches</legend>
+        <div class="row"><div><label for="wb-s${index}-when">Classify step</label>
+        <select id="wb-s${index}-when" .value=${step.when_step_id} @change=${(e: Event) => this._updateStep(index, { when_step_id: (e.target as HTMLSelectElement).value, when_category: "" })}>
+          <option value="" ?selected=${step.when_step_id === ""}>Choose an earlier classify step…</option>
+          ${sources.map(({ i }) => html`<option value=${ids[i]!} ?selected=${ids[i] === step.when_step_id}>Step ${i + 1} (${ids[i]})</option>`)}
+        </select></div>
+        <div><label for="wb-s${index}-category">Continue when category is</label>
+        <select id="wb-s${index}-category" ?disabled=${categories.length === 0} .value=${step.when_category} @change=${(e: Event) => this._updateStep(index, { when_category: (e.target as HTMLSelectElement).value })}>
+          <option value="" ?selected=${step.when_category === ""}>Choose a category…</option>
+          ${categories.map((category) => html`<option value=${category} ?selected=${category === step.when_category}>${category}</option>`)}
+        </select></div></div>
+        <p class="hint">If the category differs, every later step is skipped and the run still counts as completed.</p>${remove}</fieldset>`;
+    }
+    if (step.kind === "ai_extract") return html`<fieldset><legend>Step ${index + 1}: extract values with AI</legend>
+      <label for="wb-s${index}-prompt">Prompt</label>
+      <textarea id="wb-s${index}-prompt" maxlength="4000" .value=${step.prompt} @input=${(e: Event) => this._updateStep(index, { prompt: (e.target as HTMLTextAreaElement).value })}></textarea>
+      <label for="wb-s${index}-fields">Fields (name:type, comma separated; types string, number, boolean)</label>
+      <input id="wb-s${index}-fields" .value=${step.fields} @input=${(e: Event) => this._updateStep(index, { fields: (e.target as HTMLInputElement).value })} />
+      <p class="hint">The model must return exactly these fields with these types; anything else fails the step.</p>${remove}</fieldset>`;
     return html`<fieldset><legend>Step ${index + 1}: ${step.kind === "ai_compose" ? "compose text with AI" : "classify with AI"}</legend>
       <label for="wb-s${index}-prompt">Prompt</label>
       <textarea id="wb-s${index}-prompt" maxlength="4000" .value=${step.prompt} @input=${(e: Event) => this._updateStep(index, { prompt: (e.target as HTMLTextAreaElement).value })}></textarea>

@@ -3,8 +3,9 @@ import { PREVIEW_INPUT_LIMIT, previewChecks, type PreviewCheck } from "./workflo
 
 export const DRY_RUN_MAX_TEXT_CHARS = 2000;
 export const DRY_RUN_MAX_STEPS = 25;
-export const DRY_RUN_STATUSES = ["ok", "planned", "failed", "skipped"] as const;
-export const DRY_RUN_STEP_KINDS = ["ai_compose", "ai_classify", "notify"] as const;
+export const DRY_RUN_STATUSES = ["ok", "planned", "failed", "skipped", "taken", "not_taken"] as const;
+export const DRY_RUN_STEP_KINDS = ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"] as const;
+export const DRY_RUN_MAX_VALUE_CHARS = 500;
 export const DRY_RUN_ERRORS = {
   invalid_output: "The model reply did not match the required shape",
   timeout: "The provider took too long to reply",
@@ -16,7 +17,7 @@ export type DryRunStepKind = (typeof DRY_RUN_STEP_KINDS)[number];
 export const DRY_RUN_TARGETS = ["entity", "service", "missing"] as const;
 export interface DryRunStep {
   index: number; step_id: string; kind: DryRunStepKind; executed: boolean; status: DryRunStatus;
-  text?: string; category?: string; error?: string; message_step_id?: string | null; target?: (typeof DRY_RUN_TARGETS)[number];
+  text?: string; category?: string; values?: Record<string, string | number | boolean>; error?: string; message_step_id?: string | null; target?: (typeof DRY_RUN_TARGETS)[number];
 }
 export interface DryRunResult {
   schema_version: 1; mode: "dry_run"; workflow_id: string; destination: "local";
@@ -48,13 +49,17 @@ function step(value: unknown, index: number): value is DryRunStep {
       !DRY_RUN_STEP_KINDS.includes(value.kind as DryRunStepKind) || typeof value.executed !== "boolean" ||
       !DRY_RUN_STATUSES.includes(value.status as DryRunStatus)) return false;
   const base = ["index", "step_id", "kind", "executed", "status"];
-  const ai = value.kind !== "notify";
+  const ai = value.kind === "ai_compose" || value.kind === "ai_classify" || value.kind === "ai_extract";
   switch (value.status) {
     case "ok":
       if (!ai || value.executed !== true) return false;
-      return value.kind === "ai_compose"
-        ? keys(value, [...base, "text"]) && text(value.text, DRY_RUN_MAX_TEXT_CHARS)
-        : keys(value, [...base, "category"]) && text(value.category, 64);
+      if (value.kind === "ai_compose") return keys(value, [...base, "text"]) && text(value.text, DRY_RUN_MAX_TEXT_CHARS);
+      if (value.kind === "ai_classify") return keys(value, [...base, "category"]) && text(value.category, 64);
+      return keys(value, [...base, "values"]) && record(value.values) && Object.keys(value.values).length <= 10 &&
+        Object.entries(value.values).every(([name, item]) => STEP_ID.test(name) && ((typeof item === "string" && item.length <= DRY_RUN_MAX_VALUE_CHARS) || (typeof item === "number" && Number.isFinite(item)) || typeof item === "boolean"));
+    case "taken":
+    case "not_taken":
+      return value.kind === "branch" && value.executed === false && keys(value, base);
     case "planned":
       return !ai && value.executed === false && (keys(value, [...base, "message_step_id"]) || (keys(value, [...base, "message_step_id", "target"]) && DRY_RUN_TARGETS.includes(value.target as never))) &&
         (value.message_step_id === null || (text(value.message_step_id, 64) && STEP_ID.test(value.message_step_id as string)));
@@ -80,9 +85,10 @@ export function parseDryRun(value: unknown, workflowId: string): DryRunResult {
   const eligible = value.eligible as boolean;
   if (!eligible && (steps.length > 0 || value.provider_calls !== 0 || value.completed !== false)) throw new DryRunContractError();
   if (eligible && (!(value.triggered && value.conditions_passed) || steps.length === 0 || value.provider_calls !== calls ||
-      value.completed !== steps.every((item) => item.status === "ok" || item.status === "planned"))) throw new DryRunContractError();
-  const failedAt = steps.findIndex((item) => item.status === "failed");
-  if (steps.some((item, index) => (item.status === "skipped") !== (failedAt !== -1 && index > failedAt))) throw new DryRunContractError();
+      value.completed !== !steps.some((item) => item.status === "failed"))) throw new DryRunContractError();
+  const stopAt = steps.findIndex((item) => item.status === "failed" || item.status === "not_taken");
+  if (steps.some((item, index) => (item.status === "skipped") !== (stopAt !== -1 && index > stopAt))) throw new DryRunContractError();
+  if (steps.some((item) => item.kind === "branch" && item.status !== "taken" && item.status !== "not_taken" && item.status !== "skipped")) throw new DryRunContractError();
   return value as unknown as DryRunResult;
 }
 

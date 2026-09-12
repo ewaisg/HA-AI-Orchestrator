@@ -14,7 +14,7 @@ const EXAMPLE = {
   conditions: [{ kind: "time_window", after_time: "18:00", before_time: "06:00" }, { kind: "state", entity_id: "binary_sensor.synthetic_window", state: "on" }],
   steps: [{ step_id: "compose", kind: "ai_compose", prompt: "Write a short window reminder." }, { step_id: "notify", kind: "notify", notify_service: "notify.synthetic" }],
 };
-const KIND_LABELS = { ai_compose: "Compose text", ai_classify: "Classify text", notify: "Notification" };
+const KIND_LABELS = { ai_compose: "Compose text", ai_classify: "Classify text", ai_extract: "Extract values", branch: "Branch", notify: "Notification" };
 const DRY_RUN_MESSAGES: Record<string, string> = {
   workflow_not_found: "Save the workflow first; a dry run uses the stored version.",
   dry_run_provider_unavailable: "Select an available local provider.",
@@ -186,7 +186,10 @@ export class WorkflowPreviewView extends LitElement {
   private _renderDryRunStep(step: DryRunStep): TemplateResult {
     const label = KIND_LABELS[step.kind];
     if (step.status === "ok" && step.text !== undefined) return html`<li>${label} — composed:<div class="composed">${step.text}</div></li>`;
+    if (step.status === "ok" && step.values !== undefined) return html`<li>${label} — values: ${Object.entries(step.values).map(([name, item]) => `${name} = ${String(item)}`).join(", ")}</li>`;
     if (step.status === "ok") return html`<li>${label} — category: ${step.category}</li>`;
+    if (step.status === "taken") return html`<li>${label} — taken, later steps continue</li>`;
+    if (step.status === "not_taken") return html`<li>${label} — not taken, later steps skipped</li>`;
     if (step.status === "planned") return html`<li>${label} — planned, not sent${step.message_step_id ? ` (would use text from step ${step.message_step_id})` : ""}${step.target === "missing" ? " — target not found in Home Assistant" : step.target ? ` — target resolves to a notify ${step.target}` : ""}</li>`;
     if (step.status === "failed") return html`<li>${label} — failed: ${DRY_RUN_ERRORS[step.error as keyof typeof DRY_RUN_ERRORS] ?? "Provider error"}</li>`;
     return html`<li>${label} — skipped</li>`;

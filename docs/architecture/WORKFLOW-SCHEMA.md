@@ -42,3 +42,21 @@ document that omits them keeps exactly its previous meaning:
 Both are normalized into every stored document by `as_dict`. Documents written
 by this version are rejected by older versions' closed key check, which is the
 documented "replace backend and bundle together" rule.
+
+## Extract and branch steps (added 2026-09-12, still schema version 1)
+
+- `ai_extract`: `prompt` plus `fields`, a list of one to ten `{name, type}`
+  entries with lowercase identifier names and `type` in `string`, `number`,
+  `boolean`. The provider is asked for structured output with exactly those
+  required properties and no others; the reply is accepted only if every
+  field is present with the declared type (strings at most 500 characters,
+  numbers finite, booleans real booleans).
+- `branch`: `when_step_id` must name an earlier `ai_classify` step and
+  `when_category` one of that step's categories; validation rejects anything
+  else, so the route set is closed. At run time a branch is `taken` when the
+  classification matched, otherwise `not_taken` and every later step is
+  `skipped` while the run still counts as completed. Branches make no
+  provider call.
+
+Execute mode with any AI step (`ai_compose`, `ai_classify`, `ai_extract`)
+requires `provider_connection_id`.

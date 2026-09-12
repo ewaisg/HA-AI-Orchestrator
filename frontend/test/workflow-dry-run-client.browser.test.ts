@@ -38,6 +38,18 @@ describe("dry-run client contract", () => {
   ])("rejects %s", (_label, overrides) => {
     expect(() => parseDryRun({ ...DRY_RUN, ...overrides }, STORED_WORKFLOW_ID)).toThrow("unsupported");
   });
+  it("accepts extract values and branch outcomes with their invariants", () => {
+    const extract = parseDryRun({ ...DRY_RUN, steps: [step(0, { kind: "ai_extract", executed: true, status: "ok", values: { room: "Office", minutes_open: 12, needs_action: true } })], provider_calls: 1 }, STORED_WORKFLOW_ID);
+    expect(extract.steps[0]?.values?.minutes_open).toBe(12);
+    const notTaken = parseDryRun({ ...DRY_RUN, steps: [step(0, { kind: "ai_classify", executed: true, status: "ok", category: "routine" }), step(1, { kind: "branch", status: "not_taken" }), step(2, { status: "skipped" }), step(3, { kind: "notify", status: "skipped" })], provider_calls: 1, completed: true }, STORED_WORKFLOW_ID);
+    expect(notTaken.completed).toBe(true);
+    for (const bad of [
+      { steps: [step(0, { kind: "ai_extract", executed: true, status: "ok", values: { Room: "x" } })], provider_calls: 1 },
+      { steps: [step(0, { kind: "ai_extract", executed: true, status: "ok", values: { room: { nested: true } } })], provider_calls: 1 },
+      { steps: [step(0, { kind: "branch", status: "ok", text: "x" })], provider_calls: 0 },
+      { steps: [step(0, { kind: "branch", status: "not_taken" }), step(1, { executed: true, status: "ok", text: "ran anyway" })], provider_calls: 1 },
+    ]) expect(() => parseDryRun({ ...DRY_RUN, ...bad }, STORED_WORKFLOW_ID)).toThrow("unsupported");
+  });
   it("validates outbound identifiers and snapshot before contacting Home Assistant", async () => {
     let calls = 0;
     const hass = createFakeHass(DRY_RUN, () => { calls++; });

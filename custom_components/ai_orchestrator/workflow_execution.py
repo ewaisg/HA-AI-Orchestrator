@@ -22,7 +22,7 @@ from homeassistant.util import dt as dt_util
 
 from .providers.contract import Provider
 from .workflow_notify import async_send_notification
-from .workflow_schema import StepKind, Workflow
+from .workflow_schema import AI_STEP_KINDS, StepKind, Workflow
 from .workflow_steps import (
     STATUS_FAILED,
     STATUS_OK,
@@ -72,7 +72,7 @@ async def async_execute_workflow(
         "completed": False,
         "error": None,
     }
-    ai_steps = [step for step in workflow.steps if step.kind is not StepKind.NOTIFY]
+    ai_steps = [step for step in workflow.steps if step.kind in AI_STEP_KINDS]
     provider = (
         provider_lookup(workflow.provider_connection_id)
         if workflow.provider_connection_id is not None
@@ -102,7 +102,9 @@ async def async_execute_workflow(
                     "step_id": step.step_id,
                     "kind": step.kind.value,
                     "executed": False,
-                    "status": STATUS_PLANNED,
+                    "status": STATUS_PLANNED
+                    if step.kind is StepKind.NOTIFY
+                    else STATUS_SKIPPED,
                     "message_step_id": None,
                 }
                 for index, step in enumerate(workflow.steps)

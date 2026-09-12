@@ -10,7 +10,7 @@ export const WORKFLOW_LIMIT = 50;
 export const STORE_STATES = ["ready", "unreadable", "not_loaded"] as const;
 export const STATUS_ERRORS = ["activation_failed", "cleanup_failed"] as const;
 export const RUN_MODES = ["observe", "execute"] as const;
-export const EXECUTION_STEP_STATUSES = ["ok", "planned", "failed", "skipped", "delivered"] as const;
+export const EXECUTION_STEP_STATUSES = ["ok", "planned", "failed", "skipped", "delivered", "taken", "not_taken"] as const;
 export type RunMode = (typeof RUN_MODES)[number];
 export interface ExecutionStep { index: number; step_id: string; kind: string; executed: boolean; status: (typeof EXECUTION_STEP_STATUSES)[number]; error?: string; category?: string; target?: string }
 export interface ExecutionRecord { started_at: string; finished_at?: string; steps: ExecutionStep[]; provider_calls: number; actions_executed: number; completed: boolean; error: string | null }
