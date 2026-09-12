@@ -147,6 +147,22 @@ describe("offline workflow editor", () => {
     dryRunButton(view).click(); await settle(view);
     expect(text(view)).toContain("target not found in Home Assistant");
   });
+  it("keeps provider and target lookups when the editor is used before they resolve", async () => {
+    const pending: ((value: unknown) => void)[] = [];
+    const view = await mount({ callWS: <T>(message: Record<string, unknown>): Promise<T> => {
+      if (message.type === OPTIONS_LOOKUP) return new Promise<T>((done) => pending.push(() => done(structuredClone(CHAT_OPTIONS) as T)));
+      if (message.type === TARGETS_LOOKUP) return new Promise<T>((done) => pending.push(() => done(structuredClone(NOTIFY_TARGETS) as T)));
+      return Promise.resolve(structuredClone(VALID_PREVIEW) as T);
+    } });
+    button(view, "evening").click(); await settle(view);
+    const snapshot = view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!; snapshot.value = "{}"; snapshot.dispatchEvent(new Event("input")); await settle(view);
+    for (const resolve of pending.splice(0)) resolve(undefined); await settle(view);
+    expect(text(view)).toContain("Synthetic local AI");
+    expect(text(view)).toContain("Notification targets found in Home Assistant (2)");
+    view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
+    snapshot.value = JSON.stringify({ states: {}, time: "20:00", event: { kind: "manual" } }); snapshot.dispatchEvent(new Event("input")); await settle(view);
+    expect(dryRunButton(view).disabled).toBe(false);
+  });
   it("disables the dry run when no local provider is available and never fails the editor", async () => {
     const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflow/preview": VALID_PREVIEW }));
     button(view, "evening").click(); await settle(view);

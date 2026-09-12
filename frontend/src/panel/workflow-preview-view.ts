@@ -51,6 +51,8 @@ export class WorkflowPreviewView extends LitElement {
   private declare _connectionId: string;
   private declare _dryRun?: DryRunResult;
   private _sequence = 0;
+  /** Lookups are tied to the Home Assistant identity only, never to edits. */
+  private _lookupSequence = 0;
   private _connection?: HomeAssistantLike["connection"];
   private _userId?: string;
   private _callWS?: HomeAssistantLike["callWS"];
@@ -66,7 +68,7 @@ export class WorkflowPreviewView extends LitElement {
     if (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) {
       this._unbind(); this._reset(); this._connection = this.hass?.connection; this._userId = this.hass?.user?.id; this._callWS = this.hass?.callWS;
       this._connection?.addEventListener("disconnected", this._reset);
-      this._providers = []; this._connectionId = ""; this._targets = [];
+      this._lookupSequence++; this._providers = []; this._connectionId = ""; this._targets = [];
       void this._loadProviders();
       void this._loadTargets();
     }
@@ -75,10 +77,10 @@ export class WorkflowPreviewView extends LitElement {
   private async _loadProviders(): Promise<void> {
     const hass = this.hass;
     if (!hass) return;
-    const sequence = this._sequence;
+    const sequence = this._lookupSequence;
     try {
       const options = await fetchChatOptions(hass);
-      if (sequence !== this._sequence || !this.isConnected || this.hass?.callWS !== hass.callWS) return;
+      if (sequence !== this._lookupSequence || this.hass?.callWS !== hass.callWS) return;
       this._providers = options.providers;
       this._connectionId = options.providers[0]?.connection_id ?? "";
     } catch { /* no providers available for a dry run */ }
@@ -87,10 +89,10 @@ export class WorkflowPreviewView extends LitElement {
   private async _loadTargets(): Promise<void> {
     const hass = this.hass;
     if (!hass) return;
-    const sequence = this._sequence;
+    const sequence = this._lookupSequence;
     try {
       const targets = await fetchNotifyTargets(hass);
-      if (sequence !== this._sequence || !this.isConnected || this.hass?.callWS !== hass.callWS) return;
+      if (sequence !== this._lookupSequence || this.hass?.callWS !== hass.callWS) return;
       this._targets = targets;
     } catch { /* discovery unavailable */ }
   }

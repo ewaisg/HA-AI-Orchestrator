@@ -3244,6 +3244,7 @@ var An = "ai-orchestrator-workflow-preview", jn = {
     .error { color:var(--error-color,#852e23); } li { margin:8px 0; } select { min-height:44px; padding:8px 12px; font:inherit; border:1px solid #7d969c; border-radius:8px; background:var(--card-background-color,#fff); color:inherit; max-width:100%; } .composed { white-space:pre-wrap; border-left:3px solid #175e56; padding-left:12px; } @media(max-width:700px) { .editors { grid-template-columns:minmax(0,1fr); } textarea { height:220px; } }
   `;
 	_sequence = 0;
+	_lookupSequence = 0;
 	_connection;
 	_userId;
 	_callWS;
@@ -3266,25 +3267,25 @@ var An = "ai-orchestrator-workflow-preview", jn = {
 		this._unbind(), this._reset(), super.disconnectedCallback();
 	}
 	willUpdate(e) {
-		e.has("draft") && this.draft !== void 0 && (this._invalidate(), this._workflow = this.draft.json), e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset), this._providers = [], this._connectionId = "", this._targets = [], this._loadProviders(), this._loadTargets());
+		e.has("draft") && this.draft !== void 0 && (this._invalidate(), this._workflow = this.draft.json), e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset), this._lookupSequence++, this._providers = [], this._connectionId = "", this._targets = [], this._loadProviders(), this._loadTargets());
 	}
 	async _loadProviders() {
 		let e = this.hass;
 		if (!e) return;
-		let t = this._sequence;
+		let t = this._lookupSequence;
 		try {
 			let n = await V(e);
-			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
+			if (t !== this._lookupSequence || this.hass?.callWS !== e.callWS) return;
 			this._providers = n.providers, this._connectionId = n.providers[0]?.connection_id ?? "";
 		} catch {}
 	}
 	async _loadTargets() {
 		let e = this.hass;
 		if (!e) return;
-		let t = this._sequence;
+		let t = this._lookupSequence;
 		try {
 			let n = await Ft(e);
-			if (t !== this._sequence || !this.isConnected || this.hass?.callWS !== e.callWS) return;
+			if (t !== this._lookupSequence || this.hass?.callWS !== e.callWS) return;
 			this._targets = n;
 		} catch {}
 	}
