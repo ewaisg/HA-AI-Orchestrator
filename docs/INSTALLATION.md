@@ -170,11 +170,13 @@ if automatic registration fails; this evidence does not claim another version.
 
 For an update, preserve the previous artifact, replace the complete integration
 directory from one reviewed candidate, restart Home Assistant, and refresh the
-panel so backend and frontend match. Automatic panel registration now appends a
-content hash to the module URL so changed bundle bytes request a distinct cached
-resource. Reload the browser page after restarting Core; an already loaded
-JavaScript module cannot be replaced in place. Live verification of an update
-without manual cache clearing remains tracked under LOC-009.
+panel so backend and frontend match. Automatic panel registration serves each build at a content-addressed path
+(`/api/ai_orchestrator/panel/<hash>/ai-orchestrator-panel.js`), so changed
+bundle bytes request a URL the service worker has never cached. A query-string
+hash was tried first and observed not to work on 2026-09-12: Home Assistant's
+service worker caches every URL containing `/static/` cache-first and ignores
+query parameters. Reload the browser page after restarting Core; an already
+loaded JavaScript module cannot be replaced in place.
 
 The manual YAML fallback uses a fixed URL and does not automatically receive
 this hash. If that fallback, or an older installation, shows stale sections,

@@ -1,7 +1,9 @@
 """Tests for the isolated Home Assistant panel compatibility boundary."""
 
 import hashlib
+import re
 import threading
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -19,6 +21,7 @@ from custom_components.ai_orchestrator.const import (
     PANEL_SIDEBAR_ICON,
     PANEL_STATIC_URL,
     PANEL_URL_PATH,
+    PANEL_VERSIONED_URL_BASE,
 )
 from custom_components.ai_orchestrator.panel import (
     async_register_panel,
@@ -26,7 +29,21 @@ from custom_components.ai_orchestrator.panel import (
     async_unregister_panel,
     panel_bundle_fingerprint,
     panel_module_url,
+    panel_versioned_static_url,
 )
+
+# Home Assistant's service worker caches any URL with one of these segments
+# cache-first while ignoring the query string (observed live on 2026-09-12).
+_SERVICE_WORKER_CACHED_SEGMENTS = re.compile(r"/(static|frontend_latest|frontend_es5)/")
+
+
+@pytest.fixture(autouse=True)
+def _http(hass: HomeAssistant) -> Iterator[Mock]:
+    """The test Core has no HTTP component; registration needs its static API."""
+    http = Mock()
+    http.async_register_static_paths = AsyncMock()
+    with patch.object(hass, "http", http):
+        yield http
 
 
 async def test_register_static_assets(hass: HomeAssistant) -> None:
@@ -145,8 +162,13 @@ def test_module_url_is_content_addressed() -> None:
 
     assert fingerprint is not None
     assert fingerprint.isalnum()
-    assert panel_module_url() == f"{PANEL_MODULE_URL}?hash={fingerprint}"
-    assert panel_module_url().startswith(f"{PANEL_MODULE_URL}?")
+    assert (
+        panel_module_url()
+        == f"{PANEL_VERSIONED_URL_BASE}/{fingerprint}/ai-orchestrator-panel.js"
+    )
+    assert "?" not in panel_module_url()
+    assert _SERVICE_WORKER_CACHED_SEGMENTS.search(panel_module_url()) is None
+    assert _SERVICE_WORKER_CACHED_SEGMENTS.search(PANEL_MODULE_URL) is not None
 
 
 def test_module_url_changes_when_bundle_bytes_change(tmp_path: Path) -> None:
@@ -163,7 +185,10 @@ def test_module_url_changes_when_bundle_bytes_change(tmp_path: Path) -> None:
     fingerprint = hashlib.sha256(b"changed bundle").hexdigest()[
         :PANEL_CACHE_BUST_LENGTH
     ]
-    assert changed == f"{PANEL_MODULE_URL}?hash={fingerprint}"
+    assert changed == (
+        f"{PANEL_VERSIONED_URL_BASE}/{fingerprint}/ai-orchestrator-panel.js"
+    )
+    assert changed.rsplit("/", 1)[0] == panel_versioned_static_url(fingerprint)
 
 
 def test_module_url_falls_back_when_bundle_is_unreadable(tmp_path: Path) -> None:
@@ -216,3 +241,89 @@ async def test_unversioned_yaml_fallback_remains_accepted(
 
     assert owns_panel is False
     assert hass.data[frontend.DATA_PANELS][PANEL_URL_PATH] is existing
+
+
+async def test_registration_serves_bundle_at_content_addressed_path(
+    hass: HomeAssistant,
+) -> None:
+    """The versioned module path is registered once per fingerprint, cacheable."""
+    http = Mock()
+    http.async_register_static_paths = AsyncMock()
+    with patch.object(hass, "http", http):
+        assert await async_register_panel(hass) is True
+        assert await async_register_panel(hass) is False
+
+    http.async_register_static_paths.assert_awaited_once()
+    configs = http.async_register_static_paths.await_args.args[0]
+    fingerprint = panel_bundle_fingerprint()
+    assert fingerprint is not None
+    assert configs == [
+        StaticPathConfig(
+            panel_versioned_static_url(fingerprint),
+            str(
+                Path(__file__).parents[2]
+                / "custom_components"
+                / "ai_orchestrator"
+                / "frontend"
+            ),
+            True,
+        )
+    ]
+    module_url = hass.data[frontend.DATA_PANELS][PANEL_URL_PATH].config[
+        "_panel_custom"
+    ]["module_url"]
+    assert module_url.startswith(configs[0].url_path + "/")
+    assert _SERVICE_WORKER_CACHED_SEGMENTS.search(module_url) is None
+
+
+async def test_changed_bundle_registers_a_new_path_on_reregistration(
+    hass: HomeAssistant, tmp_path: Path
+) -> None:
+    """After the bundle bytes change, the next registration serves a new prefix."""
+    http = Mock()
+    http.async_register_static_paths = AsyncMock()
+    bundle = tmp_path / "panel.js"
+    bundle.write_bytes(b"first bundle")
+    with (
+        patch.object(hass, "http", http),
+        patch("custom_components.ai_orchestrator.panel._PANEL_BUNDLE", bundle),
+    ):
+        assert await async_register_panel(hass) is True
+        async_unregister_panel(hass)
+        bundle.write_bytes(b"second bundle")
+        assert await async_register_panel(hass) is True
+
+    prefixes = [
+        call.args[0][0].url_path
+        for call in http.async_register_static_paths.await_args_list
+    ]
+    expected = [
+        panel_versioned_static_url(
+            hashlib.sha256(data).hexdigest()[:PANEL_CACHE_BUST_LENGTH]
+        )
+        for data in (b"first bundle", b"second bundle")
+    ]
+    assert prefixes == expected
+    assert len(set(prefixes)) == 2
+
+
+async def test_unreadable_bundle_registers_no_versioned_path(
+    hass: HomeAssistant, tmp_path: Path
+) -> None:
+    """The unversioned fallback URL needs no extra static registration."""
+    http = Mock()
+    http.async_register_static_paths = AsyncMock()
+    with (
+        patch.object(hass, "http", http),
+        patch(
+            "custom_components.ai_orchestrator.panel._PANEL_BUNDLE",
+            tmp_path / "missing.js",
+        ),
+    ):
+        assert await async_register_panel(hass) is True
+
+    http.async_register_static_paths.assert_not_awaited()
+    module_url = hass.data[frontend.DATA_PANELS][PANEL_URL_PATH].config[
+        "_panel_custom"
+    ]["module_url"]
+    assert module_url == PANEL_MODULE_URL

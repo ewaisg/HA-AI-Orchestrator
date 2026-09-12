@@ -31,19 +31,21 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryError
 
 from .const import (
+    DOMAIN,
     NAME,
     PANEL_CACHE_BUST_LENGTH,
-    PANEL_CACHE_BUST_QUERY,
     PANEL_ELEMENT_NAME,
     PANEL_FILENAME,
     PANEL_MODULE_URL,
     PANEL_SIDEBAR_ICON,
     PANEL_STATIC_URL,
     PANEL_URL_PATH,
+    PANEL_VERSIONED_URL_BASE,
 )
 
 _PANEL_DIRECTORY = Path(__file__).parent / "frontend"
 _PANEL_BUNDLE = _PANEL_DIRECTORY / PANEL_FILENAME
+_DATA_VERSIONED_STATIC_URLS = f"{DOMAIN}_versioned_static_urls"
 
 
 def panel_bundle_fingerprint() -> str | None:
@@ -51,7 +53,9 @@ def panel_bundle_fingerprint() -> str | None:
 
     The frontend service worker caches the panel module response, so a changed
     bundle must be requested at a different URL. Content addressing makes the
-    URL change exactly when the bytes change.
+    URL change exactly when the bytes change. The fingerprint is placed in the
+    URL path, not the query string, because the service worker matches its
+    cache while ignoring query parameters.
     """
     try:
         data = _PANEL_BUNDLE.read_bytes()
@@ -60,12 +64,38 @@ def panel_bundle_fingerprint() -> str | None:
     return hashlib.sha256(data).hexdigest()[:PANEL_CACHE_BUST_LENGTH]
 
 
+def panel_versioned_static_url(fingerprint: str) -> str:
+    """Return the content-addressed static URL prefix for one bundle fingerprint."""
+    return f"{PANEL_VERSIONED_URL_BASE}/{fingerprint}"
+
+
 def panel_module_url() -> str:
-    """Return the versioned module URL used to register and validate the panel."""
+    """Return the versioned module URL used to register and validate the panel.
+
+    The unversioned URL is returned only when the bundle cannot be read; it
+    remains subject to the service worker's cache, as documented for the YAML
+    fallback.
+    """
     fingerprint = panel_bundle_fingerprint()
     if fingerprint is None:
         return PANEL_MODULE_URL
-    return f"{PANEL_MODULE_URL}?{PANEL_CACHE_BUST_QUERY}={fingerprint}"
+    return f"{panel_versioned_static_url(fingerprint)}/{PANEL_FILENAME}"
+
+
+async def _async_ensure_versioned_static_path(
+    hass: HomeAssistant, module_url: str
+) -> None:
+    """Serve the bundle directory at the content-addressed prefix, once per hash."""
+    if module_url == PANEL_MODULE_URL:
+        return
+    prefix = module_url.removesuffix(f"/{PANEL_FILENAME}")
+    registered: set[str] = hass.data.setdefault(_DATA_VERSIONED_STATIC_URLS, set())
+    if prefix in registered:
+        return
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(prefix, str(_PANEL_DIRECTORY), cache_headers=True)]
+    )
+    registered.add(prefix)
 
 
 def _expected_custom_panel_config(module_url: str) -> dict[str, object]:
@@ -95,7 +125,7 @@ def _is_compatible_panel(panel: frontend.Panel, module_url: str) -> bool:
 
 
 async def async_register_static_assets(hass: HomeAssistant) -> None:
-    """Serve the bundled panel through Home Assistant's documented HTTP API."""
+    """Serve the unversioned bundle path used only by the documented YAML fallback."""
     await hass.http.async_register_static_paths(
         [
             StaticPathConfig(
@@ -121,6 +151,7 @@ async def async_register_panel(hass: HomeAssistant) -> bool:
             )
         return False
 
+    await _async_ensure_versioned_static_path(hass, module_url)
     await panel_custom.async_register_panel(
         hass,
         frontend_url_path=PANEL_URL_PATH,

@@ -2077,7 +2077,13 @@ function gt(e, t, n) {
 async function _t(e) {
 	return ht(await e.callWS({ type: "ai_orchestrator/chat/options" }));
 }
-async function vt(e, t, n, r) {
+function vt() {
+	let e = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
+	e[6] = e[6] & 15 | 64, e[8] = e[8] & 63 | 128;
+	let t = [...e].map((e) => e.toString(16).padStart(2, "0")).join("");
+	return `${t.slice(0, 8)}-${t.slice(8, 12)}-${t.slice(12, 16)}-${t.slice(16, 20)}-${t.slice(20)}`;
+}
+async function yt(e, t, n, r) {
 	if (!G.test(t) || !G.test(n) || r.length === 0 || r.length > W.max_messages || r.length % 2 != 1 || r.some((e, t) => e.role !== (t % 2 == 0 ? "user" : "assistant") || !J(e.content, W.max_message_chars)) || r.reduce((e, t) => e + t.content.length, 0) > W.max_total_chars) throw Error("Invalid chat request");
 	return gt(await e.callWS({
 		type: "ai_orchestrator/chat/send",
@@ -2089,7 +2095,7 @@ async function vt(e, t, n, r) {
 		}))
 	}), t, n);
 }
-function yt(e, t) {
+function bt(e, t) {
 	let n = [...e.map((e) => ({ ...e })), {
 		role: "user",
 		content: t
@@ -2102,7 +2108,7 @@ function yt(e, t) {
 }
 //#endregion
 //#region src/panel/chat-view.ts
-var bt = "ai-orchestrator-chat-view", xt = {
+var xt = "ai-orchestrator-chat-view", St = {
 	unauthorized: "Administrator access is required for chat.",
 	chat_busy: "A request is still running. Wait a moment, then send again.",
 	chat_duplicate_request: "This request was already submitted. Start a new request to retry.",
@@ -2113,7 +2119,7 @@ var bt = "ai-orchestrator-chat-view", xt = {
 	chat_connection: "Home Assistant could not reach the local provider.",
 	chat_not_found: "The configured model is not available. Check provider settings.",
 	chat_unsupported: "This provider does not support the requested text generation."
-}, St = class extends N {
+}, Ct = class extends N {
 	static properties = {
 		hass: { attribute: !1 },
 		_options: { state: !0 },
@@ -2248,10 +2254,10 @@ var bt = "ai-orchestrator-chat-view", xt = {
 		e?.preventDefault();
 		let t = this.hass, n = this._draft.trim(), r = this._options?.providers.find((e) => e.connection_id === this._connectionId);
 		if (t === void 0 || this._busy || this._loading || !r || !n || n.length > W.max_message_chars || this.hass?.connection?.connected === !1) return;
-		let i = yt(this._history, n), a = ++this._sequence, o = this._connectionId;
+		let i = bt(this._history, n), a = ++this._sequence, o = this._connectionId;
 		this._busy = !0, this._pendingPrompt = n, this._error = "", this._notice = i.omitted ? "Earlier turns were left out to stay within the conversation limit." : "";
 		try {
-			let e = await vt(t, o, crypto.randomUUID(), i.messages);
+			let e = await yt(t, o, vt(), i.messages);
 			if (a !== this._sequence || !this.isConnected) return;
 			this._history = [...i.messages, {
 				role: "assistant",
@@ -2262,7 +2268,7 @@ var bt = "ai-orchestrator-chat-view", xt = {
 		} catch (e) {
 			if (a !== this._sequence || !this.isConnected) return;
 			let t = typeof e == "object" && e && "code" in e && typeof e.code == "string" ? e.code : "";
-			this._error = xt[t] ?? "The reply could not be completed. Your message is ready to try again.";
+			this._error = St[t] ?? "The reply could not be completed. Your message is ready to try again.";
 		} finally {
 			a === this._sequence && (this._busy = !1, this._pendingPrompt = "", await this.updateComplete, this.renderRoot.querySelector("textarea")?.focus());
 		}
@@ -2331,7 +2337,7 @@ var bt = "ai-orchestrator-chat-view", xt = {
       </form>
     </div>`;
 	}
-}, Ct = 131072, wt = {
+}, wt = 131072, Tt = {
 	matched: "Matched",
 	event_kind_mismatch: "Event type did not match",
 	state_unchanged: "State did not change",
@@ -2348,20 +2354,20 @@ var bt = "ai-orchestrator-chat-view", xt = {
 		super("Workflow preview response is unsupported.");
 	}
 };
-function Tt(e) {
+function Et(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
-function Et(e, t) {
+function Dt(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Dt(e, t, n) {
-	return Array.isArray(e) && e.length <= t && e.every((e, t) => Tt(e) && Et(e, [
+function Ot(e, t, n) {
+	return Array.isArray(e) && e.length <= t && e.every((e, t) => Et(e) && Dt(e, [
 		"index",
 		"passed",
 		"reason"
 	]) && e.index === t && typeof e.passed == "boolean" && typeof e.reason == "string" && n.includes(e.reason) && e.passed === (e.reason === "matched"));
 }
-var Ot = [
+var kt = [
 	"mode",
 	"enabled",
 	"triggered",
@@ -2373,69 +2379,69 @@ var Ot = [
 	"provider_calls",
 	"actions_executed"
 ];
-function kt(e, t, n) {
-	return Tt(e) && Et(e, n ? ["schema_version", ...Ot] : Ot) && (!n || e.schema_version === 1) && e.mode === t;
-}
-function At(e) {
-	if (!kt(e, "observation_only", !1)) throw new Y();
-	return Mt(e);
+function At(e, t, n) {
+	return Et(e) && Dt(e, n ? ["schema_version", ...kt] : kt) && (!n || e.schema_version === 1) && e.mode === t;
 }
 function jt(e) {
-	if (!kt(e, "offline", !0)) throw new Y();
-	return Mt(e);
+	if (!At(e, "observation_only", !1)) throw new Y();
+	return Nt(e);
 }
 function Mt(e) {
-	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !Dt(e.trigger_results, 10, [
+	if (!At(e, "offline", !0)) throw new Y();
+	return Nt(e);
+}
+function Nt(e) {
+	if (typeof e.enabled != "boolean" || typeof e.triggered != "boolean" || typeof e.conditions_passed != "boolean" || typeof e.eligible != "boolean" || e.provider_calls !== 0 || e.actions_executed !== 0 || !Ot(e.trigger_results, 10, [
 		"matched",
 		"event_kind_mismatch",
 		"state_unchanged",
 		"entity_not_selected",
 		"target_state_mismatch",
 		"time_mismatch"
-	]) || !Dt(e.condition_results, 20, [
+	]) || !Ot(e.condition_results, 20, [
 		"matched",
 		"outside_time_window",
 		"state_unavailable",
 		"state_mismatch",
 		"state_not_numeric",
 		"outside_numeric_bounds"
-	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Tt(e) && Et(e, ["index", "kind"]) && e.index === t && [
+	]) || !Array.isArray(e.planned_steps) || e.planned_steps.length > 25 || !e.planned_steps.every((e, t) => Et(e) && Dt(e, ["index", "kind"]) && e.index === t && [
 		"ai_compose",
 		"ai_classify",
 		"notify"
 	].includes(e.kind)) || e.triggered !== e.trigger_results.some((e) => e.passed) || e.conditions_passed !== e.condition_results.every((e) => e.passed) || e.eligible !== e.planned_steps.length > 0 || e.eligible && (!e.triggered || !e.conditions_passed)) throw new Y();
 	return e;
 }
-async function Nt(e, t, n) {
+async function Pt(e, t, n) {
 	if (!t.trim() || !n.trim() || t.length > 131072 || n.length > 131072) throw new Y();
-	return jt(await e.callWS({
+	return Mt(await e.callWS({
 		type: "ai_orchestrator/workflow/preview",
 		workflow_json: t,
 		snapshot_json: n
 	}));
 }
-var Pt = [
+var Ft = [
 	"ready",
 	"unreadable",
 	"not_loaded"
-], Ft = ["activation_failed", "cleanup_failed"], X = class extends Error {
+], It = ["activation_failed", "cleanup_failed"], X = class extends Error {
 	constructor() {
 		super("The workflow response does not match the supported contract."), this.name = "WorkflowContractError";
 	}
-}, It = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
+}, Lt = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 function Z(e) {
 	return typeof e == "object" && !!e && !Array.isArray(e);
 }
 function Q(e, t) {
 	return Object.keys(e).length === t.length && t.every((t) => Object.hasOwn(e, t));
 }
-function Lt(e, t) {
+function Rt(e, t) {
 	return Array.isArray(e) && e.length <= t && e.every(Z);
 }
-function Rt(e) {
+function zt(e) {
 	return Number.isSafeInteger(e) && e >= 0;
 }
-function zt(e) {
+function Bt(e) {
 	if (!Z(e) || !Q(e, [
 		"schema_version",
 		"workflow_id",
@@ -2445,7 +2451,7 @@ function zt(e) {
 		"triggers",
 		"conditions",
 		"steps"
-	]) || e.schema_version !== 1 || typeof e.workflow_id != "string" || !It.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Lt(e.triggers, 10) || !Lt(e.conditions, 20) || !Lt(e.steps, 25)) throw new X();
+	]) || e.schema_version !== 1 || typeof e.workflow_id != "string" || !Lt.test(e.workflow_id) || typeof e.name != "string" || e.name.trim() === "" || e.name.length > 128 || typeof e.description != "string" || e.description.length > 512 || typeof e.enabled != "boolean" || !Rt(e.triggers, 10) || !Rt(e.conditions, 20) || !Rt(e.steps, 25)) throw new X();
 	return {
 		schema_version: 1,
 		workflow_id: e.workflow_id,
@@ -2457,7 +2463,7 @@ function zt(e) {
 		steps: e.steps
 	};
 }
-function Bt(e) {
+function Vt(e) {
 	if (!Z(e) || !Q(e, [
 		"active",
 		"observations",
@@ -2465,10 +2471,10 @@ function Bt(e) {
 		"registrations",
 		"latest",
 		"error"
-	]) || typeof e.active != "boolean" || !Rt(e.observations) || !Rt(e.ignored_events) || !Rt(e.registrations) || e.error !== null && !Ft.includes(e.error) || e.active && e.error !== null) throw new X();
+	]) || typeof e.active != "boolean" || !zt(e.observations) || !zt(e.ignored_events) || !zt(e.registrations) || e.error !== null && !It.includes(e.error) || e.active && e.error !== null) throw new X();
 	let t = null;
 	if (e.latest !== null) try {
-		t = At(e.latest);
+		t = jt(e.latest);
 	} catch {
 		throw new X();
 	}
@@ -2481,26 +2487,26 @@ function Bt(e) {
 		error: e.error
 	};
 }
-function Vt(e) {
+function Ht(e) {
 	if (!Array.isArray(e) || e.length > 50) throw new X();
 	let t = /* @__PURE__ */ new Set();
 	return e.map((e) => {
 		if (!Z(e) || !Q(e, ["workflow", "status"])) throw new X();
-		let n = zt(e.workflow);
+		let n = Bt(e.workflow);
 		if (t.has(n.workflow_id)) throw new X();
 		return t.add(n.workflow_id), {
 			workflow: n,
-			status: Bt(e.status)
+			status: Vt(e.status)
 		};
 	});
 }
-function Ht(e) {
+function Ut(e) {
 	if (!Z(e) || !Q(e, [
 		"schema_version",
 		"store",
 		"workflows"
-	]) || e.schema_version !== 1 || !Pt.includes(e.store)) throw new X();
-	let t = Vt(e.workflows);
+	]) || e.schema_version !== 1 || !Ft.includes(e.store)) throw new X();
+	let t = Ht(e.workflows);
 	if (e.store !== "ready" && t.length > 0) throw new X();
 	return {
 		schema_version: 1,
@@ -2508,29 +2514,29 @@ function Ht(e) {
 		workflows: t
 	};
 }
-function Ut(e, t) {
+function Wt(e, t) {
 	if (!Z(e) || !Object.hasOwn(e, "workflow")) throw new X();
-	let { workflow: n, ...r } = e, i = zt(n);
+	let { workflow: n, ...r } = e, i = Bt(n);
 	if (t !== void 0 && i.workflow_id !== t) throw new X();
-	let a = Ht(r);
+	let a = Ut(r);
 	if (!a.workflows.some((e) => e.workflow.workflow_id === i.workflow_id)) throw new X();
 	return {
 		...a,
 		workflow: i
 	};
 }
-async function Wt(e) {
-	return Ht(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
+async function Gt(e) {
+	return Ut(await e.callWS({ type: "ai_orchestrator/workflows/list" }));
 }
-async function Gt(e, t) {
+async function Kt(e, t) {
 	if (!t.trim() || t.length > 131072) throw new X();
-	return Ut(await e.callWS({
+	return Wt(await e.callWS({
 		type: "ai_orchestrator/workflows/save",
 		workflow_json: t
 	}));
 }
-async function Kt(e, t, n) {
-	let r = Ut(await e.callWS({
+async function qt(e, t, n) {
+	let r = Wt(await e.callWS({
 		type: "ai_orchestrator/workflows/set_enabled",
 		workflow_id: t,
 		enabled: n
@@ -2538,15 +2544,15 @@ async function Kt(e, t, n) {
 	if (r.workflow.enabled !== n) throw new X();
 	return r;
 }
-async function qt(e, t) {
-	let n = Ht(await e.callWS({
+async function Jt(e, t) {
+	let n = Ut(await e.callWS({
 		type: "ai_orchestrator/workflows/delete",
 		workflow_id: t
 	}));
 	if (n.workflows.some((e) => e.workflow.workflow_id === t)) throw new X();
 	return n;
 }
-async function Jt(e, t) {
+async function Yt(e, t) {
 	let n = await e.callWS({
 		type: "ai_orchestrator/workflows/run_manual",
 		workflow_id: t
@@ -2554,14 +2560,14 @@ async function Jt(e, t) {
 	if (!Z(n) || n.schema_version !== 1) throw new X();
 	let r = Object.fromEntries(Object.entries(n).filter(([e]) => e !== "schema_version"));
 	try {
-		return At(r);
+		return jt(r);
 	} catch {
 		throw new X();
 	}
 }
 //#endregion
 //#region src/panel/workflow-preview-view.ts
-var Yt = "ai-orchestrator-workflow-preview", Xt = {
+var Xt = "ai-orchestrator-workflow-preview", Zt = {
 	schema_version: 1,
 	workflow_id: "12345678-1234-4123-8123-123456789abc",
 	name: "Synthetic evening window preview",
@@ -2589,11 +2595,11 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
 		kind: "notify",
 		notify_service: "notify.synthetic"
 	}]
-}, Zt = {
+}, Qt = {
 	ai_compose: "Compose text",
 	ai_classify: "Classify text",
 	notify: "Notification"
-}, Qt = class extends N {
+}, $t = class extends N {
 	static properties = {
 		hass: { attribute: !1 },
 		draft: { attribute: !1 },
@@ -2641,7 +2647,7 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
 		e.has("draft") && this.draft !== void 0 && (this._invalidate(), this._workflow = this.draft.json), e.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) && (this._unbind(), this._reset(), this._connection = this.hass?.connection, this._userId = this.hass?.user?.id, this._callWS = this.hass?.callWS, this._connection?.addEventListener("disconnected", this._reset));
 	}
 	_example(e) {
-		this._invalidate(), this._workflow = JSON.stringify(Xt, null, 2), this._snapshot = JSON.stringify({
+		this._invalidate(), this._workflow = JSON.stringify(Zt, null, 2), this._snapshot = JSON.stringify({
 			states: { "binary_sensor.synthetic_window": "on" },
 			time: e ? "12:00" : "20:00",
 			event: {
@@ -2663,7 +2669,7 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Nt(e, this._workflow, this._snapshot);
+			let t = await Pt(e, this._workflow, this._snapshot);
 			n() && (this._result = t);
 		} catch {
 			n() && (this._error = "Preview could not be completed. Check both JSON documents, administrator access, and the installed integration version.");
@@ -2677,7 +2683,7 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
 		this._invalidate(), this._busy = !0;
 		let t = this._sequence, n = () => t === this._sequence && this.isConnected && this.hass?.callWS === e.callWS && this.hass?.connection === e.connection && this.hass?.user?.id === e.user?.id;
 		try {
-			let t = await Gt(e, this._workflow);
+			let t = await Kt(e, this._workflow);
 			if (!n()) return;
 			this._workflow = JSON.stringify(t.workflow, null, 2), this._saved = !0, this.dispatchEvent(new CustomEvent("workflow-saved", {
 				bubbles: !0,
@@ -2695,8 +2701,8 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
       <p>Experimental offline JSON editor. Test a draft against a supplied snapshot: previewing reads no live home state, contacts no provider, and executes no action. "Save as workflow" stores the workflow document in Home Assistant; an enabled saved workflow then watches its triggers and records outcomes without running any step.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
       <div class="actions"><button type="button" @click=${() => this._example(!1)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(!0)}>Load synthetic daytime example</button></div>
-      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${Ct} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
-      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${Ct} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
+      <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${wt} .value=${this._workflow} @input=${(e) => this._edit(e, !0)}></textarea></div>
+      <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${wt} .value=${this._snapshot} @input=${(e) => this._edit(e, !1)}></textarea></div></div>
       <div class="actions"><button class="primary" type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim() || !this._snapshot.trim()} @click=${this._preview}>${this._busy ? "Previewing…" : "Preview workflow"}</button><button type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === !1 || !this._workflow.trim()} @click=${this._save}>${this._busy ? "Working…" : "Save as workflow"}</button><button type="button" @click=${this._reset}>Reset preview</button></div>
       <div role="status" aria-live="polite">${this._error ? w`<p class="error">${this._error}</p>` : E}${this._saved ? w`<p>Workflow saved. It appears in the stored workflows list below.</p>` : E}${this._busy ? w`<p>Evaluating the supplied snapshot…</p>` : E}${this._result ? this._renderResult(this._result) : E}</div>
     </section>`;
@@ -2704,20 +2710,20 @@ var Yt = "ai-orchestrator-workflow-preview", Xt = {
 	_renderResult(e) {
 		return w`<div class="result"><h2>${e.eligible ? "Scenario passes — steps planned" : "Scenario blocked — no steps planned"}</h2>
       <p>Draft enabled flag: ${e.enabled ? "yes" : "no"}. Preview never activates a workflow.</p>
-      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => w`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${wt[e.reason]}</li>`)}</ul>
-      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? w`<ul>${e.condition_results.map((e) => w`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${wt[e.reason]}</li>`)}</ul>` : w`<p>No conditions.</p>`}
-      <h3>Planned steps</h3>${e.planned_steps.length ? w`<ol>${e.planned_steps.map((e) => w`<li>${Zt[e.kind]} — not executed</li>`)}</ol>` : w`<p>No steps planned.</p>`}
+      <h3>Triggers (any must pass)</h3><ul>${e.trigger_results.map((e) => w`<li>Trigger ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${Tt[e.reason]}</li>`)}</ul>
+      <h3>Conditions (all must pass)</h3>${e.condition_results.length ? w`<ul>${e.condition_results.map((e) => w`<li>Condition ${e.index + 1}: ${e.passed ? "Pass" : "Fail"} — ${Tt[e.reason]}</li>`)}</ul>` : w`<p>No conditions.</p>`}
+      <h3>Planned steps</h3>${e.planned_steps.length ? w`<ol>${e.planned_steps.map((e) => w`<li>${Qt[e.kind]} — not executed</li>`)}</ol>` : w`<p>No steps planned.</p>`}
       <p>Provider calls: 0 · Actions executed: 0</p></div>`;
 	}
 };
-customElements.define(Yt, Qt);
+customElements.define(Xt, $t);
 //#endregion
 //#region src/panel/workflows-view.ts
-var $t = "ai-orchestrator-workflows", en = {
+var en = "ai-orchestrator-workflows", tn = {
 	load: "Stored workflows could not be read from Home Assistant. Check administrator access and the installed integration version.",
 	mutate: "The change could not be completed. Nothing was executed; reload to see the current stored state.",
 	observe: "The observation could not be completed. Nothing was executed."
-}, tn = class extends N {
+}, nn = class extends N {
 	static properties = {
 		hass: { attribute: !1 },
 		refreshToken: {
@@ -2870,12 +2876,12 @@ var $t = "ai-orchestrator-workflows", en = {
 		let t = ++this._sequence;
 		this._viewState = "loading", this._error = "";
 		try {
-			let n = await Wt(e);
+			let n = await Gt(e);
 			if (!this._current(t, e)) return;
 			this._store = n.store, this._entries = n.workflows, this._viewState = "ready";
 		} catch {
 			if (!this._current(t, e)) return;
-			this._entries = [], this._viewState = "error", this._error = en.load;
+			this._entries = [], this._viewState = "error", this._error = tn.load;
 		}
 	};
 	async _mutate(e) {
@@ -2885,23 +2891,23 @@ var $t = "ai-orchestrator-workflows", en = {
 		this._pending = e, this._error = "", e.action !== "observe" && (this._observation = void 0);
 		try {
 			if (e.action === "observe") {
-				let r = await Jt(t, e.id);
+				let r = await Yt(t, e.id);
 				if (!this._current(n, t)) return;
 				this._observation = {
 					id: e.id,
 					result: r
 				};
-				let i = await Wt(t);
+				let i = await Gt(t);
 				if (!this._current(n, t)) return;
 				this._store = i.store, this._entries = i.workflows;
 				return;
 			}
-			let r = e.action === "delete" ? await qt(t, e.id) : await Kt(t, e.id, e.action === "enable");
+			let r = e.action === "delete" ? await Jt(t, e.id) : await qt(t, e.id, e.action === "enable");
 			if (!this._current(n, t)) return;
 			this._store = r.store, this._entries = r.workflows, this._confirmDeleteId = void 0;
 		} catch {
 			if (!this._current(n, t)) return;
-			this._error = e.action === "observe" ? en.observe : en.mutate;
+			this._error = e.action === "observe" ? tn.observe : tn.mutate;
 		} finally {
 			this._pending === e && (this._pending = void 0, this._refreshRequested && this._current(n, t) && queueMicrotask(() => void this._load()));
 		}
@@ -3028,10 +3034,10 @@ var $t = "ai-orchestrator-workflows", en = {
     </p>`;
 	}
 };
-customElements.define($t, tn);
+customElements.define(en, nn);
 //#endregion
 //#region src/panel/ai-orchestrator-panel.ts
-var nn = "ai-orchestrator-panel", $ = [
+var rn = "ai-orchestrator-panel", $ = [
 	{
 		id: "home",
 		label: "Home"
@@ -3064,12 +3070,12 @@ var nn = "ai-orchestrator-panel", $ = [
 		id: "settings",
 		label: "Settings"
 	}
-], rn = {
+], an = {
 	providers: "Provider connections",
 	workflows: "Workflow runtime",
 	conversation: "Conversation agent",
 	ai_task: "AI Task entity"
-}, an = {
+}, on = {
 	automations: {
 		title: "Automation Studio is not active yet",
 		detail: "The foundation build does not create, publish, or run workflows. The structured builder arrives only after its deterministic runtime and safety checks are proven."
@@ -3099,11 +3105,11 @@ var nn = "ai-orchestrator-panel", $ = [
 		detail: "Only the live integration status is available in Phase 0. Credential, privacy, retention, and cloud-routing controls are not simulated here."
 	}
 };
-function on(e) {
+function sn(e) {
 	let t = e?.path?.split("/").filter(Boolean).at(-1);
 	return $.find((e) => e.id === t)?.id;
 }
-var sn = class extends N {
+var cn = class extends N {
 	static properties = {
 		hass: { attribute: !1 },
 		narrow: { type: Boolean },
@@ -3129,7 +3135,7 @@ var sn = class extends N {
 	}
 	willUpdate(e) {
 		if (e.has("route")) {
-			let e = on(this.route);
+			let e = sn(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
 		e.has("_activeSection") && this._activeSection !== "automations" && (this._draft = void 0);
@@ -3258,7 +3264,7 @@ var sn = class extends N {
 			return w`
               <li class="status-row">
                 <span>
-                  <span class="status-name">${rn[e]}</span>
+                  <span class="status-name">${an[e]}</span>
                   <span class="status-detail">${this._featureDetail(n)}</span>
                 </span>
                 <span class="state-pill ${t ? n ? "available" : "unavailable" : "unknown"}">
@@ -3295,7 +3301,7 @@ var sn = class extends N {
     `;
 	}
 	_renderPlaceholder(e) {
-		let t = an[e], n = $.find((t) => t.id === e)?.label ?? "Section";
+		let t = on[e], n = $.find((t) => t.id === e)?.label ?? "Section";
 		return w`
       <header class="page-header">
         <div>
@@ -3519,7 +3525,7 @@ var sn = class extends N {
 			this._probeResult = void 0, this._probeLoadState = "error";
 		}
 	};
-}, cn = "ai-orchestrator-providers-view", ln = "ai-orchestrator-catalog-view";
-customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(bt, St), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(nn, sn), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(cn, mt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(ln, $e);
+}, ln = "ai-orchestrator-providers-view", un = "ai-orchestrator-catalog-view";
+customElements.get("ai-orchestrator-chat-view") === void 0 && customElements.define(xt, Ct), customElements.get("ai-orchestrator-panel") === void 0 && customElements.define(rn, cn), customElements.get("ai-orchestrator-providers-view") === void 0 && customElements.define(ln, mt), customElements.get("ai-orchestrator-catalog-view") === void 0 && customElements.define(un, $e);
 //#endregion
-export { sn as AiOrchestratorPanel, ln as CATALOG_VIEW_TAG, bt as CHAT_VIEW_TAG, $e as CatalogView, St as ChatView, nn as PANEL_TAG, cn as PROVIDERS_VIEW_TAG, mt as ProvidersView };
+export { cn as AiOrchestratorPanel, un as CATALOG_VIEW_TAG, xt as CHAT_VIEW_TAG, $e as CatalogView, Ct as ChatView, rn as PANEL_TAG, ln as PROVIDERS_VIEW_TAG, mt as ProvidersView };

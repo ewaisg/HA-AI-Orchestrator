@@ -35,8 +35,10 @@ PANEL_STATIC_URL: Final = f"/api/{DOMAIN}/static"
 PANEL_MODULE_URL: Final = f"{PANEL_STATIC_URL}/{PANEL_FILENAME}"
 PANEL_SIDEBAR_ICON: Final = "mdi:robot-outline"
 
-# Home Assistant's frontend service worker caches the panel module response.
-# `cache_headers=False` does not defeat it, so the module URL must change when
-# the bundle changes. See LOC-009 and the 2026-09-05 LOC-008 evidence.
-PANEL_CACHE_BUST_QUERY: Final = "hash"
+# Home Assistant's frontend service worker applies a cache-first rule with
+# `ignoreSearch` to every URL containing a `/static/`, `/frontend_latest/` or
+# `/frontend_es5/` segment, so neither `cache_headers=False` nor a query string
+# defeats it (observed live 2026-09-12; see LOC-009). The versioned module is
+# therefore served from a content-addressed *path* outside those segments.
+PANEL_VERSIONED_URL_BASE: Final = f"/api/{DOMAIN}/panel"
 PANEL_CACHE_BUST_LENGTH: Final = 16
