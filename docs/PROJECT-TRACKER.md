@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-12 (live r3 session)
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **r9 (`main@3c75d9e`) is live on Core 2026.9.2, rollback `before-r9-plaq__sj`: builder with edit-existing and reordering, execute mode, notification discovery, dry run, extract/branch, catalogue bound. An independent review of commits 9afc1b6..HEAD is in progress; act on its findings, then the release gates (LOC-007, WFL-008) and a push. Owner will build the first live execute workflow themselves (ENV-004). Still open: LOC-008 Android, LOC-004/003/005 live reproductions.**
+Current resume point: **r10 (`main@7fec449`) is live on Core 2026.9.2, rollback `before-r10-2z2r5mvm`, with one independent review pass fully addressed (`docs/evidence/2026-09-12-independent-review-r10.md`). Owner will build the first live execute workflow (ENV-004). Remaining for LOC-007/WFL-008: LOC-008 Android confirmation, LOC-003 timeout, LOC-004 duplicate/transport and LOC-005 registry-change live reproductions, a second reviewer pass on this record, and the push of the local commits.**
 
 Accepted candidate evidence: the August 29 clean Git-archive Linux gate recorded 340 full, 98 focused, 30 security/evidence/traceability, and 231 pure tests plus Ruff/canary. The frontend recorded 95 browser tests plus lint, typecheck, build, sync, and byte identity (75,409 bytes; SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`). Both independent pre-live reviewers approved the candidate; evidence commit is `dc71eca6d5e8124c2d2101064d44e3269a5f9190`. These are historical gates, not September 5 test reruns. The Windows checkout's CRLF bundle differs physically; use the canonical Git archive for exact-artifact installation.
 

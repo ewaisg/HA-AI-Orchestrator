@@ -32,3 +32,15 @@ panel path, and the catalogue bound contract.
 | `scripts/run_pure_tests.py` | see `pure-reviewfix.txt` | |
 | `npm --prefix frontend run check` | 244 browser tests; bundle 168,643 bytes SHA-256 `faaf9cc8…1333` | `frontend-reviewfix.txt` |
 | Ruff, canary | clean, exit 0 | tool output |
+
+## Live r10
+
+Archive `outputs/r10/ai-orchestrator-r10.zip` (SHA-256
+`8ef74df6c8153e2fcd329857b4ec091845e02e3ba41d9aa604436cb2548b1a46`, 29 files,
+bundle 168,643 bytes) uploaded through the File editor, hashes matched,
+installer reported `VERIFIED_ROLLBACK:
+/homeassistant/.ai-orchestrator-backups/before-r10-2z2r5mvm/ai_orchestrator`
+and `INSTALLED: 29 reviewed files, all bytes verified`; files removed. Core
+restarted from Settings → System (no running automation reported). After
+startup the panel registered
+`/api/ai_orchestrator/panel/faaf9cc84ffef1cf/ai-orchestrator-panel.js`.
