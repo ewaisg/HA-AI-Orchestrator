@@ -145,12 +145,11 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
 
 ## WFL-002 stored workflows
 
-- ENV-015: the WFL-002 candidate (stored workflows, activation, panel list) has
-  not been installed or observed on the owner's instance. Required: save a
-  workflow from the editor, enable it, observe a real state change or time
-  trigger recorded in the list, restart Core and confirm the workflow is active
-  again with counters reset, and confirm `.storage/ai_orchestrator.workflows`
-  survives. Consuming task: WFL-002. Simulated restart tests do not replace this.
+- ENV-015 `RESOLVED FOR WFL-002` (2026-09-12): agent-observed on the owner's
+  Core 2026.9.2 after installing r3: save, enable, a live clock-trigger
+  observation with no step executed, storage file present, and re-activation
+  with reset counters after a Core restart. Owner-reported items were not
+  needed. See `evidence/2026-09-12-live-r3-install.md`. Consuming task: WFL-002 (closed).
 
 ## September 12 main-branch review (merged onto the branch line)
 
