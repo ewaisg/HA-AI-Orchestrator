@@ -93,7 +93,7 @@ describe("stored workflows view", () => {
     const unreadable = await mount(
       createRoutedFakeHass({ "ai_orchestrator/workflows/list": { schema_version: 1, store: "unreadable", workflows: [] } }),
     );
-    expect(text(unreadable)).toContain("Stored workflows could not be read");
+    expect(text(unreadable)).toContain("cannot validate");
 
     const broken = await mount(
       createRoutedFakeHass({ "ai_orchestrator/workflows/list": { ...WORKFLOW_LIST, marker: "private-marker-must-not-render" } }),
@@ -207,6 +207,54 @@ describe("stored workflows view", () => {
     resolve(structuredClone(WORKFLOW_LIST));
     await settle(view);
     expect(text(view)).not.toContain("Synthetic evening window");
+  });
+
+  it("does not strand a mutation when a reload or identity change overlaps it", async () => {
+    let resolve!: (value: unknown) => void;
+    const requests: string[] = [];
+    const hass: HomeAssistantLike = {
+      user: { id: "admin" },
+      callWS: <T>(message: Record<string, unknown>): Promise<T> => {
+        requests.push(message.type as string);
+        if (message.type === "ai_orchestrator/workflows/list") return Promise.resolve(structuredClone(WORKFLOW_LIST) as T);
+        return new Promise<T>((done) => { resolve = done as (value: unknown) => void; });
+      },
+    };
+    const view = await mount(hass);
+    button(view, "Disable").click();
+    await settle(view);
+    expect(button(view, "Reload workflows").disabled).toBe(true);
+    view.refreshToken = 1;
+    await settle(view);
+    expect(requests.filter((t) => t === "ai_orchestrator/workflows/list")).toHaveLength(1);
+    resolve({ ...WORKFLOW_LIST, workflow: { ...STORED_WORKFLOW, enabled: false } });
+    await settle(view);
+    expect(button(view, "Disable").disabled).toBe(false);
+    expect(button(view, "Reload workflows").disabled).toBe(false);
+    expect(text(view)).not.toContain("Saving…");
+
+    button(view, "Disable").click();
+    await settle(view);
+    view.hass = { ...hass, user: { id: "another-admin" } };
+    await settle(view);
+    resolve({ raw: "private-late-failure" });
+    await settle(view);
+    expect(text(view)).not.toContain("could not be completed");
+    expect(text(view)).not.toContain("private-late-failure");
+    expect(button(view, "Reload workflows").disabled).toBe(false);
+  });
+
+  it("loads exactly once on first mount and once more on reattachment", async () => {
+    const requests: string[] = [];
+    const view = await mount(
+      createRoutedFakeHass({ "ai_orchestrator/workflows/list": WORKFLOW_LIST }, (m) => requests.push(m.type as string)),
+    );
+    expect(requests).toHaveLength(1);
+    view.remove();
+    document.body.append(view);
+    await settle(view);
+    expect(requests).toHaveLength(2);
+    expect(text(view)).toContain("Synthetic evening window");
   });
 
   it("reloads when the refresh token changes and hands a document to the editor", async () => {

@@ -147,6 +147,12 @@ export class AiOrchestratorPanel extends LitElement {
         this._activeSection = routeSection;
       }
     }
+    // A stored document handed to the editor is for that visit only; leaving
+    // Automations must not re-apply it when the section is rebuilt later.
+    const changedKeys = changed as Map<PropertyKey, unknown>;
+    if (changedKeys.has("_activeSection") && this._activeSection !== "automations") {
+      this._draft = undefined;
+    }
   }
 
   /**

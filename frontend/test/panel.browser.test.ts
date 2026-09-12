@@ -245,6 +245,19 @@ describe("AI Orchestrator panel shell", () => {
     await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
     expect(requestTypes).toContain("ai_orchestrator/workflows/save");
     expect(listCalls()).toBe(before + 1);
+
+    // Leaving Automations drops the handed-over draft; returning shows a clean editor.
+    const homeButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Home"));
+    homeButton?.click();
+    await panel.updateComplete;
+    automationButton?.click();
+    await panel.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    const rebuiltEditor = panel.shadowRoot?.querySelector("ai-orchestrator-workflow-preview") as LitElement | null;
+    await rebuiltEditor!.updateComplete;
+    expect(rebuiltEditor!.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value).toBe("");
   });
 
   it("renders a bounded failure without exposing malformed probe content", async () => {

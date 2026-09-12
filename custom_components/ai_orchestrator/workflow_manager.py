@@ -10,6 +10,7 @@ separate tracked work (WFL-003, WFL-004) behind the release gate.
 
 from __future__ import annotations
 
+import asyncio
 from copy import deepcopy
 from typing import Any, Final
 
@@ -43,6 +44,7 @@ class WorkflowManager:
         self._errors: dict[str, str] = {}
         self._store_state = STORE_NOT_LOADED
         self._started = False
+        self._lock = asyncio.Lock()
 
     @property
     def started(self) -> bool:
@@ -123,34 +125,44 @@ class WorkflowManager:
         if not self._started or self._store_state != STORE_READY:
             raise WorkflowManagerError("workflow storage is unavailable")
 
-    async def async_save(self, raw: Any) -> dict[str, Any]:
-        """Validate, persist, and (re)activate one workflow document."""
-        self._require_ready()
-        document = await self._store.async_upsert(raw)
+    @callback
+    def _apply(self, document: dict[str, Any]) -> None:
+        """Replace the live observer to match a document that was just stored.
+
+        A mutation that completes after the manager stopped (foundation
+        unloaded while the write was in flight) must not register a listener
+        nobody will stop; the next start re-reads the store instead.
+        """
         self._deactivate(document["workflow_id"])
         self._retry_stale()
-        if document["enabled"]:
+        if self._started and document["enabled"]:
             self._activate(document)
-        return document
+
+    async def async_save(self, raw: Any) -> dict[str, Any]:
+        """Validate, persist, and (re)activate one workflow document."""
+        async with self._lock:
+            self._require_ready()
+            document = await self._store.async_upsert(raw)
+            self._apply(document)
+            return document
 
     async def async_delete(self, workflow_id: str) -> bool:
         """Deactivate and remove one workflow; return whether it existed."""
-        self._require_ready()
-        self._deactivate(workflow_id)
-        self._retry_stale()
-        return await self._store.async_delete(workflow_id)
+        async with self._lock:
+            self._require_ready()
+            self._deactivate(workflow_id)
+            self._retry_stale()
+            return await self._store.async_delete(workflow_id)
 
     async def async_set_enabled(
         self, workflow_id: str, enabled: bool
     ) -> dict[str, Any]:
         """Persist the enabled flag and apply it to the live observer."""
-        self._require_ready()
-        document = await self._store.async_set_enabled(workflow_id, enabled)
-        self._deactivate(workflow_id)
-        self._retry_stale()
-        if enabled:
-            self._activate(document)
-        return document
+        async with self._lock:
+            self._require_ready()
+            document = await self._store.async_set_enabled(workflow_id, enabled)
+            self._apply(document)
+            return document
 
     @callback
     def run_manual(self, workflow_id: str) -> dict[str, Any]:

@@ -230,6 +230,10 @@ export class WorkflowsView extends LitElement {
     if (hass === undefined || hass.connection?.connected === false) {
       return;
     }
+    // A reload during a mutation would strand that mutation's pending state.
+    if (this._pending !== undefined) {
+      return;
+    }
     const sequence = ++this._sequence;
     this._viewState = "loading";
     this._error = "";
@@ -282,7 +286,9 @@ export class WorkflowsView extends LitElement {
       if (!this._current(sequence, hass)) return;
       this._error = pending.action === "observe" ? STATIC_ERRORS.observe : STATIC_ERRORS.mutate;
     } finally {
-      if (this._current(sequence, hass)) {
+      // Clear the pending marker whenever it is still ours, even if the view
+      // was reset or its identity changed meanwhile, so controls never stick.
+      if (this._pending === pending) {
         this._pending = undefined;
       }
     }
@@ -308,7 +314,11 @@ export class WorkflowsView extends LitElement {
           notification is sent, and no device action executes.
         </p>
         <div class="actions">
-          <button type="button" ?disabled=${this._viewState === "loading" || !this.hass} @click=${this._load}>
+          <button
+            type="button"
+            ?disabled=${this._viewState === "loading" || this._pending !== undefined || !this.hass}
+            @click=${this._load}
+          >
             ${this._viewState === "loading" ? "Loading…" : "Reload workflows"}
           </button>
         </div>
@@ -316,8 +326,9 @@ export class WorkflowsView extends LitElement {
           ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
           ${this._store === "unreadable"
             ? html`<p class="notice error">
-                Stored workflows could not be read. Nothing on disk was changed and no workflow is
-                active; saving is refused until the storage file is repaired or restored.
+                The stored workflow file contains data this version cannot validate. Nothing on
+                disk was changed and no workflow is active; saving is refused until the file is
+                repaired or restored from a backup.
               </p>`
             : nothing}
         </div>

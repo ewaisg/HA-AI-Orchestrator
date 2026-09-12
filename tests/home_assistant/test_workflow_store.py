@@ -1,15 +1,19 @@
 """Workflow storage: validated writes, fail-closed reads, no direct file edits."""
 
+import asyncio
 from copy import deepcopy
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, UnsupportedStorageVersionError
+from homeassistant.helpers.storage import Store
+from homeassistant.util.file import WriteError
 
 from custom_components.ai_orchestrator.workflow_schema import WorkflowValidationError
 from custom_components.ai_orchestrator.workflow_store import (
     MAX_WORKFLOWS,
     STORAGE_KEY,
+    WorkflowNotFoundError,
     WorkflowStore,
     WorkflowStoreError,
 )
@@ -122,7 +126,7 @@ async def test_set_enabled_revalidates_and_fails_closed(hass, hass_storage, draf
         await store.async_set_enabled(WORKFLOW_ID, True)
     assert store.get(WORKFLOW_ID)["enabled"] is False
     assert hass_storage[STORAGE_KEY]["data"]["workflows"][0]["enabled"] is False
-    with pytest.raises(WorkflowStoreError, match="workflow not found"):
+    with pytest.raises(WorkflowNotFoundError):
         await store.async_set_enabled("00000000-0000-4000-8000-000000000000", True)
 
     await store.async_upsert(draft)
@@ -176,17 +180,19 @@ async def test_unreadable_storage_fails_closed_without_rewriting(
     assert hass_storage == before
 
 
-async def test_write_failure_leaves_memory_and_storage_unchanged(
-    hass, hass_storage, draft
+@pytest.mark.parametrize("error", [WriteError("disk"), OSError("disk")])
+async def test_swallowed_disk_write_failure_is_detected_by_read_back(
+    hass, hass_storage, draft, error
 ):
+    """HA's Store logs a failed write and returns normally; the store must notice."""
     store = WorkflowStore(hass)
     await store.async_load()
     await store.async_upsert(draft)
     before = deepcopy(hass_storage)
     with (
         patch(
-            "custom_components.ai_orchestrator.workflow_store.Store.async_save",
-            new=AsyncMock(side_effect=HomeAssistantError("disk")),
+            "homeassistant.helpers.storage.Store._async_write_data",
+            new=AsyncMock(side_effect=error),
         ),
         pytest.raises(WorkflowStoreError, match="write failed"),
     ):
@@ -195,10 +201,72 @@ async def test_write_failure_leaves_memory_and_storage_unchanged(
     assert hass_storage == before
     with (
         patch(
-            "custom_components.ai_orchestrator.workflow_store.Store.async_save",
-            new=AsyncMock(side_effect=OSError("disk")),
+            "homeassistant.helpers.storage.Store._async_write_data",
+            new=AsyncMock(side_effect=error),
         ),
         pytest.raises(WorkflowStoreError, match="write failed"),
     ):
         await store.async_delete(WORKFLOW_ID)
     assert store.get(WORKFLOW_ID) is not None
+    assert hass_storage == before
+
+    # A first write into an empty store that never lands must not report success.
+    fresh = WorkflowStore(hass)
+    hass_storage.pop(STORAGE_KEY)
+    await fresh.async_load()
+    with (
+        patch(
+            "homeassistant.helpers.storage.Store._async_write_data",
+            new=AsyncMock(side_effect=error),
+        ),
+        pytest.raises(WorkflowStoreError, match="write failed"),
+    ):
+        await fresh.async_upsert(draft)
+    assert fresh.list() == []
+    assert STORAGE_KEY not in hass_storage
+
+
+async def test_read_failure_and_unsupported_version_fail_closed(hass, hass_storage):
+    for error in (
+        HomeAssistantError("read"),
+        UnsupportedStorageVersionError(STORAGE_KEY, 2, 1),
+    ):
+        store = WorkflowStore(hass)
+        with (
+            patch(
+                "homeassistant.helpers.storage.Store._async_load",
+                new=AsyncMock(side_effect=error),
+            ),
+            pytest.raises(WorkflowStoreError, match="unreadable"),
+        ):
+            await store.async_load()
+        assert not store.loaded
+    assert STORAGE_KEY not in hass_storage
+
+
+async def test_overlapping_mutations_are_serialized(hass, hass_storage, draft):
+    """Interleaved mutations must all persist; none may overwrite another."""
+    store = WorkflowStore(hass)
+    await store.async_load()
+    original = Store._async_write_data
+
+    async def yielding_write(self, data):
+        await asyncio.sleep(0)
+        await original(self, data)
+
+    other_id = "12345678-1234-4123-8123-000000000001"
+    with patch(
+        "homeassistant.helpers.storage.Store._async_write_data",
+        new=yielding_write,
+    ):
+        await asyncio.gather(
+            store.async_upsert(draft),
+            store.async_upsert({**draft, "workflow_id": other_id}),
+            store.async_set_enabled(WORKFLOW_ID, False),
+        )
+    ids = [item["workflow_id"] for item in store.list()]
+    assert ids == [WORKFLOW_ID, other_id]
+    assert store.get(WORKFLOW_ID)["enabled"] is False
+    stored = hass_storage[STORAGE_KEY]["data"]["workflows"]
+    assert [item["workflow_id"] for item in stored] == ids
+    assert stored[0]["enabled"] is False

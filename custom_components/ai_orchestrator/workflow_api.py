@@ -24,7 +24,7 @@ from .runtime import async_get_runtime, is_foundation_loaded
 from .workflow_manager import WorkflowManager, WorkflowManagerError
 from .workflow_preview_api import load_bounded_json
 from .workflow_schema import WorkflowValidationError
-from .workflow_store import WorkflowStoreError
+from .workflow_store import WorkflowNotFoundError, WorkflowStoreError
 
 WORKFLOW_RESPONSE_SCHEMA_VERSION = 1
 
@@ -176,25 +176,15 @@ async def websocket_workflow_set_enabled(
     manager = _manager(hass, connection, msg["id"])
     if manager is None:
         return
-    if msg["enabled"] is not True and msg["enabled"] is not False:
-        connection.send_error(
-            msg["id"], ERR_INVALID_WORKFLOW, "enabled must be a boolean."
-        )
-        return
     try:
         document = await manager.async_set_enabled(msg["workflow_id"], msg["enabled"])
     except WorkflowValidationError as err:
         connection.send_error(msg["id"], ERR_INVALID_WORKFLOW, str(err))
         return
-    except WorkflowStoreError as err:
-        if str(err) == "workflow not found":
-            connection.send_error(msg["id"], ERR_NOT_FOUND, "Workflow not found.")
-            return
-        connection.send_error(
-            msg["id"], ERR_STORE_UNAVAILABLE, "Workflow storage is unavailable."
-        )
+    except WorkflowNotFoundError:
+        connection.send_error(msg["id"], ERR_NOT_FOUND, "Workflow not found.")
         return
-    except WorkflowManagerError:
+    except WorkflowManagerError, WorkflowStoreError:
         connection.send_error(
             msg["id"], ERR_STORE_UNAVAILABLE, "Workflow storage is unavailable."
         )

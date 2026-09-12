@@ -121,10 +121,13 @@ no notification is sent, and no Home Assistant action is called. Restarting
 Core or reloading the foundation entry re-reads the stored documents and
 re-activates the enabled ones. See [the preview guide](OFFLINE-WORKFLOW-PREVIEW.md).
 
-If the list reports that stored workflows could not be read, the storage file
-contains a document the installed version cannot validate. Nothing is rewritten
-and no workflow is active; restore the file from a backup or remove it after
-copying it aside. The Home page's Workflow runtime flag stays unavailable until
+If the list reports that the stored workflow file cannot be validated, it holds
+data the installed version does not accept. Nothing is rewritten and no workflow
+is active; restore the file from a backup or remove it after copying it aside.
+A file that is not valid JSON at all is handled by Home Assistant itself: it is
+renamed aside with a `.corrupt` suffix, a repair issue is raised, and the list
+shows no stored workflows. Every save is read back from storage before it is
+reported as saved. The Home page's Workflow runtime flag stays unavailable until
 step execution exists.
 
 The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded

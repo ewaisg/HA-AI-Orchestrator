@@ -1,10 +1,13 @@
 """Workflow activation lifecycle over stored documents on the named Core."""
 
+import asyncio
 from copy import deepcopy
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.storage import Store
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ai_orchestrator import (
@@ -219,6 +222,98 @@ async def test_cleanup_failure_is_retained_and_retried(hass, hass_storage):
     assert saved["enabled"] is True
     assert status_of(manager, WORKFLOW_A)["error"] is None
     assert status_of(manager, WORKFLOW_A)["active"] is True
+    assert manager.async_stop() is True
+
+
+async def test_read_failure_during_setup_keeps_the_foundation_loaded(
+    hass: HomeAssistant, hass_storage
+) -> None:
+    entry = MockConfigEntry(
+        domain=DOMAIN, data={}, unique_id=FOUNDATION_ENTRY_UNIQUE_ID
+    )
+    with (
+        patch(
+            "custom_components.ai_orchestrator.async_register_panel",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+        patch("custom_components.ai_orchestrator.async_unregister_panel", new=Mock()),
+        patch(
+            "homeassistant.helpers.storage.Store._async_load",
+            new=AsyncMock(side_effect=HomeAssistantError("private read failure")),
+        ),
+    ):
+        assert await async_setup_entry(hass, entry)
+        runtime = async_get_runtime(hass)
+        assert entry.entry_id in runtime.loaded_foundation_entry_ids
+        assert runtime.workflow_manager is not None
+        assert runtime.workflow_manager.status() == {
+            "store": STORE_UNREADABLE,
+            "workflows": [],
+        }
+        assert await async_unload_entry(hass, entry)
+
+
+async def test_mutation_finishing_after_stop_does_not_activate(hass, hass_storage):
+    seed(hass_storage, document(WORKFLOW_A, enabled=False))
+    manager = WorkflowManager(hass)
+    await manager.async_start()
+    original = Store._async_write_data
+    release = asyncio.Event()
+
+    async def blocked_write(self, data):
+        await release.wait()
+        await original(self, data)
+
+    with patch(
+        "homeassistant.helpers.storage.Store._async_write_data", new=blocked_write
+    ):
+        save = asyncio.ensure_future(manager.async_set_enabled(WORKFLOW_A, True))
+        await asyncio.sleep(0)
+        assert manager.async_stop() is True
+        release.set()
+        saved = await save
+    assert saved["enabled"] is True
+    assert hass_storage[STORAGE_KEY]["data"]["workflows"][0]["enabled"] is True
+    assert status_of(manager, WORKFLOW_A)["active"] is False
+    assert status_of(manager, WORKFLOW_A)["registrations"] == 0
+    await flip(hass)
+    assert status_of(manager, WORKFLOW_A)["observations"] == 0
+
+    # The next start reads the persisted enabled flag and activates normally.
+    await manager.async_start()
+    assert status_of(manager, WORKFLOW_A)["active"] is True
+    assert manager.async_stop() is True
+
+
+async def test_overlapping_saves_keep_observers_consistent_with_the_store(
+    hass, hass_storage
+):
+    manager = WorkflowManager(hass)
+    await manager.async_start()
+    original = Store._async_write_data
+
+    async def yielding_write(self, data):
+        await asyncio.sleep(0)
+        await original(self, data)
+
+    with patch(
+        "homeassistant.helpers.storage.Store._async_write_data", new=yielding_write
+    ):
+        await asyncio.gather(
+            manager.async_save(document(WORKFLOW_A)),
+            manager.async_save(document(WORKFLOW_B, entity="sensor.other")),
+        )
+    status = manager.status()
+    assert [item["workflow"]["workflow_id"] for item in status["workflows"]] == [
+        WORKFLOW_A,
+        WORKFLOW_B,
+    ]
+    assert all(item["status"]["active"] for item in status["workflows"])
+    await flip(hass, "sensor.synthetic")
+    await flip(hass, "sensor.other")
+    assert status_of(manager, WORKFLOW_A)["observations"] == 1
+    assert status_of(manager, WORKFLOW_B)["observations"] == 1
     assert manager.async_stop() is True
 
 

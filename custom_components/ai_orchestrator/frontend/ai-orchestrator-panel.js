@@ -2860,7 +2860,7 @@ var $t = "ai-orchestrator-workflows", en = {
 	}
 	_load = async () => {
 		let e = this.hass;
-		if (e === void 0 || e.connection?.connected === !1) return;
+		if (e === void 0 || e.connection?.connected === !1 || this._pending !== void 0) return;
 		let t = ++this._sequence;
 		this._viewState = "loading", this._error = "";
 		try {
@@ -2897,7 +2897,7 @@ var $t = "ai-orchestrator-workflows", en = {
 			if (!this._current(n, t)) return;
 			this._error = e.action === "observe" ? en.observe : en.mutate;
 		} finally {
-			this._current(n, t) && (this._pending = void 0);
+			this._pending === e && (this._pending = void 0);
 		}
 	}
 	_loadIntoEditor(e) {
@@ -2917,15 +2917,20 @@ var $t = "ai-orchestrator-workflows", en = {
           notification is sent, and no device action executes.
         </p>
         <div class="actions">
-          <button type="button" ?disabled=${this._viewState === "loading" || !this.hass} @click=${this._load}>
+          <button
+            type="button"
+            ?disabled=${this._viewState === "loading" || this._pending !== void 0 || !this.hass}
+            @click=${this._load}
+          >
             ${this._viewState === "loading" ? "Loading…" : "Reload workflows"}
           </button>
         </div>
         <div role="status" aria-live="polite">
           ${this._error ? w`<p class="error">${this._error}</p>` : E}
           ${this._store === "unreadable" ? w`<p class="notice error">
-                Stored workflows could not be read. Nothing on disk was changed and no workflow is
-                active; saving is refused until the storage file is repaired or restored.
+                The stored workflow file contains data this version cannot validate. Nothing on
+                disk was changed and no workflow is active; saving is refused until the file is
+                repaired or restored from a backup.
               </p>` : E}
         </div>
         ${this._renderList()}
@@ -3121,6 +3126,7 @@ var sn = class extends N {
 			let e = on(this.route);
 			e !== void 0 && (this._activeSection = e);
 		}
+		e.has("_activeSection") && this._activeSection !== "automations" && (this._draft = void 0);
 	}
 	_syncChatHeight() {
 		if (this._activeSection !== "chat") {
