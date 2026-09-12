@@ -31,9 +31,23 @@ function checks(value: unknown, max: number, reasons: string[]): value is Previe
     typeof item.passed === "boolean" && typeof item.reason === "string" && reasons.includes(item.reason) &&
     item.passed === (item.reason === "matched"));
 }
+export type WorkflowObservation = Omit<WorkflowPreview, "schema_version" | "mode"> & { mode: "observation_only" };
+const EVALUATION_KEYS = ["mode", "enabled", "triggered", "conditions_passed", "eligible", "trigger_results", "condition_results", "planned_steps", "provider_calls", "actions_executed"];
+function evaluation(value: unknown, mode: string, withSchema: boolean): value is Record<string, unknown> {
+  return record(value) && keys(value, withSchema ? ["schema_version", ...EVALUATION_KEYS] : EVALUATION_KEYS) &&
+    (!withSchema || value.schema_version === 1) && value.mode === mode;
+}
+/** Live observation recorded by an active stored workflow; same closed shape, no schema_version. */
+export function parseWorkflowObservation(value: unknown): WorkflowObservation {
+  if (!evaluation(value, "observation_only", false)) throw new PreviewContractError();
+  return parseEvaluation(value) as unknown as WorkflowObservation;
+}
 export function parseWorkflowPreview(value: unknown): WorkflowPreview {
-  if (!record(value) || !keys(value, ["schema_version", "mode", "enabled", "triggered", "conditions_passed", "eligible", "trigger_results", "condition_results", "planned_steps", "provider_calls", "actions_executed"]) ||
-    value.schema_version !== 1 || value.mode !== "offline" || typeof value.enabled !== "boolean" ||
+  if (!evaluation(value, "offline", true)) throw new PreviewContractError();
+  return parseEvaluation(value) as unknown as WorkflowPreview;
+}
+function parseEvaluation(value: Record<string, unknown>): Record<string, unknown> {
+  if (typeof value.enabled !== "boolean" ||
     typeof value.triggered !== "boolean" || typeof value.conditions_passed !== "boolean" || typeof value.eligible !== "boolean" ||
     value.provider_calls !== 0 || value.actions_executed !== 0 ||
     !checks(value.trigger_results, 10, ["matched", "event_kind_mismatch", "state_unchanged", "entity_not_selected", "target_state_mismatch", "time_mismatch"]) ||
@@ -44,7 +58,7 @@ export function parseWorkflowPreview(value: unknown): WorkflowPreview {
     value.conditions_passed !== value.condition_results.every((item) => item.passed) ||
     value.eligible !== (value.planned_steps.length > 0) ||
     (value.eligible && (!value.triggered || !value.conditions_passed))) throw new PreviewContractError();
-  return value as unknown as WorkflowPreview;
+  return value;
 }
 export async function previewWorkflow(hass: HomeAssistantLike, workflow: string, snapshot: string): Promise<WorkflowPreview> {
   if (!workflow.trim() || !snapshot.trim() || workflow.length > PREVIEW_INPUT_LIMIT || snapshot.length > PREVIEW_INPUT_LIMIT) throw new PreviewContractError();

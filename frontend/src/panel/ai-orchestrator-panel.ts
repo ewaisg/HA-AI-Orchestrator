@@ -22,6 +22,7 @@ import "./catalog-view";
 import "./providers-view";
 import "./chat-view";
 import "./workflow-preview-view";
+import "./workflows-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -101,6 +102,8 @@ export class AiOrchestratorPanel extends LitElement {
     _status: { state: true },
     _probeLoadState: { state: true },
     _probeResult: { state: true },
+    _workflowsRefresh: { state: true },
+    _draft: { state: true },
   };
 
   public static override styles = panelStyles;
@@ -115,6 +118,9 @@ export class AiOrchestratorPanel extends LitElement {
   private declare _status?: OrchestratorStatus;
   private declare _probeLoadState: ProbeLoadState;
   private declare _probeResult?: WorkflowProbeResult;
+  private declare _workflowsRefresh: number;
+  private declare _draft?: { json: string; sequence: number };
+  private _draftSequence = 0;
   private _hasRequested = false;
   private _requestSequence = 0;
 
@@ -124,6 +130,7 @@ export class AiOrchestratorPanel extends LitElement {
     this._activeSection = "home";
     this._loadState = "waiting";
     this._probeLoadState = "idle";
+    this._workflowsRefresh = 0;
   }
 
   public override disconnectedCallback(): void {
@@ -369,7 +376,18 @@ export class AiOrchestratorPanel extends LitElement {
 
   private _renderWorkflowProbe(): TemplateResult {
     return html`
-      <ai-orchestrator-workflow-preview .hass=${this.hass}></ai-orchestrator-workflow-preview>
+      <ai-orchestrator-workflow-preview
+        .hass=${this.hass}
+        .draft=${this._draft}
+        @workflow-saved=${() => { this._workflowsRefresh += 1; }}
+      ></ai-orchestrator-workflow-preview>
+      <ai-orchestrator-workflows
+        .hass=${this.hass}
+        .refreshToken=${this._workflowsRefresh}
+        @workflow-load=${(event: CustomEvent<{ json: string }>) => {
+          this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
+        }}
+      ></ai-orchestrator-workflows>
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>

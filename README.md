@@ -23,13 +23,15 @@ Provider/catalogue live acceptance and the Phase 1 release gate remain open.
 See the [chat candidate evidence](docs/evidence/2026-09-05-loc-006-local-chat.md)
 and tracker for exact checks and installation state.
 
-Visual workflows, notifications, entity/action permissions, Assist, cloud
-adapters and routing, persistent chat/audit storage, and security workflows are
-planned. The next product phase is the visual announcement workflow, after
-Phase 1 acceptance.
+Stored workflows (WFL-002) can be saved from the Automations editor and enabled;
+an enabled workflow watches its curated state/time triggers in Home Assistant
+and records whether its deterministic conditions passed. No workflow step runs
+yet. Visual workflow building, notification and AI steps, entity/action
+permissions, Assist, cloud adapters and routing, persistent chat/audit storage,
+and security workflows remain planned.
 
 - [Manual installation and current usage](docs/INSTALLATION.md)
-- [Preview a workflow in Automations or by command](docs/OFFLINE-WORKFLOW-PREVIEW.md)
+- [Preview, save, and observe a workflow in Automations](docs/OFFLINE-WORKFLOW-PREVIEW.md)
 
 - [Project tracker](docs/PROJECT-TRACKER.md)
 - [Product requirements](docs/PRODUCT-REQUIREMENTS.md)

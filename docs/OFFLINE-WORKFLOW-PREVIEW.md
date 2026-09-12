@@ -2,8 +2,9 @@
 
 WFL-002A adds a local command for evaluating a workflow against a supplied
 snapshot. It does not need Home Assistant or a provider connection. This command
-also has an administrator panel editor under **Automations** in the WFL-002C
-candidate. Neither entry point publishes or activates workflows.
+also has an administrator panel editor under **Automations**. Previewing never
+activates a workflow; saving and enabling one (WFL-002) is a separate explicit
+step described below.
 
 ## Use the panel
 
@@ -12,6 +13,22 @@ After installing the complete WFL-002C candidate, open **Automations**. The
 an explicitly labeled synthetic example, select **Preview**, and inspect the
 trigger/condition outcomes and planned step kinds. The daytime example should
 fail its evening condition. The existing lifecycle probe remains below the editor.
+
+## Save, enable, and observe
+
+**Save as workflow** validates the editor's workflow JSON on the backend and
+stores it; the saved document replaces the editor text in its normalized form.
+The **Stored workflows** list then shows it. Enable it to activate its triggers
+while the foundation entry is loaded. Each state change of a trigger entity, or
+each configured time, records an observation: whether a trigger matched, whether
+every condition passed, and which step kinds would have been planned. **Observe
+now** records one manual observation at the current time (only a manual trigger
+can match it). Counters and the latest outcome are shown per workflow; they reset
+when the workflow is saved again, disabled, or the foundation entry reloads.
+
+Observation is the whole runtime today. Steps are never executed, so an eligible
+outcome means "this workflow would have started", not that anything happened.
+Enabling a workflow that has no trigger or no step is refused.
 
 This is an offline draft editor, not a visual workflow builder. It reads no live
 household state and sends no data to an AI provider. JSON drafts stay in the open

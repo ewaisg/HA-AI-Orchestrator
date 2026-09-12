@@ -142,3 +142,12 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   browser regressions and an independent review was not supported by the
   repository: `d73890b` changed no test file and recorded no review. Regression
   tests and a recorded reviewer-agent approval now exist; live reproduction remains.
+
+## WFL-002 stored workflows
+
+- ENV-015: the WFL-002 candidate (stored workflows, activation, panel list) has
+  not been installed or observed on the owner's instance. Required: save a
+  workflow from the editor, enable it, observe a real state change or time
+  trigger recorded in the list, restart Core and confirm the workflow is active
+  again with counters reset, and confirm `.storage/ai_orchestrator.workflows`
+  survives. Consuming task: WFL-002. Simulated restart tests do not replace this.

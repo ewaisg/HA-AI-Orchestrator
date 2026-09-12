@@ -103,13 +103,29 @@ is available only when a provider entry is loaded. **Workflow runtime**,
 Conversation agent flag refers to the future native Assist integration, not
 the LOC-006 panel chat.
 
-The WFL-002C candidate adds **Workflow preview** to Automations. Administrators
-can load an explicitly synthetic example or enter workflow/snapshot JSON and
-inspect trigger/condition pass/fail results. The preview uses only the supplied
-snapshot, makes no provider calls and executes no actions. Drafts are not saved.
-See [the preview guide](OFFLINE-WORKFLOW-PREVIEW.md) for limits and examples.
-A successful offline preview does not establish live trigger or notification
-behavior; the Home page's Workflow runtime flag stays unavailable.
+**Workflow preview** in Automations lets administrators load an explicitly
+synthetic example or enter workflow/snapshot JSON and inspect trigger/condition
+pass/fail results. The preview uses only the supplied snapshot, makes no
+provider calls and executes no actions.
+
+**Save as workflow** stores the editor's workflow document in Home Assistant's
+integration storage (`.storage/ai_orchestrator.workflows`, written through the
+Store helper with atomic writes; at most 50 workflows). The **Stored workflows**
+list below the editor shows each document with Enable/Disable, Observe now,
+Load into editor, and a two-step Delete. An enabled workflow is activated while
+the foundation entry is loaded: it listens to the entities named by its state
+triggers and to its time triggers, reads only the entities named by its
+conditions, and records a redacted outcome (triggered, conditions passed,
+planned step kinds) plus counters. Nothing else happens: no text is generated,
+no notification is sent, and no Home Assistant action is called. Restarting
+Core or reloading the foundation entry re-reads the stored documents and
+re-activates the enabled ones. See [the preview guide](OFFLINE-WORKFLOW-PREVIEW.md).
+
+If the list reports that stored workflows could not be read, the storage file
+contains a document the installed version cannot validate. Nothing is rewritten
+and no workflow is active; restore the file from a backup or remove it after
+copying it aside. The Home page's Workflow runtime flag stays unavailable until
+step execution exists.
 
 The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded
 test fires one integration-owned internal event and increments an in-memory

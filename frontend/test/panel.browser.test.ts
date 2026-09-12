@@ -1,3 +1,4 @@
+import type { LitElement } from "lit";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { AiOrchestratorPanel, type CatalogView, PANEL_TAG } from "../src/entry";
@@ -8,6 +9,7 @@ import {
   FOUNDATION_STATUS,
   FOUNDATION_WORKFLOW_PROBE_RESULT,
 } from "./fixtures/fake-hass";
+import { EMPTY_LIST, STORED_WORKFLOW, WORKFLOW_LIST } from "./fixtures/workflows";
 
 const mounted: AiOrchestratorPanel[] = [];
 
@@ -167,6 +169,7 @@ describe("AI Orchestrator panel shell", () => {
         {
           "ai_orchestrator/status": FOUNDATION_STATUS,
           "ai_orchestrator/workflow/probe/run": FOUNDATION_WORKFLOW_PROBE_RESULT,
+          "ai_orchestrator/workflows/list": EMPTY_LIST,
         },
         (message) => requestTypes.push(message.type),
       ),
@@ -185,13 +188,63 @@ describe("AI Orchestrator panel shell", () => {
     await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
     await panel.updateComplete;
 
-    expect(requestTypes).toEqual([
+    // The stored-workflows list load and the probe click race across microtasks.
+    expect([...requestTypes].sort()).toEqual([
       "ai_orchestrator/status",
       "ai_orchestrator/workflow/probe/run",
+      "ai_orchestrator/workflows/list",
     ]);
     expect(shadowText(panel)).toContain("One trigger produced exactly one execution");
     expect(shadowText(panel)).toContain("Provider contacted: no");
     expect(shadowText(panel)).toContain("Home Assistant action called: no");
+  });
+
+  it("wires the stored workflows list to the editor in Automations", async () => {
+    const requestTypes: unknown[] = [];
+    const panel = await mountPanel(
+      createRoutedFakeHass(
+        {
+          "ai_orchestrator/status": FOUNDATION_STATUS,
+          "ai_orchestrator/workflows/list": WORKFLOW_LIST,
+          "ai_orchestrator/workflows/save": { ...WORKFLOW_LIST, workflow: STORED_WORKFLOW },
+        },
+        (message) => requestTypes.push(message.type),
+      ),
+    );
+    const automationButton = [
+      ...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? []),
+    ].find((button) => button.textContent?.includes("Automations"));
+    automationButton?.click();
+    await panel.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    const workflows = panel.shadowRoot?.querySelector("ai-orchestrator-workflows") as LitElement | null;
+    const editor = panel.shadowRoot?.querySelector("ai-orchestrator-workflow-preview") as LitElement | null;
+    expect(workflows).not.toBeNull();
+    expect(editor).not.toBeNull();
+    await workflows!.updateComplete;
+    expect(workflows!.shadowRoot?.textContent).toContain("Synthetic evening window");
+
+    const load = [...workflows!.shadowRoot!.querySelectorAll("button")].find((b) =>
+      b.textContent?.includes("Load into editor"),
+    );
+    load?.click();
+    await panel.updateComplete;
+    await editor!.updateComplete;
+    const textarea = editor!.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow");
+    expect(JSON.parse(textarea!.value)).toEqual(STORED_WORKFLOW);
+
+    const listCalls = () => requestTypes.filter((t) => t === "ai_orchestrator/workflows/list").length;
+    const before = listCalls();
+    const save = [...editor!.shadowRoot!.querySelectorAll("button")].find((b) =>
+      b.textContent?.includes("Save as workflow"),
+    );
+    save?.click();
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await panel.updateComplete;
+    await workflows!.updateComplete;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(requestTypes).toContain("ai_orchestrator/workflows/save");
+    expect(listCalls()).toBe(before + 1);
   });
 
   it("renders a bounded failure without exposing malformed probe content", async () => {

@@ -5,6 +5,7 @@ import { WORKFLOW_PREVIEW_TAG, type WorkflowPreviewView } from "../src/panel/wor
 import type { HomeAssistantLike } from "../src/ha/hass-contract";
 import { createRoutedFakeHass } from "./fixtures/fake-hass";
 import { VALID_PREVIEW } from "./fixtures/workflow-preview";
+import { STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
 
 const mounted: WorkflowPreviewView[] = [];
 async function settle(view: WorkflowPreviewView): Promise<void> { await view.updateComplete; await new Promise<void>((resolve) => setTimeout(resolve, 0)); await view.updateComplete; }
@@ -71,6 +72,40 @@ describe("offline workflow editor", () => {
     button(view, "evening").click(); await settle(view); button(view, "Preview workflow").click(); await settle(view);
     expect(disconnect).toBeTypeOf("function"); disconnect?.(); resolve(VALID_PREVIEW); await settle(view);
     expect(text(view)).not.toContain("Scenario passes"); expect(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value).toBe("");
+  });
+  it("saves the edited workflow only on explicit request and announces it", async () => {
+    const requests: Record<string, unknown>[] = [];
+    const savedEvents: Event[] = [];
+    const view = await mount(createRoutedFakeHass({
+      "ai_orchestrator/workflow/preview": VALID_PREVIEW,
+      "ai_orchestrator/workflows/save": { ...WORKFLOW_LIST, workflow: { ...STORED_WORKFLOW, enabled: false } },
+    }, (message) => requests.push(message)));
+    view.addEventListener("workflow-saved", (event) => savedEvents.push(event));
+    expect(button(view, "Save as workflow").disabled).toBe(true);
+    button(view, "evening").click(); await settle(view);
+    expect(requests).toEqual([]);
+    button(view, "Save as workflow").click(); await settle(view);
+    expect(requests).toHaveLength(1);
+    expect(requests[0]!.type).toBe("ai_orchestrator/workflows/save");
+    expect(JSON.parse(requests[0]!.workflow_json as string).workflow_id).toBe(STORED_WORKFLOW_ID);
+    expect(text(view)).toContain("Workflow saved");
+    expect(savedEvents).toHaveLength(1);
+    expect(JSON.parse(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value).enabled).toBe(false);
+  });
+  it("reports a failed save statically and keeps the draft", async () => {
+    const view = await mount({ callWS: async () => { throw new Error("private-secret"); } });
+    button(view, "evening").click(); await settle(view);
+    button(view, "Save as workflow").click(); await settle(view);
+    expect(text(view)).toContain("The workflow could not be saved");
+    expect(text(view)).not.toContain("private-secret");
+    expect(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value).not.toBe("");
+  });
+  it("loads a stored document handed in as a draft, replacing the editor text", async () => {
+    const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflow/preview": VALID_PREVIEW }));
+    button(view, "evening").click(); await settle(view);
+    view.draft = { json: JSON.stringify(STORED_WORKFLOW), sequence: 1 }; await settle(view);
+    expect(JSON.parse(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#workflow")!.value)).toEqual(STORED_WORKFLOW);
+    expect(text(view)).not.toContain("Scenario passes");
   });
   it("fits a 390px container and has accessible controls", async () => {
     const view = await mount(); view.style.width = "390px"; view.style.fontFamily = "Arial, sans-serif";
