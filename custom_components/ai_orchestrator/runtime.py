@@ -36,6 +36,8 @@ class AIOrchestratorRuntime:
     provider_test_in_progress_connection_ids: set[str] = field(default_factory=set)
     provider_test_statuses: dict[str, ProviderTestStatus] = field(default_factory=dict)
     chat_in_progress: dict[str, PendingChat] = field(default_factory=dict)
+    # Provider entries that forwarded the conversation entity platform.
+    conversation_entry_ids: set[str] = field(default_factory=set)
     chat_recent_requests: dict[tuple[str, str], float] = field(default_factory=dict)
     owns_panel: bool = False
     workflow_probe_unsubscribe: Callable[[], None] | None = None

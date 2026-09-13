@@ -63,7 +63,8 @@ def _canonical_uuid(value: str) -> str:
     return value
 
 
-def _text_length(value: str) -> int:
+def text_length(value: str) -> int:
+    """Return the UTF-16 code-unit length a browser and a model both count."""
     return len(value.encode("utf-16-le", errors="surrogatepass")) // 2
 
 
@@ -85,10 +86,10 @@ def _messages(value: object) -> tuple[Message, ...]:
             or item["role"] != expected_role
             or type(item["content"]) is not str
             or not item["content"].strip()
-            or _text_length(item["content"]) > CHAT_LIMITS["max_message_chars"]
+            or text_length(item["content"]) > CHAT_LIMITS["max_message_chars"]
         ):
             raise vol.Invalid("Invalid conversation message")
-        total += _text_length(item["content"])
+        total += text_length(item["content"])
         result.append(Message(role=MessageRole(expected_role), content=item["content"]))
     if total > CHAT_LIMITS["max_total_chars"]:
         raise vol.Invalid("Conversation is too long")
@@ -244,7 +245,7 @@ async def websocket_chat_send(
             type(result) is not TextGenerationResult
             or type(result.text) is not str
             or not result.text.strip()
-            or _text_length(result.text) > CHAT_LIMITS["max_response_chars"]
+            or text_length(result.text) > CHAT_LIMITS["max_response_chars"]
             or result.tool_calls
             or result.structured_output is not None
         ):

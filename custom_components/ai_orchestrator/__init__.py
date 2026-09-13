@@ -1,8 +1,9 @@
 """AI Orchestrator Home Assistant integration."""
 
-from typing import NoReturn
+from typing import Final, NoReturn
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import (
     ConfigEntryAuthFailed,
@@ -20,6 +21,7 @@ from .panel import (
     async_unregister_panel,
 )
 from .provider_entry import (
+    ChatDestination,
     LoadedProviderConnection,
     async_register_provider_entry_adapter,
     copy_provider_config,
@@ -51,6 +53,9 @@ from .workflow_probe import (
 )
 
 type AIOrchestratorConfigEntry = ConfigEntry[LoadedProviderConnection | None]
+
+# The conversation entity is the only entity platform this integration owns.
+PROVIDER_PLATFORMS: Final = (Platform.CONVERSATION,)
 
 _TRANSIENT_SETUP_ERRORS = {
     ErrorCode.CONNECTION,
@@ -108,6 +113,12 @@ async def async_unload_entry(
     runtime = async_get_runtime(hass)
     if entry.unique_id != FOUNDATION_ENTRY_UNIQUE_ID:
         loaded = getattr(entry, "runtime_data", None)
+        if entry.entry_id in runtime.conversation_entry_ids:
+            if not await hass.config_entries.async_unload_platforms(
+                entry, PROVIDER_PLATFORMS
+            ):
+                return False
+            runtime.conversation_entry_ids.discard(entry.entry_id)
         if isinstance(loaded, LoadedProviderConnection):
             runtime.provider_test_statuses.pop(loaded.connection_id, None)
         runtime.loaded_provider_entry_ids.discard(entry.entry_id)
@@ -188,6 +199,9 @@ async def _async_setup_provider_entry(
     )
     runtime.provider_test_statuses.pop(parsed.connection_id, None)
     runtime.loaded_provider_entry_ids.add(entry.entry_id)
+    if getattr(adapter, "chat_destination", None) is ChatDestination.LOCAL:
+        await hass.config_entries.async_forward_entry_setups(entry, PROVIDER_PLATFORMS)
+        runtime.conversation_entry_ids.add(entry.entry_id)
     return True
 
 

@@ -5,7 +5,7 @@ HA AI Orchestrator is a private Home Assistant product for configuring local and
 ## Current state
 
 The repository implements, and the owner's Home Assistant runs live (Core
-2026.9.2, r9 candidate):
+2026.9.2, r10 candidate):
 
 - Config-entry lifecycle, authenticated LM Studio connections, provider setup
   and connection testing, a read-only entity/device/area catalogue (bounded
@@ -13,6 +13,11 @@ The repository implements, and the owner's Home Assistant runs live (Core
   TypeScript/Lit panel served at a content-addressed path.
 - Administrator chat with a local provider (bounded, no household context, no
   tools, not persisted).
+- One Assist conversation agent per local provider connection. It answers with
+  model text only: the conversation's own turns go to the model, nothing else
+  does, no tool is offered, and it is never presented as a device-control agent.
+  Select it in Settings, then Voice assistants. Home Assistant's own assistant
+  still handles device commands.
 - Workflows (closed v1 schema, Home Assistant `Store` persistence): a
   structured builder with pickers backed by the real catalogue, discovered
   notification targets and loaded providers; a JSON editor with offline
@@ -25,8 +30,9 @@ The repository implements, and the owner's Home Assistant runs live (Core
   failure stops, evidence is redacted.
 
 Only the notify namespace can be called. Nothing runs live unless a workflow
-is saved with `run_mode: execute` and enabled. Cloud providers, Assist,
-persistent chat, routing policies and security workflows remain planned.
+is saved with `run_mode: execute` and enabled. Cloud providers, agent scopes,
+AI tool calling, persistent chat, routing policies and security workflows
+remain planned.
 The Phase 1 release gate (LOC-007) and the Phase 2 gate (WFL-008) are open;
 the tracker records exactly what has live evidence.
 

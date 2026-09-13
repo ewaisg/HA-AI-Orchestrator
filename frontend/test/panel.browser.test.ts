@@ -44,6 +44,37 @@ describe("AI Orchestrator panel shell", () => {
     expect(shadowText(panel)).toContain("Not available");
   });
 
+  it("describes the Assist agent only when the backend reports one", async () => {
+    const panel = await mountPanel();
+    const open = (): void => {
+      const button = [...(panel.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? [])].find(
+        (item) => item.textContent?.includes("Voice"),
+      );
+      button?.click();
+    };
+    open();
+    await panel.updateComplete;
+    expect(shadowText(panel)).toContain("Voice and notification setup is not active yet");
+
+    const withAgent = await mountPanel(
+      createFakeHass({
+        ...FOUNDATION_STATUS,
+        configured: true,
+        features: { ...FOUNDATION_STATUS.features, providers: true, conversation: true },
+      }),
+    );
+    [...(withAgent.shadowRoot?.querySelectorAll<HTMLButtonElement>(".nav-button") ?? [])]
+      .find((item) => item.textContent?.includes("Voice"))
+      ?.click();
+    await withAgent.updateComplete;
+
+    const text = shadowText(withAgent);
+    expect(text).toContain("Conversation agent");
+    expect(text).toContain("Settings, then Voice assistants");
+    expect(text).toContain("no way to call a Home Assistant action");
+    expect(text).not.toContain("Voice and notification setup is not active yet");
+  });
+
   it("does not treat unknown status values as healthy", async () => {
     const panel = await mountPanel(
       createFakeHass({ ...FOUNDATION_STATUS, schema_version: 99 }),

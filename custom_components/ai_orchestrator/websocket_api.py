@@ -75,7 +75,7 @@ def websocket_status(
             "features": {
                 "providers": bool(runtime.loaded_provider_entry_ids),
                 "workflows": False,
-                "conversation": False,
+                "conversation": bool(runtime.conversation_entry_ids),
                 "ai_task": False,
             },
         },

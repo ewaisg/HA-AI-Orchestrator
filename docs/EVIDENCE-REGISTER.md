@@ -169,3 +169,12 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   17 targets (phone/tablet notify entities, Echo `announce`/`speak` entities,
   legacy `mobile_app_*` services). Agents must not pick a household device to
   notify on their own. Consuming tasks: WFL-004, WFL-007.
+
+## AST-001 Assist acceptance
+
+- The conversation entity has automated evidence only. Live acceptance needs the
+  owner to select the agent in Settings, then Voice assistants, as the
+  conversation agent of a pipeline, send one sentence through it, and (for the
+  tracker's stated evidence) run one voice pipeline that uses it. No household
+  device, pipeline or satellite is chosen by an agent. Consuming tasks: AST-001,
+  AST-006.

@@ -383,6 +383,7 @@ async def test_provider_entry_setup_and_unload_are_isolated_from_foundation(
 
 async def test_lm_studio_unload_drops_provider_without_closing_shared_session(
     hass: HomeAssistant,
+    enable_custom_integrations: None,
 ) -> None:
     """LM Studio connections reuse and never own Home Assistant's session."""
     connection_id = "00000000-0000-4000-8000-00000000001c"
@@ -413,12 +414,18 @@ async def test_lm_studio_unload_drops_provider_without_closing_shared_session(
             )
         ),
     ) as validate:
-        assert await async_setup_entry(hass, entry)
+        # The conversation platform is forwarded from setup, which Home
+        # Assistant's own manager must drive so the entry holds its setup lock.
+        entry.add_to_hass(hass)
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
         assert entry.runtime_data is not None
         assert entry.runtime_data.provider.session is shared_session
-        assert await async_unload_entry(hass, entry)
-        assert entry.runtime_data is None
-        assert await async_setup_entry(hass, entry)
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        await hass.async_block_till_done()
+        assert getattr(entry, "runtime_data", None) is None
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
 
     assert validate.await_count == 2
     shared_session.close.assert_not_called()

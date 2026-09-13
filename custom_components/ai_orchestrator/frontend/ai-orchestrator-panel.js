@@ -3980,7 +3980,7 @@ var Gn = class extends k {
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : e ? S`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._renderPlaceholder(this._activeSection)}
+            ${this._activeSection === "home" ? this._renderHome() : this._activeSection === "automations" ? this._renderWorkflowProbe() : e ? S`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>` : this._activeSection === "providers" ? this._renderProviders() : this._activeSection === "permissions" ? this._renderCatalog() : this._activeSection === "voice" && this._status?.features.conversation === !0 ? this._renderVoice() : this._renderPlaceholder(this._activeSection)}
           </div>
         </main>
       </div>
@@ -4113,6 +4113,34 @@ var Gn = class extends k {
             Entity and action choices will come from live registries and begin with no AI access.
           </li>
         </ol>
+      </section>
+    `;
+	}
+	_renderVoice() {
+		return S`
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Voice &amp; Notifications</p>
+          <h1>Voice &amp; Notifications</h1>
+        </div>
+        <span class="phase-badge">Assist agent available</span>
+      </header>
+      <section class="card" aria-labelledby="voice-agent-title">
+        <h2 id="voice-agent-title">Conversation agent</h2>
+        <p>
+          Each connected local provider adds one conversation agent to Home Assistant. Choose it in
+          Settings, then Voice assistants, as the conversation agent of an Assist pipeline. It answers
+          by text through whichever pipeline you attach it to, including a voice pipeline.
+        </p>
+        <p>
+          The agent replies with model text only. It receives the words of the conversation and nothing
+          else: no entity states, no tools, and no way to call a Home Assistant action. Keep Home
+          Assistant's own assistant for device commands.
+        </p>
+        <p>
+          Notification delivery is separate: workflows in execute mode send to a notification target you
+          choose in the Automations section.
+        </p>
       </section>
     `;
 	}
