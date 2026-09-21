@@ -1,7 +1,7 @@
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { fetchChatOptions, type ChatProvider } from "../api/chat-client";
 import { fetchNotifyTargets, type NotifyTarget } from "../api/notify-client";
-import { saveWorkflow } from "../api/workflow-client";
+import { saveWorkflow, parseStoredWorkflow } from "../api/workflow-client";
 import { DRY_RUN_ERRORS, dryRunWorkflow, type DryRunResult, type DryRunStep } from "../api/workflow-dry-run-client";
 import { PREVIEW_INPUT_LIMIT, PREVIEW_REASONS, previewWorkflow, type WorkflowPreview } from "../api/workflow-preview-client";
 import type { HomeAssistantLike } from "../ha/hass-contract";
@@ -14,7 +14,7 @@ const EXAMPLE = {
   conditions: [{ kind: "time_window", after_time: "18:00", before_time: "06:00" }, { kind: "state", entity_id: "binary_sensor.synthetic_window", state: "on" }],
   steps: [{ step_id: "compose", kind: "ai_compose", prompt: "Write a short window reminder." }, { step_id: "notify", kind: "notify", notify_service: "notify.synthetic" }],
 };
-const KIND_LABELS = { ai_compose: "Compose text", ai_classify: "Classify text", ai_extract: "Extract values", branch: "Branch", notify: "Notification" };
+const KIND_LABELS = { ai_compose: "Compose text", ai_classify: "Classify text", ai_extract: "Extract values", branch: "Branch", notify: "Notification", light_control: "Light control" };
 const DRY_RUN_MESSAGES: Record<string, string> = {
   workflow_not_found: "Save the workflow first; a dry run uses the stored version.",
   dry_run_provider_unavailable: "Select an available local provider.",
@@ -63,14 +63,17 @@ export class WorkflowPreviewView extends LitElement {
   public override connectedCallback(): void { super.connectedCallback(); this._connection?.addEventListener("disconnected", this._reset); }
   public override disconnectedCallback(): void { this._unbind(); this._reset(); super.disconnectedCallback(); }
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has("draft") && this.draft !== undefined) { this._invalidate(); this._workflow = this.draft.json; }
-    if (!changed.has("hass")) return;
-    if (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS) {
+    const firstSession = this._callWS === undefined;
+    const sessionChanged = changed.has("hass") && (this._connection !== this.hass?.connection || this._userId !== this.hass?.user?.id || this._callWS !== this.hass?.callWS);
+    if (sessionChanged) {
       this._unbind(); this._reset(); this._connection = this.hass?.connection; this._userId = this.hass?.user?.id; this._callWS = this.hass?.callWS;
       this._connection?.addEventListener("disconnected", this._reset);
       this._lookupSequence++; this._providers = []; this._connectionId = ""; this._targets = [];
       void this._loadProviders();
       void this._loadTargets();
+    }
+    if (changed.has("draft") && this.draft !== undefined && (!sessionChanged || firstSession)) {
+      this._invalidate(); this._workflow = this.draft.json;
     }
   }
   /** Local providers eligible for an explicit trial; a failed lookup simply disables the dry run. */
@@ -100,10 +103,11 @@ export class WorkflowPreviewView extends LitElement {
     try { const id = (JSON.parse(this._workflow) as { workflow_id?: unknown }).workflow_id; return typeof id === "string" && UUID.test(id) ? id : undefined; } catch { return undefined; }
   }
   private _canDryRun(): boolean {
-    return !this._busy && !!this.hass && this.hass.connection?.connected !== false && !!this._snapshot.trim() && this._storedWorkflowId() !== undefined && this._providers.some((p) => p.connection_id === this._connectionId);
+    return !this._busy && !!this.hass && this.hass.connection?.connected !== false && !!this._snapshot.trim() && this._storedWorkflowId() !== undefined && (this._lightOnly() || this._providers.some((p) => p.connection_id === this._connectionId));
   }
+  private _lightOnly(): boolean { try { const workflow=parseStoredWorkflow(JSON.parse(this._workflow));return workflow.steps.length===1&&workflow.steps[0]?.kind==="light_control"; } catch { return false; } }
   private readonly _runDry = async (): Promise<void> => {
-    const hass = this.hass; const workflowId = this._storedWorkflowId(); const connectionId = this._connectionId;
+    const hass = this.hass; const workflowId = this._storedWorkflowId(); const connectionId = this._lightOnly()?null:this._connectionId;
     if (!this._canDryRun() || !hass || workflowId === undefined) return;
     this._invalidate(); this._busy = true; const sequence = this._sequence;
     const current = (): boolean => sequence === this._sequence && this.isConnected && this.hass?.callWS === hass.callWS && this.hass?.connection === hass.connection && this.hass?.user?.id === hass.user?.id;
@@ -142,13 +146,15 @@ export class WorkflowPreviewView extends LitElement {
       if (!current()) return;
       this._workflow = JSON.stringify(saved.workflow, null, 2); this._saved = true;
       this.dispatchEvent(new CustomEvent("workflow-saved", { bubbles: true, composed: true }));
-    } catch { if (current()) this._error = "The workflow could not be saved. Check the workflow JSON, administrator access, and the installed integration version."; }
+    } catch (error: unknown) { if (current()) this._error = typeof error === "object" && error !== null && "code" in error && error.code === "workflow_dry_run_required"
+      ? "Save with enabled set to false, dry run this exact workflow successfully, then enable it in the stored list."
+      : "The workflow could not be saved. Check the workflow JSON, administrator access, and the installed integration version."; }
     finally { if (current()) this._busy = false; }
   };
   protected override render(): TemplateResult {
     return html`<section aria-labelledby="preview-title">
       <h1 id="preview-title">Workflow preview</h1>
-      <p>Experimental offline JSON editor. Test a draft against a supplied snapshot: previewing reads no live home state, contacts no provider, and executes no action. "Save as workflow" stores the workflow document in Home Assistant; an enabled saved workflow then watches its triggers and records outcomes without running any step.</p>
+      <p>Test a draft against a supplied snapshot. Preview contacts no provider and executes no action. Save an execute workflow disabled, dry run it successfully with its configured provider, then enable it in the stored list. Changing the workflow requires another dry run. Observe mode never runs steps.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
       <div class="actions"><button type="button" @click=${() => this._example(false)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(true)}>Load synthetic daytime example</button></div>
       <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${PREVIEW_INPUT_LIMIT} .value=${this._workflow} @input=${(event: Event) => this._edit(event, true)}></textarea></div>
@@ -156,16 +162,16 @@ export class WorkflowPreviewView extends LitElement {
       <div class="actions"><button class="primary" type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === false || !this._workflow.trim() || !this._snapshot.trim()} @click=${this._preview}>${this._busy ? "Previewing…" : "Preview workflow"}</button><button type="button" ?disabled=${this._busy || !this.hass || this.hass.connection?.connected === false || !this._workflow.trim()} @click=${this._save}>${this._busy ? "Working…" : "Save as workflow"}</button><button type="button" @click=${this._reset}>Reset preview</button></div>
       <div class="actions">
         <label for="dry-run-provider">Local provider for a dry run</label>
-        <select id="dry-run-provider" ?disabled=${this._busy || this._providers.length === 0} .value=${this._connectionId} @change=${(event: Event) => { this._invalidate(); this._connectionId = (event.target as HTMLSelectElement).value; }}>
+        <select id="dry-run-provider" ?disabled=${this._busy || this._lightOnly() || this._providers.length === 0} .value=${this._connectionId} @change=${(event: Event) => { this._invalidate(); this._connectionId = (event.target as HTMLSelectElement).value; }}>
           ${this._providers.length === 0 ? html`<option value="">No local provider available</option>` : this._providers.map((provider) => html`<option value=${provider.connection_id} ?selected=${provider.connection_id === this._connectionId}>${provider.title}</option>`)}
         </select>
-        <button id="dry-run" type="button" ?disabled=${!this._canDryRun()} @click=${this._runDry}>${this._busy ? "Working…" : "Dry run AI steps"}</button>
+        <button id="dry-run" type="button" ?disabled=${!this._canDryRun()} @click=${this._runDry}>${this._busy ? "Working…" : this._lightOnly()?"Dry run light workflow":"Dry run AI steps"}</button>
       </div>
       <details><summary>Notification targets found in Home Assistant (${this._targets.length})</summary>
         ${this._targets.length ? html`<ul>${this._targets.map((target) => html`<li><code>${target.reference}</code> — ${target.name} (notify ${target.kind})</li>`)}</ul>` : html`<p>No notify entity or notify service was found, or discovery is unavailable.</p>`}
         <p>Use one of these references as a notify step's <code>notify_service</code>. To run a workflow live, set <code>"run_mode": "execute"</code> and, for AI steps, <code>"provider_connection_id"</code> to a local provider, then save and enable it.</p>
       </details>
-      <p>A dry run evaluates the <em>stored</em> workflow against the snapshot above, then runs its AI steps once against the selected local provider. The model sees only the step prompt, the event, the time, and the states of entities named by the workflow's conditions. Notifications are only planned; nothing is sent, stored, or executed.</p>
+      <p>A dry run evaluates the <em>stored</em> workflow against the snapshot above. For AI workflows it calls the selected local provider. A light-only workflow uses no provider and requires separately reviewed unattended permission first. No device or notification action runs. A successful eligible dry run records a publication receipt; enable separately.</p>
       <div role="status" aria-live="polite">${this._error ? html`<p class="error">${this._error}</p>` : nothing}${this._saved ? html`<p>Workflow saved. It appears in the stored workflows list below.</p>` : nothing}${this._busy ? html`<p>Working…</p>` : nothing}${this._result ? this._renderResult(this._result) : nothing}${this._dryRun ? this._renderDryRun(this._dryRun) : nothing}</div>
     </section>`;
   }
@@ -187,6 +193,7 @@ export class WorkflowPreviewView extends LitElement {
   }
   private _renderDryRunStep(step: DryRunStep): TemplateResult {
     const label = KIND_LABELS[step.kind];
+    if(step.kind==="light_control"&&step.status==="planned")return html`<li>Light control — ${step.operation==="turn_on"?"turn on":"turn off"}, planned only; no action executed.</li>`;
     if (step.status === "ok" && step.text !== undefined) return html`<li>${label} — composed:<div class="composed">${step.text}</div></li>`;
     if (step.status === "ok" && step.values !== undefined) return html`<li>${label} — values: ${Object.entries(step.values).map(([name, item]) => `${name} = ${String(item)}`).join(", ")}</li>`;
     if (step.status === "ok") return html`<li>${label} — category: ${step.category}</li>`;

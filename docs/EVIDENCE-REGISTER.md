@@ -178,3 +178,43 @@ Record the source, date, and scope of the evidence. If a value can drift, add a 
   tracker's stated evidence) run one voice pipeline that uses it. No household
   device, pipeline or satellite is chosen by an agent. Consuming tasks: AST-001,
   AST-006.
+
+## September 20 build inputs
+
+- COMP-001: live About page reports **Core 2026.9.3, Supervisor 2026.09.2,
+  OS 18.3, Frontend 20260826.7**. Existing 2026.9.2 test results do not cover
+  the newly observed Core. A separate 2026.9.3 environment and full suite are
+  required before installing this candidate; compatibility is not assumed.
+
+- ENV-004/005/006 remain unresolved for the new session. Questions were sent
+  for the exact window/notification target, initial device-action scope, and
+  available Azure/Bedrock account/deployment information. No answer has yet
+  been recorded. Consuming tasks: WFL-007, AST-004, CLD-001 through CLD-004.
+- Authenticated Chrome access to the existing panel was observed; conversation
+  was reported unavailable. This is not evidence that r11 or the current working
+  source has been installed. See `evidence/2026-09-20-build-review.md`.
+
+## September 20 window workflow update
+
+- ENV-004/WFL-007: owner selected the dining-room window and confirmed both
+  phone names discovered from the live notification catalogue. Exact IDs were
+  verified in Home Assistant and saved in its workflow. Target selection is
+  resolved. Owner subsequently reported opening and closing; the live workflow
+  recorded one completed execution, one provider call, two successful notification
+  calls and zero failures. Receipt on both handsets is still unverified.
+- r12 installation and local chat/tool smoke checks supersede the earlier
+  installation uncertainty above; see `evidence/2026-09-20-r12-manual-install.md`.
+- Workflow preview and local AI dry run passed; workflow is active with one
+  listener. See `evidence/2026-09-20-window-phone-workflow.md`. A synthetic
+  dry run is not evidence of live notification delivery. WFL-008 restart
+  persistence and the separate ENV-005/006 questions remain unresolved.
+
+- WFL-007 isolated retest: Fold8Ultra receipt is owner-confirmed; the original Android/iPhone are explicitly unchecked. Live execution completed with three successful notification calls. Both temporarily disabled native automations were restored ON and verified. See the window-phone-workflow evidence above.
+
+## September 20 r13 live assistant checks
+
+r13 installed as44 verified files with code/storage backup, restarted and panel recovered. Provider test/text chat and synthetic tool continuation passed. A scoped question used one granted dining-room window state and returned off with2providercalls/1stateread/0actions. AST002/003/005 live evidence: `evidence/2026-09-20-r13-build.md`. AST004 physical safe-light selection remains pending. WFL008 automatic startup activation defect found; manual reactivation restored1listener using existing receipt. WFL005 two AI draft attempts failed validation or transport; exact cause unknown until normalized error feedback is deployed.
+
+## September 20 r14/r15 live findings
+
+WFL-008 automatic recovery is verified after both r14 and r15 full Core restarts: the existing window workflow became Active without manual re-enabling. r15 installed all 48 byte-verified files and loaded the durable action-history endpoint/UI with an empty history; actual action persistence awaits AST-004 physical testing. WFL-005 now identifies the live drafting failure as invalid JSON, not an inferred provider outage. The next candidate requests structured output; actual selected-model support for its nested optional-field schema remains unknown until the next live generation test. See `evidence/2026-09-20-r15-exact-gate.md` and `evidence/2026-09-20-structured-draft-independent-review.md`.

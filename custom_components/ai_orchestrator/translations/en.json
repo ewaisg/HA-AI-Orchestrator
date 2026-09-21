@@ -17,38 +17,48 @@
         "title": "Configure provider connection",
         "description": "Configuration is validated by the selected backend adapter before it is saved.",
         "data": {
-          "base_url": "LM Studio API base URL",
+          "base_url": "Provider API base URL",
           "api_token": "LM Studio API token",
-          "model_id": "LM Studio model identifier"
+          "model_id": "LM Studio model identifier",
+          "api_key": "Azure OpenAI API key",
+          "deployment_id": "Azure deployment name"
         },
         "data_description": {
-          "base_url": "Enter the private-LAN IP base URL ending in /v1.",
+          "base_url": "LM Studio: private LAN IP URL ending in /v1. Azure: HTTPS resource endpoint under openai.azure.com or services.ai.azure.com.",
           "api_token": "Enter only the token value; do not include Bearer.",
-          "model_id": "Enter an exact model identifier returned by LM Studio."
+          "model_id": "Enter an exact model identifier returned by LM Studio.",
+          "api_key": "Enter the Azure resource key. Stored credentials are never returned to this form.",
+          "deployment_id": "Enter the exact deployment name from your Azure resource. The endpoint test does not verify deployment generation."
         }
       },
       "reauth_confirm": {
         "title": "Reauthenticate provider",
         "description": "Enter replacement authentication details.",
         "data": {
-          "api_token": "LM Studio API token"
+          "api_token": "LM Studio API token",
+          "api_key": "Azure OpenAI API key"
         },
         "data_description": {
-          "api_token": "Enter only the replacement token value; do not include Bearer."
+          "api_token": "Enter only the replacement token value; do not include Bearer.",
+          "api_key": "Enter the replacement resource key."
         }
       },
       "reconfigure": {
         "title": "Reconfigure provider",
         "description": "Update and validate the connection settings.",
         "data": {
-          "base_url": "LM Studio API base URL",
+          "base_url": "Provider API base URL",
           "api_token": "LM Studio API token",
-          "model_id": "LM Studio model identifier"
+          "model_id": "LM Studio model identifier",
+          "api_key": "Azure OpenAI API key",
+          "deployment_id": "Azure deployment name"
         },
         "data_description": {
-          "base_url": "Enter the complete private-LAN IP base URL ending in /v1.",
+          "base_url": "LM Studio: private LAN IP URL ending in /v1. Azure: HTTPS resource endpoint under openai.azure.com or services.ai.azure.com.",
           "api_token": "Re-enter only the token value; stored credentials are never returned to this form.",
-          "model_id": "Enter an exact model identifier returned by LM Studio."
+          "model_id": "Enter an exact model identifier returned by LM Studio.",
+          "api_key": "Enter the Azure resource key. Stored credentials are never returned to this form.",
+          "deployment_id": "Enter the exact deployment name from your Azure resource. The endpoint test does not verify deployment generation."
         }
       }
     },

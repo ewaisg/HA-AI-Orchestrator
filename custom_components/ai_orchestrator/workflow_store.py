@@ -14,6 +14,9 @@ with a lock so overlapping administrator requests cannot lose a write.
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
+import re
 from copy import deepcopy
 from typing import Any, Final
 
@@ -33,6 +36,16 @@ STORAGE_VERSION: Final = 1
 MAX_WORKFLOWS: Final = 50
 
 
+def workflow_digest(raw: Any) -> str:
+    """Bind a publication receipt to every executable draft field."""
+    document = parse_workflow(raw).as_dict()
+    document.pop("enabled")
+    document.pop("run_mode")
+    return hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
 class WorkflowStoreError(RuntimeError):
     """Static, redacted storage failure; never echoes stored content."""
 
@@ -50,6 +63,7 @@ class WorkflowStore:
             hass, STORAGE_VERSION, STORAGE_KEY, private=True, atomic_writes=True
         )
         self._workflows: dict[str, dict[str, Any]] | None = None
+        self._receipts: dict[str, dict[str, str]] = {}
         self._lock = asyncio.Lock()
 
     @property
@@ -75,7 +89,7 @@ class WorkflowStore:
             return
         if (
             not isinstance(data, dict)
-            or set(data) != {"workflows"}
+            or set(data) not in ({"workflows"}, {"workflows", "dry_run_receipts"})
             or not isinstance(data["workflows"], list)
             or len(data["workflows"]) > MAX_WORKFLOWS
         ):
@@ -89,7 +103,53 @@ class WorkflowStore:
             if document["workflow_id"] in workflows:
                 raise WorkflowStoreError("stored workflows are unreadable")
             workflows[document["workflow_id"]] = document
+        receipts = data.get("dry_run_receipts", {})
+        if not isinstance(receipts, dict) or len(receipts) > MAX_WORKFLOWS:
+            raise WorkflowStoreError("stored workflows are unreadable")
+        for workflow_id, digest in receipts.items():
+            if (
+                workflow_id not in workflows
+                or not isinstance(digest, dict)
+                or set(digest) != {"document", "bindings"}
+                or any(
+                    not isinstance(value, str)
+                    or re.fullmatch(r"[0-9a-f]{64}", value) is None
+                    for value in digest.values()
+                )
+            ):
+                raise WorkflowStoreError("stored workflows are unreadable")
         self._workflows = workflows
+        self._receipts = {
+            key: value
+            for key, value in receipts.items()
+            if value["document"] == workflow_digest(workflows[key])
+        }
+
+    def has_dry_run(self, document: dict[str, Any], bindings: str) -> bool:
+        """Return whether this exact draft has a persisted successful dry run."""
+        return self._receipts.get(document["workflow_id"]) == {
+            "document": workflow_digest(document),
+            "bindings": bindings,
+        }
+
+    async def async_record_dry_run(
+        self, document: dict[str, Any], bindings: str
+    ) -> bool:
+        """Persist a receipt only if the tested draft is still current."""
+        async with self._lock:
+            workflows = self._require_loaded()
+            current = workflows.get(document["workflow_id"])
+            if current is None or workflow_digest(current) != workflow_digest(document):
+                return False
+            receipts = {
+                **self._receipts,
+                document["workflow_id"]: {
+                    "document": workflow_digest(document),
+                    "bindings": bindings,
+                },
+            }
+            await self._commit(workflows, receipts=receipts)
+            return True
 
     def _require_loaded(self) -> dict[str, dict[str, Any]]:
         if self._workflows is None:
@@ -150,9 +210,21 @@ class WorkflowStore:
             await self._commit({**workflows, workflow_id: document})
             return deepcopy(document)
 
-    async def _commit(self, workflows: dict[str, dict[str, Any]]) -> None:
+    async def _commit(
+        self,
+        workflows: dict[str, dict[str, Any]],
+        *,
+        receipts: dict[str, dict[str, str]] | None = None,
+    ) -> None:
         """Write the whole collection, then prove it by reading it back."""
         payload = {"workflows": [deepcopy(document) for document in workflows.values()]}
+        retained = {
+            key: value
+            for key, value in (self._receipts if receipts is None else receipts).items()
+            if key in workflows and value["document"] == workflow_digest(workflows[key])
+        }
+        if retained:
+            payload["dry_run_receipts"] = retained
         try:
             await self._store.async_save(deepcopy(payload))
             persisted = await self._store.async_load()
@@ -161,3 +233,4 @@ class WorkflowStore:
         if persisted != payload:
             raise WorkflowStoreError("workflow storage write failed")
         self._workflows = workflows
+        self._receipts = retained

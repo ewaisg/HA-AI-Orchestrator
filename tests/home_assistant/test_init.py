@@ -94,7 +94,13 @@ async def test_async_setup_registers_global_surfaces(hass: HomeAssistant) -> Non
     adapter = runtime.provider_entry_adapters[LM_STUDIO_PROVIDER_TYPE]
     assert isinstance(adapter, LMStudioProviderEntryAdapter)
     assert adapter.session is shared_session
-    assert list(runtime.provider_entry_adapters) == [LM_STUDIO_PROVIDER_TYPE]
+    assert list(runtime.provider_entry_adapters) == [
+        LM_STUDIO_PROVIDER_TYPE,
+        "azure_openai_v1",
+    ]
+    azure = runtime.provider_entry_adapters["azure_openai_v1"]
+    assert azure.session is shared_session
+    assert azure.chat_destination is None
 
 
 async def test_entry_setup_and_unload_manage_panel(hass: HomeAssistant) -> None:

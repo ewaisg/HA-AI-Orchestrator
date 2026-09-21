@@ -1,21 +1,35 @@
 # Product requirements
 
-Status: Approved product direction; Phase 1 implementation and acceptance are active.
+Status: Approved product direction; r14 live, r15 source candidate awaiting deployment and live acceptance.
 
 ## Implementation snapshot
 
-The repository implements provider-neutral connection lifecycle and contracts,
-an authenticated local LM Studio adapter, provider setup/testing, a read-only
-entity/device/area catalogue, and the bundled panel. `LOC-006` adds test-ready
-administrator text chat with a selected local provider, bounded session-only
-history, no automatic household context, no streaming, and no tools or actions.
-The chat candidate is awaiting live installation and acceptance; see the
-[candidate evidence](evidence/2026-09-05-loc-006-local-chat.md).
+Live r14 includes authenticated local providers, administrator text chat,
+registry discovery, explicit observation policies and scoped questions,
+text-only Assist, visual workflow editing, dry runs and local AI notification
+execution. The dining-room window test produced three successful notification
+calls and owner-confirmed receipt on Fold8Ultra; the other handset receipts are
+unconfirmed. The observed live Core version is 2026.9.3.
 
-The capabilities below describe the complete product target. Workflows,
-observation/action permissions, Assist, notifications, Azure/Bedrock, routing,
-and persistent chat/audit storage remain planned. Exact task status and the
-Core 2026.9.0 compatibility review are in the [tracker](PROJECT-TRACKER.md).
+Installed interfaces include explicit light/media action grants and
+one-time human confirmation, local AI action proposals, disabled unsaved AI
+workflow draft/refinement controls, Chat modes and temporary Activity records.
+After the r14 restart, local chat, tools, scoped window reads and workflow
+startup recovery were verified. AI drafting still fails validation live; corrected
+prompt examples and stage diagnostics are in the r15 candidate. Physical device
+actions have not received live acceptance. Switches, critical
+actions and arbitrary services remain unavailable. Azure supports endpoint
+authentication testing only; Bedrock is offline-tested and unregistered. No
+cloud route, persistent chat history or complete Settings surface exists.
+The reviewed r15 candidate adds durable confirmed-device-action metadata only,
+with 90-day/4096-record retention; workflow audit hooks remain unwired.
+The latest frontend suite passed 363 tests, without claiming live feature acceptance.
+
+The capabilities below remain the complete product target, including broader
+device control and automation authoring. A partial typed action catalog does not
+fulfil that entire target; broad entity controls and native automation authoring
+remain incomplete. See the [tracker](PROJECT-TRACKER.md) for acceptance
+and [usage guide](INSTALLATION.md) for the currently implemented boundaries.
 
 ## Product objective
 
@@ -49,11 +63,15 @@ Create a private, polished Home Assistant AI orchestration product that lets the
 - No claimed provider or Home Assistant capability without documentation or live validation.
 - No high-risk action policy may be inferred for the user.
 
-## First complete workflow journey (planned)
+## First workflow journey and remaining acceptance
 
-The first complete user journey is the already proven concept of a window event producing an AI-written announcement on an Echo/media target, rebuilt so that provider, trigger, entity, prompt, conditions, output target, testing, and publishing are all configured through the product UI.
-
-The existing proof demonstrates feasibility but must be revalidated against the live environment before its host, model, entity, action, or timing values are committed to implementation.
+The window notification journey is configured through the product UI: local
+provider, real trigger, prompt, output targets, dry run and activation. Its
+isolated three-phone test has owner-confirmed Fold8Ultra delivery. Other handset
+receipt and broader output/voice acceptance remain separate checks. Workflow
+startup recovery is verified on r14; this does not confirm a new phone delivery.
+The original Echo/media announcement goal is not claimed by
+the phone result. See [live workflow evidence](evidence/2026-09-20-window-phone-workflow.md).
 
 ## Non-goals for the first MVP
 

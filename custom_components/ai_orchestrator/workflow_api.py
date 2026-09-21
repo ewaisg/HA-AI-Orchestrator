@@ -21,7 +21,11 @@ from .const import (
     WORKFLOW_SET_ENABLED_WEBSOCKET_TYPE,
 )
 from .runtime import async_get_runtime, is_foundation_loaded
-from .workflow_manager import WorkflowManager, WorkflowManagerError
+from .workflow_manager import (
+    WorkflowDryRunRequired,
+    WorkflowManager,
+    WorkflowManagerError,
+)
 from .workflow_preview_api import load_bounded_json
 from .workflow_schema import WorkflowValidationError
 from .workflow_store import WorkflowNotFoundError, WorkflowStoreError
@@ -101,6 +105,13 @@ async def websocket_workflow_save(
     except WorkflowValidationError as err:
         # The schema's messages name a field only, never caller content.
         connection.send_error(msg["id"], ERR_INVALID_WORKFLOW, str(err))
+        return
+    except WorkflowDryRunRequired:
+        connection.send_error(
+            msg["id"],
+            "workflow_dry_run_required",
+            "Save disabled, dry run this exact workflow, then enable execution.",
+        )
         return
     except WorkflowManagerError, WorkflowStoreError:
         connection.send_error(
@@ -183,6 +194,13 @@ async def websocket_workflow_set_enabled(
         return
     except WorkflowNotFoundError:
         connection.send_error(msg["id"], ERR_NOT_FOUND, "Workflow not found.")
+        return
+    except WorkflowDryRunRequired:
+        connection.send_error(
+            msg["id"],
+            "workflow_dry_run_required",
+            "Save disabled, dry run this exact workflow, then enable execution.",
+        )
         return
     except WorkflowManagerError, WorkflowStoreError:
         connection.send_error(

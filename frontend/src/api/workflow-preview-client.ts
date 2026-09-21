@@ -13,7 +13,7 @@ export interface PreviewCheck { index: number; passed: boolean; reason: keyof ty
 export interface WorkflowPreview {
   schema_version: 1; mode: "offline"; enabled: boolean; triggered: boolean;
   conditions_passed: boolean; eligible: boolean; trigger_results: PreviewCheck[];
-  condition_results: PreviewCheck[]; planned_steps: { index: number; kind: "ai_compose" | "ai_classify" | "ai_extract" | "branch" | "notify" }[];
+  condition_results: PreviewCheck[]; planned_steps: { index: number; kind: "ai_compose" | "ai_classify" | "ai_extract" | "branch" | "notify" | "light_control" }[];
   provider_calls: 0; actions_executed: 0;
 }
 export class PreviewContractError extends Error {
@@ -53,7 +53,7 @@ function parseEvaluation(value: Record<string, unknown>): Record<string, unknown
     !previewChecks(value.trigger_results, 10, ["matched", "event_kind_mismatch", "state_unchanged", "entity_not_selected", "target_state_mismatch", "time_mismatch"]) ||
     !previewChecks(value.condition_results, 20, ["matched", "outside_time_window", "state_unavailable", "state_mismatch", "state_not_numeric", "outside_numeric_bounds"]) ||
     !Array.isArray(value.planned_steps) || value.planned_steps.length > 25 ||
-    !value.planned_steps.every((step: unknown, index) => record(step) && keys(step, ["index", "kind"]) && step.index === index && ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"].includes(step.kind as string)) ||
+    !value.planned_steps.every((step: unknown, index) => record(step) && keys(step, ["index", "kind"]) && step.index === index && ["ai_compose", "ai_classify", "ai_extract", "branch", "notify", "light_control"].includes(step.kind as string)) ||
     value.triggered !== value.trigger_results.some((item) => item.passed) ||
     value.conditions_passed !== value.condition_results.every((item) => item.passed) ||
     value.eligible !== (value.planned_steps.length > 0) ||

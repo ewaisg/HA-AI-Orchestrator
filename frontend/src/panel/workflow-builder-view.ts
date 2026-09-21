@@ -1,5 +1,6 @@
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { fetchCatalog, type CatalogEntity } from "../api/catalog-client";
+import { fetchWorkflowLightTargets, type WorkflowLightTarget } from "../api/workflow-light-client";
 import { fetchChatOptions, newRequestId, type ChatProvider } from "../api/chat-client";
 import { fetchNotifyTargets, type NotifyTarget } from "../api/notify-client";
 import { saveWorkflow } from "../api/workflow-client";
@@ -17,6 +18,7 @@ type StepDraft = { id?: string } & (
   | { kind: "ai_classify"; prompt: string; categories: string }
   | { kind: "ai_extract"; prompt: string; fields: string }
   | { kind: "branch"; when_step_id: string; when_category: string }
+  | { kind: "light_control"; target_registry_id: string; operation: "turn_on" | "turn_off" }
   | { kind: "notify"; notify_service: string });
 const STEP_ID = /^[a-z][a-z0-9_]{0,63}$/u;
 const FIELD_TYPES = ["string", "number", "boolean"];
@@ -27,13 +29,14 @@ const MAX_MATCHES = 40;
 const SAVE_MESSAGES: Record<string, string> = {
   invalid_workflow: "Home Assistant rejected the workflow. Check the highlighted fields.",
   workflow_store_unavailable: "Workflow storage is unavailable.",
+  workflow_dry_run_required: "Save with Enabled unchecked, dry run this exact workflow successfully, then enable it in the stored list.",
   not_loaded: "The foundation is not loaded.",
 };
 
 export class WorkflowBuilderView extends LitElement {
   public static override properties = {
     hass: { attribute: false }, draft: { attribute: false }, _editing: { state: true }, _notice: { state: true },
-    _entities: { state: true }, _providers: { state: true }, _targets: { state: true },
+    _entities: { state: true }, _providers: { state: true }, _targets: { state: true }, _lightTargets: { state: true },
     _name: { state: true }, _description: { state: true }, _runMode: { state: true }, _providerId: { state: true }, _enabled: { state: true },
     _triggerKind: { state: true }, _triggerEntity: { state: true }, _toState: { state: true }, _atTime: { state: true },
     _conditions: { state: true }, _steps: { state: true }, _busy: { state: true }, _error: { state: true }, _saved: { state: true },
@@ -57,6 +60,7 @@ export class WorkflowBuilderView extends LitElement {
   private declare _notice: string;
   private declare _entities: CatalogEntity[];
   private declare _providers: ChatProvider[];
+  private declare _lightTargets: WorkflowLightTarget[];
   private declare _targets: NotifyTarget[];
   private declare _name: string;
   private declare _description: string;
@@ -79,7 +83,7 @@ export class WorkflowBuilderView extends LitElement {
 
   public constructor() {
     super();
-    this._entities = []; this._providers = []; this._targets = [];
+    this._entities = []; this._providers = []; this._targets = []; this._lightTargets = [];
     this._name = ""; this._description = ""; this._runMode = "observe"; this._providerId = ""; this._enabled = false;
     this._triggerKind = "state"; this._triggerEntity = ""; this._toState = "on"; this._atTime = "";
     this._conditions = [];
@@ -92,7 +96,7 @@ export class WorkflowBuilderView extends LitElement {
     if (!changed.has("hass")) return;
     if (this._callWS !== this.hass?.callWS || this._userId !== this.hass?.user?.id) {
       this._callWS = this.hass?.callWS; this._userId = this.hass?.user?.id;
-      this._sequence++; this._entities = []; this._providers = []; this._targets = []; this._busy = false; this._error = ""; this._saved = false;
+      this._sequence++; this._entities = []; this._providers = []; this._targets = []; this._lightTargets = []; this._busy = false; this._error = ""; this._saved = false;
       void this._loadLookups();
     }
   }
@@ -103,11 +107,12 @@ export class WorkflowBuilderView extends LitElement {
     if (!hass) return;
     const sequence = this._sequence;
     const current = (): boolean => sequence === this._sequence && this.isConnected && this.hass?.callWS === hass.callWS;
-    const [catalog, options, targets] = await Promise.allSettled([fetchCatalog(hass), fetchChatOptions(hass), fetchNotifyTargets(hass)]);
+    const [catalog, options, targets, lights] = await Promise.allSettled([fetchCatalog(hass), fetchChatOptions(hass), fetchNotifyTargets(hass), fetchWorkflowLightTargets(hass)]);
     if (!current()) return;
     if (catalog.status === "fulfilled") this._entities = catalog.value.entities.filter((entity) => !entity.disabled);
     if (options.status === "fulfilled") { this._providers = options.value.providers; if (!this._providerId) this._providerId = options.value.providers[0]?.connection_id ?? ""; }
     if (targets.status === "fulfilled") this._targets = targets.value;
+    if (lights.status === "fulfilled") this._lightTargets = lights.value;
   }
 
   private _matches(query: string): CatalogEntity[] {
@@ -133,8 +138,10 @@ export class WorkflowBuilderView extends LitElement {
       if (condition.kind === "numeric_state" && (!ENTITY.test(condition.entity_id) || (!condition.above.trim() && !condition.below.trim()) || [condition.above, condition.below].some((value) => value.trim() && !Number.isFinite(Number(value))))) problems.push(`${label}: choose an entity and a finite bound.`);
     }
     if (this._steps.length === 0) problems.push("Add at least one step.");
+    if (this._steps.some(step => step.kind === "light_control") && this._steps.length !== 1) problems.push("A light workflow requires exactly one light-control step, with no AI or notification steps.");
     for (const [index, step] of this._steps.entries()) {
       const label = `Step ${index + 1}`;
+      if (step.kind === "light_control" && !this._lightTargets.some(entity => entity.registry_id === step.target_registry_id)) problems.push(`${label}: choose a light from the current eligible registry targets.`);
       if ((step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract") && (!step.prompt.trim() || step.prompt.length > 4000)) problems.push(`${label}: enter a prompt of up to 4,000 characters.`);
       if (step.kind === "ai_classify") {
         const categories = this._categories(step.categories);
@@ -168,7 +175,7 @@ export class WorkflowBuilderView extends LitElement {
     const counts: Record<string, number> = {};
     return this._steps.map((step) => {
       if (step.id !== undefined) return step.id;
-      const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : step.kind === "ai_extract" ? "extract" : step.kind === "branch" ? "gate" : "notify";
+      const base = step.kind === "ai_compose" ? "compose" : step.kind === "ai_classify" ? "classify" : step.kind === "ai_extract" ? "extract" : step.kind === "branch" ? "gate" : step.kind === "light_control" ? "light" : "notify";
       let candidate: string;
       do { counts[base] = (counts[base] ?? 0) + 1; candidate = counts[base] === 1 ? base : `${base}_${counts[base]}`; } while (taken.has(candidate));
       taken.add(candidate);
@@ -187,10 +194,12 @@ export class WorkflowBuilderView extends LitElement {
     const representable = typeof doc.workflow_id === "string" && typeof doc.name === "string" && triggers.length === 1 && trigger !== undefined &&
       (trigger.kind === "manual" || trigger.kind === "time" || (trigger.kind === "state" && Array.isArray(trigger.entity_ids) && trigger.entity_ids.length === 1)) &&
       conditions.every((c) => ["time_window", "state", "numeric_state"].includes(c.kind as string)) &&
-      steps.every((s) => ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"].includes(s.kind as string) && typeof s.step_id === "string" && STEP_ID.test(s.step_id));
+      steps.every((s) => ["ai_compose", "ai_classify", "ai_extract", "branch", "notify", "light_control"].includes(s.kind as string) && typeof s.step_id === "string" && STEP_ID.test(s.step_id)) &&
+      (!steps.some(s => s.kind === "light_control") || (steps.length === 1 && ["turn_on", "turn_off"].includes(steps[0]?.operation as string)));
     if (!representable) { this._notice = "This workflow uses a shape the builder cannot show (for example several triggers); use the JSON editor below."; return; }
     this._workflowId = doc.workflow_id as string; this._editing = true;
     this._name = doc.name as string; this._description = typeof doc.description === "string" ? doc.description : ""; this._enabled = doc.enabled === true; this._runMode = doc.run_mode === "execute" ? "execute" : "observe";
+    if (steps.some(step => step.kind === "light_control")) this._enabled = false;
     if (typeof doc.provider_connection_id === "string") this._providerId = doc.provider_connection_id;
     this._triggerKind = trigger.kind as TriggerKind;
     this._triggerEntity = trigger.kind === "state" ? String((trigger.entity_ids as string[])[0]) : "";
@@ -202,6 +211,7 @@ export class WorkflowBuilderView extends LitElement {
       : { kind: "numeric_state", entity_id: String(c.entity_id ?? ""), above: c.above === undefined ? "" : String(c.above), below: c.below === undefined ? "" : String(c.below) });
     this._steps = steps.map((s): StepDraft => {
       const id = s.step_id as string;
+      if (s.kind === "light_control") return { id, kind: "light_control", target_registry_id: String(s.target_registry_id ?? ""), operation: s.operation as "turn_on" | "turn_off" };
       if (s.kind === "ai_compose") return { id, kind: "ai_compose", prompt: String(s.prompt ?? "") };
       if (s.kind === "ai_classify") return { id, kind: "ai_classify", prompt: String(s.prompt ?? ""), categories: (Array.isArray(s.categories) ? s.categories : []).join(", ") };
       if (s.kind === "ai_extract") return { id, kind: "ai_extract", prompt: String(s.prompt ?? ""), fields: (Array.isArray(s.fields) ? (s.fields as Record<string, unknown>[]) : []).map((f) => `${String(f.name)}:${String(f.type)}`).join(", ") };
@@ -231,6 +241,7 @@ export class WorkflowBuilderView extends LitElement {
     const ids = this._stepIds();
     const steps = this._steps.map((step, index) => {
       const step_id = ids[index]!;
+      if (step.kind === "light_control") return { step_id, kind: "light_control", target_registry_id: step.target_registry_id, operation: step.operation };
       if (step.kind === "ai_compose") return { step_id, kind: "ai_compose", prompt: step.prompt };
       if (step.kind === "ai_classify") return { step_id, kind: "ai_classify", prompt: step.prompt, categories: this._categories(step.categories) };
       if (step.kind === "ai_extract") return { step_id, kind: "ai_extract", prompt: step.prompt, fields: this._fields(step.fields) };
@@ -239,7 +250,7 @@ export class WorkflowBuilderView extends LitElement {
     });
     const usesAi = this._steps.some((step) => step.kind === "ai_compose" || step.kind === "ai_classify" || step.kind === "ai_extract");
     return {
-      schema_version: 1, workflow_id: this._workflowId, name: this._name.trim(), description: this._description, enabled: this._enabled,
+      schema_version: 1, workflow_id: this._workflowId, name: this._name.trim(), description: this._description, enabled: this._steps.some(step => step.kind === "light_control") ? false : this._enabled,
       run_mode: this._runMode, provider_connection_id: this._runMode === "execute" && usesAi ? this._providerId : null,
       triggers, conditions, steps,
     };
@@ -296,7 +307,7 @@ export class WorkflowBuilderView extends LitElement {
               ${this._providers.length === 0 ? html`<option value="">No local provider available</option>` : this._providers.map((p) => html`<option value=${p.connection_id} ?selected=${p.connection_id === this._providerId}>${p.title}</option>`)}
             </select></div>
         </div>
-        <label class="check" for="wb-enabled"><input id="wb-enabled" type="checkbox" .checked=${this._enabled} @change=${(e: Event) => { this._touch(); this._enabled = (e.target as HTMLInputElement).checked; }} /> Enable after saving</label>
+        <label class="check" for="wb-enabled"><input id="wb-enabled" type="checkbox" .checked=${this._enabled} ?disabled=${this._steps.some(step => step.kind === "light_control")} @change=${(e: Event) => { this._touch(); this._enabled = (e.target as HTMLInputElement).checked; }} /> Enable after saving</label>
       </fieldset>
       <fieldset><legend>Trigger</legend>
         <label for="wb-trigger-kind">Kind</label>
@@ -321,6 +332,8 @@ export class WorkflowBuilderView extends LitElement {
       </fieldset>
       <fieldset><legend>Steps (in order)</legend>
         ${this._steps.map((step, index) => this._renderStep(step, index))}
+        <button type="button" @click=${() => { this._touch(); this._enabled = false; this._steps = [{ kind: "light_control", target_registry_id: "", operation: "turn_on" }]; }}>Use one deterministic light action instead</button>
+        ${this._steps.some(step => step.kind === "light_control") ? html`<p>A light workflow is saved disabled and makes no provider calls during execution. Review separate unattended authorization for this exact saved workflow, perform its dry run, then enable separately. Saving or AI drafting never grants permission.</p>` : nothing}
         <div class="actions">
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_compose", prompt: "" })}>Add compose text</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_classify", prompt: "", categories: "urgent, routine" })}>Add classify</button>
@@ -368,6 +381,10 @@ export class WorkflowBuilderView extends LitElement {
 
   private _renderStep(step: StepDraft, index: number): TemplateResult {
     const remove = html`<span class="actions"><button type="button" ?disabled=${index === 0} @click=${() => { this._touch(); this._steps = this._move(this._steps, index, -1); }}>Move step ${index + 1} up</button><button type="button" ?disabled=${index === this._steps.length - 1} @click=${() => { this._touch(); this._steps = this._move(this._steps, index, 1); }}>Move step ${index + 1} down</button><button type="button" @click=${() => { this._touch(); this._steps = this._steps.filter((_, i) => i !== index); }}>Remove step ${index + 1}</button></span>`;
+    if (step.kind === "light_control") return html`<fieldset><legend>Step ${index + 1}: deterministic light control</legend>
+      <label for="wb-s${index}-light">Exact registry light</label><select id="wb-s${index}-light" .value=${step.target_registry_id} @change=${(event: Event) => this._updateStep(index, { target_registry_id: (event.target as HTMLSelectElement).value })}><option value="">Choose a light</option>${this._lightTargets.map(entity => html`<option value=${entity.registry_id}>${entity.name} — ${entity.entity_id}</option>`)}</select>
+      <label for="wb-s${index}-operation">Light operation</label><select id="wb-s${index}-operation" .value=${step.operation} @change=${(event: Event) => this._updateStep(index, { operation: (event.target as HTMLSelectElement).value as "turn_on" | "turn_off" })}><option value="turn_on">Turn on</option><option value="turn_off">Turn off</option></select>
+      <p>Registry selection is not permission. Missing, grouped or restricted targets can be rejected during separate authorization and execution checks.</p>${remove}</fieldset>`;
     if (step.kind === "notify") return html`<fieldset><legend>Step ${index + 1}: send a notification</legend>
       <label for="wb-s${index}-target">Target (from Home Assistant)</label>
       <select id="wb-s${index}-target" .value=${step.notify_service} @change=${(e: Event) => this._updateStep(index, { notify_service: (e.target as HTMLSelectElement).value })}>

@@ -169,7 +169,7 @@ describe("AI Orchestrator panel shell", () => {
     await catalog?.updateComplete;
 
     expect(shadowText(panel)).toContain("Home Assistant registry catalogue");
-    expect(shadowText(panel)).toContain("AI access none");
+    expect(shadowText(panel)).toContain("Explicit permissions");
     expect(catalog?.shadowRoot?.textContent).toContain("No registered entities are available");
   });
 

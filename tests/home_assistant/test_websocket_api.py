@@ -86,7 +86,7 @@ def _expected_status(*, configured: bool) -> dict:
         "configured": configured,
         "features": {
             "providers": False,
-            "workflows": False,
+            "workflows": configured,
             "conversation": False,
             "ai_task": False,
         },

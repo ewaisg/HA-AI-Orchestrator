@@ -4,8 +4,14 @@ HA AI Orchestrator is a private Home Assistant product for configuring local and
 
 ## Current state
 
-The repository implements, and the owner's Home Assistant runs live (Core
-2026.9.2, r10 candidate):
+Live r14 is installed and restarted on the observed Home Assistant Core 2026.9.3
+installation. Local chat, tool support, a scoped window-state question and
+workflow startup recovery are verified. An earlier
+dining-room window workflow completed a local AI generation and three successful
+notification calls; the owner confirmed receipt on Fold8Ultra. Receipt on the
+other two phones remains unconfirmed. AI drafting still returns an invalid draft
+on live r14; corrected prompt examples and precise validation-stage messages are
+in the uninstalled r15 candidate. See the tracker for exact evidence.
 
 - Config-entry lifecycle, authenticated LM Studio connections, provider setup
   and connection testing, a read-only entity/device/area catalogue (bounded
@@ -29,10 +35,40 @@ The repository implements, and the owner's Home Assistant runs live (Core
   Assistant actually has. One run per workflow at a time, no retries, first
   failure stops, evidence is redacted.
 
-Only the notify namespace can be called. Nothing runs live unless a workflow
-is saved with `run_mode: execute` and enabled. Cloud providers, agent scopes,
-AI tool calling, persistent chat, routing policies and security workflows
-remain planned.
+Workflow execution calls only the notify namespace. It requires an enabled
+`execute` workflow and a successful dry run bound to its current configuration.
+Save a disabled draft, dry run it with its configured local provider, then enable
+it. Observe now never runs steps or sends notifications.
+
+Live r14 also includes explicit local observation policies, a synthetic tool
+probe, independent questions about permitted states, and these interfaces:
+
+- **Chat modes:** text conversation, questions about permitted entities, and
+  device control with review and confirmation. Observation and action grants
+  are separate and start empty.
+- **Typed device actions:** explicitly grant individual light on/off and media
+  play/pause/volume targets in Entities & Permissions. Local AI can propose one
+  permitted action, or the user can choose it directly. Every dispatch requires
+  a separate human confirmation bound to current permissions and state. Switch
+  targets, critical actions and arbitrary services remain unavailable.
+- **AI workflow drafting:** describe a notification workflow using selected
+  entity/notification references. The returned draft is disabled and unsaved;
+  review, save, successful dry run and enable are separate steps. Existing internal
+  workflows can be selected explicitly to request a new draft copy. Live draft
+  generation is not yet accepted; use the visual builder or JSON editor.
+- **Activity:** latest redacted workflow results and ordered scoped-question
+  traces. These are temporary runtime records, not persistent audit history.
+
+The r15 candidate adds reviewed durable metadata for confirmed device actions,
+with 90-day retention and a 4096-record bound. Workflow audit hooks are not wired.
+No physical device-action acceptance is claimed. The latest frontend suite passed
+363 tests; automated checks do not establish live acceptance.
+
+Azure OpenAI v1 setup tests endpoint authentication only; the offline Bedrock
+adapter remains unregistered. Neither enables cloud chat, workflow routing or
+failover. Assist remains text-only. Persistent chat, complete workflow audit,
+full Settings, broader entity control, native automation authoring and deterministic
+security templates remain unfinished.
 The Phase 1 release gate (LOC-007) and the Phase 2 gate (WFL-008) are open;
 the tracker records exactly what has live evidence.
 

@@ -7,6 +7,19 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 
+from .action_ai_api import websocket_action_interpret
+from .action_api import (
+    websocket_action_catalog,
+    websocket_action_confirm,
+    websocket_action_propose,
+    websocket_action_save,
+    websocket_switch_review_preview,
+    websocket_switch_review_revoke,
+    websocket_switch_review_save,
+)
+from .agent_api import websocket_agent_list, websocket_agent_save
+from .agent_tools_api import websocket_agent_chat, websocket_agent_probe_tools
+from .audit_api import websocket_audit_list
 from .catalog import build_catalog_snapshot
 from .chat import websocket_chat_options, websocket_chat_send
 from .const import (
@@ -29,12 +42,22 @@ from .providers.contract import (
     safe_provider_error_code,
 )
 from .runtime import ProviderTestStatus, async_get_runtime, is_foundation_loaded
+from .workflow_action_api import (
+    websocket_workflow_light_authorize,
+    websocket_workflow_light_catalog,
+    websocket_workflow_light_preview,
+    websocket_workflow_light_revoke,
+)
 from .workflow_api import (
     websocket_workflow_delete,
     websocket_workflow_list,
     websocket_workflow_run_manual,
     websocket_workflow_save,
     websocket_workflow_set_enabled,
+)
+from .workflow_draft_api import (
+    websocket_workflow_draft_source,
+    websocket_workflow_generate_draft,
 )
 from .workflow_dry_run_api import websocket_workflow_dry_run
 from .workflow_notify_api import websocket_notify_targets
@@ -74,7 +97,11 @@ def websocket_status(
             "configured": is_foundation_loaded(hass),
             "features": {
                 "providers": bool(runtime.loaded_provider_entry_ids),
-                "workflows": False,
+                "workflows": bool(
+                    is_foundation_loaded(hass)
+                    and runtime.workflow_manager is not None
+                    and runtime.workflow_manager.ready
+                ),
                 "conversation": bool(runtime.conversation_entry_ids),
                 "ai_task": False,
             },
@@ -314,6 +341,19 @@ async def websocket_provider_test(
 def async_register_websocket_commands(hass: HomeAssistant) -> None:
     """Register integration-wide WebSocket commands once during setup."""
     websocket_api.async_register_command(hass, websocket_status)
+    websocket_api.async_register_command(hass, websocket_audit_list)
+    websocket_api.async_register_command(hass, websocket_action_catalog)
+    websocket_api.async_register_command(hass, websocket_action_save)
+    websocket_api.async_register_command(hass, websocket_switch_review_preview)
+    websocket_api.async_register_command(hass, websocket_switch_review_save)
+    websocket_api.async_register_command(hass, websocket_switch_review_revoke)
+    websocket_api.async_register_command(hass, websocket_action_propose)
+    websocket_api.async_register_command(hass, websocket_action_confirm)
+    websocket_api.async_register_command(hass, websocket_action_interpret)
+    websocket_api.async_register_command(hass, websocket_agent_list)
+    websocket_api.async_register_command(hass, websocket_agent_save)
+    websocket_api.async_register_command(hass, websocket_agent_probe_tools)
+    websocket_api.async_register_command(hass, websocket_agent_chat)
     websocket_api.async_register_command(hass, websocket_run_workflow_probe)
     websocket_api.async_register_command(hass, websocket_provider_list)
     websocket_api.async_register_command(hass, websocket_provider_test)
@@ -327,4 +367,10 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_workflow_set_enabled)
     websocket_api.async_register_command(hass, websocket_workflow_run_manual)
     websocket_api.async_register_command(hass, websocket_workflow_dry_run)
+    websocket_api.async_register_command(hass, websocket_workflow_generate_draft)
+    websocket_api.async_register_command(hass, websocket_workflow_draft_source)
     websocket_api.async_register_command(hass, websocket_notify_targets)
+    websocket_api.async_register_command(hass, websocket_workflow_light_catalog)
+    websocket_api.async_register_command(hass, websocket_workflow_light_preview)
+    websocket_api.async_register_command(hass, websocket_workflow_light_authorize)
+    websocket_api.async_register_command(hass, websocket_workflow_light_revoke)

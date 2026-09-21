@@ -83,6 +83,7 @@ class StepKind(StrEnum):
     AI_EXTRACT = "ai_extract"
     BRANCH = "branch"
     NOTIFY = "notify"
+    LIGHT_CONTROL = "light_control"
 
 
 AI_STEP_KINDS: Final = frozenset(
@@ -166,6 +167,8 @@ class WorkflowStep:
     fields: tuple[ExtractField, ...] = ()
     when_step_id: str | None = None
     when_category: str | None = None
+    target_registry_id: str | None = None
+    operation: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         """Return the exact serializable form."""
@@ -181,6 +184,9 @@ class WorkflowStep:
             data["categories"] = list(self.categories)
         if self.notify_service is not None:
             data["notify_service"] = self.notify_service
+        if self.target_registry_id is not None:
+            data["target_registry_id"] = self.target_registry_id
+            data["operation"] = self.operation
         return data
 
 
@@ -336,6 +342,8 @@ _STEP_KEYS = frozenset(
         "fields",
         "when_step_id",
         "when_category",
+        "target_registry_id",
+        "operation",
     }
 )
 _WORKFLOW_KEYS = frozenset(
@@ -478,8 +486,25 @@ def parse_step(raw: Any) -> WorkflowStep:
             {"step_id", "kind", "when_step_id", "when_category"}
         ),
         StepKind.NOTIFY: frozenset({"step_id", "kind", "notify_service"}),
+        StepKind.LIGHT_CONTROL: frozenset(
+            {"step_id", "kind", "target_registry_id", "operation"}
+        ),
     }
     _reject_unknown_keys(data, allowed[kind], "step")
+
+    if kind is StepKind.LIGHT_CONTROL:
+        target = _require_bounded_str(
+            data.get("target_registry_id"), "step.target_registry_id", max_chars=64
+        )
+        operation = data.get("operation")
+        if type(operation) is not str or operation not in {"turn_on", "turn_off"}:
+            raise WorkflowValidationError("light operation must be turn_on or turn_off")
+        return WorkflowStep(
+            step_id=step_id,
+            kind=kind,
+            target_registry_id=target,
+            operation=operation,
+        )
 
     if kind is StepKind.AI_EXTRACT:
         raw_fields = _require_list(
@@ -648,6 +673,15 @@ def parse_workflow(raw: Any) -> Workflow:
     step_ids = [step.step_id for step in steps]
     if len(set(step_ids)) != len(step_ids):
         raise WorkflowValidationError("workflow.steps must have unique step_id values")
+    if any(step.kind is StepKind.LIGHT_CONTROL for step in steps) and len(steps) != 1:
+        raise WorkflowValidationError(
+            "a light workflow requires exactly one light step"
+        )
+    if (
+        any(step.kind is StepKind.LIGHT_CONTROL for step in steps)
+        and provider_connection_id is not None
+    ):
+        raise WorkflowValidationError("a deterministic light workflow has no provider")
     # A branch may only gate on an earlier classify step and one of its categories,
     # so the route set is closed at validation time.
     for index, step in enumerate(steps):

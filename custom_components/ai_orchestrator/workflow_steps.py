@@ -24,7 +24,7 @@ from .providers.contract import (
     TextGenerationResult,
     safe_provider_error_code,
 )
-from .workflow_schema import StepKind, Workflow, WorkflowStep
+from .workflow_schema import AI_STEP_KINDS, StepKind, Workflow, WorkflowStep
 
 STEP_TIMEOUT_SECONDS: Final = 60
 MAX_COMPOSE_CHARS: Final = 2000
@@ -223,13 +223,15 @@ def _validate_extract(result: object, step: WorkflowStep) -> dict[str, Any] | No
 async def run_ai_steps(
     workflow: Workflow,
     context: StepContext,
-    provider: Provider,
+    provider: Provider | None,
     *,
     timeout_seconds: float = STEP_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Run AI steps in order against one provider; never execute a notify step."""
     if not isinstance(workflow, Workflow) or not isinstance(context, StepContext):
         raise WorkflowStepError("run_ai_steps requires a parsed workflow and context")
+    if provider is None and any(step.kind in AI_STEP_KINDS for step in workflow.steps):
+        raise WorkflowStepError("AI steps require an explicit provider")
     results: list[dict[str, Any]] = []
     provider_calls = 0
     failed = False
@@ -256,6 +258,16 @@ async def run_ai_steps(
         if step.kind is StepKind.NOTIFY:
             results.append(
                 {**entry, "status": STATUS_PLANNED, "message_step_id": last_text_step}
+            )
+            continue
+        if step.kind is StepKind.LIGHT_CONTROL:
+            results.append(
+                {
+                    **entry,
+                    "status": STATUS_PLANNED,
+                    "target_registry_id": step.target_registry_id,
+                    "operation": step.operation,
+                }
             )
             continue
         provider_calls += 1

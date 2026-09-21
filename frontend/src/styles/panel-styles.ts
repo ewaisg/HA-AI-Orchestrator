@@ -198,10 +198,11 @@ export const panelStyles = css`
     width: min(980px, 100%);
   }
 
-  .app-frame.chat-mode ai-orchestrator-chat-view {
+  .app-frame.chat-mode ai-orchestrator-assistant {
     flex: 1 1 auto;
     min-height: 0;
   }
+
 
   .page-header {
     display: flex;

@@ -20,6 +20,7 @@ from custom_components.ai_orchestrator.provider_entry import (
     LoadedProviderConnection,
     async_register_provider_entry_adapter,
     build_provider_entry_data,
+    provider_configuration_fingerprint,
     provider_entry_unique_id,
 )
 from custom_components.ai_orchestrator.providers.contract import (
@@ -120,6 +121,7 @@ async def setup(hass: HomeAssistant, *, save=True):
         provider_type=SYNTHETIC_PROVIDER_TYPE,
         provider=provider,
         validation=ConnectionValidationResult(reachable=True, authenticated=True),
+        configuration_fingerprint=provider_configuration_fingerprint(entry.data),
     )
     runtime = async_get_runtime(hass)
     runtime.loaded_provider_entry_ids.add(entry.entry_id)

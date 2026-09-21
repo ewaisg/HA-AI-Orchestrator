@@ -4,7 +4,7 @@ import { PREVIEW_INPUT_LIMIT, previewChecks, type PreviewCheck } from "./workflo
 export const DRY_RUN_MAX_TEXT_CHARS = 2000;
 export const DRY_RUN_MAX_STEPS = 25;
 export const DRY_RUN_STATUSES = ["ok", "planned", "failed", "skipped", "taken", "not_taken"] as const;
-export const DRY_RUN_STEP_KINDS = ["ai_compose", "ai_classify", "ai_extract", "branch", "notify"] as const;
+export const DRY_RUN_STEP_KINDS = ["ai_compose", "ai_classify", "ai_extract", "branch", "notify", "light_control"] as const;
 export const DRY_RUN_MAX_VALUE_CHARS = 500;
 export const DRY_RUN_ERRORS = {
   invalid_output: "The model reply did not match the required shape",
@@ -18,6 +18,7 @@ export const DRY_RUN_TARGETS = ["entity", "service", "missing"] as const;
 export interface DryRunStep {
   index: number; step_id: string; kind: DryRunStepKind; executed: boolean; status: DryRunStatus;
   text?: string; category?: string; values?: Record<string, string | number | boolean>; error?: string; message_step_id?: string | null; target?: (typeof DRY_RUN_TARGETS)[number];
+  target_registry_id?: string; operation?: "turn_on" | "turn_off";
 }
 export interface DryRunResult {
   schema_version: 1; mode: "dry_run"; workflow_id: string; destination: "local";
@@ -61,6 +62,7 @@ function step(value: unknown, index: number): value is DryRunStep {
     case "not_taken":
       return value.kind === "branch" && value.executed === false && keys(value, base);
     case "planned":
+      if(value.kind==="light_control")return value.executed===false&&keys(value,[...base,"target_registry_id","operation","target"])&&text(value.target_registry_id,64)&&["turn_on","turn_off"].includes(value.operation as string)&&value.target==="entity";
       return !ai && value.executed === false && (keys(value, [...base, "message_step_id"]) || (keys(value, [...base, "message_step_id", "target"]) && DRY_RUN_TARGETS.includes(value.target as never))) &&
         (value.message_step_id === null || (text(value.message_step_id, 64) && STEP_ID.test(value.message_step_id as string)));
     case "failed":
@@ -81,6 +83,7 @@ export function parseDryRun(value: unknown, workflowId: string): DryRunResult {
       value.triggered !== value.trigger_results.some((item) => item.passed) ||
       value.conditions_passed !== value.condition_results.every((item) => item.passed)) throw new DryRunContractError();
   const steps = value.steps as DryRunStep[];
+  if(steps.some(item=>item.kind==="light_control")&&(steps.length!==1||steps[0]?.status!=="planned"||value.provider_calls!==0))throw new DryRunContractError();
   const calls = steps.filter((item) => item.kind !== "notify" && (item.status === "ok" || item.status === "failed")).length;
   const eligible = value.eligible as boolean;
   if (!eligible && (steps.length > 0 || value.provider_calls !== 0 || value.completed !== false)) throw new DryRunContractError();
@@ -92,7 +95,9 @@ export function parseDryRun(value: unknown, workflowId: string): DryRunResult {
   return value as unknown as DryRunResult;
 }
 
-export async function dryRunWorkflow(hass: HomeAssistantLike, workflowId: string, connectionId: string, snapshot: string): Promise<DryRunResult> {
-  if (!UUID.test(workflowId) || !UUID.test(connectionId) || !snapshot.trim() || snapshot.length > PREVIEW_INPUT_LIMIT) throw new DryRunContractError();
-  return parseDryRun(await hass.callWS<unknown>({ type: "ai_orchestrator/workflows/dry_run", workflow_id: workflowId, connection_id: connectionId, snapshot_json: snapshot }), workflowId);
+export async function dryRunWorkflow(hass: HomeAssistantLike, workflowId: string, connectionId: string | null, snapshot: string): Promise<DryRunResult> {
+  if (!UUID.test(workflowId) || (connectionId!==null&&!UUID.test(connectionId)) || !snapshot.trim() || snapshot.length > PREVIEW_INPUT_LIMIT) throw new DryRunContractError();
+  const result=parseDryRun(await hass.callWS<unknown>({ type: "ai_orchestrator/workflows/dry_run", workflow_id: workflowId, ...(connectionId===null?{}:{connection_id:connectionId}), snapshot_json: snapshot }), workflowId);
+  if(connectionId===null&&(result.provider_calls!==0||result.steps.some(item=>item.kind!=="light_control")))throw new DryRunContractError();
+  return result;
 }

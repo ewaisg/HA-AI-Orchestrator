@@ -13,7 +13,7 @@ error codes, counters and timestamps. No message text is retained.
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Any, Final
 
@@ -61,8 +61,14 @@ async def async_execute_workflow(
     provider_lookup: ProviderLookup,
     *,
     now: datetime | None = None,
+    run_allowed: Callable[[], bool] | None = None,
+    light_executor: Callable[[], Awaitable[dict[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     """Run AI steps then deliveries; return a redacted execution record."""
+    if len(workflow.steps) == 1 and workflow.steps[0].kind.value == "light_control":
+        if light_executor is None:
+            raise ValueError("Unattended light execution is unavailable")
+        return await light_executor()
     started = now or dt_util.utcnow()
     record: dict[str, Any] = {
         "started_at": started.isoformat(),
@@ -125,6 +131,8 @@ async def async_execute_workflow(
         record["error"] = first.get("error")
     steps: list[dict[str, Any]] = []
     for step in outcome["steps"]:
+        if run_allowed is not None and not run_allowed():
+            raise asyncio.CancelledError
         if step["status"] != STATUS_PLANNED or failed:
             steps.append(_redact(step))
             continue

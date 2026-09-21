@@ -8,7 +8,7 @@ import {
 export const WORKFLOW_RESPONSE_SCHEMA_VERSION = 1;
 export const WORKFLOW_LIMIT = 50;
 export const STORE_STATES = ["ready", "unreadable", "not_loaded"] as const;
-export const STATUS_ERRORS = ["activation_failed", "cleanup_failed"] as const;
+export const STATUS_ERRORS = ["activation_failed", "cleanup_failed", "dry_run_required"] as const;
 export const RUN_MODES = ["observe", "execute"] as const;
 export const EXECUTION_STEP_STATUSES = ["ok", "planned", "failed", "skipped", "delivered", "taken", "not_taken"] as const;
 export type RunMode = (typeof RUN_MODES)[number];
@@ -147,6 +147,14 @@ export function parseStoredWorkflow(value: unknown): StoredWorkflow {
   ) {
     throw new WorkflowContractError();
   }
+  if (value.steps.some(step => step.kind === "light_control")) {
+    const step = value.steps[0]!;
+    if (value.steps.length !== 1 || value.provider_connection_id !== null ||
+        !exactKeys(step, ["step_id", "kind", "target_registry_id", "operation"]) ||
+        typeof step.step_id !== "string" || !STEP_ID.test(step.step_id) ||
+        typeof step.target_registry_id !== "string" || !step.target_registry_id.trim() || step.target_registry_id.length > 64 ||
+        !["turn_on", "turn_off"].includes(step.operation as string)) throw new WorkflowContractError();
+  }
   return {
     schema_version: 1,
     workflow_id: value.workflow_id,
@@ -275,6 +283,8 @@ export async function saveWorkflow(
   if (!workflowJson.trim() || workflowJson.length > PREVIEW_INPUT_LIMIT) {
     throw new WorkflowContractError();
   }
+  const draft:unknown=JSON.parse(workflowJson);
+  if(record(draft)&&Array.isArray(draft.steps)&&draft.steps.some((step:unknown)=>record(step)&&step.kind==="light_control")&&draft.enabled===true)throw new WorkflowContractError();
   return parseMutation(
     await hass.callWS<unknown>({
       type: "ai_orchestrator/workflows/save",

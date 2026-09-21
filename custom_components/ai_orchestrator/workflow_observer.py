@@ -161,14 +161,16 @@ class WorkflowObserver:
         """Observe a manual event at the supplied instant while active."""
         if self._generation is None:
             raise WorkflowObserverError("observer is not active")
-        return self._observe({"kind": "manual"}, now)
+        return self._observe({"kind": "manual"}, now, allow_execution=False)
 
     @staticmethod
     def _bounded_state(state: State | None) -> bool:
         return isinstance(state, State) and len(state.state) <= 255
 
     @callback
-    def _observe(self, event: dict[str, str], now: datetime) -> dict[str, Any]:
+    def _observe(
+        self, event: dict[str, str], now: datetime, *, allow_execution: bool = True
+    ) -> dict[str, Any]:
         if not isinstance(now, datetime) or now.tzinfo is None:
             raise WorkflowObserverError("observation requires an aware datetime")
         states = {}
@@ -185,6 +187,6 @@ class WorkflowObserver:
         result["mode"] = "observation_only"
         self._latest = result
         self._observations = min(MAX_OBSERVATIONS, self._observations + 1)
-        if result["eligible"] and self._on_eligible is not None:
+        if allow_execution and result["eligible"] and self._on_eligible is not None:
             self._on_eligible(deepcopy(result), deepcopy(snapshot))
         return deepcopy(result)

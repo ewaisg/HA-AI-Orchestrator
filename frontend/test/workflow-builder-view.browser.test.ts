@@ -6,8 +6,8 @@ import { VALID_CATALOG } from "./catalog-client.browser.test";
 import { createRoutedFakeHass } from "./fixtures/fake-hass";
 import { CHAT_OPTIONS, NOTIFY_TARGETS, STORED_WORKFLOW, STORED_WORKFLOW_ID, WORKFLOW_LIST } from "./fixtures/workflows";
 
-const LOOKUPS = new Set(["ai_orchestrator/catalog/list", "ai_orchestrator/chat/options", "ai_orchestrator/notify/targets"]);
-const ROUTES = { "ai_orchestrator/catalog/list": VALID_CATALOG, "ai_orchestrator/chat/options": CHAT_OPTIONS, "ai_orchestrator/notify/targets": NOTIFY_TARGETS, "ai_orchestrator/workflows/save": { ...WORKFLOW_LIST, workflow: STORED_WORKFLOW } };
+const LOOKUPS = new Set(["ai_orchestrator/catalog/list", "ai_orchestrator/chat/options", "ai_orchestrator/notify/targets", "ai_orchestrator/workflows/light_actions/catalog"]);
+const ROUTES = { "ai_orchestrator/workflows/light_actions/catalog": { schema_version: 1, targets: [] }, "ai_orchestrator/catalog/list": VALID_CATALOG, "ai_orchestrator/chat/options": CHAT_OPTIONS, "ai_orchestrator/notify/targets": NOTIFY_TARGETS, "ai_orchestrator/workflows/save": { ...WORKFLOW_LIST, workflow: STORED_WORKFLOW } };
 const mounted: WorkflowBuilderView[] = [];
 async function settle(view: WorkflowBuilderView): Promise<void> { await view.updateComplete; await new Promise<void>((r) => setTimeout(r, 0)); await view.updateComplete; await new Promise<void>((r) => setTimeout(r, 0)); await view.updateComplete; }
 async function mount(hass?: HomeAssistantLike): Promise<WorkflowBuilderView> {

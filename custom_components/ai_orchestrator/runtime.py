@@ -10,8 +10,15 @@ from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN
 
 if TYPE_CHECKING:
+    from .action_manager import ActionManager
+    from .action_store import ActionStore
+    from .agent_store import AgentStore
+    from .agent_tools import ObservationToolEngine
+    from .audit_lifecycle import AuditLifecycle
+    from .audit_store import AuditStore
     from .chat import PendingChat
     from .provider_entry import ProviderEntryAdapter
+    from .workflow_actions import WorkflowActions
     from .workflow_manager import WorkflowManager
 
 
@@ -44,9 +51,26 @@ class AIOrchestratorRuntime:
     workflow_probe_execution_count: int = 0
     workflow_probe_registration_count: int = 0
     workflow_manager: WorkflowManager | None = None
+    workflow_actions: WorkflowActions | None = None
+    agent_store: AgentStore | None = None
+    action_store: ActionStore | None = None
+    action_manager: ActionManager | None = None
+    audit_store: AuditStore | None = None
+    audit_lifecycle: AuditLifecycle | None = None
+    action_ai_tasks: dict[str, tuple[str, asyncio.Task[Any]]] = field(
+        default_factory=dict
+    )
+    agent_tool_engine: ObservationToolEngine | None = None
+    agent_tool_users: dict[str, object] = field(default_factory=dict)
+    agent_tool_recent_requests: dict[tuple[str, str], float] = field(
+        default_factory=dict
+    )
     workflow_dry_runs_in_progress: set[str] = field(default_factory=set)
     # user_id -> (provider entry_id, task) so a provider unload can cancel it.
     workflow_dry_run_tasks: dict[str, tuple[str, asyncio.Task[Any]]] = field(
+        default_factory=dict
+    )
+    workflow_draft_tasks: dict[str, tuple[str, asyncio.Task[Any]]] = field(
         default_factory=dict
     )
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 import re
 from collections.abc import Callable, Mapping
@@ -88,6 +90,34 @@ class LoadedProviderConnection:
     provider_type: str
     provider: Provider = field(repr=False)
     validation: ConnectionValidationResult
+    configuration_fingerprint: str | None = field(default=None, repr=False)
+
+
+def provider_configuration_fingerprint(data: Mapping[str, object]) -> str:
+    """Hash validated provider configuration without retaining another secret copy."""
+    parsed = parse_provider_entry_data(data)
+    payload = build_provider_entry_data(
+        connection_id=parsed.connection_id,
+        provider_type=parsed.provider_type,
+        provider_config=parsed.provider_config,
+    )
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
+def loaded_provider_matches_entry(
+    loaded: LoadedProviderConnection, entry_data: Mapping[str, object]
+) -> bool:
+    """Reject a stale runtime while reconfiguration is awaiting unload/reload."""
+    if loaded.configuration_fingerprint is None:
+        return False
+    try:
+        return loaded.configuration_fingerprint == provider_configuration_fingerprint(
+            entry_data
+        )
+    except TypeError, ValueError:
+        return False
 
 
 @callback

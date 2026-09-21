@@ -11,6 +11,7 @@ import {
 } from "../api/workflow-client";
 import type { WorkflowObservation } from "../api/workflow-preview-client";
 import type { HomeAssistantLike } from "../ha/hass-contract";
+import "./workflow-light-review";
 
 export const WORKFLOWS_VIEW_TAG = "ai-orchestrator-workflows";
 
@@ -288,9 +289,11 @@ export class WorkflowsView extends LitElement {
       this._store = list.store;
       this._entries = list.workflows;
       this._confirmDeleteId = undefined;
-    } catch {
+    } catch (error: unknown) {
       if (!this._current(sequence, hass)) return;
-      this._error = pending.action === "observe" ? STATIC_ERRORS.observe : STATIC_ERRORS.mutate;
+      this._error = typeof error === "object" && error !== null && "code" in error && error.code === "workflow_dry_run_required"
+        ? "Execution requires a successful dry run of this exact workflow. Save disabled, dry run, then enable."
+        : pending.action === "observe" ? STATIC_ERRORS.observe : STATIC_ERRORS.mutate;
     } finally {
       // Clear the pending marker whenever it is still ours, even if the view
       // was reset or its identity changed meanwhile, so controls never stick.
@@ -334,6 +337,7 @@ export class WorkflowsView extends LitElement {
           Assistant action can be called.
         </p>
         <div class="actions">
+          <p>Before enabling execution, save disabled and successfully dry run the exact workflow with its configured provider. Observe now only checks conditions and never sends notifications.</p>
           <button
             type="button"
             ?disabled=${this._viewState === "loading" || this._pending !== undefined || !this.hass}
@@ -380,6 +384,8 @@ export class WorkflowsView extends LitElement {
         ? "Activation failed"
         : status.error === "cleanup_failed"
           ? "Cleanup pending"
+          : status.error === "dry_run_required"
+            ? "Dry run required"
           : status.active
             ? "Active"
             : workflow.enabled
@@ -403,12 +409,17 @@ export class WorkflowsView extends LitElement {
         </p>
         <p class="meta">
           ${workflow.run_mode === "execute"
-            ? html`Mode: <strong>execute</strong> — eligible outcomes run the steps and deliver notifications. Executions ${status.executions} · Failures ${status.execution_failures} · Skipped while busy ${status.skipped_busy}${status.execution_running ? " · running now" : ""}`
+            ? html`Mode: <strong>execute</strong> — eligible outcomes run authorized steps. Executions ${status.executions} · Failures ${status.execution_failures} · Skipped while busy ${status.skipped_busy}${status.execution_running ? " · running now" : ""}`
             : html`Mode: observe — outcomes are recorded; no step runs.`}
         </p>
         ${status.last_execution ? this._renderExecution(status.last_execution) : nothing}
         ${status.latest ? this._renderOutcome("Latest observation", status.latest) : nothing}
         ${observation ? this._renderOutcome("Manual observation", observation) : nothing}
+        ${workflow.steps.length===1&&workflow.steps[0]?.kind==="light_control"?html`
+          <details><summary>Saved light workflow triggers and conditions</summary><pre>${JSON.stringify({triggers:workflow.triggers,conditions:workflow.conditions},null,2)}</pre></details>
+          <ai-orchestrator-workflow-light-review .hass=${this.hass} .workflow=${workflow}></ai-orchestrator-workflow-light-review>
+          <p>Save disabled → review unattended permission → load into editor for provider-free dry run → enable separately. An unknown outcome is not proof of a physical device change.</p>
+        `:nothing}
         <div class="actions">
           <button
             type="button"

@@ -1,212 +1,204 @@
 # Manual installation and current usage
 
-Status: Phase 1 local-provider preview; LOC-006 chat has recorded live acceptance. The Phase 1 release gate remains open.
-
-The current repository supports a manual-copy Home Assistant installation.
-HACS installation and updating are not yet validated or claimed.
-
-Use the exact candidate and artifact identified in the [tracker](PROJECT-TRACKER.md)
-and [LOC-006 evidence](evidence/2026-09-05-loc-006-local-chat.md). An arbitrary
-checkout is not evidence of a tested installation. Historical live acceptance
-targets Core 2026.8.3; the owner's current Core 2026.9.0/Frontend 20260826.4
-environment is undergoing `COMP-001` validation. No broader compatibility
-range is claimed.
+Live r14 is installed and restarted on the owner's observed Core 2026.9.3
+installation. Local chat, tools, scoped window reads and workflow recovery are
+verified. AI drafts still fail validation live, and physical device-action
+acceptance remains pending. The r15 candidate adds corrected draft examples,
+validation-stage messages and durable confirmed-device-action metadata; it is
+not yet installed. Use the exact reviewed artifact
+named in the [tracker](PROJECT-TRACKER.md), not an arbitrary checkout. HACS
+installation and a broader compatibility range are not claimed.
 
 ## Install
 
-1. Obtain the reviewed manual-copy artifact for the named candidate from
-   `https://github.com/ewaisg/HA-AI-Orchestrator` or the linked candidate evidence.
-   Keep an existing backup and the previous integration artifact for rollback.
-2. Copy the complete artifact folder
-   `custom_components/ai_orchestrator` into the Home Assistant configuration
-   directory as `/config/custom_components/ai_orchestrator`.
-3. Confirm that the final manifest path is exactly
-   `/config/custom_components/ai_orchestrator/manifest.json`. Do not copy the
-   repository root or create an extra nested `custom_components` directory.
-4. Restart Home Assistant.
-5. Open **Settings -> Devices & services -> Add integration**, search for
-   **AI Orchestrator**, and submit the field-free foundation setup form.
-6. Open **AI Orchestrator** from the sidebar while signed in as a Home
-   Assistant administrator.
+The ZIP contains `custom_components/ai_orchestrator/`. Extract that folder into
+the Home Assistant configuration directory. The final path must be
+`/config/custom_components/ai_orchestrator/manifest.json`, without an extra nested
+directory. On the owner's File editor, the configuration root is displayed as
+`/homeassistant`.
 
-Home Assistant OS users can transfer the directory through an approved file
-access method such as Samba Share or Studio Code Server. Provider credentials,
-Home Assistant secrets, and household data do not belong in the repository or
-the integration directory.
+Manual extraction is sufficient: do not also upload the intact ZIP or run the
+Python installer. The separate Python installer is an alternative for verified
+copying and backups; its instructions expect the intact ZIP beside it inside
+`custom_components/ai_orchestrator`.
 
-## Provider setup and testing
+1. Preserve the previous complete integration artifact and a Home Assistant
+   backup. Follow the candidate's installation evidence.
+2. Copy the complete reviewed integration folder, verify its files, then restart
+   Home Assistant.
+3. For a first installation, open **Settings → Devices & services → Add
+   integration → AI Orchestrator** and create the foundation entry.
+4. Open **AI Orchestrator** from the sidebar as an administrator. Existing
+   installations keep their foundation and provider entries.
 
-After creating the foundation entry, add **AI Orchestrator** again from
-Home Assistant's integration setup to create a provider connection. Select
-**LM Studio** and enter the actual server base URL, API token, and configured
-model identifier. The adapter requires a private LAN IP address; public
-addresses, hostnames, credentials in URLs, and custom URL paths are rejected.
-Use the token value without a `Bearer` prefix. Setup validates authentication
-and the configured model against the server's model list.
+Do not put credentials, Home Assistant secrets or household data in the
+integration folder or repository.
 
-The **Providers** panel lists loaded connections. **Test connection** checks
-reachability, authentication, and the configured model without sending a prompt
-or household context. It does not prove text-generation, streaming, tool, or
-structured-output capabilities. A connection shows **Not tested** until an
-explicit test completes in the current runtime; reload/restart resets that
-observation. Stored credentials are handled through Home Assistant's backend
-config/re-auth/reconfigure flows and are not returned to this panel.
+## Providers
 
-## Read-only chat candidate
+Add **AI Orchestrator** again through Home Assistant's integration setup to create
+a provider connection. Select **LM Studio** and enter its actual private LAN IP
+base URL, token and configured model identifier. Enter the token without a
+`Bearer` prefix. This adapter rejects public addresses, hostnames, URL credentials
+and custom URL paths.
 
-After installing matching LOC-006 backend and panel files:
+**Test connection** checks authentication and configured-model presence without
+sending household prompts. It does not prove generation, tools, streaming or
+structured output. The timestamped result resets after restart/reload.
+Reauthentication/configuration use backend forms; saved secrets are not returned
+to the panel.
 
-1. Open **Chat**, select a loaded local provider, and read its destination and
-   access disclosure. The model's generation capability is explicitly unverified.
-2. Enter a harmless text request, such as drafting a reminder, and press **Send**
-   or **Ctrl/Command + Enter**. The backend contacts that local provider only.
-3. Continue with a follow-up message or select **New chat** to clear the view.
+Azure OpenAI v1 tests endpoint authentication only and is excluded from local
+chat, Assist and workflows. Bedrock remains offline-tested and unregistered.
+No cloud route or automatic failover is enabled.
 
-Chat sends a fixed assistant instruction and the conversation supplied in the
-view. It reads no household state, attaches no catalogue data, exposes no tools,
-and executes no device action. It does not use cloud failover or automatic
-retries. A complete reply appears after generation; streaming is unavailable.
+## Chat and observation
 
-Requests contain at most 21 messages, 4,000 characters per message, and 16,000
-conversation characters. Replies are limited to 4,000 characters and provider
-work has a 60-second deadline. Counts use browser text units, so some emoji
-count as two. Earlier complete turns are omitted when needed
-to stay within the conversation limit, with a notice in the view. One request
-per administrator and four requests across the integration may run at once.
+In **Chat → Assistant mode**, choose:
 
-History stays in the open chat view and is cleared by **New chat**, a provider
-change, leaving the view, or losing/changing the Home Assistant user/connection
-context. No transcript is saved to browser storage or integration storage.
-The future persistent-history defaults in DEC-018 are not implemented here.
-This does not establish the LM Studio server's own logging or retention policy.
+- **Conversation — text only:** only your conversation goes to the local model;
+  no household context or action tools are added.
+- **Ask about permitted entities:** save explicit observation scope, run
+  **Test tool support**, then ask an independent question about permitted states.
+  These controls also appear in **Entities & Permissions**.
+- **Device control — review and confirm:** use the separate action flow below.
 
-Clearing while waiting discards the eventual reply; the provider request may
-continue until completion or its deadline. Wait before sending again if the
-backend reports that the previous request is still running. A failed generation
-keeps the draft for an explicit retry. Unloading its provider cancels the
-integration's owned generation task.
+Text chat bounds are 21 messages, 4,000 UTF-16 units per message, 16,000 total,
+4,000 per reply and a 60-second generation deadline. There is no streaming.
+**New chat**, leaving the view, changing providers or losing the user/connection
+context clears the view's history. Clearing a pending reply does not guarantee
+provider processing stopped.
 
-These instructions describe the implemented candidate. Its live chat acceptance
-is recorded separately in the linked LOC-006 evidence; implementation and
-automated checks alone do not establish a successful live model reply.
+Observation grants start empty. Eligible numeric/on-off states are allowed;
+sensitive classes and attributes are excluded. Scoped answers show operation
+counts and ordered trace markers. Chat and scoped-question history are not
+persisted. DEC-018 retention defaults are future storage requirements, not
+active transcript retention. Provider-side logging is a separate policy.
 
-## Catalogue and foundation status
+## Device actions — live acceptance pending
 
-**Entities & Permissions** is currently a read-only registry catalogue: entity,
-device, and area metadata, relationships, availability, and search. It omits
-state values and attributes. Every entity displays **AI access: none**; this
-screen cannot grant access or run actions.
-Each registry list is bounded to 10,000 records; if a registry is larger, the
-view says how many records are not shown.
+1. In **Entities & Permissions → Device action permissions**, choose a local
+   provider and supported operation, select individual targets, then choose
+   **Save action permissions**. Observation grants do not grant control.
+2. In **Chat → Device control — review and confirm**, enter one precise
+   **Device request** and choose **Ask AI to propose**, or select the granted
+   device/operation directly and choose **Review action**.
+3. Review the exact entity, operation, arguments, current state and risk.
+   Choose **Confirm this action** to dispatch once, or **Cancel proposal**.
 
-The Home page reports authenticated foundation status. **Provider connections**
-is available only when a provider entry is loaded. **Workflow runtime**,
-**Conversation agent**, and **AI Task entity** remain unavailable. The
-Conversation agent flag refers to the future native Assist integration, not
-the LOC-006 panel chat.
+Supported operations are individual light on/off and media play/pause/volume.
+Switch targets, grouped targets that expand the selection, critical actions and
+arbitrary services are denied. AI receives your request and granted device
+names/identifiers, and cannot confirm its own proposal. HA permissions and state
+are rechecked at confirmation. Tokens expire after five minutes and are consumed
+once; changed state, scope, provider or service registration requires a new proposal.
 
-**Workflow preview** in Automations lets administrators load an explicitly
-synthetic example or enter workflow/snapshot JSON and inspect trigger/condition
-pass/fail results. The preview uses only the supplied snapshot, makes no
-provider calls and executes no actions.
+HA accepting a call does not prove its physical result. If the outcome is
+unknown, check the device before requesting another action. There is no automatic
+retry. Automated and independent review evidence does not establish live
+device acceptance.
 
-**Save as workflow** stores the editor's workflow document in Home Assistant's
-integration storage (`.storage/ai_orchestrator.workflows`, written through the
-Store helper with atomic writes; at most 50 workflows). The **Stored workflows**
-list below the editor shows each document with Enable/Disable, Observe now,
-Load into editor, and a two-step Delete. An enabled workflow is activated while
-the foundation entry is loaded: it listens to the entities named by its state
-triggers and to its time triggers, reads only the entities named by its
-conditions, and records a redacted outcome (triggered, conditions passed,
-planned step kinds) plus counters. Nothing else happens: no text is generated,
-no notification is sent, and no Home Assistant action is called. Restarting
-Core or reloading the foundation entry re-reads the stored documents and
-re-activates the enabled ones. See [the preview guide](OFFLINE-WORKFLOW-PREVIEW.md).
+## Workflows and AI drafts
 
-If the list reports that the stored workflow file cannot be validated, it holds
-data the installed version does not accept. Nothing is rewritten and no workflow
-is active; restore the file from a backup or remove it after copying it aside.
-A file that is not valid JSON at all is handled by Home Assistant itself: it is
-renamed aside with a `.corrupt` suffix, a repair issue is raised, and the list
-shows no stored workflows. Every save is read back from storage before it is
-reported as saved.
+**Automations** contains a structured builder, JSON editor, deterministic preview
+and stored workflows. Select real entities, a local provider and discovered
+notification targets. Compose, classify, extract and branch steps are supported;
+workflow side effects are limited to notifications.
 
-**Dry run AI steps** (WFL-003) runs a stored workflow's compose/classify steps
-once against a selected local provider using the editor's snapshot. It is an
-explicit administrator trial like chat: the model receives the step prompt and
-a bounded context only, notifications are planned but never sent, and nothing
-is stored.
+**Create a workflow with AI** accepts a description, an optional selected
+entity and up to eight notification targets. Only the description and selected
+identifiers go to the local model. **Generate draft** returns a disabled, unsaved
+workflow. **Review in workflow editor** transfers it for inspection. It does not
+save, enable or execute itself, or create native HA automations. Selecting an
+existing internal workflow explicitly discloses its drafting fields and selects
+its references; refinement returns a new disabled copy, never overwrites the source.
+Live r14 drafting currently fails validation. Use the visual builder or JSON editor
+until a fresh live draft passes review. Candidate r15 adds corrected examples and
+specific validation messages; no success from those changes is claimed yet.
 
-A workflow saved with `"run_mode": "execute"` (and a `provider_connection_id`
-when it has AI steps) runs live once enabled: its AI steps run and its notify
-steps deliver the composed text to a notify entity or legacy notify service
-that Home Assistant actually has. Nothing else can be called. See
-[the guide](OFFLINE-WORKFLOW-PREVIEW.md) for the exact rules. The Home page's
-Workflow runtime flag stays unavailable until the release gate.
+1. Review the trigger, conditions, provider, prompt and targets; save disabled.
+2. Use a supplied/synthetic snapshot to **Preview workflow**, then **Dry run AI
+   steps**. Preview contacts no provider; dry run generates text but sends no
+   notification.
+3. A successful eligible dry run records a publication receipt bound to the
+   exact workflow, provider configuration and notification target identity.
+   Enable only after this succeeds.
+4. Test the real trigger and confirm delivery on the recipient device.
 
-The Automations section also exposes the Phase 0 **lifecycle probe**. That bounded
-test fires one integration-owned internal event and increments an in-memory
-counter. A valid result reports exactly one execution for the trigger, no
-provider contact, and no Home Assistant action call. It is not a published
-automation or the product workflow runtime.
+**Observe now** never executes steps or sends notifications. Execute mode allows
+one run per workflow at a time, no retries, and stops on the first failure.
+This AI-dependent path is not a primary security or life-safety alert.
 
-Voice/notification configuration, activity/security, and full settings remain
-planned. No panel feature currently executes a device action.
+At most 50 workflows live in `.storage/ai_orchestrator.workflows`.
+Restart/reload restores eligible enabled workflows. Changed provider/target
+identity or an invalid receipt can prevent activation; inspect status and repeat
+the dry run before enabling. Unreadable storage fails closed. See
+[workflow details](OFFLINE-WORKFLOW-PREVIEW.md).
 
-## Troubleshooting
+Live r12 recorded three successful dining-room window phone notification calls
+and owner-confirmed Fold8Ultra receipt. The original Android/iPhone receipts
+remain unconfirmed. Native door/window automations were restored after testing.
+See [live evidence](evidence/2026-09-20-window-phone-workflow.md).
 
-- If Home Assistant cannot find the integration, verify the exact manifest path
-  and restart Home Assistant again.
-- Only one foundation config entry is permitted. Later setup attempts create
-  provider entries; do not remove the foundation merely to add a provider.
-- The panel, provider/catalogue commands, and chat require an administrator.
-- If no provider appears, check that its config entry loaded successfully,
-  correct its connection/model/authentication issue, and refresh providers.
-- If chat reports a timeout or invalid response, shorten the request and retry
-  explicitly. A configured token in message content or reflected in the reply
-  is rejected; do not paste credentials into chat.
-- If the panel reports an unsupported status response, replace the whole
-  `ai_orchestrator` directory from one repository revision; do not mix backend
-  and frontend files from different revisions.
-- Check **Settings -> System -> Logs** for `ai_orchestrator` setup errors.
-  Keep tokens, private endpoints, and household text out of shared evidence.
-- If the lifecycle probe does not report exactly one execution for its trigger,
-  treat the result as a failed compatibility check and do not infer that
-  workflows are available.
+## Assist, Activity and Settings
 
-Automatic panel registration remains an isolated compatibility boundary. Both
-automatic registration and the exact YAML fallback documented in
-`custom_components/ai_orchestrator/panel.py` were live-verified on Home
-Assistant OS with Core 2026.8.3 and Frontend 20260729.7. Use the fallback only
-if automatic registration fails; this evidence does not claim another version.
+Each loaded local provider supplies a text-only conversation agent. Select it
+in **Settings → Voice assistants** for an Assist pipeline. It receives conversation
+turns only, with no household tools or device control. Panel text generation does
+not prove microphone, speaker or full voice-pipeline acceptance.
 
-## Update and removal boundary
+**Activity & Security** displays latest workflow outcomes and steps. Counters
+and last-run records may reset after edits, disabling or restart; this is not
+durable audit history. Notification success means HA accepted the call, not
+handset receipt. The r15 candidate adds **Durable action history** for confirmed
+device-action metadata only: up to 90 days and 4096 records, explicit refresh and
+load-more controls, no household identifiers or message content. Workflow audit
+hooks are not wired. A committed record means the service call returned; unknown
+outcomes require checking the device before trying again. This candidate is not
+yet live. Full Settings, persistent chat, cloud routes, broad entity control,
+native automation authoring and deterministic security templates remain unfinished.
 
-For an update, preserve the previous artifact, replace the complete integration
-directory from one reviewed candidate, restart Home Assistant, and refresh the
-panel so backend and frontend match. Automatic panel registration serves each build at a content-addressed path
-(`/api/ai_orchestrator/panel/<hash>/ai-orchestrator-panel.js`), so changed
-bundle bytes request a URL the service worker has never cached. A query-string
-hash was tried first and observed not to work on 2026-09-12: Home Assistant's
-service worker caches every URL containing `/static/` cache-first and ignores
-query parameters. Reload the browser page after restarting Core; an already
-loaded JavaScript module cannot be replaced in place.
+## Updates, troubleshooting and rollback
 
-The manual YAML fallback uses a fixed URL and does not automatically receive
-this hash. If that fallback, or an older installation, shows stale sections,
-clear the Home Assistant site cache in the browser or reset the Companion App
-frontend cache, then reopen the panel. This may require signing in again; do not
-remove the integration or its provider entries to clear frontend caching.
+- Replace the complete integration directory from one candidate; never mix
+  backend/frontend revisions. Restart Home Assistant and reload the page.
+- Automatic registration uses
+  `/api/ai_orchestrator/panel/<hash>/ai-orchestrator-panel.js`. Its changing path
+  avoids the observed service-worker cache issue. The older fixed YAML fallback
+  may require a frontend cache clear; do not remove provider entries for caching.
+- Missing providers or unavailable permissions require checking the config entry,
+  administrator session and stored policy. Failure never authorizes a fallback
+  provider or expanded target selection.
+- Inspect **Settings → System → Logs** for setup failures. Keep credentials,
+  private endpoints and household text out of shared diagnostics.
 
-Follow the candidate's installation and
-verification record rather than mixing individual files. To roll back the code,
-restore the previous complete artifact and restart; any future storage migration
-needs its own documented downgrade/restore procedure.
+Before each installation, back up code and integration storage together. Separate
+action grants use a separate `.storage/ai_orchestrator.actions` store; existing
+observation/workflow stores are not converted into control grants. Include the
+actions store in backups once it exists. The r15 audit store is separate;
+preserve it with the matching artifact and follow its candidate rollback record.
 
-Historical config-entry removal/reinstallation, reload, restart recovery,
-cache-bypassing refresh, YAML fallback, restoration of automatic registration,
-and Android Companion rendering are recorded for the named FND-011 target in
-[the lifecycle evidence](evidence/2026-08-23-fnd-011-panel-lifecycle.md).
-They do not approve the changed chat candidate or Core 2026.9.0.
-Updated lifecycle, desktop/mobile, provider, chat, and scoped-log acceptance
-remain governed by the tracker and candidate evidence.
+The forthcoming reviewed-switch candidate upgrades action-policy storage from
+version 1 to version 2. It preserves light/media grants, removes dormant switch
+grants, and starts with no physical-target switch reviews. Review a switch's
+actual connected device in **Entities & Permissions**, complete the three
+physical-target attestations, and save the review. Then separately save the
+desired on/off permissions. Each switch action still requires confirmation.
+Review refresh or revocation removes that switch's on/off grants. Changed device
+identity makes its previous review unusable.
+
+Before installing that candidate, retain verified snapshots of both
+`.storage/ai_orchestrator.actions` and `.storage/ai_orchestrator.audit`, including
+whether each file existed. Older action-policy readers cannot load version 2,
+and older audit readers cannot accept new switch operation records. Rolling back
+requires the matching reviewed storage checkpoint as well as code; never edit
+version numbers or strip review fields to manufacture compatibility. Preserve
+the newer audit file separately if a checkpoint restoration would remove newer
+history. A code-only rollback may leave action controls unavailable.
+
+For code rollback, restore the previous complete artifact and restart. r12 has no
+action manager and does not consume those grants. Do not delete or rename live
+storage files to troubleshoot. Preserve the matching storage checkpoint and
+review retained action grants before a later upgrade reenables the action UI.
+A code rollback does not reverse a device action already performed. Follow the
+candidate rollback record and [tracker](PROJECT-TRACKER.md) for outstanding checks.

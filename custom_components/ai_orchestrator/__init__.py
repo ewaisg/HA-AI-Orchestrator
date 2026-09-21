@@ -13,6 +13,13 @@ from homeassistant.exceptions import (
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 
+from .action_ai_api import async_cancel_action_interpretations
+from .action_manager import ActionManager
+from .action_store import ActionStore
+from .agent_store import AgentPolicyError, AgentStore, AgentStoreError
+from .agent_tools import ObservationToolEngine
+from .audit_lifecycle import AuditLifecycle
+from .audit_store import AuditStore, AuditStoreError
 from .chat import async_cancel_provider_chats
 from .const import FOUNDATION_ENTRY_UNIQUE_ID
 from .panel import (
@@ -28,7 +35,14 @@ from .provider_entry import (
     foundation_entry_data,
     is_foundation_entry_data,
     parse_provider_entry_data,
+    provider_configuration_fingerprint,
     validate_provider_entry_identity,
+)
+from .providers.azure_openai_v1 import (
+    PROVIDER_TYPE as AZURE_PROVIDER_TYPE,
+)
+from .providers.azure_openai_v1 import (
+    AzureOpenAIV1ProviderEntryAdapter,
 )
 from .providers.contract import (
     SAFE_ERROR_MESSAGES,
@@ -45,8 +59,10 @@ from .providers.lm_studio import (
 )
 from .runtime import async_get_runtime
 from .websocket_api import async_register_websocket_commands
+from .workflow_actions import WorkflowActions
+from .workflow_draft_api import async_cancel_provider_drafts
 from .workflow_dry_run_api import async_cancel_provider_dry_runs
-from .workflow_manager import WorkflowManager
+from .workflow_manager import WorkflowManager, WorkflowManagerError
 from .workflow_probe import (
     async_setup_workflow_probe,
     async_unload_workflow_probe,
@@ -70,11 +86,15 @@ _TRANSIENT_SETUP_ERRORS = {
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up integration-wide static and authenticated API surfaces."""
     runtime = async_get_runtime(hass)
-    if LM_STUDIO_PROVIDER_TYPE not in runtime.provider_entry_adapters:
-        async_register_provider_entry_adapter(
-            hass,
-            LMStudioProviderEntryAdapter(async_get_clientsession(hass)),
-        )
+    session = None
+    for provider_type, factory in (
+        (LM_STUDIO_PROVIDER_TYPE, LMStudioProviderEntryAdapter),
+        (AZURE_PROVIDER_TYPE, AzureOpenAIV1ProviderEntryAdapter),
+    ):
+        if provider_type not in runtime.provider_entry_adapters:
+            if session is None:
+                session = async_get_clientsession(hass)
+            async_register_provider_entry_adapter(hass, factory(session))
     await async_register_static_assets(hass)
     async_register_websocket_commands(hass)
     return True
@@ -95,12 +115,76 @@ async def async_setup_entry(
         return True
 
     if not runtime.loaded_foundation_entry_ids:
-        runtime.owns_panel = await async_register_panel(hass)
-        async_setup_workflow_probe(hass)
-        # A manager left over from a failed cleanup retries that cleanup first.
+        if runtime.agent_store is None:
+            runtime.agent_store = AgentStore(hass)
+        try:
+            await runtime.agent_store.async_load()
+        except AgentStoreError:
+            # A failed policy load leaves all scope operations unavailable.
+            # Keep unrelated foundation features usable; never replace the store.
+            pass
+        if runtime.agent_tool_engine is None:
+            runtime.agent_tool_engine = ObservationToolEngine(hass)
+        if runtime.action_store is None:
+            runtime.action_store = ActionStore(hass)
+        try:
+            await runtime.action_store.async_load()
+        except AgentStoreError:
+            pass  # Unreadable grants remain unavailable; never replace with defaults.
+        if runtime.audit_store is None:
+            runtime.audit_store = AuditStore(hass)
         if runtime.workflow_manager is None:
             runtime.workflow_manager = WorkflowManager(hass)
-        await runtime.workflow_manager.async_start()
+        if runtime.workflow_actions is None:
+            runtime.workflow_actions = WorkflowActions(
+                hass, runtime.workflow_manager, runtime.audit_store
+            )
+        runtime.workflow_manager.set_action_service(runtime.workflow_actions)
+        runtime.workflow_manager.async_stop()
+        runtime.workflow_actions.stop()
+        try:
+            await runtime.workflow_manager.async_wait_stopped()
+            await runtime.workflow_actions.async_wait_stopped()
+        except WorkflowManagerError, AgentPolicyError:
+            raise ConfigEntryNotReady("Previous workflows are still stopping") from None
+        if runtime.action_manager is None:
+            runtime.action_manager = ActionManager(
+                hass, runtime.action_store, runtime.audit_store
+            )
+        if runtime.audit_lifecycle is None:
+            runtime.audit_lifecycle = AuditLifecycle(
+                hass, runtime.audit_store, runtime.action_manager.async_expire_proposals
+            )
+        try:
+            # Finish prior final-result writes before journal crash recovery.
+            runtime.action_manager.stop()
+            await runtime.action_manager.async_wait_stopped()
+            await runtime.audit_lifecycle.async_start()
+            await runtime.action_manager.async_start()
+            await runtime.workflow_actions.async_start()
+        except AgentPolicyError, AgentStoreError, AuditStoreError:
+            # Keep actions closed while unrelated foundation features remain usable.
+            runtime.audit_lifecycle.stop()
+            if runtime.action_manager is not None:
+                runtime.action_manager.stop()
+            runtime.workflow_actions.stop()
+        try:
+            runtime.owns_panel = await async_register_panel(hass)
+            async_setup_workflow_probe(hass)
+            # A manager left over from failed cleanup retries that cleanup first.
+            await runtime.workflow_manager.async_start()
+        except BaseException:
+            runtime.audit_lifecycle.stop()
+            if runtime.action_manager is not None:
+                runtime.action_manager.stop()
+            runtime.workflow_actions.stop()
+            async_unload_workflow_probe(hass)
+            if runtime.workflow_manager is not None:
+                runtime.workflow_manager.async_stop()
+            if runtime.owns_panel:
+                async_unregister_panel(hass)
+                runtime.owns_panel = False
+            raise
     runtime.loaded_foundation_entry_ids.add(entry.entry_id)
     entry.runtime_data = None
     return True
@@ -120,11 +204,21 @@ async def async_unload_entry(
                 return False
             runtime.conversation_entry_ids.discard(entry.entry_id)
         if isinstance(loaded, LoadedProviderConnection):
+            if runtime.action_manager is not None:
+                runtime.action_manager.cancel_provider(loaded.connection_id)
+            if runtime.agent_tool_engine is not None:
+                runtime.agent_tool_engine.cancel_provider(loaded.connection_id)
             runtime.provider_test_statuses.pop(loaded.connection_id, None)
+            if runtime.workflow_manager is not None:
+                runtime.workflow_manager.async_cancel_provider_runs(
+                    loaded.connection_id
+                )
         runtime.loaded_provider_entry_ids.discard(entry.entry_id)
         entry.runtime_data = None
         async_cancel_provider_chats(hass, entry.entry_id)
         async_cancel_provider_dry_runs(hass, entry.entry_id)
+        async_cancel_provider_drafts(hass, entry.entry_id)
+        async_cancel_action_interpretations(hass, entry.entry_id)
         return True
 
     runtime.loaded_foundation_entry_ids.discard(entry.entry_id)
@@ -132,8 +226,22 @@ async def async_unload_entry(
         return True
 
     async_unload_workflow_probe(hass)
-    if runtime.workflow_manager is not None and runtime.workflow_manager.async_stop():
-        runtime.workflow_manager = None
+    if runtime.action_manager is not None:
+        runtime.action_manager.stop()
+    if runtime.workflow_actions is not None:
+        runtime.workflow_actions.stop()
+    if runtime.audit_lifecycle is not None:
+        runtime.audit_lifecycle.stop()
+    for _, task in list(runtime.workflow_draft_tasks.values()):
+        task.cancel()
+    for _, task in list(runtime.action_ai_tasks.values()):
+        task.cancel()
+    if runtime.agent_tool_engine is not None:
+        # Retain task ownership across reload until pending cancellation finishes.
+        runtime.agent_tool_engine.stop()
+    if runtime.workflow_manager is not None:
+        # Retain owners until final writes settle; setup drains before recovery.
+        runtime.workflow_manager.async_stop()
     if runtime.owns_panel:
         async_unregister_panel(hass)
         runtime.owns_panel = False
@@ -180,6 +288,7 @@ async def _async_setup_provider_entry(
     adapter = runtime.provider_entry_adapters.get(parsed.provider_type)
     if adapter is None:
         raise ConfigEntryError("Provider type is not registered")
+    configuration_fingerprint = provider_configuration_fingerprint(entry.data)
     try:
         provider = await adapter.async_create_provider(
             copy_provider_config(parsed.provider_config)
@@ -196,6 +305,7 @@ async def _async_setup_provider_entry(
         provider_type=parsed.provider_type,
         provider=provider,
         validation=validation,
+        configuration_fingerprint=configuration_fingerprint,
     )
     runtime.provider_test_statuses.pop(parsed.connection_id, None)
     runtime.loaded_provider_entry_ids.add(entry.entry_id)

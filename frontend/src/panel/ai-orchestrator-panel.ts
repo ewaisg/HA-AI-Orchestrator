@@ -1,4 +1,5 @@
 import { html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
+import { keyed } from "lit/directives/keyed.js";
 
 import {
   fetchOrchestratorStatus,
@@ -18,12 +19,18 @@ import type {
   HomeAssistantRoute,
 } from "../ha/hass-contract";
 import { panelStyles } from "../styles/panel-styles";
+import { parseStoredWorkflow } from "../api/workflow-client";
 import "./catalog-view";
+import "./agent-scopes-view";
 import "./providers-view";
-import "./chat-view";
+import "./assistant-view";
 import "./workflow-builder-view";
 import "./workflow-preview-view";
 import "./workflows-view";
+import "./activity-view";
+import "./audit-view";
+import "./workflow-draft-view";
+import "./action-controls-view";
 
 export const PANEL_TAG = "ai-orchestrator-panel";
 
@@ -124,6 +131,17 @@ export class AiOrchestratorPanel extends LitElement {
   private declare _draft?: { json: string; sequence: number };
   private declare _builderDraft?: { json: string; sequence: number };
   private _draftSequence = 0;
+  private _viewSession = 0;
+  private _sessionConnection?: HomeAssistantLike["connection"];
+  private _sessionCall?: HomeAssistantLike["callWS"];
+  private _sessionUser?: string;
+
+  private readonly _clearSessionContent = (): void => {
+    this._draft = undefined;
+    this._builderDraft = undefined;
+    this._viewSession += 1;
+    this.requestUpdate();
+  };
   private _hasRequested = false;
   private _requestSequence = 0;
 
@@ -137,6 +155,8 @@ export class AiOrchestratorPanel extends LitElement {
   }
 
   public override disconnectedCallback(): void {
+    this._sessionConnection?.removeEventListener("disconnected", this._clearSessionContent);
+    this._clearSessionContent();
     this._requestSequence += 1;
     window.removeEventListener("resize", this._onViewportChange);
     window.visualViewport?.removeEventListener("resize", this._onViewportChange);
@@ -144,6 +164,15 @@ export class AiOrchestratorPanel extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has("hass") && (this._sessionConnection !== this.hass?.connection ||
+        this._sessionCall !== this.hass?.callWS || this._sessionUser !== this.hass?.user?.id)) {
+      this._sessionConnection?.removeEventListener("disconnected", this._clearSessionContent);
+      this._clearSessionContent();
+      this._sessionConnection = this.hass?.connection;
+      this._sessionCall = this.hass?.callWS;
+      this._sessionUser = this.hass?.user?.id;
+      this._sessionConnection?.addEventListener("disconnected", this._clearSessionContent);
+    }
     if (changed.has("route")) {
       const routeSection = sectionFromRoute(this.route);
       if (routeSection !== undefined) {
@@ -180,6 +209,7 @@ export class AiOrchestratorPanel extends LitElement {
 
   public override connectedCallback(): void {
     super.connectedCallback();
+    this._sessionConnection?.addEventListener("disconnected", this._clearSessionContent);
     window.addEventListener("resize", this._onViewportChange, { passive: true });
     window.visualViewport?.addEventListener("resize", this._onViewportChange, { passive: true });
   }
@@ -201,19 +231,21 @@ export class AiOrchestratorPanel extends LitElement {
         ${this._renderSidebar()}
         <main class="workspace" id="main-content" tabindex="-1">
           <div class="workspace-inner">
-            ${this._activeSection === "home"
+            ${keyed(this._viewSession, this._activeSection === "home"
               ? this._renderHome()
               : this._activeSection === "automations"
                 ? this._renderWorkflowProbe()
                 : isChat
-                  ? html`<ai-orchestrator-chat-view .hass=${this.hass}></ai-orchestrator-chat-view>`
+                  ? this._renderChatModes()
                 : this._activeSection === "providers"
                   ? this._renderProviders()
                   : this._activeSection === "permissions"
                     ? this._renderCatalog()
+                  : this._activeSection === "activity"
+                    ? html`<ai-orchestrator-audit .hass=${this.hass}></ai-orchestrator-audit><ai-orchestrator-activity .hass=${this.hass}></ai-orchestrator-activity>`
                   : this._activeSection === "voice" && this._status?.features.conversation === true
                     ? this._renderVoice()
-                  : this._renderPlaceholder(this._activeSection)}
+                  : this._renderPlaceholder(this._activeSection))}
           </div>
         </main>
       </div>
@@ -227,7 +259,7 @@ export class AiOrchestratorPanel extends LitElement {
           <span class="brand-mark" aria-hidden="true">AI</span>
           <div class="brand-copy">
             <p class="brand-title">AI Orchestrator</p>
-          <p class="brand-subtitle">Local provider preview</p>
+          <p class="brand-subtitle">Home Assistant AI</p>
           </div>
         </div>
 
@@ -250,7 +282,7 @@ export class AiOrchestratorPanel extends LitElement {
         <div class="sidebar-note">
           <strong>Local AI, explicit requests</strong>
           Chat sends only your conversation to the selected local provider. Browsing the entity
-          catalogue sends no household context to AI. Device actions remain unavailable.
+          catalogue sends no household context to AI. Device control requires saved permissions and your confirmation.
         </div>
       </aside>
     `;
@@ -262,10 +294,10 @@ export class AiOrchestratorPanel extends LitElement {
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
-          <h1>Build from a verified foundation</h1>
+          <h1>Your Home Assistant AI</h1>
           <p class="page-intro">
-            Set up a local provider, browse your entity catalogue, and try a read-only chat.
-            Workflow execution, device permissions, and Assist remain in development.
+            Connect a local provider, build and test notification workflows, and inspect their results.
+            Choose observation permissions explicitly; available capabilities are shown below.
           </p>
         </div>
         <span class="privacy-badge">Local status check only</span>
@@ -309,10 +341,37 @@ export class AiOrchestratorPanel extends LitElement {
     `;
   }
 
+  private _renderChatModes(): TemplateResult {
+    const socket = this.hass?.connection;
+    const user = this.hass?.user?.id;
+    const call = this.hass?.callWS;
+    return html`
+      <ai-orchestrator-assistant .hass=${this.hass}
+        @assistant-workflow-review=${(event: CustomEvent<{json: string}>) => {
+          if (!this.isConnected || this._activeSection !== "chat" || !this.hass ||
+              this.hass.connection !== socket || this.hass.user?.id !== user ||
+              this.hass.callWS !== call || socket?.connected === false ||
+              event.target !== this.renderRoot.querySelector("ai-orchestrator-assistant") ||
+              typeof event.detail?.json !== "string" || event.detail.json.length > 65_536) return;
+          try {
+            const workflow = parseStoredWorkflow(JSON.parse(event.detail.json));
+            if (workflow.enabled) return;
+            const draft = {json: JSON.stringify(workflow, null, 2), sequence: ++this._draftSequence};
+            this._activeSection = "automations";
+            this._builderDraft = draft;
+            this._draft = draft;
+          } catch {
+            // Invalid handoffs never replace the editor or trigger persistence.
+          }
+        }}
+      ></ai-orchestrator-assistant>
+    `;
+  }
+
   private _renderFeatureCard(): TemplateResult {
     return html`
       <section class="card" aria-labelledby="feature-status-heading">
-        <h2 id="feature-status-heading">Foundation capabilities</h2>
+        <h2 id="feature-status-heading">Available capabilities</h2>
         <p class="card-intro">Values come from the versioned integration status response.</p>
         <ul class="status-list">
           ${STATUS_FEATURE_KEYS.map((feature) => {
@@ -340,20 +399,19 @@ export class AiOrchestratorPanel extends LitElement {
     return html`
       <section class="card" aria-labelledby="next-steps-heading">
         <h2 id="next-steps-heading">What happens next</h2>
-        <p class="card-intro">Each capability opens only after its own verification gate.</p>
+        <p class="card-intro">Start with a local provider, then test a workflow before enabling it.</p>
         <ol class="next-list">
           <li>
-            <strong>Confirm the panel lifecycle</strong>
-            Load, reload, mobile layout, caching, and upgrade behavior must be tested on the target
-            Home Assistant version.
+            <strong>Build an automation</strong>
+            Choose a real trigger and notification targets in Automations. Save disabled and dry run before enabling.
           </li>
           <li>
             <strong>Connect a verified local provider</strong>
-            Provider setup will require live endpoint, authentication, model, and capability evidence.
+            Add your connection in Providers and run its connection test.
           </li>
           <li>
             <strong>Discover permissions from Home Assistant</strong>
-            Entity and action choices will come from live registries and begin with no AI access.
+            Select permitted entities in Entities &amp; Permissions. Review execution results in Activity &amp; Security.
           </li>
         </ol>
       </section>
@@ -417,6 +475,11 @@ export class AiOrchestratorPanel extends LitElement {
 
   private _renderWorkflowProbe(): TemplateResult {
     return html`
+      <ai-orchestrator-workflow-draft .hass=${this.hass}
+        @generated-workflow=${(event: CustomEvent<{json: string}>) => {
+          this._builderDraft = {json: event.detail.json, sequence: ++this._draftSequence};
+          this._draft = {json: event.detail.json, sequence: ++this._draftSequence};
+        }}></ai-orchestrator-workflow-draft>
       <ai-orchestrator-workflow-builder
         .hass=${this.hass}
         .draft=${this._builderDraft}
@@ -510,8 +573,10 @@ export class AiOrchestratorPanel extends LitElement {
             or attributes are included, and every entity begins with no AI access.
           </p>
         </div>
-        <span class="privacy-badge">Read-only · AI access none</span>
+        <span class="privacy-badge">Explicit permissions</span>
       </header>
+      <ai-orchestrator-agent-scopes-view .hass=${this.hass}></ai-orchestrator-agent-scopes-view>
+      <ai-orchestrator-action-controls-view .hass=${this.hass} mode="permissions"></ai-orchestrator-action-controls-view>
       <ai-orchestrator-catalog-view .hass=${this.hass}></ai-orchestrator-catalog-view>
     `;
   }

@@ -7,12 +7,14 @@ from unittest.mock import AsyncMock
 from homeassistant.core import HomeAssistant, ServiceCall
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ai_orchestrator.const import DOMAIN
+from custom_components.ai_orchestrator import async_unload_entry
+from custom_components.ai_orchestrator.const import DOMAIN, FOUNDATION_ENTRY_UNIQUE_ID
 from custom_components.ai_orchestrator.provider_entry import (
     ChatDestination,
     LoadedProviderConnection,
     async_register_provider_entry_adapter,
     build_provider_entry_data,
+    provider_configuration_fingerprint,
     provider_entry_unique_id,
 )
 from custom_components.ai_orchestrator.providers.contract import (
@@ -102,6 +104,7 @@ def register_provider(hass: HomeAssistant, text=COMPOSED):
         provider_type=SYNTHETIC_PROVIDER_TYPE,
         provider=provider,
         validation=ConnectionValidationResult(reachable=True, authenticated=True),
+        configuration_fingerprint=provider_configuration_fingerprint(entry.data),
     )
     async_get_runtime(hass).loaded_provider_entry_ids.add(entry.entry_id)
     return provider, entry
@@ -134,6 +137,12 @@ async def start_manager(hass: HomeAssistant, document):
     manager = WorkflowManager(hass)
     runtime.workflow_manager = manager
     await manager.async_start()
+    # Execution/lifecycle unit tests start from an already-reviewed fixture;
+    # transport publication receipts are exercised separately.
+    await manager.async_save({**document, "enabled": False})
+    await manager._store.async_record_dry_run(
+        manager.get(document["workflow_id"]), manager.publication_bindings(document)
+    )
     await manager.async_save(document)
     return manager
 
@@ -442,7 +451,7 @@ async def test_stop_during_run_cancels_it_so_a_new_manager_can_run(hass, hass_st
     hass.states.async_set("binary_sensor.synthetic_window", "on")
     await asyncio.sleep(0)
 
-    assert manager.async_stop() is True
+    assert manager.async_stop() is False
     release.set()
     await hass.async_block_till_done()
     assert calls == []
@@ -453,3 +462,129 @@ async def test_stop_during_run_cancels_it_so_a_new_manager_can_run(hass, hass_st
     await trigger(hass)
     assert len(calls) == 1
     assert status(manager)["executions"] == 1
+
+
+async def test_observe_now_never_executes_manual_execute_workflow(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    calls = register_notify_service(hass)
+    manager = await start_manager(
+        hass, workflow(triggers=[{"kind": "manual"}], conditions=[])
+    )
+    result = manager.run_manual(WORKFLOW_ID)
+    await hass.async_block_till_done()
+    assert result["eligible"] is True
+    assert result["mode"] == "observation_only"
+    provider.generate.assert_not_awaited()
+    assert calls == []
+
+
+async def test_pending_cancellation_keeps_guard_and_cannot_deliver(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    started, cancelled, release = asyncio.Event(), asyncio.Event(), asyncio.Event()
+
+    async def delayed_cancellation(request):
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cancelled.set()
+            await release.wait()
+        return TextGenerationResult(text=COMPOSED)
+
+    provider.generate.side_effect = delayed_cancellation
+    calls = register_notify_service(hass)
+    document = workflow()
+    manager = await start_manager(hass, document)
+    snapshot = {"event": {"kind": "manual"}, "time": "20:00", "states": {}}
+    manager._schedule_execution(document, snapshot)
+    await started.wait()
+    original_task = manager._tasks[WORKFLOW_ID]
+    manager._deactivate(WORKFLOW_ID)
+    await cancelled.wait()
+    manager._activate(document)
+    manager._schedule_execution(document, snapshot)
+    try:
+        assert WORKFLOW_ID in manager._running
+        assert len(manager._tasks) == 1
+        assert status(manager)["skipped_busy"] == 1
+    finally:
+        for task in list(manager._tasks.values()):
+            if task is not original_task:
+                task.cancel()
+        release.set()
+        await hass.async_block_till_done()
+    assert calls == []
+    assert manager._tasks == {}
+    assert manager._running == set()
+    provider.generate.side_effect = None
+    provider.generate.return_value = TextGenerationResult(text=COMPOSED)
+    manager._schedule_execution(document, snapshot)
+    await hass.async_block_till_done()
+    assert len(calls) == 1
+
+
+async def test_provider_unload_cancels_execute_run(hass, hass_storage):
+    provider, entry = register_provider(hass)
+    started, release, cancelled = asyncio.Event(), asyncio.Event(), asyncio.Event()
+
+    async def slow(request):
+        started.set()
+        try:
+            await release.wait()
+        except asyncio.CancelledError:
+            cancelled.set()
+            raise
+        return TextGenerationResult(text=COMPOSED)
+
+    provider.generate.side_effect = slow
+    calls = register_notify_service(hass)
+    document = workflow()
+    manager = await start_manager(hass, document)
+    manager._schedule_execution(
+        document, {"event": {"kind": "manual"}, "time": "20:00", "states": {}}
+    )
+    await started.wait()
+    assert await async_unload_entry(hass, entry)
+    release.set()
+    await hass.async_block_till_done()
+    assert cancelled.is_set()
+    assert calls == []
+
+
+async def test_foundation_unload_retains_pending_manager_guard(hass, hass_storage):
+    provider, _ = register_provider(hass)
+    started, cancelled, release = asyncio.Event(), asyncio.Event(), asyncio.Event()
+
+    async def resistant(request):
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cancelled.set()
+            await release.wait()
+        return TextGenerationResult(text=COMPOSED)
+
+    provider.generate.side_effect = resistant
+    calls = register_notify_service(hass)
+    document = workflow()
+    manager = await start_manager(hass, document)
+    snapshot = {"event": {"kind": "manual"}, "time": "20:00", "states": {}}
+    manager._schedule_execution(document, snapshot)
+    await started.wait()
+    foundation = MockConfigEntry(
+        domain=DOMAIN, unique_id=FOUNDATION_ENTRY_UNIQUE_ID, data={}
+    )
+    runtime = async_get_runtime(hass)
+    runtime.loaded_foundation_entry_ids = {foundation.entry_id}
+    assert await async_unload_entry(hass, foundation)
+    await cancelled.wait()
+    try:
+        assert runtime.workflow_manager is manager
+        await manager.async_start()
+        manager._schedule_execution(document, snapshot)
+        assert status(manager)["skipped_busy"] == 1
+    finally:
+        release.set()
+        await hass.async_block_till_done()
+    assert calls == []
+    assert provider.generate.await_count == 1

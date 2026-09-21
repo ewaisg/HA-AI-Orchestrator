@@ -1,9 +1,9 @@
 # HA AI Orchestrator — UI and Product Plan
 
-Status: Product design baseline; Phase 1 implementation and acceptance are active
+Status: Product design baseline; r14 live and r15 source candidate awaiting deployment and live acceptance
 Audience: Product, frontend, Home Assistant integration, provider/API, security, and QA contributors
 Scope: Private, single-household Home Assistant AI orchestration product
-Implementation status: Provider setup/testing and read-only catalogue implemented; LOC-006 administrator chat has live acceptance; WFL-002C adds an offline draft preview editor
+Implementation status: Local chat, tools, scoped reads and workflow startup recovery verified on r14; AI draft validation still fails live; r15 adds reviewed action audit metadata and draft diagnostics
 
 ## 1. Purpose
 
@@ -21,18 +21,24 @@ cloud account access or device actions.
 
 | Surface | Implemented scope | Remaining boundary |
 |---|---|---|
-| Home | Administrator status and loaded-provider availability | Operational workflow/activity overview is planned |
-| Providers | Home Assistant backend setup/re-auth/reconfigure for authenticated local LM Studio; list and explicit timestamped connection test | Capability wizards, cloud providers, route editor, and dependency management are planned |
-| Entities & Permissions | Searchable read-only entity/device/area registry metadata and availability; `AI access: none` everywhere | No state values, attributes, context selection, or permission grants |
-| Chat | LOC-006 administrator local text trial with provider selector, complete replies, safe errors, keyboard submit, and bounded session-only history | No household context, tools/actions, streaming, profiles, Assist, or persistent history; current acceptance is tracked separately |
-| Automations | WFL-002C offline JSON draft/snapshot preview with explicit synthetic examples, static condition results, and no execution; existing lifecycle probe remains available | Visual studio, persistent activation, AI steps and notification execution remain planned. The WFL-002B listener harness is isolated from startup. |
-| Other sections | Navigation and scope placeholders | Voice/notifications, activity/security, and full settings are planned |
+| Home | Administrator status, provider availability and runtime capability reporting | Complete operational overview remains planned |
+| Providers | LM Studio setup/re-auth/reconfigure/testing; Azure endpoint authentication test only | Bedrock offline and unregistered; no cloud inference routes or failover |
+| Entities & Permissions | Registry metadata/search; explicit local observation scopes and tool probe; separate individual light/media action grants | Sensitive observation classes, switch targets, critical actions and arbitrary services remain denied |
+| Chat | Local conversation and permitted-state questions verified live; typed device control, direct or AI proposal, requires separate human confirmation | Physical device-action acceptance pending; no streaming, persistent history, autonomous or unrestricted control |
+| Automations | Visual builder, stored activation, JSON preview, mandatory dry-run receipts, compose/classify/extract/branch and real notify execution; disabled unsaved AI draft/refinement interface | Live r14 AI drafts fail validation; r15 corrects examples and adds stage diagnostics. No native HA automation authoring, arbitrary action steps or deterministic security templates |
+| Voice & Notifications | Text-only Assist conversation agent guidance; notifications configured in workflows | No scoped/action-capable Assist or verified complete voice pipeline |
+| Activity & Security | Temporary workflow results and scoped-question traces; reviewed r15 candidate adds durable confirmed-device-action metadata, bounded to 90 days/4096 records | Candidate not live; workflow audit hooks unwired; physical outcomes remain unconfirmed |
+| Settings | Placeholder | Full policy, retention/export and diagnostics controls remain planned |
 
-The panel uses TypeScript/Lit and one bundled module. Historical live acceptance
-names Core 2026.8.3 and Frontend 20260729.7; the owner's now-installed Core
-2026.9.0 and Frontend 20260826.4 are under `COMP-001` validation. Neither that
-discovery nor historical mobile evidence approves the changed chat candidate.
-See [LOC-006 candidate evidence](../evidence/2026-09-05-loc-006-local-chat.md).
+The panel uses TypeScript/Lit and one bundled module. Live r14 is installed on
+observed Core 2026.9.3. The window workflow's isolated test recorded three
+successful notification calls and owner-confirmed Fold8Ultra receipt; the other
+handsets remain unconfirmed. After restart, local chat, tools, scoped window reads
+and workflow recovery were verified. Broad entity control and native automation
+authoring remain incomplete. The latest frontend suite passed 363 tests; r15
+deployment and live acceptance remain pending. See [live workflow evidence](../evidence/2026-09-20-window-phone-workflow.md)
+and [current usage](../INSTALLATION.md). Later screen descriptions in this plan
+are target specifications, not claims that every control already exists.
 
 ## 2. Product principles
 
@@ -131,11 +137,12 @@ The user may exit after any stage. Home should display `Continue setup` until mi
 
 ### 5.2 Minimum readiness
 
-For the implemented LOC-006 trial, a loaded local provider is selected directly.
-The view discloses that generation capability is unverified and only sends text
-after an explicit administrator submission. No profile, context permission
-editor, or routing policy editor is required for this restricted trial.
-Its live readiness still depends on the candidate's acceptance evidence.
+Text conversation selects a loaded local provider directly and sends only after
+an explicit administrator submission. Scoped questions require a saved observation
+policy and successful synthetic tool probe. Candidate device control requires
+separate saved action grants plus an exact reviewed proposal and one-time human
+confirmation. These local flows have no cloud route editor dependency. Candidate
+live acceptance remains governed by the tracker.
 
 The planned profile-based chat experience is ready when:
 
@@ -193,8 +200,9 @@ and explicit model identifier through Home Assistant's backend form. It uses
 the selected model already served by LM Studio. It has no arbitrary custom
 headers, public/hostname endpoints, model load/unload management, adjustable
 timeout, or TLS-verification override. Connection testing proves only the
-connection/authentication/configured-model lookup; generation is an explicit
-LOC-006 trial and other capabilities remain unverified.
+connection/authentication/configured-model lookup; generation uses explicit
+trials. Scoped observation offers a synthetic tool probe; its success
+is specific to the tested connection and is not a blanket capability guarantee.
 
 Planned field categories, subject to later adapter and security review:
 
@@ -477,10 +485,14 @@ History is in-memory only and clears on leaving the view, provider changes,
 **New chat**, and Home Assistant context loss/change. Clearing a pending reply
 discards it from the view but is not a stop-generation request; provider work
 may finish before the backend deadline. Provider unload cancels owned work.
-No persistent transcript, tool cards, entity citations, action confirmation,
-streaming, or native ConversationEntity/Assist surface is implemented here.
+Text conversation has no persistent transcript or streaming. The Assistant
+mode selector separately offers permitted-state questions with ordered trace
+markers and device control with explicit grants, a local AI or direct proposal,
+and a human confirmation card. These modes do not silently enrich ordinary chat.
+The native Assist conversation entity remains text-only.
 
-Sections 9.1 through 9.3 specify the planned profile/action-capable experience.
+Sections 9.1 through 9.3 specify the broader target experience; they do not expand
+the supported action catalog or establish physical device-action acceptance.
 
 ### 9.1 Chat profile
 
@@ -828,20 +840,20 @@ discovery, implementation evidence, or current authoritative documentation.
 | ID | Decision/unknown | Needed evidence or owner |
 |---|---|---|
 | UI-001 | Final product name and sidebar label | User decision |
-| UI-002 | Target Home Assistant version and frontend compatibility range | Historical target Core 2026.8.3/Frontend 20260729.7; Core 2026.9.0/Frontend 20260826.4 now observed, with COMP-001 acceptance open; no broader range claimed |
+| UI-002 | Target Home Assistant version and frontend compatibility range | Current live observation Core 2026.9.3/Frontend 20260826.7; named-version test evidence and outstanding gates in the tracker; no broader range claimed |
 | UI-003 | Exact entities, devices, areas, actions, notification targets, and Assist pipelines available | Live Home Assistant discovery; do not assume |
 | UI-004 | First-release Azure account/resource type, endpoint, models, and authentication | User account details plus live Microsoft documentation/test |
 | UI-005 | First-release AWS account, region, model access, and IAM/authentication method | User account details plus live AWS documentation/test |
 | UI-006 | LM Studio model lifecycle scope (consume only versus manage load/unload) | User preference plus supported API validation |
 | UI-007 | Default sensitive entity/attribute policy | Defaults accepted in DEC-017/DEC-019; selectors, enforcement, and any exceptions require implementation evidence |
-| UI-008 | High-risk and critical action classification details | Security review against discovered HA action catalog |
+| UI-008 | High-risk and critical action classification details | Candidate supports human-confirmed light/media operations; generic switch targets remain denied pending target risk classification; critical actions unavailable |
 | UI-009 | Confirmation delivery beyond the panel | HA/Companion App capability proof and user preference |
 | UI-010 | Execution/chat retention defaults and storage limits | Defaults accepted in DEC-018: chat 30 days, execution metadata 90 days; persistence/storage limits remain unimplemented; LOC-006 is session-only |
-| UI-011 | Whether workflow templates can create native HA automation artifacts or remain internal only | DEC-009 selects the integration-owned deterministic v1 runtime; workflow implementation starts in Phase 2 |
+| UI-011 | Whether workflow templates can create native HA automation artifacts or remain internal only | DEC-009 selects the implemented integration-owned v1 runtime; AI drafts do not create native HA automations |
 | UI-012 | Required localization languages | User decision |
 | UI-013 | Browser/device accessibility test matrix | User environment and QA decision |
 | UI-014 | Whether a free-form flow canvas is needed after the structured builder | Usage evidence after MVP |
-| UI-015 | Whether per-user chat history and voice authorization are feasible | LOC-006 isolates an administrator's in-memory view and pending requests; persistent/non-admin history and Assist authorization remain planned |
+| UI-015 | Whether per-user chat history and voice authorization are feasible | Administrator panel sessions isolate pending requests; Assist is text-only with no control; persistent/non-admin history and scoped/action-capable voice remain planned |
 
 ## 19. Design review for remaining implementation
 
