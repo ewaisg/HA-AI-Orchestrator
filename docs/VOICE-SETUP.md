@@ -63,3 +63,9 @@ light's physical state.
 Status: assistant configuration saved; owner Samsung speech/physical acceptance
 and Alexa permission/linking acceptance remain pending. No complete voice or
 Echo-local-LLM acceptance is claimed.
+
+Follow-up: a typed request through **Local AI + home control**, “Turn off Loft”,
+returned “Turned off the light”. The separate Loft entity dialog then reported
+Off. This proves the selected pipeline's command path, not phone microphone,
+speech recognition, spoken reply or physical-device acceptance. The owner chose
+to finish Samsung first and keep Alexa disabled.
