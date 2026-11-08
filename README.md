@@ -2,90 +2,59 @@
 
 HA AI Orchestrator is a private Home Assistant product for configuring local and cloud AI providers, building constrained AI-assisted automations, and using those agents through chat, Assist, notifications, and voice—with minimal YAML.
 
-## Current state
+## Current release: interface 2026.11.07
 
-Live r14 is installed and restarted on the observed Home Assistant Core 2026.9.3
-installation. Local chat, tool support, a scoped window-state question and
-workflow startup recovery are verified. An earlier
-dining-room window workflow completed a local AI generation and three successful
-notification calls; the owner confirmed receipt on Fold8Ultra. Receipt on the
-other two phones remains unconfirmed. AI drafting still returns an invalid draft
-on live r14; corrected prompt examples and precise validation-stage messages are
-in the uninstalled r15 candidate. See the tracker for exact evidence.
+A guided local-first workspace inside Home Assistant: connect LM Studio, verify a
+plain chat, choose explicit permissions, and build a notification workflow.
 
-- Config-entry lifecycle, authenticated LM Studio connections, provider setup
-  and connection testing, a read-only entity/device/area catalogue (bounded
-  to 10,000 records per list, with omissions reported), and a bundled
-  TypeScript/Lit panel served at a content-addressed path.
-- Administrator chat with a local provider (bounded, no household context, no
-  tools, not persisted).
-- One Assist conversation agent per local provider connection. It answers with
-  model text only: the conversation's own turns go to the model, nothing else
-  does, no tool is offered, and it is never presented as a device-control agent.
-  Select it in Settings, then Voice assistants. Home Assistant's own assistant
-  still handles device commands.
-- Workflows (closed v1 schema, Home Assistant `Store` persistence): a
-  structured builder with pickers backed by the real catalogue, discovered
-  notification targets and loaded providers; a JSON editor with offline
-  preview; stored workflows that observe their triggers and record redacted
-  outcomes; AI-step dry runs (compose, classify with a closed category enum,
-  extract with typed fields, branch on a classification) against a local
-  provider; and `execute` mode, which runs the AI steps and delivers the
-  composed text through a notify entity or legacy notify service that Home
-  Assistant actually has. One run per workflow at a time, no retries, first
-  failure stops, evidence is redacted.
+- **Guided setup:** ordered connection, chat, permissions and workflow steps.
+  Provider-loaded status does not claim that inference or device control passed.
+- **Simpler workflow workspace:** a Build → Test → Enable guide, numbered builder
+  sections, optional conditions, and collapsed AI drafting, JSON testing and
+  developer diagnostics. Explicit editor handoffs open the testing section.
+- **Recovery:** actionable activation/dry-run errors, a Settings & recovery page,
+  and a visible interface release label. Simple state/time drafts can create a
+  sample test event without hand-writing JSON.
+- **Preserved backend:** this release changes no provider transport, execution,
+  authorization, confirmation or storage policy. The integration manifest remains
+  0.1.0; the interface has its own visible release identifier.
 
-Workflow execution calls only the notify namespace. It requires an enabled
-`execute` workflow and a successful dry run bound to its current configuration.
-Save a disabled draft, dry run it with its configured local provider, then enable
-it. Observe now never runs steps or sends notifications.
+November live recovery verified an authenticated LM Studio connection and a
+plain chat response through Home Assistant Core 2026.11.0. This is a smoke test,
+not a claim that all backend behavior is certified on that Core version. The
+existing multi-phone workflow was found inactive with an activation error and
+has been paused for review. A separate lab workflow passed its dry run and
+real trigger with one local generation, one accepted notification and no failures;
+it was paused afterward. Handset receipt is tracked separately. Historical September test counts and revision names
+are not current acceptance evidence.
 
-Live r14 also includes explicit local observation policies, a synthetic tool
-probe, independent questions about permitted states, and these interfaces:
+The frontend gate passes **457 browser tests**, lint, TypeScript checks, build,
+sync and byte-identical bundle verification. Production dependency audit reports
+zero vulnerabilities. Development dependency audit findings are not resolved by
+this interface release.
 
-- **Chat modes:** text conversation, questions about permitted entities, and
-  device control with review and confirmation. Observation and action grants
-  are separate and start empty.
-- **Typed device actions:** explicitly grant individual light on/off and media
-  play/pause/volume targets in Entities & Permissions. Local AI can propose one
-  permitted action, or the user can choose it directly. Every dispatch requires
-  a separate human confirmation bound to current permissions and state. Switch
-  targets, critical actions and arbitrary services remain unavailable.
-- **AI workflow drafting:** describe a notification workflow using selected
-  entity/notification references. The returned draft is disabled and unsaved;
-  review, save, successful dry run and enable are separate steps. Existing internal
-  workflows can be selected explicitly to request a new draft copy. Live draft
-  generation is not yet accepted; use the visual builder or JSON editor.
-- **Activity:** latest redacted workflow results and ordered scoped-question
-  traces. These are temporary runtime records, not persistent audit history.
+### Current boundaries
 
-The r15 candidate adds reviewed durable metadata for confirmed device actions,
-with 90-day retention and a 4096-record bound. Workflow audit hooks are not wired.
-No physical device-action acceptance is claimed. The latest frontend suite passed
-363 tests; automated checks do not establish live acceptance.
+The custom Assist conversation agent is text-only. The panel separately supports
+scoped state questions and reviewed device proposals; grants and confirmations
+remain required. Workflows are integration-owned documents rather than native
+Home Assistant automations. AI notification workflows require a successful dry
+run before enablement. Observe mode records trigger outcomes and runs no steps.
+AI-generated drafts must be reviewed, saved and tested separately.
 
-Azure OpenAI v1 setup tests endpoint authentication only; the offline Bedrock
-adapter remains unregistered. Neither enables cloud chat, workflow routing or
-failover. Assist remains text-only. Persistent chat, complete workflow audit,
-full Settings, broader entity control, native automation authoring and deterministic
-security templates remain unfinished.
-The Phase 1 release gate (LOC-007) and the Phase 2 gate (WFL-008) are open;
-the tracker records exactly what has live evidence.
+Physical device acceptance, complete voice-pipeline acceptance, persistent chat,
+complete workflow audit and cloud routing/failover remain outside this release.
+Azure endpoint tests do not establish inference support; Bedrock is not a
+registered production provider. Earlier tracker sections describe historical or
+unfinished work and do not expand this release's scope.
 
-- [Manual installation and current usage](docs/INSTALLATION.md)
-- [Preview, save, and observe a workflow in Automations](docs/OFFLINE-WORKFLOW-PREVIEW.md)
-
+- [Setup, testing and interface rollback](docs/GETTING-STARTED.md)
+- [Manual installation](docs/INSTALLATION.md)
+- [Release evidence](docs/evidence/2026-11-07-interface-release.md)
 - [Project tracker](docs/PROJECT-TRACKER.md)
 - [Product requirements](docs/PRODUCT-REQUIREMENTS.md)
-- [Approved architecture](docs/architecture/ARCHITECTURE.md)
-- [Home Assistant platform review](docs/architecture/HA-PLATFORM-REVIEW.md)
-- [UI/product plan](docs/product/UI-PRODUCT-PLAN.md)
-- [Quality and security plan](docs/quality/QUALITY-SECURITY-PLAN.md)
-- [Architecture decision records](docs/architecture/adrs/README.md)
+- [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Decision register](docs/DECISIONS.md)
-- [Evidence and unknowns](docs/EVIDENCE-REGISTER.md)
-
-The tracker is the source of truth for what is done, what is active, what is blocked, and the exact resume point.
 
 ## Working principles
 

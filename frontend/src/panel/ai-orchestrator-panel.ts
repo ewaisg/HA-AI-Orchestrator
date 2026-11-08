@@ -245,6 +245,8 @@ export class AiOrchestratorPanel extends LitElement {
                     ? html`<ai-orchestrator-audit .hass=${this.hass}></ai-orchestrator-audit><ai-orchestrator-activity .hass=${this.hass}></ai-orchestrator-activity>`
                   : this._activeSection === "voice" && this._status?.features.conversation === true
                     ? this._renderVoice()
+                  : this._activeSection === "settings"
+                    ? this._renderSettings()
                   : this._renderPlaceholder(this._activeSection))}
           </div>
         </main>
@@ -280,6 +282,7 @@ export class AiOrchestratorPanel extends LitElement {
         </nav>
 
         <div class="sidebar-note">
+          <p>Interface release · 2026.11.07</p>
           <strong>Local AI, explicit requests</strong>
           Chat sends only your conversation to the selected local provider. Browsing the entity
           catalogue sends no household context to AI. Device control requires saved permissions and your confirmation.
@@ -294,15 +297,16 @@ export class AiOrchestratorPanel extends LitElement {
       <header class="page-header">
         <div>
           <p class="eyebrow">Private Home Assistant AI</p>
-          <h1>Your Home Assistant AI</h1>
+          <h1>Make your home a little smarter.</h1>
           <p class="page-intro">
-            Connect a local provider, build and test notification workflows, and inspect their results.
-            Choose observation permissions explicitly; available capabilities are shown below.
+            Your local model, connected to Home Assistant. Begin with a conversation, then build a useful notification workflow.
           </p>
         </div>
         <span class="privacy-badge">Local status check only</span>
       </header>
 
+      <div class="content-grid">${this._renderNextSteps()}</div>
+      <details class="card technical-details"><summary>Connection status &amp; technical details</summary>
       <section class="hero" aria-labelledby="foundation-status" aria-busy=${this._loadState === "loading"}>
         <div class="hero-copy" aria-live="polite">
           <p class="status-kicker">
@@ -327,9 +331,8 @@ export class AiOrchestratorPanel extends LitElement {
         </div>
       </section>
 
-      <div class="content-grid">
-        ${this._renderFeatureCard()} ${this._renderNextSteps()}
-      </div>
+        ${this._renderFeatureCard()}
+      </details>
 
       <div class="assurance">
         <span class="assurance-mark" aria-hidden="true">✓</span>
@@ -396,24 +399,24 @@ export class AiOrchestratorPanel extends LitElement {
   }
 
   private _renderNextSteps(): TemplateResult {
+    const loaded = this._loadState === "ready" && this._status?.features.providers === true;
     return html`
-      <section class="card" aria-labelledby="next-steps-heading">
-        <h2 id="next-steps-heading">What happens next</h2>
-        <p class="card-intro">Start with a local provider, then test a workflow before enabling it.</p>
-        <ol class="next-list">
-          <li>
-            <strong>Build an automation</strong>
-            Choose a real trigger and notification targets in Automations. Save disabled and dry run before enabling.
-          </li>
-          <li>
-            <strong>Connect a verified local provider</strong>
-            Add your connection in Providers and run its connection test.
-          </li>
-          <li>
-            <strong>Discover permissions from Home Assistant</strong>
-            Select permitted entities in Entities &amp; Permissions. Review execution results in Activity &amp; Security.
-          </li>
+      <section class="card setup-guide" aria-labelledby="next-steps-heading">
+        <p class="eyebrow">Start small. Test each step.</p>
+        <h2 id="next-steps-heading">Your setup, one step at a time</h2>
+        <p class="card-intro">${loaded ? "A provider is loaded. Test it before trying chat or enabling a workflow." : "Start by connecting LM Studio. No devices or automations are changed during setup."}</p>
+        <ol class="setup-path">
+          <li><span class="step-number">1</span><div><h3>Connect your model</h3>
+            <p>${loaded ? "Provider loaded — inference still needs testing." : "In Providers, open the integration page and choose Add hub → LM Studio. Use the server computer’s LAN address, API token and exact model ID."}</p>
+            <button class="primary-button" @click=${() => this._selectSection("providers")}>${loaded ? "Test connection" : "Connect LM Studio"}</button></div></li>
+          <li><span class="step-number">2</span><div><h3>Say hello</h3><p>Open Chat, choose your model and send “Reply with READY”. This sends only your message; no household state is included.</p>
+            <button class="secondary-button" ?disabled=${!loaded} @click=${() => this._selectSection("chat")}>Try your first chat</button></div></li>
+          <li><span class="step-number">3</span><div><h3>Choose what AI can see</h3><p>Optional: select one harmless entity, save its observation permission, then test tool support. Permission to read is separate from permission to control.</p>
+            <button class="secondary-button" ?disabled=${!loaded} @click=${() => this._selectSection("permissions")}>Choose permissions</button></div></li>
+          <li><span class="step-number">4</span><div><h3>Create your first workflow</h3><p>Start with a notification. Build a disabled draft, test it without sending anything, then enable only after reviewing the result.</p>
+            <button class="secondary-button" ?disabled=${!loaded} @click=${() => this._selectSection("automations")}>Open workflows</button></div></li>
         </ol>
+        <button class="secondary-button" @click=${this._refreshStatus}>Refresh setup status</button>
       </section>
     `;
   }
@@ -447,6 +450,21 @@ export class AiOrchestratorPanel extends LitElement {
     `;
   }
 
+  private _renderSettings(): TemplateResult {
+    return html`
+      <header class="page-header"><div><p class="eyebrow">Settings &amp; recovery</p><h1>Your setup, under your control.</h1><p class="page-intro">Interface release 2026.11.07. These shortcuts use Home Assistant’s existing settings.</p></div></header>
+      <section class="card"><h2>Connection &amp; voice</h2><p>Manage model URLs and tokens in the integration’s connection form. Choose your conversation agent and speech providers separately in Voice assistants.</p>
+        <div class="hero-actions"><a class="primary-button" href="/config/integrations/integration/ai_orchestrator">Manage connections</a><a class="secondary-button" href="/config/voice-assistants">Voice assistants</a></div>
+      </section>
+      <section class="card" style="margin-top:20px"><h2>Back up before an update</h2><p>Create and download a Home Assistant backup. Keep a copy of the installed integration folder. This interface update does not migrate workflow or permission storage.</p><a class="secondary-button" href="/config/backup/overview">Open backups</a></section>
+      <section class="card" style="margin-top:20px"><h2>If something stops working</h2><ol class="next-list">
+        <li><strong>Pause the affected workflow.</strong> Disable it in Automations and check its last result in Activity &amp; Security.</li>
+        <li><strong>Check the model connection.</strong> Verify LM Studio is running, the token is valid and the exact model is loaded. Test in Providers, then try a plain message in Chat.</li>
+        <li><strong>Roll back an interface update.</strong> Restore the backed-up frontend/ai-orchestrator-panel.js file, reload the foundation integration entry, then reload the browser. Do not delete your stored workflows or provider credentials.</li>
+      </ol><p>Assist is text-only in this integration. Device actions use the panel’s separate permissions and confirmation flow. Workflow history and device-action history have different retention; full workflow audit and cloud routing remain unfinished.</p></section>
+    `;
+  }
+
   private _renderPlaceholder(section: Exclude<SectionId, "home">): TemplateResult {
     const copy = PLACEHOLDER_COPY[section];
     const sectionLabel = SECTIONS.find((item) => item.id === section)?.label ?? "Section";
@@ -475,35 +493,48 @@ export class AiOrchestratorPanel extends LitElement {
 
   private _renderWorkflowProbe(): TemplateResult {
     return html`
+      <header class="page-header"><div><p class="eyebrow">Workflows</p><h1>A clear path from idea to action.</h1><p class="page-intro">These workflows belong to AI Orchestrator; they do not replace Home Assistant’s native automations.</p></div><span class="privacy-badge">Local only</span></header>
+      <section class="workflow-roadmap card" aria-label="Workflow steps">
+        <div><strong>1 · Build</strong><p>Choose when it happens and who gets notified. For AI notifications, choose Execute mode and save disabled.</p></div>
+        <div><strong>2 · Test</strong><p>Use Test &amp; advanced tools to dry run the saved draft. No notification is sent.</p></div>
+        <div><strong>3 · Enable</strong><p>Find the draft in Saved workflows. Enable it only after its successful dry run.</p></div>
+      </section>
+      <details class="editor-disclosure"><summary>Describe a workflow with AI <span>Optional · review before saving</span></summary>
       <ai-orchestrator-workflow-draft .hass=${this.hass}
         @generated-workflow=${(event: CustomEvent<{json: string}>) => {
           this._builderDraft = {json: event.detail.json, sequence: ++this._draftSequence};
           this._draft = {json: event.detail.json, sequence: ++this._draftSequence};
         }}></ai-orchestrator-workflow-draft>
+      </details>
       <ai-orchestrator-workflow-builder
         .hass=${this.hass}
         .draft=${this._builderDraft}
         @workflow-saved=${() => { this._workflowsRefresh += 1; }}
         @workflow-draft=${(event: CustomEvent<{ json: string }>) => {
           this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
+          this._openWorkflowTesting();
         }}
       ></ai-orchestrator-workflow-builder>
+      <details class="editor-disclosure" id="workflow-testing"><summary>Test &amp; advanced tools <span>Dry run a saved draft · JSON editor</span></summary>
       <ai-orchestrator-workflow-preview
         .hass=${this.hass}
         .draft=${this._draft}
         @workflow-saved=${() => { this._workflowsRefresh += 1; }}
       ></ai-orchestrator-workflow-preview>
+      </details>
       <ai-orchestrator-workflows
         .hass=${this.hass}
         .refreshToken=${this._workflowsRefresh}
         @workflow-load=${(event: CustomEvent<{ json: string }>) => {
           this._draft = { json: event.detail.json, sequence: ++this._draftSequence };
+          this._openWorkflowTesting();
         }}
         @workflow-edit=${(event: CustomEvent<{ json: string }>) => {
           this._builderDraft = { json: event.detail.json, sequence: ++this._draftSequence };
           this.renderRoot.querySelector("ai-orchestrator-workflow-builder")?.scrollIntoView({ block: "start" });
         }}
       ></ai-orchestrator-workflows>
+      <details class="editor-disclosure"><summary>Developer diagnostics <span>Lifecycle check · no device action</span></summary>
       <header class="page-header">
         <div>
           <p class="eyebrow">Automations</p>
@@ -540,8 +571,16 @@ export class AiOrchestratorPanel extends LitElement {
             ${this._renderWorkflowProbeResult()}
           </div>
         </div>
-      </section>
+      </section></details>
     `;
+  }
+
+  private _openWorkflowTesting(): void {
+    const tools = this.renderRoot.querySelector<HTMLDetailsElement>("#workflow-testing");
+    if (tools) {
+      tools.open = true;
+      tools.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
   }
 
   private _renderProviders(): TemplateResult {
@@ -645,7 +684,7 @@ export class AiOrchestratorPanel extends LitElement {
         kicker: "Foundation connection confirmed",
         title: "The integration is configured",
         detail:
-          "Home Assistant returned the supported foundation status. Feature readiness remains limited to the explicit capability values below.",
+          "Home Assistant is connected. Follow the setup steps below to connect a model, verify chat and build your first workflow.",
         tone: "ready",
       };
     }

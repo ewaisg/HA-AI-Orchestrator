@@ -229,6 +229,7 @@ describe("AI Orchestrator panel shell", () => {
       "ai_orchestrator/notify/targets",
       "ai_orchestrator/status",
       "ai_orchestrator/workflow/probe/run",
+      "ai_orchestrator/workflows/light_actions/catalog",
       "ai_orchestrator/workflows/list",
     ]);
     expect(shadowText(panel)).toContain("One trigger produced exactly one execution");

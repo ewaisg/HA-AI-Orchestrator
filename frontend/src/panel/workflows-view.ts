@@ -366,7 +366,7 @@ export class WorkflowsView extends LitElement {
       return nothing;
     }
     if (this._entries.length === 0) {
-      return html`<p class="notice">No stored workflows. Use "Save as workflow" in the editor above.</p>`;
+      return html`<p class="notice">No stored workflows yet. Build your first notification above and choose Save workflow. Keep it disabled until its dry run succeeds.</p>`;
     }
     return html`<div class="list" role="list" aria-label="Stored workflows">
       ${this._entries.map((entry) => this._renderEntry(entry))}
@@ -399,6 +399,8 @@ export class WorkflowsView extends LitElement {
           <span class="badge ${badge}">${badgeLabel}</span>
         </div>
         ${workflow.description ? html`<p class="meta">${workflow.description}</p>` : nothing}
+        ${status.error === "activation_failed" ? html`<p class="notice error"><strong>This workflow is not running.</strong> Check Providers for a loaded connection and verify its model. Then review the workflow’s targets and dry-run result before enabling it. Do not treat an enabled switch as proof that the workflow is active.</p>` : nothing}
+        ${status.error === "dry_run_required" ? html`<p class="notice">Test this saved version before enabling it. Choose Load into editor below, open Test &amp; advanced tools, then run Dry run AI steps. No notification is sent by a dry run.</p>` : nothing}
         <p class="meta">
           ${workflow.triggers.length} trigger(s) · ${workflow.conditions.length} condition(s) ·
           ${workflow.steps.length} step(s)

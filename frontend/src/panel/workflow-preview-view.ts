@@ -102,6 +102,26 @@ export class WorkflowPreviewView extends LitElement {
   private _storedWorkflowId(): string | undefined {
     try { const id = (JSON.parse(this._workflow) as { workflow_id?: unknown }).workflow_id; return typeof id === "string" && UUID.test(id) ? id : undefined; } catch { return undefined; }
   }
+  private readonly _sampleEvent = (): void => {
+    if (this._busy) return;
+    this._invalidate();
+    try {
+      const workflow = parseStoredWorkflow(JSON.parse(this._workflow));
+      const trigger = workflow.triggers[0];
+      if (!trigger || workflow.conditions.length > 0) throw new Error();
+      if (trigger.kind === "state" && Array.isArray(trigger.entity_ids) &&
+          typeof trigger.entity_ids[0] === "string" && typeof trigger.to_state === "string") {
+        const entity = trigger.entity_ids[0];
+        const target = trigger.to_state;
+        this._snapshot = JSON.stringify({ states: { [entity]: target }, time: "12:00",
+          event: { kind: "state", entity_id: entity, from_state: target === "off" ? "on" : "off", to_state: target } }, null, 2);
+      } else if (trigger.kind === "time" && typeof trigger.at_time === "string") {
+        this._snapshot = JSON.stringify({ states: {}, time: trigger.at_time, event: { kind: "time" } }, null, 2);
+      } else throw new Error();
+    } catch {
+      this._error = "Sample events support a state-to-value or time trigger without conditions. For other workflows, enter a representative snapshot in the advanced editor.";
+    }
+  };
   private _canDryRun(): boolean {
     return !this._busy && !!this.hass && this.hass.connection?.connected !== false && !!this._snapshot.trim() && this._storedWorkflowId() !== undefined && (this._lightOnly() || this._providers.some((p) => p.connection_id === this._connectionId));
   }
@@ -156,6 +176,8 @@ export class WorkflowPreviewView extends LitElement {
       <h1 id="preview-title">Workflow preview</h1>
       <p>Test a draft against a supplied snapshot. Preview contacts no provider and executes no action. Save an execute workflow disabled, dry run it successfully with its configured provider, then enable it in the stored list. Changing the workflow requires another dry run. Observe mode never runs steps.</p>
       <p>Start with a synthetic window example, then edit the workflow or snapshot. The example identifiers are fictional.</p>
+      <div class="actions"><button id="sample-event" type="button" ?disabled=${this._busy || !this._workflow.trim()} @click=${this._sampleEvent}>Create sample test event for this draft</button></div>
+      <p>For a simple state or time trigger without conditions, create sample data above and choose Dry run AI steps below. Sample data is not your home’s current state. Review the JSON if you need a different scenario.</p>
       <div class="actions"><button type="button" @click=${() => this._example(false)}>Load synthetic evening example</button><button type="button" @click=${() => this._example(true)}>Load synthetic daytime example</button></div>
       <div class="editors"><div><label for="workflow">Workflow JSON</label><textarea id="workflow" spellcheck="false" maxlength=${PREVIEW_INPUT_LIMIT} .value=${this._workflow} @input=${(event: Event) => this._edit(event, true)}></textarea></div>
       <div><label for="snapshot">Snapshot JSON</label><textarea id="snapshot" spellcheck="false" maxlength=${PREVIEW_INPUT_LIMIT} .value=${this._snapshot} @input=${(event: Event) => this._edit(event, false)}></textarea></div></div>

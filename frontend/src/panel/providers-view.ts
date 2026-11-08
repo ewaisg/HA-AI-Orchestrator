@@ -278,8 +278,8 @@ export class ProvidersView extends LitElement {
         <div class="empty-state">
           <h3>No provider connections</h3>
           <p>
-            Add a provider through Home Assistant's AI Orchestrator integration page.
-            Credentials stay in the backend config flow and never return to this panel.
+            Open the integration page, choose Add hub, then select LM Studio. Enter the server’s private LAN URL ending in /v1, its API token and the exact model identifier.
+            Credentials stay in Home Assistant and never return to this panel. After saving, return here and test the connection; then try a message in Chat.
           </p>
           <a class="primary-link" href=${PROVIDER_MANAGEMENT_PATH}>Add provider connection</a>
         </div>

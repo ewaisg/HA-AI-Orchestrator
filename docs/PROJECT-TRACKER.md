@@ -1,10 +1,19 @@
 # Project tracker
 
-Last updated: 2026-09-20
+Last updated: 2026-11-07
 Overall state: **Phase 1 — local provider and onboarding MVP**
-Current resume point: **r16 installed/restarted (50 exact files), exact backend 1393 and frontend 379 passed. Live AI workflow generation now succeeds with structured output; generated window/phone draft saved disabled for a synthetic dry run, result pending. AST-008 unified assistant candidate implemented; parent session-race fix approved, short-height layout fix underway. Next: verify dry run, remove temporary disabled duplicate, finish/review/deploy unified assistant, then physical light acceptance (owner choice pending). Keep turn open.**
+Current resume point: **November interface release 2026.11.07 installed; authenticated local chat and isolated notification workflow verified on Core 2026.11.0. Preserve the installed backend. Both the legacy multi-phone workflow and the new lab workflow are paused, and the lab helper is off. See November evidence for actual checks. Voice and physical device controls require separate acceptance and are not claimed complete.**
 
 Accepted candidate evidence: the August 29 clean Git-archive Linux gate recorded 340 full, 98 focused, 30 security/evidence/traceability, and 231 pure tests plus Ruff/canary. The frontend recorded 95 browser tests plus lint, typecheck, build, sync, and byte identity (75,409 bytes; SHA-256 `18f23c5e787ecce2bdb052ba1d1799a116a18f3833da70e6a481f423e6037450`). Both independent pre-live reviewers approved the candidate; evidence commit is `dc71eca6d5e8124c2d2101064d44e3269a5f9190`. These are historical gates, not September 5 test reruns. The Windows checkout's CRLF bundle differs physically; use the canonical Git archive for exact-artifact installation.
+
+## November recovery and usability release
+
+| ID | Task | Status | Evidence / next action |
+| --- | --- | --- | --- |
+| UX-101 | Guided onboarding and progressive workflow disclosure | DONE | Ordered setup, progressive workflow tools, numbered builder, sample-event helper, recovery page and visible release. 457 browser tests, lint, typecheck, build/sync/bundle identity passed. See November release evidence. |
+| REC-101 | Restore local model connection and prove chat | DONE | Owner entered token in HA. Model discovery/setup and READY chat passed, including after reload. A disabled isolated workflow passed dry run (1 provider / 0 actions), then real helper trigger (1 execution / 1 provider / 1 notify / 0 failures). Both workflows paused and helper off after the test. Handset receipt is separate owner evidence. |
+
+Current release scope: frontend usability improvements only; preserve backend permissions, storage and workflow execution policies. Historical revision/test claims below are not fresh verification.
 
 ## Status rules
 
@@ -19,7 +28,7 @@ Accepted candidate evidence: the August 29 clean Git-archive Linux gate recorded
 
 No task may move to `DONE` based only on an assertion.
 
-## Active snapshot
+## Historical September snapshot (superseded by November evidence)
 
 | Field | Current value |
 |---|---|

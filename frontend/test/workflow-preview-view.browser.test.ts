@@ -26,6 +26,27 @@ function dryRunButton(view: WorkflowPreviewView): HTMLButtonElement { return vie
 afterEach(() => { for (const view of mounted.splice(0)) view.remove(); });
 
 describe("offline workflow editor", () => {
+  it.each([
+    { trigger: { kind: "state", entity_ids: ["input_boolean.test"], to_state: "on" }, event: { kind: "state", entity_id: "input_boolean.test", from_state: "off", to_state: "on" }, time: "12:00" },
+    { trigger: { kind: "time", at_time: "18:30" }, event: { kind: "time" }, time: "18:30" },
+  ])("creates an explicit sample event without contacting Home Assistant: $trigger.kind", async ({trigger, event, time}) => {
+    const requests: Record<string, unknown>[] = [];
+    const view = await mount(createRoutedFakeHass({}, message => requests.push(message)));
+    view.draft = { sequence: 1, json: JSON.stringify({ ...STORED_WORKFLOW, enabled: false, conditions: [], triggers: [trigger] }) };
+    await settle(view);
+    button(view, "Create sample test event").click(); await settle(view);
+    const sample = JSON.parse(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!.value) as Record<string, unknown>;
+    expect(sample.event).toEqual(event); expect(sample.time).toBe(time);
+    expect(actions(requests)).toEqual([]);
+    expect(text(view)).toContain("not your home’s current state");
+  });
+  it("does not invent condition values for sample events", async () => {
+    const view = await mount();
+    view.draft = { sequence: 1, json: JSON.stringify(STORED_WORKFLOW) }; await settle(view);
+    button(view, "Create sample test event").click(); await settle(view);
+    expect(text(view)).toContain("enter a representative snapshot");
+    expect(view.shadowRoot!.querySelector<HTMLTextAreaElement>("#snapshot")!.value).toBe("");
+  });
   it("requires explicit sample loading and preview; shows readable results", async () => {
     const requests: Record<string, unknown>[] = [];
     const view = await mount(createRoutedFakeHass({ "ai_orchestrator/workflow/preview": VALID_PREVIEW }, (message) => requests.push(message)));

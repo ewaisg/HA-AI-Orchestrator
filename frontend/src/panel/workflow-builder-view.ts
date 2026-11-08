@@ -44,7 +44,7 @@ export class WorkflowBuilderView extends LitElement {
   public static override styles = css`
     :host { display:block; min-width:0; color:var(--primary-text-color,#233642); margin-bottom:32px; }
     * { box-sizing:border-box; } h1 { font-size:26px; margin:0 0 10px; } h2 { font-size:18px; margin:18px 0 8px; }
-    p { line-height:1.6; } fieldset { border:1px solid var(--divider-color,#ccd9da); border-radius:12px; padding:12px 16px; margin:0 0 14px; min-width:0; }
+    summary { cursor:pointer; padding:14px 0; font-weight:600; } details { margin-bottom:14px; } p { line-height:1.6; } fieldset { border:1px solid var(--divider-color,#ccd9da); border-radius:12px; padding:12px 16px; margin:0 0 14px; min-width:0; }
     legend { font-weight:600; padding:0 6px; } label { display:block; font-weight:600; margin:10px 0 4px; }
     input, select, textarea { width:100%; min-width:0; min-height:44px; padding:8px 12px; font:inherit; color:inherit; background:var(--card-background-color,#fff); border:1px solid #7d969c; border-radius:8px; }
     textarea { min-height:96px; resize:vertical; } .row { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:12px; }
@@ -293,11 +293,11 @@ export class WorkflowBuilderView extends LitElement {
       ${this._notice ? html`<p class="error" id="wb-notice">${this._notice}</p>` : nothing}
       ${this._editing ? html`<p id="wb-editing">Editing the stored workflow <code>${this._workflowId}</code>; saving replaces it and resets its live status.</p>` : nothing}
       <p>Assemble a workflow from what Home Assistant actually has: a trigger, optional deterministic conditions, AI steps, and a notification target. Nothing is sent until you save; a saved workflow only runs live when its mode is <strong>execute</strong> and it is enabled.</p>
-      <fieldset><legend>Workflow</legend>
+      <fieldset><legend>1 · Name &amp; behavior</legend>
         <div class="row">
           <div><label for="wb-name">Name</label><input id="wb-name" maxlength="128" .value=${this._name} @input=${(e: Event) => { this._touch(); this._name = (e.target as HTMLInputElement).value; }} /></div>
           <div><label for="wb-description">Description (optional)</label><input id="wb-description" maxlength="512" .value=${this._description} @input=${(e: Event) => { this._touch(); this._description = (e.target as HTMLInputElement).value; }} /></div>
-          <div><label for="wb-mode">Mode</label>
+          <div><label for="wb-mode">Mode</label><p class="hint">Observe records trigger matches only. Execute runs the steps once enabled; save disabled for testing.</p>
             <select id="wb-mode" .value=${this._runMode} @change=${(e: Event) => { this._touch(); this._runMode = (e.target as HTMLSelectElement).value as "observe" | "execute"; }}>
               <option value="observe" ?selected=${this._runMode === "observe"}>Observe only (record outcomes)</option>
               <option value="execute" ?selected=${this._runMode === "execute"}>Execute (run AI steps and deliver)</option>
@@ -309,7 +309,7 @@ export class WorkflowBuilderView extends LitElement {
         </div>
         <label class="check" for="wb-enabled"><input id="wb-enabled" type="checkbox" .checked=${this._enabled} ?disabled=${this._steps.some(step => step.kind === "light_control")} @change=${(e: Event) => { this._touch(); this._enabled = (e.target as HTMLInputElement).checked; }} /> Enable after saving</label>
       </fieldset>
-      <fieldset><legend>Trigger</legend>
+      <fieldset><legend>2 · When should it happen?</legend>
         <label for="wb-trigger-kind">Kind</label>
         <select id="wb-trigger-kind" .value=${this._triggerKind} @change=${(e: Event) => { this._touch(); this._triggerKind = (e.target as HTMLSelectElement).value as TriggerKind; }}>
           <option value="state" ?selected=${this._triggerKind === "state"}>An entity changes to a state</option>
@@ -322,16 +322,17 @@ export class WorkflowBuilderView extends LitElement {
         </div>` : nothing}
         ${this._triggerKind === "time" ? html`<label for="wb-at-time">At (HH:MM, local)</label><input id="wb-at-time" placeholder="20:00" maxlength="5" .value=${this._atTime} @input=${(e: Event) => { this._touch(); this._atTime = (e.target as HTMLInputElement).value; }} />` : nothing}
       </fieldset>
-      <fieldset><legend>Conditions (all must pass)</legend>
+      <details><summary>Only run when… <span class="hint">Optional conditions</span></summary><fieldset><legend>Conditions (all must pass)</legend>
         ${this._conditions.map((condition, index) => this._renderCondition(condition, index))}
         <div class="actions">
           <button type="button" @click=${() => this._addCondition({ kind: "time_window", after_time: "18:00", before_time: "06:00" })}>Add time window</button>
           <button type="button" @click=${() => this._addCondition({ kind: "state", entity_id: "", state: "on" })}>Add entity state</button>
           <button type="button" @click=${() => this._addCondition({ kind: "numeric_state", entity_id: "", above: "", below: "" })}>Add numeric bound</button>
         </div>
-      </fieldset>
-      <fieldset><legend>Steps (in order)</legend>
+      </fieldset></details>
+      <fieldset><legend>3 · What should happen?</legend>
         ${this._steps.map((step, index) => this._renderStep(step, index))}
+        <details><summary>More actions &amp; advanced steps</summary>
         <button type="button" @click=${() => { this._touch(); this._enabled = false; this._steps = [{ kind: "light_control", target_registry_id: "", operation: "turn_on" }]; }}>Use one deterministic light action instead</button>
         ${this._steps.some(step => step.kind === "light_control") ? html`<p>A light workflow is saved disabled and makes no provider calls during execution. Review separate unattended authorization for this exact saved workflow, perform its dry run, then enable separately. Saving or AI drafting never grants permission.</p>` : nothing}
         <div class="actions">
@@ -340,7 +341,7 @@ export class WorkflowBuilderView extends LitElement {
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "ai_extract", prompt: "", fields: "room:string, needs_action:boolean" })}>Add extract values</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "branch", when_step_id: "", when_category: "" })}>Add branch</button>
           <button type="button" ?disabled=${this._steps.length >= 25} @click=${() => this._addStep({ kind: "notify", notify_service: "" })}>Add notification</button>
-        </div>
+        </div></details>
       </fieldset>
       ${problems.length ? html`<ul class="error" id="wb-problems">${problems.map((problem) => html`<li>${problem}</li>`)}</ul>` : nothing}
       <div class="actions">
@@ -348,7 +349,7 @@ export class WorkflowBuilderView extends LitElement {
         <button id="wb-to-editor" type="button" @click=${this._toEditor}>Open in JSON editor</button>
         <button type="button" @click=${this._startNew}>Start a new one</button>
       </div>
-      <div role="status" aria-live="polite">${this._error ? html`<p class="error">${this._error}</p>` : nothing}${this._saved ? html`<p>Workflow saved. It appears in the stored workflows list below; enable it there or with the checkbox above before saving.</p>` : nothing}</div>
+      <div role="status" aria-live="polite">${this._error ? html`<p class="error">${this._error}</p>` : nothing}${this._saved ? html`<p>Workflow saved. Next: choose Load into editor in the saved list below and dry run this version in Test & advanced tools. A successful test does not enable it; enabling is a separate step.</p>` : nothing}</div>
     </section>`;
   }
 

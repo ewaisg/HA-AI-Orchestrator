@@ -1,6 +1,24 @@
 import { css } from "lit";
 
 export const panelStyles = css`
+  .setup-path { list-style:none; padding:0; margin:24px 0; display:grid; gap:0; }
+  .setup-path li { display:flex; gap:18px; padding:22px 0; border-bottom:1px solid var(--orchestrator-border); }
+  .setup-path li:last-child { border:0; }
+  .step-number { display:grid; place-items:center; flex:0 0 36px; height:36px; border-radius:12px; background:var(--orchestrator-accent-soft); color:var(--orchestrator-accent-strong); font-weight:750; }
+  .setup-path h3 { margin:2px 0 6px; font-size:1.05rem; }
+  .setup-path p { margin:0 0 12px; color:var(--orchestrator-muted); line-height:1.65; max-width:680px; }
+  .setup-guide { grid-column:1 / -1; }
+  .technical-details { grid-column:1 / -1; }
+  summary { cursor:pointer; font-weight:650; padding:8px 0; }
+  summary:focus-visible { outline:3px solid var(--orchestrator-accent); outline-offset:4px; }
+  .editor-disclosure { border:1px solid var(--orchestrator-border); background:var(--orchestrator-surface); border-radius:14px; margin:20px 0; padding:16px 20px; }
+  .editor-disclosure > summary { line-height:1.6; }
+  .editor-disclosure > summary span { display:block; font-size:.82rem; font-weight:400; color:var(--orchestrator-muted); margin:4px 0 0 16px; }
+  .editor-disclosure[open] > summary { margin-bottom:22px; }
+  .workflow-roadmap { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin-bottom:24px; }
+  .workflow-roadmap p { color:var(--orchestrator-muted); line-height:1.6; font-size:.9rem; }
+  @media(max-width:720px) { .workflow-roadmap { grid-template-columns:1fr; gap:8px; } }
+
   :host {
     --orchestrator-accent: var(--primary-color, #0c6b66);
     --orchestrator-accent-strong: #07514d;
@@ -214,7 +232,7 @@ export const panelStyles = css`
 
   .eyebrow {
     margin: 0 0 8px;
-    color: var(--orchestrator-accent-strong);
+    color: var(--orchestrator-text);
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.1em;

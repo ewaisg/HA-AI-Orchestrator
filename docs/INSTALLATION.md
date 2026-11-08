@@ -1,13 +1,11 @@
 # Manual installation and current usage
 
-Live r14 is installed and restarted on the owner's observed Core 2026.9.3
-installation. Local chat, tools, scoped window reads and workflow recovery are
-verified. AI drafts still fail validation live, and physical device-action
-acceptance remains pending. The r15 candidate adds corrected draft examples,
-validation-stage messages and durable confirmed-device-action metadata; it is
-not yet installed. Use the exact reviewed artifact
-named in the [tracker](PROJECT-TRACKER.md), not an arbitrary checkout. HACS
-installation and a broader compatibility range are not claimed.
+The current interface release is **2026.11.07**. Follow
+[Getting started](GETTING-STARTED.md) for connection, testing and rollback.
+This frontend-only update preserves the installed backend and stored data.
+The integration's 0.1.0 manifest does not identify its interface revision.
+September r14/r15 installation descriptions have been superseded by the
+November release evidence. HACS and a broad compatibility range are not claimed.
 
 ## Install
 
