@@ -60,6 +60,18 @@ checks chat again. No migration or backend replacement is needed.
 
 ## Limits
 
+### Handset re-registration follow-up
+
+The owner reported reinstalling the notification handset. The lab workflow alone
+was updated to its newly discovered notify-entity registration; the legacy
+multi-phone workflow was left paused. The revised disabled document passed a
+fresh sample-event dry run. After enablement and a deliberate helper transition,
+the runtime reported 1 completed execution, 1 provider call, 1 delivered
+notification and 0 failures. The owner explicitly confirmed receiving the
+notification. The lab workflow was disabled again and its helper reset off.
+This confirms receipt for the new registration, not for the previous handset
+registration used in the earlier test.
+
 No full backend test suite was rerun on Core 2026.11.0. No physical light/switch,
 complete voice pipeline, cloud inference/failover or broad compatibility claim.
 Legacy September revision/test statements in the tracker are historical.
