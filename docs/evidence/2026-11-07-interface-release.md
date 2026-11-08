@@ -51,6 +51,9 @@ installed candidate was downloaded again and byte-matched. The final sample-even
 candidate was downloaded separately and exactly matched the final 290010-byte
 bundle and SHA-256 above. Reloading the available
 integration entry activated the new interface without a full Core restart.
+The final installed sample-event button was then exercised against the saved
+disabled lab workflow. The resulting dry run completed with 1 local provider
+call and 0 executed actions. Both saved workflows remained disabled.
 
 Rollback restores that original bundle, reloads the entry and browser, and
 checks chat again. No migration or backend replacement is needed.
